@@ -1,0 +1,63 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@100..900&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap");
+
+body {
+  font-family: "Ubuntu", "Noto Sans Bengali", sans-serif;
+  font-size: 14px;
+}
+
+a {
+  text-decoration: none;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+
+  li {
+    list-style: none;
+
+    a {
+      text-decoration: none;
+    }
+  }
+}
+
+.hand {
+  cursor: pointer;
+}
+
+// PrimeNG Override
+
+.w-100 {
+  .p-dropdown,
+  .p-inputnumber-input,
+  .p-fileupload-choose,
+  .p-multiselect,
+  .p-calendar,
+  .p-password,
+  .p-checkbox,
+  .p-button,
+  .p-inputtext {
+    width: 100%;
+  }
+}
+
+.headless {
+  .p-dialog-header {
+    display: none !important;
+  }
+  .p-dialog-content {
+    padding: 1.25rem 0 !important;
+  }
+}
+
+.p-menubar {
+  display: flex !important;
+  align-items: center !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  color: transparent !important;
+  padding: 0 !important;
+  gap: 0 !important;
+}
