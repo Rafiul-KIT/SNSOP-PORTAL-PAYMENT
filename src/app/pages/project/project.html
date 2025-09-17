@@ -1,0 +1,160 @@
+<!-- Breadcrumb -->
+<div class="breadcrumb-wrapper mb-3">
+  <p-breadcrumb [model]="breadCrumbItems" [home]="breadcrumbHome" class="max-w-full"></p-breadcrumb>
+</div>
+
+<!-- Outer panel -->
+<div class="card shadow-sm project-container">
+  <div class="card-body">
+    <!-- Form -->
+    <form [formGroup]="projectForm" class="container-fluid">
+      <div class="row g-3">
+        <!-- Left column -->
+        <div class="col-12 col-md-6">
+          <div class="row mb-2">
+            <label class="col-md-4 col-form-label text-md-end">Project Name :</label>
+            <div class="col-md-8">
+              <input type="text" class="form-control" formControlName="projectName" />
+            </div>
+          </div>
+
+          <div class="row mb-2">
+            <label class="col-md-4 col-form-label text-md-end">Start Date :</label>
+            <div class="col-md-8">
+              <p-datePicker formControlName="startDate" dateFormat="dd/mm/yy"></p-datePicker>
+            </div>
+          </div>
+
+          <div class="row mb-2">
+            <label class="col-md-4 col-form-label text-md-end">End Date :</label>
+            <div class="col-md-8">
+              <p-datePicker formControlName="endDate" dateFormat="dd/mm/yy"></p-datePicker>
+            </div>
+          </div>
+
+          <div class="row mb-2">
+            <label class="col-md-4 col-form-label text-md-end">Project Sanction Date :</label>
+            <div class="col-md-8">
+              <p-datePicker formControlName="sanctionDate" dateFormat="dd/mm/yy"></p-datePicker>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right column -->
+        <div class="col-12 col-md-6">
+          <div class="row mb-2">
+            <label class="col-md-4 col-form-label text-md-end">Target Beneficiaries :</label>
+            <div class="col-md-8">
+              <input type="number" class="form-control" formControlName="targetBeneficiaries" />
+            </div>
+          </div>
+
+          <div class="row mb-2">
+            <label class="col-md-4 col-form-label text-md-end">Project Cost (USD) :</label>
+            <div class="col-md-8">
+              <input type="number" class="form-control" formControlName="cost" />
+            </div>
+          </div>
+
+          <div class="row mb-2">
+            <label class="col-md-4 col-form-label text-md-end">Person Incharge :</label>
+            <div class="col-md-8">
+              <input type="text" class="form-control" formControlName="inchargeName" />
+            </div>
+          </div>
+
+          <div class="row mb-2">
+            <label class="col-md-4 col-form-label text-md-end">Mobile :</label>
+            <div class="col-md-8">
+              <input type="text" class="form-control" formControlName="inchargeMobile" />
+            </div>
+          </div>
+
+          <div class="row mb-2">
+            <label class="col-md-4 col-form-label text-md-end">Email :</label>
+            <div class="col-md-8">
+              <input type="email" class="form-control" formControlName="inchargeEmail" />
+            </div>
+          </div>
+
+          <div class="row mb-2">
+            <label class="col-md-4 col-form-label text-md-end">Status :</label>
+            <div class="col-md-8">
+              <select class="form-select" formControlName="status">
+                <option value="">--Select--</option>
+                <option *ngFor="let s of statusList" [value]="s">{{ s }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <!-- Section: State / County -->
+    <h5 class="fw-semibold mt-5 mb-3 text-center">State / County wise Project Details</h5>
+
+    <!-- Add new target form -->
+    <form [formGroup]="targetForm" class="row g-3 align-items-end mb-3">
+      <div class="col-12 col-md-5">
+        <label class="form-label">State</label>
+        <select class="form-select" formControlName="state">
+          <option value="">--Select--</option>
+          <option *ngFor="let st of states" [value]="st">{{ st }}</option>
+        </select>
+      </div>
+
+      <div class="col-12 col-md-5">
+        <label class="form-label">County</label>
+        <select class="form-select" formControlName="county">
+          <option value="">--Select--</option>
+          <option *ngFor="let c of counties" [value]="c">{{ c }}</option>
+        </select>
+      </div>
+
+      <div class="col-12 col-md-2">
+        <p-button label="Add New" icon="pi pi-plus" severity="success" (click)="addTarget()"></p-button>
+      </div>
+    </form>
+
+    <!-- Table of added locations -->
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped mt-3" *ngIf="targets.length > 0">
+        <thead>
+        <tr>
+          <th>#</th>
+          <th>State</th>
+          <th>County</th>
+          <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let t of targets; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ t.state }}</td>
+          <td>{{ t.county }}</td>
+          <td>
+            <p-button
+              icon="pi pi-trash"
+              severity="danger"
+              (click)="removeTarget(i)"
+              label="Remove">
+            </p-button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Buttons -->
+    <div class="d-flex justify-content-center gap-2 mt-4 mb-4 flex-wrap">
+      <p-button label="Save" icon="fas fa-save" severity="primary" (click)="onSave()"></p-button>
+      <p-button label="Clear All" icon="fas fa-eraser" severity="warn" (click)="onClear()"></p-button>
+      <p-button label="Cancel" icon="fas fa-times" severity="secondary" (click)="onCancel()"></p-button>
+    </div>
+
+    <!-- Status message -->
+    <div *ngIf="statusMsg" class="text-center small text-muted mb-3">
+      {{ statusMsg }}
+    </div>
+  </div>
+</div>

@@ -45,6 +45,18 @@ export class Header {
 
     this.menuList = [
       {
+        label: 'Project',
+        icon: 'fas fa-project-diagram',
+        routerLink: 'pages/project-list',
+        routerLinkActiveOptions: 'active',
+      },
+      {
+        label: 'Sub-Project',
+        icon: 'fas fa-tasks',
+        routerLink: 'sub-project',
+        routerLinkActiveOptions: 'active',
+      },
+      {
         label: 'Creating Wage Request',
         icon: 'fas fa-plus',
         routerLink: 'payment/create-wage-request',
