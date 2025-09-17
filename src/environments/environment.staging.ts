@@ -1,12 +1,12 @@
 export const environment = {
   production: false,
-  domain: "localhost",
-  globalApi: 'http://api.snsopmis.com:8000/services',
+  domain: 'http://devteam.karoothitbd.com',
+  globalApi: 'http://devteam.karoothitbd.com:8088/mis_server',
   portals: {
-    master: "http://master.snsopmis.com:4010/",
-    beneficiary: "http://beneficiary.snsopmis.com:4020/",
-    payment: "http://payment.snsopmis.com:4030/",
-    grm: "http://grm.snsopmis.com:4040/",
-    report: "http://report.snsopmis.com:4050/",
+    master: 'http://devteam.karoothitbd.com:8080/master',
+    beneficiary: 'http://devteam.karoothitbd.com:8080/beneficiary',
+    payment: 'http://devteam.karoothitbd.com:8080/payment',
+    grm: 'http://devteam.karoothitbd.com:8080/grm',
+    report: 'http://devteam.karoothitbd.com:8080/report',
   },
 };
