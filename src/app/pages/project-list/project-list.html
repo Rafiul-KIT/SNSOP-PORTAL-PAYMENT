@@ -1,70 +1,119 @@
-<div class="card shadow-sm">
-  <div class="card-body">
+@if (isLoading) {
+<app-loader></app-loader>
+} @else {
+<div class="breadcrumb-wrapper">
+  <p-breadcrumb
+    [model]="breadcrumbItems"
+    [home]="breadcrumbHome"
+    class="w-100"
+  ></p-breadcrumb>
+</div>
 
-    <!-- Header actions -->
-    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-      <h5 class="fw-semibold mb-0">Project List</h5>
-
-      <div class="d-flex gap-2">
-        <input type="text"
-               [(ngModel)]="searchText"
-               (input)="onSearch()"
-               placeholder="Search projects..."
-               class="form-control form-control-sm" />
+<div class="card p-3 mb-2">
+  <div class="row d-flex align-items-center">
+    <div class="col-12 col-md-6 col-lg-8">
+      <h5 class="m-0">Project List</h5>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4 text-end">
+      <div class="d-flex align-items-center gap-2">
+        <input
+          type="text"
+          [(ngModel)]="searchText"
+          (input)="onSearch()"
+          placeholder="Search Projects..."
+          class="form-control form-control-sm"
+        />
         <!-- New Project Button -->
-        <button pButton type="button" label="Add New"
-                pTooltip="Create New Project" tooltipPosition="top" appendTo="body"
-                (click)="newProject()"
-                style="white-space: nowrap;">
-        </button>
+        <p-button
+          label="Add New"
+          pTooltip="Create New Project"
+          tooltipPosition="top"
+          icon="fas fa-plus"
+          (onClick)="newProject()"
+          size="small"
+          class="w-100"
+        />
       </div>
     </div>
-
-    <!-- Projects table -->
-    <p-table [value]="filteredProjects" [paginator]="true" [rows]="5" responsiveLayout="scroll">
-      <ng-template pTemplate="header">
-        <tr>
-          <th>#</th>
-          <th>Name</th>
-          <th>Status</th>
-          <th>Start Date</th>
-          <th>End Date</th>
-          <th>Incharge</th>
-          <th>Actions</th>
-        </tr>
-      </ng-template>
-
-      <ng-template pTemplate="body" let-project let-i="rowIndex">
-        <tr>
-          <td>{{ i + 1 }}</td>
-          <td>{{ project.name }}</td>
-          <td>{{ project.status }}</td>
-          <td>{{ project.startDate }}</td>
-          <td>{{ project.endDate }}</td>
-          <td>{{ project.inchargeName }}</td>
-          <td>
-            <!-- View Button -->
-            <button pButton type="button" icon="fas fa-eye" class="p-button-sm p-button-rounded p-button-info me-2"
-                    pTooltip="View Details" tooltipPosition="top" appendTo="body"
-                    (click)="viewProject(project.id)">
-            </button>
-
-            <!-- Edit Button -->
-            <button pButton type="button" icon="fas fa-pencil-alt" class="p-button-sm p-button-rounded p-button-secondary me-2"
-                    pTooltip="Edit Project" tooltipPosition="top" appendTo="body"
-                    (click)="editProject(project.id)">
-            </button>
-
-            <!-- Delete Button -->
-            <button pButton type="button" icon="fas fa-trash" class="p-button-sm p-button-rounded p-button-danger me-2"
-                    pTooltip="Delete Project" tooltipPosition="top" appendTo="body"
-                    (click)="deleteProject(project.id)">
-            </button>
-
-          </td>
-        </tr>
-      </ng-template>
-    </p-table>
-
   </div>
 </div>
+
+<p-table
+  [value]="projects"
+  [scrollable]="true"
+  scrollHeight="64vh"
+  [tableStyle]="{ 'width': '100%', 'margin-bottom': '5px' }"
+  size="small"
+>
+  <ng-template pTemplate="header">
+    <tr>
+      <th>#</th>
+      <th>Name</th>
+      <th>Status</th>
+      <th>Start Date</th>
+      <th>End Date</th>
+      <th>Incharge</th>
+      <th [width]="140" class="text-center">Actions</th>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-project let-i="rowIndex">
+    <tr>
+      <td>{{ i + 1 }}</td>
+      <td>{{ project.name }}</td>
+      <td>{{ project.status }}</td>
+      <td>{{ project.startDate }}</td>
+      <td>{{ project.endDate }}</td>
+      <td>{{ project.inchargeName }}</td>
+      <td>
+        <!-- View Button -->
+        <button
+          pButton
+          type="button"
+          icon="fas fa-eye"
+          class="p-button-sm p-button-rounded p-button-info me-2"
+          pTooltip="View Details"
+          tooltipPosition="top"
+          appendTo="body"
+          (click)="viewProject(project.id)"
+        ></button>
+
+        <!-- Edit Button -->
+        <button
+          pButton
+          type="button"
+          icon="fas fa-pencil-alt"
+          class="p-button-sm p-button-rounded p-button-secondary me-2"
+          pTooltip="Edit Project"
+          tooltipPosition="top"
+          appendTo="body"
+          (click)="editProject(project.id)"
+        ></button>
+
+        <!-- Delete Button -->
+        <button
+          pButton
+          type="button"
+          icon="fas fa-trash"
+          class="p-button-sm p-button-rounded p-button-danger me-2"
+          pTooltip="Delete Project"
+          tooltipPosition="top"
+          appendTo="body"
+          (click)="deleteProject(project.id)"
+        ></button>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-paginator
+  class="paginator-sticky"
+  [rows]="pageSize"
+  [totalRecords]="totalRecords"
+  [rowsPerPageOptions]="[10, 25, 50]"
+  (onPageChange)="onPageChange($event)"
+  [first]="(currentPage) * pageSize"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+>
+</p-paginator>
+}

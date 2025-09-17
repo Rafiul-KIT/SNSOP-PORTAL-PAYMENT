@@ -11,17 +11,17 @@ export const routes: Routes = [
   },
   {
     component: ProjectList,
-    path: 'pages/project-list',  // Set the path for the project list page
+    path: 'project-list',  // Set the path for the project list page
   },
   {
     component: Project,
-    path: 'pages/project',  // Set the path for the project list page
+    path: 'project',  // Set the path for the project list page
   },
   {
-    path: 'pages/project/:id',
+    path: 'project/:id',
     component: Project,      // edit/view project
   },
-  { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+  { path: '', pathMatch: 'full', redirectTo: 'project-list' },
   {
     component: NotFound,
     path: '**',
