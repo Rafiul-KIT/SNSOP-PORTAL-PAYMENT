@@ -1,0 +1,70 @@
+<div class="card shadow-sm">
+  <div class="card-body">
+
+    <!-- Header actions -->
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+      <h5 class="fw-semibold mb-0">Project List</h5>
+
+      <div class="d-flex gap-2">
+        <input type="text"
+               [(ngModel)]="searchText"
+               (input)="onSearch()"
+               placeholder="Search projects..."
+               class="form-control form-control-sm" />
+        <!-- New Project Button -->
+        <button pButton type="button" label="Add New"
+                pTooltip="Create New Project" tooltipPosition="top" appendTo="body"
+                (click)="newProject()"
+                style="white-space: nowrap;">
+        </button>
+      </div>
+    </div>
+
+    <!-- Projects table -->
+    <p-table [value]="filteredProjects" [paginator]="true" [rows]="5" responsiveLayout="scroll">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Status</th>
+          <th>Start Date</th>
+          <th>End Date</th>
+          <th>Incharge</th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-project let-i="rowIndex">
+        <tr>
+          <td>{{ i + 1 }}</td>
+          <td>{{ project.name }}</td>
+          <td>{{ project.status }}</td>
+          <td>{{ project.startDate }}</td>
+          <td>{{ project.endDate }}</td>
+          <td>{{ project.inchargeName }}</td>
+          <td>
+            <!-- View Button -->
+            <button pButton type="button" icon="fas fa-eye" class="p-button-sm p-button-rounded p-button-info me-2"
+                    pTooltip="View Details" tooltipPosition="top" appendTo="body"
+                    (click)="viewProject(project.id)">
+            </button>
+
+            <!-- Edit Button -->
+            <button pButton type="button" icon="fas fa-pencil-alt" class="p-button-sm p-button-rounded p-button-secondary me-2"
+                    pTooltip="Edit Project" tooltipPosition="top" appendTo="body"
+                    (click)="editProject(project.id)">
+            </button>
+
+            <!-- Delete Button -->
+            <button pButton type="button" icon="fas fa-trash" class="p-button-sm p-button-rounded p-button-danger me-2"
+                    pTooltip="Delete Project" tooltipPosition="top" appendTo="body"
+                    (click)="deleteProject(project.id)">
+            </button>
+
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+  </div>
+</div>

@@ -1,0 +1,23 @@
+.project-container {
+  max-height: 80vh;       // keep inside viewport
+  overflow-y: auto;       // scroll vertically if content overflows
+  padding: 1rem;
+
+  .table-responsive {
+    overflow-x: auto;     // horizontal scroll for small screens
+  }
+}
+
+.col-form-label {
+  font-weight: 500;
+  text-align: right;
+
+  @media (max-width: 768px) {
+    text-align: left;     // stack labels above inputs on small screens
+  }
+}
+
+:host ::ng-deep .p-calendar,
+:host ::ng-deep .p-inputtext {
+  width: 100% !important;
+}

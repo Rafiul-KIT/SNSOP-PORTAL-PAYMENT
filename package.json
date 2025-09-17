@@ -1,7 +1,7 @@
 {
   "name": "snsop-mf-portal-payment",
   "version": "0.0.0",
-"scripts": {
+  "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "dev": "ng serve --port 4030 --ssl false",
@@ -24,7 +24,8 @@
     "axios": "^1.11.0",
     "bootstrap": "^5.3.8",
     "ngx-cookie-service": "^20.1.0",
-    "primeng": "^20.0.1",
+    "primeicons": "^7.0.0",
+    "primeng": "^20.1.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
