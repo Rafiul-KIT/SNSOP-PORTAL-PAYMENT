@@ -1,12 +1,12 @@
 export const environment = {
   production: false,
-  domain: 'http://devteam.karoothitbd.com',
-  globalApi: 'http://devteam.karoothitbd.com:8088/mis_server',
+  domain: 'https://devportalmaster.southsudansafetynet.info',
+  globalApi: 'https://devgwapp.southsudansafetynet.info/mis_server/',
   portals: {
-    master: 'http://devteam.karoothitbd.com:8080/master',
-    beneficiary: 'http://devteam.karoothitbd.com:8080/beneficiary',
-    payment: 'http://devteam.karoothitbd.com:8080/payment',
-    grm: 'http://devteam.karoothitbd.com:8080/grm',
-    report: 'http://devteam.karoothitbd.com:8080/report',
+    master: 'https://devportalmaster.southsudansafetynet.info/master/',
+    beneficiary: 'https://devportalmaster.southsudansafetynet.info/beneficiary',
+    payment: 'https://devportalmaster.southsudansafetynet.info/payment',
+    grm: 'https://devportalmaster.southsudansafetynet.info/grm',
+    report: 'https://devportalmaster.southsudansafetynet.info/report',
   },
 };
