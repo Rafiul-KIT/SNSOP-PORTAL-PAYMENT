@@ -1,5 +1,6 @@
 export const environment = {
   production: false,
+  env: 'dev',
   domain: 'https://devportalmaster.southsudansafetynet.info',
   globalApi: 'https://devgwapp.southsudansafetynet.info/mis_server/',
   portals: {
