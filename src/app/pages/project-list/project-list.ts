@@ -10,14 +10,30 @@ import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { InputTextModule } from 'primeng/inputtext';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { Loader } from '../../components/loader/loader';
+import { ApiService} from '../../services/api.service';
+import { ChangeDetectorRef } from '@angular/core';
 
-interface Project {
+interface ProjectItemDto {
   id: number;
-  name: string;
-  status: string;
-  startDate: string;
-  endDate: string;
+  projectName: string;
+  startAt: string;
+  endAt: string;
+  sanctionedAt: string;
+  targetBeneficiary: number;
+  estimatedCost: number;
   inchargeName: string;
+  inchargeMobile: string;
+  inchargeEmail: string;
+  status: 'InProgress' | 'Closed' | string;
+}
+
+interface PagedResponseProjectDto {
+  code: number;
+  message: string;
+  content: ProjectItemDto[];
+  pageNumber: number;   // backend may return this (0/1-based)
+  pageSize: number;
+  totalElements: number;
 }
 
 @Component({
@@ -39,89 +55,88 @@ interface Project {
   styleUrls: ['./project-list.scss'],
 })
 export class ProjectList implements OnInit {
-  projects: Project[] = [];
-  filteredProjects: Project[] = [];
-  searchText: string = '';
+  rows: ProjectItemDto[] = [];
+  searchText = '';          // kept for UI; gateway will read it downstream
   isLoading = true;
   totalRecords = 0;
 
   breadcrumbItems: any[] = [];
   breadcrumbHome: any;
 
-  currentPage = 0; // 0-based
+  currentPage = 0;          // UI state (PrimeNG is 0-based)
   pageSize = 10;
 
-  constructor(private router: Router) {}
+  selectedProjectId?: number;
 
-  initBreadcrumb() {
-    this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
-    this.breadcrumbItems = [{ label: 'Project List' }];
-  }
+  // 🔧 Update to your real gateway path
+  private readonly PROJECTS_ENDPOINT = '/api/project/get';
+
+  constructor(private router: Router, private api: ApiService,private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
-    this.initBreadcrumb();
-    // ✅ Replace with API call later
-    this.projects = [
-      {
-        id: 1,
-        name: 'Health Project',
-        status: 'Active',
-        startDate: '2025-01-01',
-        endDate: '2025-06-30',
-        inchargeName: 'John Doe',
-      },
-      {
-        id: 2,
-        name: 'Education Project',
-        status: 'Completed',
-        startDate: '2024-03-01',
-        endDate: '2024-12-31',
-        inchargeName: 'Jane Smith',
-      },
-      {
-        id: 3,
-        name: 'Food Program',
-        status: 'Inactive',
-        startDate: '2025-02-15',
-        endDate: '2025-10-15',
-        inchargeName: 'Ali Hassan',
-      },
-    ];
-    this.filteredProjects = [...this.projects];
-    this.isLoading = false;
+    this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
+    this.breadcrumbItems = [{ label: 'Project List' }];
+    this.loadProjects();
   }
 
-  onPageChange(event: any) {
-    this.currentPage = event.page;
-    this.pageSize = event.rows;
+  private qs(params: Record<string, any>): string {
+    const usp = new URLSearchParams();
+    Object.entries(params).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && v !== '') usp.set(k, String(v));
+    });
+    return usp.toString();
   }
 
-  onSearch(): void {
-    const term = this.searchText.toLowerCase();
-    this.filteredProjects = this.projects.filter(
-      (p) =>
-        p.name.toLowerCase().includes(term) ||
-        p.status.toLowerCase().includes(term) ||
-        p.inchargeName.toLowerCase().includes(term)
-    );
-  }
+  async loadProjects() {
+    this.isLoading = true;
+    this.cdr.detectChanges();
+    try {
+      const query = this.qs({
+        page: this.currentPage,       // if API is 1-based: this.currentPage + 1
+        size: this.pageSize,
+        id: this.selectedProjectId,   // 👈 include id only when defined
+      });
 
-  newProject(): void {
-    this.router.navigate(['/project']); // matches { path: 'project' }
-  }
+      const url = `${this.PROJECTS_ENDPOINT}?${query}`;
+      const res = await this.api.GET(url);
+      const data = res.data as PagedResponseProjectDto;
 
-  editProject(id: number): void {
-    this.router.navigate(['/project', id]); // matches { path: 'project/:id' }
-  }
-
-  viewProject(id: number): void {
-    this.router.navigate(['/project', id]); // same as edit for now
-  }
-
-  deleteProject(id: number): void {
-    if (confirm('Are you sure you want to delete this project?')) {
-      this.projects = this.projects.filter((p) => p.id !== id);
-      this.filteredProjects = [...this.projects];
+      this.rows = data?.content ?? [];
+      this.totalRecords = data?.totalElements ?? 0;
+    } catch (err) {
+      console.error('Failed to load projects', err);
+      this.rows = [];
+      this.totalRecords = 0;
+    } finally {
+      this.isLoading = false;
+      this.cdr.detectChanges();
     }
   }
+  onPageChange(event: any) {
+    this.currentPage = event.page;  // 0-based from PrimeNG
+    this.pageSize = event.rows;     // update for correct numbering & [first]
+    this.loadProjects();            // backend/gateway figures out the page
+  }
+
+
+  onSearch(): void {
+    // Trigger reload; gateway reads search from its own source
+    this.loadProjects();
+  }
+
+  newProject() { this.router.navigate(['/project']); }
+  editProject(id: number) { this.router.navigate(['/project', id]); }
+  viewProject(id: number) { this.router.navigate(['/project', id]); }
+
+  async deleteProject(id: number) {
+    if (!confirm('Are you sure you want to delete this project?')) return;
+    try {
+      await this.api.DELETE(`${this.PROJECTS_ENDPOINT}/${id}`);
+      this.loadProjects();
+    } catch (e) {
+      console.error('Delete failed', e);
+    }
+  }
+
+  //trackById(_i: number, r: ProjectItemDto) { return r.id; }
 }

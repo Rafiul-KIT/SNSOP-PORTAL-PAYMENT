@@ -45,6 +45,12 @@ export class Header {
 
     this.menuList = [
       {
+        label: 'Dashboard',
+        icon: 'fas fa-project-dashboard',
+        routerLink: 'dashboard',
+        routerLinkActiveOptions: 'active',
+      },
+      {
         label: 'Project',
         icon: 'fas fa-project-diagram',
         routerLink: 'project-list',

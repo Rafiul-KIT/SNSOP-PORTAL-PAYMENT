@@ -21,7 +21,7 @@ export const routes: Routes = [
     path: 'project/:id',
     component: Project,      // edit/view project
   },
-  { path: '', pathMatch: 'full', redirectTo: 'project-list' },
+  { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
   {
     component: NotFound,
     path: '**',

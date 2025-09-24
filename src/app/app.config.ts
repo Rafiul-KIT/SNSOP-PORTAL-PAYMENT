@@ -9,6 +9,8 @@ import { routes } from './app.routes';
 import Aura from '@primeuix/themes/aura';
 import { provideAnimations } from '@angular/platform-browser/animations';
 
+import { CookieService } from 'ngx-cookie-service';
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
@@ -26,5 +28,6 @@ export const appConfig: ApplicationConfig = {
         tooltip: 1100, // tooltip
       },
     }),
+    CookieService,
   ],
 };
