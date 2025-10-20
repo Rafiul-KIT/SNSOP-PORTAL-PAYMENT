@@ -3,6 +3,7 @@ import { Dashboard } from './pages/dashboard/dashboard';
 import { NotFound } from './components/not-found/not-found';
 import { ProjectList } from './pages/project-list/project-list';
 import {Project} from './pages/project/project';
+import { SubProject } from './pages/sub-project/sub-project';
 
 export const routes: Routes = [
   {
@@ -11,15 +12,19 @@ export const routes: Routes = [
   },
   {
     component: ProjectList,
-    path: 'project-list',  // Set the path for the project list page
+    path: 'project-list',  
+  },
+    {
+    component: SubProject,
+    path: 'sub-project',  
   },
   {
     component: Project,
-    path: 'project',  // Set the path for the project list page
+    path: 'project', 
   },
   {
     path: 'project/:id',
-    component: Project,      // edit/view project
+    component: Project, 
   },
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
   {
