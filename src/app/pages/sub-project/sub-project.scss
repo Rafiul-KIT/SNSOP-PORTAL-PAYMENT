@@ -1,0 +1,146 @@
+:host {
+  --brand: #31d2f2;
+}
+
+/* Override Bootstrap “primary” tones locally without touching global theme */
+.bg-primary {
+  background-color: var(--brand) !important;
+  border-color: var(--brand) !important;
+}
+.text-primary {
+  color: var(--brand) !important;
+}
+.border-primary {
+  border-color: var(--brand) !important;
+}
+.btn-primary {
+  background-color: var(--brand) !important;
+  border-color: var(--brand) !important;
+}
+.btn-outline-primary {
+  color: var(--brand) !important;
+  border-color: var(--brand) !important;
+}
+.bg-primary.bg-opacity-10 {
+  background-color: color-mix(in srgb, var(--brand) 10%, transparent) !important;
+}
+
+/* Minor polish */
+.navbar-brand { letter-spacing: .3px; }
+.card { border-radius: 12px; }
+.input-group-text { background: #f6f9fc; }
+.form-label { margin-bottom: .35rem; }
+.form-control:focus,
+.form-select:focus,
+textarea.form-control:focus,
+.btn:focus,
+.btn:focus-visible {
+  outline: 0;
+  box-shadow: none;    
+  border-color: var(--brand);
+}
+/* ====== COMPACT & CLEAN FORM LAYOUT ====== */
+
+/* Card spacing & padding */
+.card-body {
+  padding: 1.25rem 1.5rem !important;
+}
+
+/* Reduce vertical gap between fields (Bootstrap g-3 → g-2ish) */
+.row.g-3 {
+  --bs-gutter-y: 0.5rem !important;
+  --bs-gutter-x: 1rem !important;
+}
+
+/* Section spacing */
+.mb-5 {
+  margin-bottom: 1.5rem !important;
+}
+
+/* Section headers tighter */
+h4 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 1rem !important;
+  padding-bottom: 0.35rem !important;
+}
+
+/* Labels smaller & tighter */
+.form-label {
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem !important;
+  color: #495057;
+}
+
+/* Input fields compact */
+.form-control,
+.form-select {
+  padding: 0.35rem 0.6rem !important;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  min-height: 35px;
+}
+
+/* Input group smaller */
+.input-group-text {
+  padding: 0.35rem 0.6rem !important;
+  background-color: #f8f9fa;
+}
+
+/* Reduce textarea size */
+textarea.form-control {
+  min-height: 60px;
+}
+
+/* Buttons: balanced & consistent */
+.btn {
+  padding: 0.35rem 0.8rem !important;
+  font-size: 0.9rem;
+  border-radius: 6px;
+}
+
+/* Action buttons alignment */
+.card.bg-light .card-body {
+  padding: 1rem 1.25rem;
+}
+
+/* Card styling */
+.card {
+  border-radius: 10px;
+  margin-bottom: 1rem !important;
+}
+
+/* Compact card headers for activity sections */
+.card-header {
+  padding: 0.4rem 0.8rem !important;
+}
+
+/* Icon button for remove (X) */
+.btn-icon {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+/* Remove fat focus glow */
+.form-control:focus,
+.form-select:focus {
+  border-color: #31d2f2;
+  box-shadow: 0 0 0 2px rgba(49, 210, 242, 0.25);
+}
+
+/* Section divider consistency */
+.border-bottom {
+  border-color: #dee2e6 !important;
+}
+
+/* Lighten form background */
+.min-vh-100 {
+  background-color: #f8f9fb;
+}
+.px-6 { padding-left: 20rem !important; padding-right: 20rem !important; }
+
