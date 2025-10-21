@@ -1,23 +1,25 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BreadcrumbModule } from 'primeng/breadcrumb';  // Added BreadcrumbModule
 import { Button } from 'primeng/button';
-import {DatePickerModule} from 'primeng/datepicker';
+import { DatePickerModule } from 'primeng/datepicker';
 import { ActivatedRoute } from '@angular/router';
 import { TooltipModule } from 'primeng/tooltip';
+import { Loader } from '../../components/loader/loader';
+import { ApiService } from '../../services/api.service';
 
 @Component({
   selector: 'app-project',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule,  // For reactive forms
-    BreadcrumbModule,     // Added BreadcrumbModule
-    DatePickerModule,     // PrimeNG DatePicker
+    ReactiveFormsModule, // For reactive forms
+    BreadcrumbModule, // Added BreadcrumbModule
+    DatePickerModule, // PrimeNG DatePicker
     TooltipModule,
     Button,
-    // TooltipModule for buttons
+    Loader
   ],
   templateUrl: './project.html',
   styleUrls: ['./project.scss']
@@ -29,6 +31,7 @@ export class Project implements OnInit {
   projectId: string | null = null;
  
   isEditMode = false;
+  isLoading = false;
 
   // Dropdown options for the form
   statusList = ['Active', 'Inactive', 'Completed'];
@@ -44,8 +47,17 @@ export class Project implements OnInit {
 
   targets: { state: string; county: string }[] = [];
   statusMsg: string | null = null;
+  private readonly PROJECTS_ENDPOINT = '/api/project/target/get';
 
-  constructor(private route: ActivatedRoute, private fb: FormBuilder) {}
+  constructor(private route: ActivatedRoute, private fb: FormBuilder, private apiService: ApiService, private cdr: ChangeDetectorRef) { }
+
+  private qs(params: Record<string, any>): string {
+    const usp = new URLSearchParams();
+    Object.entries(params).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && v !== '') usp.set(k, String(v));
+    });
+    return usp.toString();
+  }
 
   ngOnInit(): void {
     // Get the project ID from the route (for editing an existing project)
@@ -78,15 +90,39 @@ export class Project implements OnInit {
       county: ['', Validators.required]
     });
   }
+  async loadProjectData(id: string): Promise<void> {
+    this.isLoading = true;
+    try {
+      const query = this.qs({ projectId: id });
+      const url = `${this.PROJECTS_ENDPOINT}?${query}`;
 
-  loadProjectData(id: string): void {
-    console.log(`Loading data for project with ID: ${id}`);
-    // This is where you would fetch the project data via an API
-    // For example:
-    // this.projectService.getProjectById(id).subscribe(data => {
-    //   this.projectForm.patchValue(data);
-    // });
+      const res = await this.apiService.GET(url);
+
+      // ✅ Axios wraps actual data in res.data
+      const data = res.data;
+
+      if (data && data.code === 200 && Array.isArray(data.content)) {
+        this.targets = data.content.map((item: any) => ({
+          state: item.stateName,
+          county: item.countyName,
+          stateId: item.stateId,
+          countyId: item.countyId
+        }));
+
+        this.statusMsg = `Loaded ${this.targets.length} target(s) successfully.`;
+      } else {
+        this.statusMsg = 'No project data found.';
+      }
+    } catch (err) {
+      console.error('Failed to load project data:', err);
+      this.statusMsg = 'Error loading project data.';
+    } finally {
+      this.isLoading = false;
+      this.cdr.detectChanges();
+    }
   }
+
+
 
   // Add a new target (state/county)
   addTarget(): void {
