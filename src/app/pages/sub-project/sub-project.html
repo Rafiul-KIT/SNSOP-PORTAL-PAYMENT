@@ -1,4 +1,16 @@
-<div class="min-vh-100 bg-light">
+
+    @if (isLoading) {
+  <app-loader></app-loader>
+} @else {
+  <div class="breadcrumb-wrapper">
+    <p-breadcrumb
+      [model]="breadcrumbItems"
+      [home]="breadcrumbHome"
+      class="w-100"
+    ></p-breadcrumb>
+  </div>
+}
+<div class="min-vh-100 ">
 
     <!-- Header -->
 

@@ -68,6 +68,12 @@ export class Header {
         routerLink: 'payment/create-wage-request',
         routerLinkActiveOptions: 'active',
       },
+        {
+        label: 'Beneficiary Attendance',
+        icon: 'fas fa-plus',
+        routerLink: 'beneficiary-attendance',
+        routerLinkActiveOptions: 'active',
+      },
       {
         label: 'Creating Payroll',
         icon: 'fas fa-file-circle-plus',
