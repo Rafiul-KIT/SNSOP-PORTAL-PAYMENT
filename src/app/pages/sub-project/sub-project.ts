@@ -8,6 +8,8 @@ import {
   FormControl,
 } from '@angular/forms';
 import { Loader } from '../../components/loader/loader';
+import { ActivatedRoute } from '@angular/router';
+import { ApiService } from '../../services/api.service';
 import { Breadcrumb } from 'primeng/breadcrumb';
 
 @Component({
@@ -25,12 +27,31 @@ export class SubProject {
   proposalForm: FormGroup;
   breadcrumbItems: any[] = [];
   breadcrumbHome: any;
+  subprojectId: string | null = null;
+
   ngOnInit(): void {
     this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
     this.breadcrumbItems = [{ label: 'Project List' }];
     this.breadcrumbItems = [{ label: 'Sub-Project' }];
+
+    this.subprojectId = this.route.snapshot.paramMap.get('id');
+    if (this.subprojectId) {
+      this.loadSubProject(this.subprojectId);
+    }
   }
-  constructor(private fb: FormBuilder) {
+
+  async loadSubProject(id: string) {
+    this.isLoading = true;
+    try {
+      const res = await this.api.GET(`/api/subproject/${id}`);
+      this.proposalForm.patchValue(res.data);
+    } catch (err) {
+      console.error('Failed to load sub-project', err);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+  constructor(private fb: FormBuilder, private route: ActivatedRoute, private api: ApiService) {
     this.proposalForm = this.fb.group({
       ip: [''],
       projectName: [''],

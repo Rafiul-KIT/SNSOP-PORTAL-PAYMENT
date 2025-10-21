@@ -1,9 +1,44 @@
+
+.custom-white-btn {
+  display: inline-block;
+  padding: 1px 6px;
+border: none;
+  background-color: #0b5c41;
+  color: #ffffff; 
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.25s ease-in-out;
+  border-radius: 8px;
+}
+
+.custom-white-btn:hover {
+  background-color: #ffffff;
+  color: #059669;
+  border-color: #059669;
+  box-shadow: 0 0 6px rgba(5, 150, 105, 0.3);
+}
+
+.custom-white-btn:active {
+  transform: scale(0.97);
+}
+
+.custom-white-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.3);
+}
+
+.custom-white-btn + .custom-white-btn {
+  margin-left: 8px;
+}
+
 .header {
   position: fixed;
   top: 0;
   left: 0;
   height: 60px;
-  background-color: #ffffff;
+  background-color: #0b5c41;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -20,7 +55,7 @@
     gap: 5px;
 
     .name {
-      color: #0ea5e9;
+      color: #f9fcfd;
       text-transform: uppercase;
     }
 
@@ -68,6 +103,7 @@
       right: 0;
     }
     .item {
+      background-color: #b7cfe7;
       width: 100%;
       padding: 5px 10px;
       &:hover {
@@ -149,12 +185,18 @@
   }
 
   .menues {
-    color: #ffffff;
+    color: #000000;
     display: flex;
+    
     align-items: center;
     justify-content: flex-start;
     width: 100%;
   }
+p-button{
+color: #e5e7eb;
+ border-radius: 2rem;
+background-color: #ffffff ;
+}
 }
 
 

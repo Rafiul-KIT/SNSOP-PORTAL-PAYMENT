@@ -5,6 +5,8 @@ import { ProjectList } from './pages/project-list/project-list';
 import {Project} from './pages/project/project';
 import { SubProject } from './pages/sub-project/sub-project';
 import { BeneficiaryAttendance } from './pages/beneficiary-attendance/beneficiary-attendance';
+import { SubProjectList } from './pages/sub-project-list/sub-project-list';
+import { SubProjectDetails } from './pages/sub-project-details/sub-project-details';
 
 export const routes: Routes = [
   {
@@ -16,8 +18,16 @@ export const routes: Routes = [
     path: 'project-list',  
   },
     {
+    component: SubProjectList,
+    path: 'sub-project-list',
+  },
+  {
     component: SubProject,
-    path: 'sub-project',  
+    path: 'sub-project',
+  },
+  {
+    component: SubProject,
+    path: 'sub-project/:id',
   },
    {
     component: BeneficiaryAttendance,
@@ -27,6 +37,11 @@ export const routes: Routes = [
     component: Project,
     path: 'project', 
   },
+  {
+  path: 'sub-project-details/:id',
+  component: SubProjectDetails,
+},
+
   {
     path: 'project/:id',
     component: Project, 

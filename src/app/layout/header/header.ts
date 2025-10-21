@@ -57,7 +57,7 @@ export class Header {
       {
         label: 'Sub-Project',
         icon: 'fas fa-tasks',
-        routerLink: 'dashboard',
+        routerLink: 'sub-project-list',
         routerLinkActiveOptions: 'active',
       },
       {
