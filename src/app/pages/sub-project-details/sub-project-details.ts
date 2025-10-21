@@ -18,7 +18,9 @@ interface WorkDetail {
   id: number;
   workName: string;
   workCode: string;
+  areaOfWorkId: number;
   areaOfWork: string;
+  workActivityId: number;
   workActivity: string;
   estManPower: number;
   estDay: number;
@@ -28,9 +30,9 @@ interface WorkDetail {
   estCost: number;
   equipmentCost: number;
   materialCost: number;
-  equipmentPhotoUrl: string;
-  workPhotoUrl: string;
-  materialPhotoUrl: string;
+  equipmentPhotoUrl: string | null;
+  workPhotoUrl: string | null;
+  materialPhotoUrl: string | null;
   status: boolean;
 }
 
@@ -40,48 +42,64 @@ interface ApiResponse {
   content: WorkDetail[];
 }
 
+interface Target {
+  workName: string;
+  areaOfWork: string;
+  state?: string;
+  county?: string;
+  stateId?: number;
+  countyId?: number;
+  workCode?: string;
+  id?: number;
+}
+
 @Component({
   selector: 'app-sub-project-details',
   standalone: true,
-   imports: [
+  imports: [
     CommonModule,
-    ReactiveFormsModule, // For reactive forms
-    BreadcrumbModule, // Added BreadcrumbModule
-    DatePickerModule, // PrimeNG DatePicker
+    ReactiveFormsModule,
+    BreadcrumbModule,
+    DatePickerModule,
     TooltipModule,
-    Loader,
     FormsModule,
     Button
-],
+  ],
   templateUrl: './sub-project-details.html',
   styleUrls: ['./sub-project-details.scss'],
 })
-export class SubProjectDetails   implements OnInit {
+export class SubProjectDetails implements OnInit {
   projectForm!: FormGroup;
   targetForm!: FormGroup;
 
-  projectId: string | null = null;
- 
+  subprojectId: string | null = null;
   isEditMode = false;
   isLoading = false;
 
-  // Dropdown options for the form
+
   statusList = ['Active', 'Inactive', 'Completed'];
   states = ['Jonglei', 'Unity', 'Upper Nile'];
   counties = ['Bor', 'Twic East', 'Akobo'];
 
-  // Breadcrumb for navigation
+
   breadCrumbItems = [
     { label: 'Settings' },
     { label: 'Project Registration' }
   ];
   breadcrumbHome = { icon: 'pi pi-home', routerLink: '/' };
 
-  targets: { state: string; county: string }[] = [];
+  targets: Target[] = [];
   statusMsg: string | null = null;
-  private readonly PROJECTS_ENDPOINT = '/api/project/target/get';
+  
+  private readonly PROJECTS_ENDPOINT = '/api/subproject/work-details/get';
 
-  constructor(private route: ActivatedRoute, private fb: FormBuilder, private apiService: ApiService, private cdr: ChangeDetectorRef) { }
+  constructor(
+    private route: ActivatedRoute, 
+    private fb: FormBuilder, 
+    private apiService: ApiService, 
+    private cdr: ChangeDetectorRef,
+    private router: Router
+  ) { }
 
   private qs(params: Record<string, any>): string {
     const usp = new URLSearchParams();
@@ -92,95 +110,133 @@ export class SubProjectDetails   implements OnInit {
   }
 
   ngOnInit(): void {
-    // Get the project ID from the route (for editing an existing project)
-    this.projectId = this.route.snapshot.paramMap.get('id');
+   
+    this.subprojectId = this.route.snapshot.paramMap.get('id');
 
-    if (this.projectId) {
+    if (this.subprojectId) {
       this.isEditMode = true;
-      this.loadProjectData(this.projectId);
+      this.loadProjectData(this.subprojectId);
     } else {
       this.isEditMode = false;
     }
 
-    // Initialize the project form
     this.projectForm = this.fb.group({
       projectName: ['', Validators.required],
       startDate: [null, Validators.required],
       endDate: [null, Validators.required],
       sanctionDate: [null],
-      targetBeneficiaries: ['', Validators.required],
-      cost: ['', Validators.required],
+      targetBeneficiaries: ['', [Validators.required, Validators.min(1)]],
+      cost: ['', [Validators.required, Validators.min(0)]],
       inchargeName: ['', Validators.required],
       inchargeMobile: ['', [Validators.required, Validators.pattern(/^[0-9]{9,15}$/)]],
       inchargeEmail: ['', [Validators.required, Validators.email]],
       status: ['', Validators.required],
     });
 
-    // Initialize the target form for adding state/county details
     this.targetForm = this.fb.group({
       state: ['', Validators.required],
       county: ['', Validators.required]
     });
   }
+
   async loadProjectData(id: string): Promise<void> {
     this.isLoading = true;
+    this.statusMsg = 'Loading project data...';
+    
     try {
-      const query = this.qs({ projectId: id });
+      const query = this.qs({ subprojectId: id });
       const url = `${this.PROJECTS_ENDPOINT}?${query}`;
 
       const res = await this.apiService.GET(url);
 
-      // ✅ Axios wraps actual data in res.data
       const data = res.data;
 
-      if (data && data.code === 200 && Array.isArray(data.content)) {
-        this.targets = data.content.map((item: any) => ({
-          state: item.stateName,
-          county: item.countyName,
-          stateId: item.stateId,
-          countyId: item.countyId
+      if (data && data.code === 200 && Array.isArray(data.content) && data.content.length > 0) {
+       
+        this.targets = data.content.map((item: WorkDetail) => ({
+          id: item.id,
+          workName: item.workName,
+          workCode: item.workCode,
+          areaOfWork: item.areaOfWork,
+        
+          state: (item as any).stateName || '',
+          county: (item as any).countyName || '',
+          stateId: (item as any).stateId,
+          countyId: (item as any).countyId
         }));
 
-        this.statusMsg = `Loaded ${this.targets.length} target(s) successfully.`;
+        this.statusMsg = `Loaded ${this.targets.length} work detail(s) successfully.`;
       } else {
-        this.statusMsg = 'No project data found.';
+        this.statusMsg = 'No work details found for this project.';
+        this.targets = [];
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to load project data:', err);
-      this.statusMsg = 'Error loading project data.';
+      this.statusMsg = err?.response?.data?.message || 'Error loading project data.';
+      this.targets = [];
     } finally {
       this.isLoading = false;
       this.cdr.detectChanges();
     }
   }
 
-
-
   // Add a new target (state/county)
   addTarget(): void {
     if (this.targetForm.valid) {
-      this.targets.push(this.targetForm.value);
+      const newTarget: Target = {
+        state: this.targetForm.value.state,
+        county: this.targetForm.value.county,
+        workName: '', 
+        areaOfWork: '' 
+      };
+      
+      this.targets.push(newTarget);
       this.targetForm.reset();
+      this.statusMsg = 'Target location added successfully.';
+    } else {
+      this.targetForm.markAllAsTouched();
+      this.statusMsg = 'Please select both state and county.';
     }
   }
 
-  // Remove a target (state/county)
+  // Remove a target
   removeTarget(index: number): void {
-    this.targets.splice(index, 1);
+    if (index >= 0 && index < this.targets.length) {
+      this.targets.splice(index, 1);
+      this.statusMsg = 'Target removed successfully.';
+    }
   }
 
   // Save project details
-  onSave(): void {
+  async onSave(): Promise<void> {
     if (this.projectForm.valid) {
+      if (this.targets.length === 0) {
+        this.statusMsg = 'Please add at least one target location.';
+        return;
+      }
+
+      this.isLoading = true;
       const payload = {
         ...this.projectForm.value,
-        targets: this.targets
+        targets: this.targets,
+        subprojectId: this.subprojectId
       };
-      console.log('Project Data:', payload);
-      this.statusMsg = 'Project saved successfully!';
+
+      try {
+
+        console.log('Project Data:', payload);
+        this.statusMsg = 'Project saved successfully!';
+        
+      } catch (err: any) {
+        console.error('Failed to save project:', err);
+        this.statusMsg = err?.response?.data?.message || 'Error saving project.';
+      } finally {
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
     } else {
       this.projectForm.markAllAsTouched();
-      this.statusMsg = 'Please fill all required fields.';
+      this.statusMsg = 'Please fill all required fields correctly.';
     }
   }
 
@@ -192,11 +248,15 @@ export class SubProjectDetails   implements OnInit {
     this.statusMsg = 'Form cleared.';
   }
 
-  // Cancel the operation and reset the form
+  // Cancel the operation
   onCancel(): void {
-    this.projectForm.reset();
-    this.targetForm.reset();
-    this.targets = [];
-    this.statusMsg = 'Action cancelled.';
+    if (confirm('Are you sure you want to cancel? All unsaved changes will be lost.')) {
+      this.projectForm.reset();
+      this.targetForm.reset();
+      this.targets = [];
+      this.statusMsg = 'Action cancelled.';
+      // Optionally navigate back
+      // this.router.navigate(['/projects']);
+    }
   }
 }

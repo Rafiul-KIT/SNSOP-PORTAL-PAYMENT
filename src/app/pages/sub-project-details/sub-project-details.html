@@ -122,16 +122,16 @@
         <thead>
         <tr>
           <th>#</th>
-          <th>State</th>
-          <th>County</th>
+          <th>Work Name</th>
+          <th>Area Of Work</th>
           <th>Action</th>
         </tr>
         </thead>
         <tbody>
         <tr *ngFor="let t of targets; let i = index">
           <td>{{ i + 1 }}</td>
-          <td>{{ t.state }}</td>
-          <td>{{ t.county }}</td>
+          <td>{{ t.workName }}</td>
+          <td>{{ t.areaOfWork }}</td>
           <td>
             <p-button
               icon="pi pi-trash"
