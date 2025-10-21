@@ -31,7 +31,7 @@ interface PagedResponseProjectDto {
   code: number;
   message: string;
   content: ProjectItemDto[];
-  pageNumber: number;   // backend may return this (0/1-based)
+  pageNumber: number;   
   pageSize: number;
   totalElements: number;
 }

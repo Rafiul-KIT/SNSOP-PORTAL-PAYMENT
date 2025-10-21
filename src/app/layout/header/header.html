@@ -1,21 +1,19 @@
 <div class="header">
-  <div class="portals" (click)="showPortalOptions = !showPortalOptions">
-    <i class="fas fa-braille hand"></i>
-    <div><small>Portal</small><span class="name">Payment</span></div>
+  <div class="portals text-light" (click)="showPortalOptions = !showPortalOptions">
+    <i class="fas fa-braille hand text-light"></i>
+    <div><small class="text-light">Portal</small><span class="name">Payment</span></div>
     <i class="fas fa-angle-{{showPortalOptions ? 'down' : 'right'}} hand"></i>
-    <span class="vertical-line"></span>
+    <span class=" vertical-line"></span>
   </div>
 
   @if(menuList && menuList.length > 0){
   <div class="menues">
     @for(menu of menuList; track menu){
-    <p-button
-      label="{{ menu.label }}"
-      variant="text"
-      severity="secondary"
-      size="small"
-      [routerLink]="menu.routerLink"
-    />
+    <button class="custom-white-btn" [routerLink]="menu.routerLink">
+  {{ menu.label }}
+</button>
+
+
     }
   </div>
   }
@@ -26,7 +24,7 @@
   >
     <div class="portal-items">
       @for(portal of portalList;track portal){
-      <a class="item" [href]="portal.link">
+      <a class="item " [href]="portal.link">
         <i class="{{ portal.icon }}" class="w-50"></i>
         <span>{{ portal.label }}</span>
       </a>

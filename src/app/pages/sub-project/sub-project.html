@@ -24,7 +24,11 @@
                 <div class="d-flex align-items-center gap-3">
                     <input type="search" class="form-control" placeholder="Search..." [formControl]="searchCtrl"
                         style="width: 250px;" />
+                         <button type="button" class="btn btn-primary" >
+                                Look up
+                                </button>
                 </div>
+                   
             </div>
         </nav>
         <!-- Main Content -->
@@ -345,9 +349,7 @@
                                         <button type="button" class="btn btn-outline-secondary" (click)="onCancel()">
                                             <i class="fas fa-times me-2"></i>Cancel
                                         </button>
-                                        <button type="button" class="btn btn-info text-white" (click)="onAddNew()">
-                                            <i class="fas fa-plus me-2"></i>Add New
-                                        </button>
+                                    
                                         <button type="submit" class="btn btn-success">
                                             <i class="fas fa-save me-2"></i>Save
                                         </button>
