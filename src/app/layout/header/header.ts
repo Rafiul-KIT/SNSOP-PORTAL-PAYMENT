@@ -1,9 +1,10 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, effect, ViewChild } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { PopoverModule } from 'primeng/popover';
 import { MenubarModule } from 'primeng/menubar';
 import { environment } from '../../../environments/environment';
+import { ApiService } from '../../services/api.service';
 
 @Component({
   selector: 'app-header',
@@ -14,35 +15,32 @@ import { environment } from '../../../environments/environment';
 export class Header {
   showPortalOptions: boolean = false;
   showUsermenu: boolean = false;
-  portalList: any = [];
   menuList: any = [];
+  userInfo: any = null;
   userMenuList: any = [];
 
-  constructor(private router: Router) {
-    this.portalList = [
-      {
-        label: 'Dashboard',
-        link: environment.portals.master,
-        icon: 'fas fa-dashboard',
-      },
-      {
-        label: 'Beneficiary',
-        link: environment.portals.beneficiary,
-        icon: 'fas fa-user-friends',
-      },
-      {
-        label: 'Payment',
-        link: environment.portals.payment,
-        icon: 'fas fa-credit-card',
-      },
-      { label: 'GRM', link: environment.portals.grm, icon: 'fas fa-sitemap' },
-      {
-        label: 'Report',
-        link: environment.portals.report,
-        icon: 'fas fa-chart-line',
-      },
-    ];
+  portalList = [
+    {
+      label: 'Beneficiary',
+      link: environment.portals.beneficiary,
+      icon: 'fas fa-user-friends',
+    },
+    {
+      label: 'Payment',
+      link: environment.portals.payment,
+      icon: 'fas fa-credit-card',
+    },
+    { label: 'GRM', link: environment.portals.grm, icon: 'fas fa-sitemap' },
+    {
+      label: 'Report',
+      link: environment.portals.report,
+      icon: 'fas fa-chart-line',
+    },
+    { label: 'Settings', link: environment.portals.masterSettings, icon: 'fas fa-cog' },
+    { label: 'Survey CTO', icon: 'fas fa-poll' },
+  ];
 
+  constructor(private router: Router, private apiService: ApiService,) {
     this.menuList = [
       {
         label: 'Dashboard',
@@ -59,57 +57,67 @@ export class Header {
       {
         label: 'Sub-Project',
         icon: 'fas fa-tasks',
-        routerLink: 'sub-project',
+        routerLink: 'dashboard',
         routerLinkActiveOptions: 'active',
       },
       {
         label: 'Creating Wage Request',
         icon: 'fas fa-plus',
-        routerLink: 'payment/create-wage-request',
+        routerLink: 'dashboard',
         routerLinkActiveOptions: 'active',
       },
       {
         label: 'Creating Payroll',
         icon: 'fas fa-file-circle-plus',
-        routerLink: 'payment/create-payroll',
+        routerLink: 'dashboard',
         routerLinkActiveOptions: 'active',
       },
       {
         label: 'Payroll Download',
         icon: 'fas fa-download',
-        routerLink: 'payment/payroll-download',
+        routerLink: 'dashboard',
         routerLinkActiveOptions: 'active',
       },
       {
         label: 'Sub Payroll',
         icon: 'fas fa-list',
-        routerLink: 'payment/sub-payroll',
+        routerLink: 'dashboard',
         routerLinkActiveOptions: 'active',
       },
       {
         label: 'Supplementary Payroll',
         icon: 'fas fa-list',
-        routerLink: 'payment/supplementary-payroll',
+        routerLink: 'dashboard',
         routerLinkActiveOptions: 'active',
       },
       {
         label: 'Payroll for Mobile Wallet',
         icon: 'fas fa-list',
-        routerLink: 'payment/mobile-wallet-payroll',
+        routerLink: 'dashboard',
         routerLinkActiveOptions: 'active',
       },
       {
         label: 'Payroll Reconcile',
         icon: 'fas fa-list',
-        routerLink: 'payment/payroll-reconcile',
+        routerLink: 'dashboard',
         routerLinkActiveOptions: 'active',
       },
     ];
+
+     effect(() => {
+      this.userInfo = this.apiService.loginState()?.user;
+      // if (this.userInfo?.roleId) {
+      //   this.loadMenusForUser(this.userInfo.roleId);
+      // }
+    });
   }
 
   goToProfile = () => {
     window.location.href = `${environment.portals.master}/home/profile`;
   };
 
-  logout = () => {};
+    logout() {
+    this.apiService.logout();
+    window.location.href = `${environment.portals.master}/#/landing`;
+  }
 }
