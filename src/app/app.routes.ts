@@ -4,6 +4,7 @@ import { NotFound } from './components/not-found/not-found';
 import { ProjectList } from './pages/project-list/project-list';
 import {Project} from './pages/project/project';
 import { SubProject } from './pages/sub-project/sub-project';
+import { BeneficiaryAttendance } from './pages/beneficiary-attendance/beneficiary-attendance';
 
 export const routes: Routes = [
   {
@@ -17,6 +18,10 @@ export const routes: Routes = [
     {
     component: SubProject,
     path: 'sub-project',  
+  },
+   {
+    component: BeneficiaryAttendance,
+    path: 'beneficiary-attendance',  
   },
   {
     component: Project,

@@ -1,21 +1,35 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, FormControl } from '@angular/forms';
+import {
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  FormArray,
+  FormControl,
+} from '@angular/forms';
+import { Loader } from '../../components/loader/loader';
+import { Breadcrumb } from 'primeng/breadcrumb';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, Loader, Breadcrumb],
   templateUrl: './sub-project.html',
-  styleUrl: './sub-project.scss'
+  styleUrl: './sub-project.scss',
 })
 export class SubProject {
   // 🔎 modern reactive control for search
   searchCtrl = new FormControl<string>('');
-
+  isLoading = false;
   materialsPhotoName = '';
   proposalForm: FormGroup;
-
+  breadcrumbItems: any[] = [];
+  breadcrumbHome: any;
+  ngOnInit(): void {
+    this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
+    this.breadcrumbItems = [{ label: 'Project List' }];
+    this.breadcrumbItems = [{ label: 'Sub-Project' }];
+  }
   constructor(private fb: FormBuilder) {
     this.proposalForm = this.fb.group({
       ip: [''],
@@ -35,7 +49,7 @@ export class SubProject {
       endCoordinate: [''],
       estimatedCost: [0],
       estimatedSkillLabour: [0],
-      paperScreeningStatus: ['']
+      paperScreeningStatus: [''],
     });
   }
 
@@ -54,7 +68,7 @@ export class SubProject {
       typeOfEquipment: [''],
       estimatedCostOfEquipment: [0],
       workPhoto: [null],
-      workPhotoName: ['']
+      workPhotoName: [''],
     });
   }
 
@@ -105,7 +119,11 @@ export class SubProject {
   }
 
   onCancel(): void {
-    if (confirm('Are you sure you want to cancel? All unsaved changes will be lost.')) {
+    if (
+      confirm(
+        'Are you sure you want to cancel? All unsaved changes will be lost.'
+      )
+    ) {
       this.onAddNew();
     }
   }
