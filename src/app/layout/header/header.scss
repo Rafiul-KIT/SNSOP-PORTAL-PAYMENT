@@ -1,44 +1,9 @@
-
-.custom-white-btn {
-  display: inline-block;
-  padding: 1px 6px;
-border: none;
-  background-color: #0b5c41;
-  color: #ffffff; 
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  text-decoration: none;
-  transition: all 0.25s ease-in-out;
-  border-radius: 8px;
-}
-
-.custom-white-btn:hover {
-  background-color: #ffffff;
-  color: #059669;
-  border-color: #059669;
-  box-shadow: 0 0 6px rgba(5, 150, 105, 0.3);
-}
-
-.custom-white-btn:active {
-  transform: scale(0.97);
-}
-
-.custom-white-btn:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.3);
-}
-
-.custom-white-btn + .custom-white-btn {
-  margin-left: 8px;
-}
-
 .header {
   position: fixed;
   top: 0;
   left: 0;
   height: 60px;
-  background-color: #0b5c41;
+  background-color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -55,7 +20,7 @@ border: none;
     gap: 5px;
 
     .name {
-      color: #f9fcfd;
+      color: #0ea5e9;
       text-transform: uppercase;
     }
 
@@ -83,12 +48,11 @@ border: none;
 
   .user-menu {
     position: fixed;
-    top: 60px;
+    top: 65px;
     right: -250px;
     z-index: 9999;
     padding: 10px;
-    min-width: 150px;
-    width: auto;
+    width: 150px;
     height: auto;
     background: #ffffff;
     box-shadow: 0px 24px 48px -12px rgba(16, 24, 40, 0.18);
@@ -100,10 +64,9 @@ border: none;
     justify-content: flex-start;
 
     &.show {
-      right: 0;
+      right: 5px;
     }
     .item {
-      background-color: #b7cfe7;
       width: 100%;
       padding: 5px 10px;
       &:hover {
@@ -185,45 +148,10 @@ border: none;
   }
 
   .menues {
-    color: #000000;
+    color: #ffffff;
     display: flex;
-    
     align-items: center;
     justify-content: flex-start;
     width: 100%;
   }
-p-button{
-color: #e5e7eb;
- border-radius: 0.1rem;
-background-color: #ffffff ;
-}
-}
-
-
-
-.submenu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  min-width: 220px;
-  margin-top: .25rem;
-  padding: .5rem 0;
-  background: #fff;
-  border: 1px solid var(--surface-border, #e5e7eb);
-  border-radius: .5rem;
-  box-shadow: 0 6px 18px rgba(0,0,0,.08);
-  z-index: 1000;
-}
-
-.submenu-item {
-  display: flex;
-  align-items: center;
-  gap: .5rem;
-  padding: .5rem .75rem;
-  color: inherit;
-  text-decoration: none;
-}
-
-.submenu-item:hover {
-  background: var(--surface-100, #f5f6f7);
 }
