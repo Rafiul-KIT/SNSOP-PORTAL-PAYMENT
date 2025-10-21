@@ -10,6 +10,7 @@ import Aura from '@primeuix/themes/aura';
 import { provideAnimations } from '@angular/platform-browser/animations';
 
 import { CookieService } from 'ngx-cookie-service';
+import { MessageService } from 'primeng/api';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -28,6 +29,6 @@ export const appConfig: ApplicationConfig = {
         tooltip: 1100, // tooltip
       },
     }),
-    CookieService,
+    CookieService, MessageService
   ],
 };

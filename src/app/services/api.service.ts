@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import axios from 'axios';
 import { CookieService } from 'ngx-cookie-service';
-import { environment } from '../../environments/environment.staging';
+import { environment } from '../../environments/environment';
 import { jwtDecode } from 'jwt-decode';
 import { Router } from '@angular/router';
 
@@ -10,25 +10,11 @@ import { Router } from '@angular/router';
 })
 export class ApiService {
   private globalApi: string = environment.globalApi;
-  private globalContentApi = `${environment.globalApi}/contentservice`;
-
   public loginState = signal({
     token: null,
     user: null,
   });
-
-  public ACCESS_TOKEN = 'mis_ta';
-  public REFRESH_TOKEN = 'mis_tr';
-  public USER_ID = 'mis_uid';
-  public USER_SELLER_ID = 'mis_usid';
-  public USER_ROLE = 'mis_rl';
-
-  private multiPartApiHeader = {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  };
-
+  public ACCESS_TOKEN = environment.cookie_name;
   private apiHeader: any = {
     headers: {
       'Content-Type': 'application/json',
@@ -47,100 +33,45 @@ export class ApiService {
         token: accessToken,
         user: userData,
       });
+      this.axiosInstance.defaults.headers.common[
+        'Authorization'
+      ] = `Bearer ${accessToken}`;
     }
 
-    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-    // ================= Interceptors =================
+    // ✅ Request interceptor → always attach fresh token
     this.axiosInstance.interceptors.request.use(
-      (request: any) => {
-        request.headers['Time-Zone'] = timeZone;
-        const accessToken: any = this.cookieService.get(this.ACCESS_TOKEN);
-        if (accessToken) {
-          request.headers['Authorization'] = `Bearer ${accessToken}`;
+      (config) => {
+        const token = this.cookieService.get(this.ACCESS_TOKEN);
+        if (token) {
+          config.headers['Authorization'] = `Bearer ${token}`;
         }
-        return request;
+        return config;
       },
       (error) => Promise.reject(error)
     );
 
+    // ✅ Response interceptor → handle 401 globally
     this.axiosInstance.interceptors.response.use(
       (response) => response,
-      async (error) => {
-        const originalRequest = error.config;
-        if (
-          error.response &&
-          error.response.status === 401 &&
-          !originalRequest._retry
-        ) {
-          originalRequest._retry = true;
-          try {
-            const apiHeader = {
-              headers: {
-                'Content-Type': 'application/json',
-                'Refresh-Token': this.cookieService.get(this.REFRESH_TOKEN),
-              },
-            };
-            const response = await axios.get(
-              `${environment.globalApi}/ums/api/authenticate/newAccessToken`,
-              apiHeader
-            );
-            const accessToken = response.data.data.content.accessToken;
-            const refreshToken = response.data.data.content.refreshToken;
-
-            this.cookieService.set(
-              this.ACCESS_TOKEN,
-              accessToken,
-              1,
-              '/',
-              environment.domain
-            );
-            this.cookieService.set(
-              this.REFRESH_TOKEN,
-              refreshToken,
-              1,
-              '/',
-              environment.domain
-            );
-
-            this.axiosInstance.defaults.headers.common[
-              'Authorization'
-              ] = `Bearer ${accessToken}`;
-
-            return this.axiosInstance(originalRequest);
-          } catch (refreshError) {
-            console.error('Token refresh failed:', refreshError);
-            return Promise.reject(refreshError);
-          }
-        } else if (error.response && error.response.status === 403) {
-          return Promise.reject(error);
+      (error) => {
+        if (error.response && error.response.status === 401) {
+          console.warn('401 Unauthorized → redirecting to login...');
+          this.logout(); // reuse your existing logout
         }
         return Promise.reject(error);
       }
     );
   }
 
-  // ================= Login / Logout =================
-  setToken = (jwtToken: any) => {
-    const userData: any = jwtDecode(jwtToken);
-    this.loginState.set({
-      token: jwtToken,
-      user: userData,
-    });
-    this.cookieService.set(
-      this.ACCESS_TOKEN,
-      jwtToken,
-      1,
-      '/',
-      environment.domain
-    );
-    this.router.navigateByUrl('/dashboard');
-  };
-
   logout = () => {
     this.cookieService.deleteAll('/', environment.domain, false);
     this.loginState.set({ token: null, user: null });
-    this.router.navigateByUrl('/auth/sign-in');
+
+    // Build redirect URL dynamically
+    const landingPath = environment.useHash ? '/#/landing' : '/landing';
+    const redirectUrl = `${environment.portals.master}${landingPath}`;
+
+    window.location.href = redirectUrl;
   };
 
   // ================= Basic HTTP Functions =================
@@ -166,71 +97,5 @@ export class ApiService {
 
   DELETE = (endpoint: string) => {
     return this.axiosInstance.delete(endpoint, this.apiHeader);
-  };
-
-  // ================= Refresh Token =================
-  refreshTokenManually = async () => {
-    try {
-      const apiHeader = {
-        headers: {
-          'Content-Type': 'application/json',
-          'Refresh-Token': this.cookieService.get(this.REFRESH_TOKEN),
-        },
-      };
-      const response = await axios.get(
-        `${environment.globalApi}/ums/api/authenticate/newAccessToken`,
-        apiHeader
-      );
-      const accessToken = response.data.data.content.accessToken;
-      const refreshToken = response.data.data.content.refreshToken;
-      const decoded: any = jwtDecode(accessToken);
-
-      this.cookieService.set(
-        this.ACCESS_TOKEN,
-        accessToken,
-        1,
-        '/',
-        environment.domain
-      );
-      this.cookieService.set(
-        this.REFRESH_TOKEN,
-        refreshToken,
-        1,
-        '/',
-        environment.domain
-      );
-      this.cookieService.set(
-        this.USER_ID,
-        decoded.sub,
-        1,
-        '/',
-        environment.domain
-      );
-      this.cookieService.set(
-        this.USER_ROLE,
-        decoded.userType,
-        1,
-        '/',
-        environment.domain
-      );
-    } catch (refreshError) {
-      console.error('Token refresh failed:', refreshError);
-    }
-  };
-
-  // ================= File Upload & User Profile =================
-  uploadImage = (endpoint: string, payload: {}) => {
-    return this.axiosInstance.post(
-      `${this.globalContentApi}/${endpoint}`,
-      payload,
-      this.multiPartApiHeader
-    );
-  };
-
-  getUserProfile = (endpoint: string) => {
-    return this.axiosInstance.get(
-      `/ums/${endpoint}`,
-      this.apiHeader
-    );
   };
 }

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Loader } from '../../components/loader/loader';
 
+
 @Component({
   selector: 'app-dashboard',
   imports: [Loader],
@@ -8,5 +9,5 @@ import { Loader } from '../../components/loader/loader';
   styleUrl: './dashboard.scss',
 })
 export class Dashboard {
-  isLoading: boolean = true;
+  isLoading: boolean = false;
 }

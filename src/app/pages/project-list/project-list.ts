@@ -57,7 +57,7 @@ interface PagedResponseProjectDto {
 export class ProjectList implements OnInit {
   rows: ProjectItemDto[] = [];
   searchText = '';          // kept for UI; gateway will read it downstream
-  isLoading = true;
+  isLoading = false;
   totalRecords = 0;
 
   breadcrumbItems: any[] = [];
@@ -89,7 +89,6 @@ export class ProjectList implements OnInit {
 
   async loadProjects() {
     this.isLoading = true;
-    this.cdr.detectChanges();
     try {
       const query = this.qs({
         page: this.currentPage,       // if API is 1-based: this.currentPage + 1
