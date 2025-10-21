@@ -71,7 +71,7 @@ export class ProjectList implements OnInit {
   // 🔧 Update to your real gateway path
   private readonly PROJECTS_ENDPOINT = '/api/project/get';
 
-  constructor(private router: Router, private api: ApiService,private cdr: ChangeDetectorRef) {}
+  constructor(private router: Router, private api: ApiService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
