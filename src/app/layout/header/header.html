@@ -1,42 +1,51 @@
 <div class="header">
-  <div class="portals" (click)="showPortalOptions = !showPortalOptions">
-    <i class="fas fa-braille hand"></i>
-    <div><small>Portal</small><span class="name">Payment</span></div>
+  <div class="portals text-light" (click)="showPortalOptions = !showPortalOptions">
+    <i class="fas fa-braille hand text-light"></i>
+    <div><small class="text-light">Portal</small><span class="name">Payment</span></div>
     <i class="fas fa-angle-{{showPortalOptions ? 'down' : 'right'}} hand"></i>
-    <span class="vertical-line"></span>
+    <span class=" vertical-line"></span>
   </div>
 
   @if(menuList && menuList.length > 0){
   <div class="menues">
     @for(menu of menuList; track menu){
-    <a [routerLink]="menu.routerLink" routerLinkActive="active-route">
-      <p-button label="{{ menu.label }}" variant="text" severity="secondary" size="small" [icon]="menu.icon" />
-    </a>
+    <button class="custom-white-btn" [routerLink]="menu.routerLink">
+  {{ menu.label }}
+</button>
+
+
     }
   </div>
   }
 
-  <div class="portals-option-wrapper {{showPortalOptions ? 'show' : ''}}" (mouseleave)="showPortalOptions = false">
+  <div
+    class="portals-option-wrapper {{showPortalOptions ? 'show' : ''}}"
+    (mouseleave)="showPortalOptions = false"
+  >
     <div class="portal-items">
       @for(portal of portalList;track portal){
-      <a class="item" [href]="portal.link">
-        <i class="{{ portal.icon }}"></i>
+      <a class="item " [href]="portal.link">
+        <i class="{{ portal.icon }}" class="w-50"></i>
         <span>{{ portal.label }}</span>
       </a>
       }
     </div>
   </div>
 
-  <p-button variant="text" icon="fas fa-user-circle" severity="info" (onClick)="showUsermenu = !showUsermenu" />
+  @if(userInfo){
+  <p-button [text]="true" icon="fas fa-user-circle fa-lg" severity="info"
+    (onClick)="showUsermenu = !showUsermenu"></p-button>
 
-  <div class="user-menu {{showUsermenu ? 'show' : ''}}" (mouseleave)="showUsermenu = false">
-    <div class="item" (click)="goToProfile()">
+  <div class="user-menu {{ showUsermenu ? 'show' : '' }}" (mouseleave)="showUsermenu = false">
+    <div class="item">
+      <!-- (click)="goToProfile()" -->
       <i class="fas fa-user me-2"></i>
-      Profile
+      Profile ({{userInfo.sub}})
     </div>
     <div class="item" (click)="logout()">
       <i class="fas fa-sign-out-alt me-2"></i>
       Logout
     </div>
   </div>
+  }
 </div>
