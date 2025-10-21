@@ -36,17 +36,21 @@ export class Header {
       link: environment.portals.report,
       icon: 'fas fa-chart-line',
     },
-    { label: 'Settings', link: environment.portals.masterSettings, icon: 'fas fa-cog' },
+    {
+      label: 'Settings',
+      link: environment.portals.masterSettings,
+      icon: 'fas fa-cog',
+    },
     { label: 'Survey CTO', icon: 'fas fa-poll' },
   ];
 
-  constructor(private router: Router, private apiService: ApiService,) {
+  constructor(private router: Router, private apiService: ApiService) {
     this.menuList = [
       {
         label: 'Dashboard',
-        icon: 'fas fa-project-dashboard',
+        icon: 'fas fa-dashboard',
         routerLink: 'dashboard',
-        routerLinkActiveOptions: 'active',
+        routerLinkActiveOptions: { exact: true },
       },
       {
         label: 'Project',
@@ -62,19 +66,19 @@ export class Header {
       },
       {
         label: 'Creating Wage Request',
-        icon: 'fas fa-plus',
+        icon: 'fas fa-hand-holding-usd',
         routerLink: 'dashboard',
         routerLinkActiveOptions: 'active',
       },
-        {
+      {
         label: 'Beneficiary Attendance',
-        icon: 'fas fa-plus',
+        icon: 'fas fa-users',
         routerLink: 'beneficiary-attendance',
         routerLinkActiveOptions: 'active',
       },
       {
         label: 'Creating Payroll',
-        icon: 'fas fa-file-circle-plus',
+        icon: 'fas fa-file-invoice-dollar',
         routerLink: 'dashboard',
         routerLinkActiveOptions: 'active',
       },
@@ -86,31 +90,31 @@ export class Header {
       },
       {
         label: 'Sub Payroll',
-        icon: 'fas fa-list',
+        icon: 'fas fa-list-alt',
         routerLink: 'dashboard',
         routerLinkActiveOptions: 'active',
       },
       {
         label: 'Supplementary Payroll',
-        icon: 'fas fa-list',
+        icon: 'fas fa-clipboard-check',
         routerLink: 'dashboard',
         routerLinkActiveOptions: 'active',
       },
       {
         label: 'Payroll for Mobile Wallet',
-        icon: 'fas fa-list',
+        icon: 'fas fa-mobile-alt',
         routerLink: 'dashboard',
         routerLinkActiveOptions: 'active',
       },
       {
         label: 'Payroll Reconcile',
-        icon: 'fas fa-list',
+        icon: 'fas fa-sync-alt',
         routerLink: 'dashboard',
         routerLinkActiveOptions: 'active',
       },
     ];
 
-     effect(() => {
+    effect(() => {
       this.userInfo = this.apiService.loginState()?.user;
       // if (this.userInfo?.roleId) {
       //   this.loadMenusForUser(this.userInfo.roleId);
@@ -118,11 +122,15 @@ export class Header {
     });
   }
 
+  isActive(route: string): boolean {
+    return this.router.isActive(route, true);
+  }
+
   goToProfile = () => {
     window.location.href = `${environment.portals.master}/home/profile`;
   };
 
-    logout() {
+  logout() {
     this.apiService.logout();
     window.location.href = `${environment.portals.master}/#/landing`;
   }

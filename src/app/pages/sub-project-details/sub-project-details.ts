@@ -43,6 +43,9 @@ interface ApiResponse {
 }
 
 interface Target {
+estCost: any;
+estManPower: any;
+workActivity: any;
   workName: string;
   areaOfWork: string;
   state?: string;
@@ -83,8 +86,8 @@ export class SubProjectDetails implements OnInit {
 
 
   breadCrumbItems = [
-    { label: 'Settings' },
-    { label: 'Project Registration' }
+    { label: 'Sub-Project List' },
+    { label: 'Sub-Project Details' }
   ];
   breadcrumbHome = { icon: 'pi pi-home', routerLink: '/' };
 
@@ -158,7 +161,9 @@ export class SubProjectDetails implements OnInit {
           workName: item.workName,
           workCode: item.workCode,
           areaOfWork: item.areaOfWork,
-        
+          workActivity: item.workActivity,
+          estManPower: item.estManPower,
+          estCost: item.estCost,
           state: (item as any).stateName || '',
           county: (item as any).countyName || '',
           stateId: (item as any).stateId,
@@ -186,8 +191,11 @@ export class SubProjectDetails implements OnInit {
       const newTarget: Target = {
         state: this.targetForm.value.state,
         county: this.targetForm.value.county,
-        workName: '', 
-        areaOfWork: '' 
+        workName: '',
+        areaOfWork: '',
+        estCost: 0,
+        estManPower: 0,
+        workActivity: 0
       };
       
       this.targets.push(newTarget);
