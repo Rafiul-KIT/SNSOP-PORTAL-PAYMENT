@@ -66,9 +66,11 @@
     &.show {
       right: 5px;
     }
+
     .item {
       width: 100%;
       padding: 5px 10px;
+
       &:hover {
         cursor: pointer;
         background-color: #b7cfe7;
@@ -153,5 +155,16 @@
     align-items: center;
     justify-content: flex-start;
     width: 100%;
+
+    a {
+      text-decoration: none;
+
+      &.active-route {
+        ::ng-deep .p-button {
+          background-color: #f1f5f9 !important;
+
+        }
+      }
+    }
   }
 }
