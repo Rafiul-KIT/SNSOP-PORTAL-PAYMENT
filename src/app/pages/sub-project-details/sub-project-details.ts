@@ -1,14 +1,18 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { BreadcrumbModule } from 'primeng/breadcrumb';
-import { ButtonModule } from 'primeng/button';
-import { DatePickerModule } from 'primeng/datepicker';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { TableModule } from 'primeng/table';
+import { ButtonModule, Button } from 'primeng/button';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TooltipModule } from 'primeng/tooltip';
-import { HttpClient, HttpHeaders, HttpParams, provideHttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { PaginatorModule } from 'primeng/paginator';
+import { BreadcrumbModule } from 'primeng/breadcrumb';
+import { InputTextModule } from 'primeng/inputtext';
+import { FloatLabelModule } from 'primeng/floatlabel';
 import { Loader } from '../../components/loader/loader';
+import { ApiService} from '../../services/api.service';
+import { ChangeDetectorRef } from '@angular/core';
+import { DatePickerModule } from 'primeng/datepicker';
 
 interface WorkDetail {
   id: number;
@@ -39,59 +43,66 @@ interface ApiResponse {
 @Component({
   selector: 'app-sub-project-details',
   standalone: true,
-  imports: [
+   imports: [
     CommonModule,
-    ReactiveFormsModule,
-    BreadcrumbModule,
-    DatePickerModule,
+    ReactiveFormsModule, // For reactive forms
+    BreadcrumbModule, // Added BreadcrumbModule
+    DatePickerModule, // PrimeNG DatePicker
     TooltipModule,
-    ButtonModule,
     Loader,
-  ],
+    FormsModule,
+    Button
+],
   templateUrl: './sub-project-details.html',
-  styleUrl: './sub-project-details.scss',
- 
+  styleUrls: ['./sub-project-details.scss'],
 })
-export class SubProjectDetails implements OnInit {
-  // Inject modern way (Angular 20)
-  private fb = inject(FormBuilder);
-  private route = inject(ActivatedRoute);
-  private http = inject(HttpClient);
-
+export class SubProjectDetails   implements OnInit {
   projectForm!: FormGroup;
   targetForm!: FormGroup;
+
+  projectId: string | null = null;
+ 
   isEditMode = false;
   isLoading = false;
 
-  subprojectId: string | null = null;
-  workDetails: WorkDetail[] = [];
-
-  // Dropdowns
+  // Dropdown options for the form
   statusList = ['Active', 'Inactive', 'Completed'];
   states = ['Jonglei', 'Unity', 'Upper Nile'];
   counties = ['Bor', 'Twic East', 'Akobo'];
 
-  breadCrumbItems = [{ label: 'Settings' }, { label: 'Sub Project Details' }];
+  // Breadcrumb for navigation
+  breadCrumbItems = [
+    { label: 'Settings' },
+    { label: 'Project Registration' }
+  ];
   breadcrumbHome = { icon: 'pi pi-home', routerLink: '/' };
 
   targets: { state: string; county: string }[] = [];
   statusMsg: string | null = null;
+  private readonly PROJECTS_ENDPOINT = '/api/project/target/get';
 
-  private readonly WORK_DETAILS_API = '/api/subproject/work-details/get';
+  constructor(private route: ActivatedRoute, private fb: FormBuilder, private apiService: ApiService, private cdr: ChangeDetectorRef) { }
 
-  ngOnInit(): void {
-    this.subprojectId = this.route.snapshot.paramMap.get('id');
-    this.initForms();
-
-    if (this.subprojectId) {
-      this.isEditMode = true;
-      this.loadWorkDetails(this.subprojectId);
-    } else {
-      console.warn('⚠️ No subprojectId provided in route.');
-    }
+  private qs(params: Record<string, any>): string {
+    const usp = new URLSearchParams();
+    Object.entries(params).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && v !== '') usp.set(k, String(v));
+    });
+    return usp.toString();
   }
 
-  private initForms(): void {
+  ngOnInit(): void {
+    // Get the project ID from the route (for editing an existing project)
+    this.projectId = this.route.snapshot.paramMap.get('id');
+
+    if (this.projectId) {
+      this.isEditMode = true;
+      this.loadProjectData(this.projectId);
+    } else {
+      this.isEditMode = false;
+    }
+
+    // Initialize the project form
     this.projectForm = this.fb.group({
       projectName: ['', Validators.required],
       startDate: [null, Validators.required],
@@ -105,32 +116,47 @@ export class SubProjectDetails implements OnInit {
       status: ['', Validators.required],
     });
 
+    // Initialize the target form for adding state/county details
     this.targetForm = this.fb.group({
       state: ['', Validators.required],
-      county: ['', Validators.required],
+      county: ['', Validators.required]
     });
   }
-
-  /** ✅ Fetch work details from API (modern way) */
-  async loadWorkDetails(id: string) {
+  async loadProjectData(id: string): Promise<void> {
     this.isLoading = true;
     try {
-      const params = new HttpParams().set('subprojectId', id);
-      const headers = new HttpHeaders();
+      const query = this.qs({ projectId: id });
+      const url = `${this.PROJECTS_ENDPOINT}?${query}`;
 
-      const response = await firstValueFrom(
-        this.http.get<ApiResponse>(this.WORK_DETAILS_API, { params, headers })
-      );
+      const res = await this.apiService.GET(url);
 
-      this.workDetails = response?.content ?? [];
-      console.log('✅ Work details loaded:', this.workDetails);
+      // ✅ Axios wraps actual data in res.data
+      const data = res.data;
+
+      if (data && data.code === 200 && Array.isArray(data.content)) {
+        this.targets = data.content.map((item: any) => ({
+          state: item.stateName,
+          county: item.countyName,
+          stateId: item.stateId,
+          countyId: item.countyId
+        }));
+
+        this.statusMsg = `Loaded ${this.targets.length} target(s) successfully.`;
+      } else {
+        this.statusMsg = 'No project data found.';
+      }
     } catch (err) {
-      console.error('❌ Failed to load work details', err);
+      console.error('Failed to load project data:', err);
+      this.statusMsg = 'Error loading project data.';
     } finally {
       this.isLoading = false;
+      this.cdr.detectChanges();
     }
   }
 
+
+
+  // Add a new target (state/county)
   addTarget(): void {
     if (this.targetForm.valid) {
       this.targets.push(this.targetForm.value);
@@ -138,14 +164,19 @@ export class SubProjectDetails implements OnInit {
     }
   }
 
+  // Remove a target (state/county)
   removeTarget(index: number): void {
     this.targets.splice(index, 1);
   }
 
+  // Save project details
   onSave(): void {
     if (this.projectForm.valid) {
-      const payload = { ...this.projectForm.value, targets: this.targets };
-      console.log('📤 Saving Project Data:', payload);
+      const payload = {
+        ...this.projectForm.value,
+        targets: this.targets
+      };
+      console.log('Project Data:', payload);
       this.statusMsg = 'Project saved successfully!';
     } else {
       this.projectForm.markAllAsTouched();
@@ -153,6 +184,7 @@ export class SubProjectDetails implements OnInit {
     }
   }
 
+  // Clear all form fields
   onClear(): void {
     this.projectForm.reset();
     this.targetForm.reset();
@@ -160,6 +192,7 @@ export class SubProjectDetails implements OnInit {
     this.statusMsg = 'Form cleared.';
   }
 
+  // Cancel the operation and reset the form
   onCancel(): void {
     this.projectForm.reset();
     this.targetForm.reset();

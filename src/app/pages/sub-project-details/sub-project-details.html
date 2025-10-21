@@ -1,179 +1,160 @@
+<!-- Breadcrumb -->
 <div class="breadcrumb-wrapper mb-3">
-  <p-breadcrumb [model]="breadCrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
+  <p-breadcrumb [model]="breadCrumbItems" [home]="breadcrumbHome" class="max-w-full"></p-breadcrumb>
 </div>
 
-@if (isLoading) {
-  <app-loader />
-} @else {
-  <div class="card shadow-sm project-container bg-white p-4">
+<!-- Outer panel -->
+<div class="card shadow-sm project-container">
+  <div class="card-body">
+    <!-- Form -->
     <form [formGroup]="projectForm" class="container-fluid">
       <div class="row g-3">
-        <!-- Left -->
+        <!-- Left column -->
         <div class="col-12 col-md-6">
-          <div class="mb-2">
-            <label class="fw-semibold">Project Name:</label>
-            <input class="form-control" formControlName="projectName" />
+          <div class="row mb-2">
+            <label class="col-md-4 col-form-label text-md-end">Project Name :</label>
+            <div class="col-md-8">
+              <input type="text" class="form-control" formControlName="projectName" />
+            </div>
           </div>
 
-          <div class="mb-2">
-            <label class="fw-semibold">Start Date:</label>
-            <p-datePicker formControlName="startDate" dateFormat="dd/mm/yy"></p-datePicker>
+          <div class="row mb-2">
+            <label class="col-md-4 col-form-label text-md-end">Start Date :</label>
+            <div class="col-md-8">
+              <p-datePicker formControlName="startDate" dateFormat="dd/mm/yy"></p-datePicker>
+            </div>
           </div>
 
-          <div class="mb-2">
-            <label class="fw-semibold">End Date:</label>
-            <p-datePicker formControlName="endDate" dateFormat="dd/mm/yy"></p-datePicker>
+          <div class="row mb-2">
+            <label class="col-md-4 col-form-label text-md-end">End Date :</label>
+            <div class="col-md-8">
+              <p-datePicker formControlName="endDate" dateFormat="dd/mm/yy"></p-datePicker>
+            </div>
           </div>
 
-          <div class="mb-2">
-            <label class="fw-semibold">Sanction Date:</label>
-            <p-datePicker formControlName="sanctionDate" dateFormat="dd/mm/yy"></p-datePicker>
+          <div class="row mb-2">
+            <label class="col-md-4 col-form-label text-md-end">Project Sanction Date :</label>
+            <div class="col-md-8">
+              <p-datePicker formControlName="sanctionDate" dateFormat="dd/mm/yy"></p-datePicker>
+            </div>
           </div>
         </div>
 
-        <!-- Right -->
+        <!-- Right column -->
         <div class="col-12 col-md-6">
-          <div class="mb-2">
-            <label class="fw-semibold">Target Beneficiaries:</label>
-            <input type="number" class="form-control" formControlName="targetBeneficiaries" />
+          <div class="row mb-2">
+            <label class="col-md-4 col-form-label text-md-end">Target Beneficiaries :</label>
+            <div class="col-md-8">
+              <input type="number" class="form-control" formControlName="targetBeneficiaries" />
+            </div>
           </div>
 
-          <div class="mb-2">
-            <label class="fw-semibold">Cost (USD):</label>
-            <input type="number" class="form-control" formControlName="cost" />
+          <div class="row mb-2">
+            <label class="col-md-4 col-form-label text-md-end">Project Cost (USD) :</label>
+            <div class="col-md-8">
+              <input type="number" class="form-control" formControlName="cost" />
+            </div>
           </div>
 
-          <div class="mb-2">
-            <label class="fw-semibold">Incharge Name:</label>
-            <input type="text" class="form-control" formControlName="inchargeName" />
+          <div class="row mb-2">
+            <label class="col-md-4 col-form-label text-md-end">Person Incharge :</label>
+            <div class="col-md-8">
+              <input type="text" class="form-control" formControlName="inchargeName" />
+            </div>
           </div>
 
-          <div class="mb-2">
-            <label class="fw-semibold">Mobile:</label>
-            <input type="text" class="form-control" formControlName="inchargeMobile" />
+          <div class="row mb-2">
+            <label class="col-md-4 col-form-label text-md-end">Mobile :</label>
+            <div class="col-md-8">
+              <input type="text" class="form-control" formControlName="inchargeMobile" />
+            </div>
           </div>
 
-          <div class="mb-2">
-            <label class="fw-semibold">Email:</label>
-            <input type="email" class="form-control" formControlName="inchargeEmail" />
+          <div class="row mb-2">
+            <label class="col-md-4 col-form-label text-md-end">Email :</label>
+            <div class="col-md-8">
+              <input type="email" class="form-control" formControlName="inchargeEmail" />
+            </div>
           </div>
 
-          <div class="mb-2">
-            <label class="fw-semibold">Status:</label>
-            <select class="form-select" formControlName="status">
-              <option value="">--Select--</option>
-              @for (s of statusList; track s) {
-                <option [value]="s">{{ s }}</option>
-              }
-            </select>
+          <div class="row mb-2">
+            <label class="col-md-4 col-form-label text-md-end">Status :</label>
+            <div class="col-md-8">
+              <select class="form-select" formControlName="status">
+                <option value="">--Select--</option>
+                <option *ngFor="let s of statusList" [value]="s">{{ s }}</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>
     </form>
 
-    <h5 class="fw-semibold mt-5 text-center">State / County wise Project Details</h5>
+    <!-- Section: State / County -->
+    <h5 class="fw-semibold mt-5 mb-3 text-center">State / County wise Project Details</h5>
 
+    <!-- Add new target form -->
     <form [formGroup]="targetForm" class="row g-3 align-items-end mb-3">
-      <div class="col-md-5">
+      <div class="col-12 col-md-5">
         <label class="form-label">State</label>
         <select class="form-select" formControlName="state">
           <option value="">--Select--</option>
-          @for (st of states; track st) {
-            <option [value]="st">{{ st }}</option>
-          }
+          <option *ngFor="let st of states" [value]="st">{{ st }}</option>
         </select>
       </div>
 
-      <div class="col-md-5">
+      <div class="col-12 col-md-5">
         <label class="form-label">County</label>
         <select class="form-select" formControlName="county">
           <option value="">--Select--</option>
-          @for (c of counties; track c) {
-            <option [value]="c">{{ c }}</option>
-          }
+          <option *ngFor="let c of counties" [value]="c">{{ c }}</option>
         </select>
       </div>
 
-      <div class="col-md-2">
+      <div class="col-12 col-md-2">
         <p-button label="Add New" icon="pi pi-plus" severity="success" (click)="addTarget()"></p-button>
       </div>
     </form>
 
-    @if (targets.length > 0) {
-      <table class="table table-bordered table-striped mt-3">
+    <!-- Table of added locations -->
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped mt-3" *ngIf="targets.length > 0">
         <thead>
-          <tr>
-            <th>#</th>
-            <th>State</th>
-            <th>County</th>
-            <th>Action</th>
-          </tr>
+        <tr>
+          <th>#</th>
+          <th>State</th>
+          <th>County</th>
+          <th>Action</th>
+        </tr>
         </thead>
         <tbody>
-          @for (t of targets; track $index) {
-            <tr>
-              <td>{{ $index + 1 }}</td>
-              <td>{{ t.state }}</td>
-              <td>{{ t.county }}</td>
-              <td>
-                <p-button
-                  icon="pi pi-trash"
-                  severity="danger"
-                  label="Remove"
-                  (click)="removeTarget($index)">
-                </p-button>
-              </td>
-            </tr>
-          }
+        <tr *ngFor="let t of targets; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ t.state }}</td>
+          <td>{{ t.county }}</td>
+          <td>
+            <p-button
+              icon="pi pi-trash"
+              severity="danger"
+              (click)="removeTarget(i)"
+              label="Remove">
+            </p-button>
+          </td>
+        </tr>
         </tbody>
       </table>
-    }
+    </div>
 
-    <!-- Work Details (from API) -->
-    <h5 class="fw-semibold mt-5 text-center">Work Details</h5>
-    @if (workDetails.length > 0) {
-      <div class="table-responsive">
-        <table class="table table-bordered mt-2">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Work Name</th>
-              <th>Code</th>
-              <th>Activity</th>
-              <th>Est. Manpower</th>
-              <th>Start</th>
-              <th>End</th>
-              <th>Cost</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (w of workDetails; track w.id) {
-              <tr>
-                <td>{{ $index + 1 }}</td>
-                <td>{{ w.workName }}</td>
-                <td>{{ w.workCode }}</td>
-                <td>{{ w.workActivity }}</td>
-                <td>{{ w.estManPower }}</td>
-                <td>{{ w.estStartAt }}</td>
-                <td>{{ w.estEndAt }}</td>
-                <td>{{ w.estCost | currency: 'USD' }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    } @else {
-      <div class="text-center text-muted mt-2">No work details found.</div>
-    }
-
-    <div class="d-flex justify-content-center gap-2 mt-4 flex-wrap">
+    <!-- Buttons -->
+    <div class="d-flex justify-content-center gap-2 mt-4 mb-4 flex-wrap">
       <p-button label="Save" icon="fas fa-save" severity="primary" (click)="onSave()"></p-button>
-      <p-button label="Clear" icon="fas fa-eraser" severity="warn" (click)="onClear()"></p-button>
+      <p-button label="Clear All" icon="fas fa-eraser" severity="warn" (click)="onClear()"></p-button>
       <p-button label="Cancel" icon="fas fa-times" severity="secondary" (click)="onCancel()"></p-button>
     </div>
 
-    @if (statusMsg) {
-      <div class="text-center small text-muted mt-3">{{ statusMsg }}</div>
-    }
+    <!-- Status message -->
+    <div *ngIf="statusMsg" class="text-center small text-muted mb-3">
+      {{ statusMsg }}
+    </div>
   </div>
-}
+</div>
