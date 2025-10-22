@@ -19,7 +19,6 @@ import { ApiService } from '../../services/api.service';
     DatePickerModule, // PrimeNG DatePicker
     TooltipModule,
     Button,
-    Loader
   ],
   templateUrl: './project.html',
   styleUrls: ['./project.scss']
