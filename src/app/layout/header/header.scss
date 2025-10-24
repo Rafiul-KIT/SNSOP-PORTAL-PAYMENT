@@ -3,14 +3,14 @@
   top: 0;
   left: 0;
   height: 60px;
-  background-color: #ffffff;
+  background-color: #CFE2FF;
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100vw;
   padding: 0 10px;
   z-index: 99999;
-  border-bottom: 1px solid #95bce4;
+  border-bottom: 1px solid #0481fd;
 
   .portals {
     color: #202020;
@@ -48,11 +48,11 @@
 
   .user-menu {
     position: fixed;
-    top: 65px;
+    top: 60px;
     right: -250px;
     z-index: 9999;
     padding: 10px;
-    width: 150px;
+    width: auto;
     height: auto;
     background: #ffffff;
     box-shadow: 0px 24px 48px -12px rgba(16, 24, 40, 0.18);
@@ -64,13 +64,11 @@
     justify-content: flex-start;
 
     &.show {
-      right: 5px;
+      right: 0px;
     }
-
     .item {
       width: 100%;
       padding: 5px 10px;
-
       &:hover {
         cursor: pointer;
         background-color: #b7cfe7;
@@ -86,8 +84,8 @@
     padding: 16px;
     max-width: 425px;
     height: auto;
-    background: #ffffff;
-    box-shadow: 0px 24px 48px -12px rgba(16, 24, 40, 0.18);
+    background: #E7F1FF;
+    box-shadow: 0px 24px 48px -12px rgba(79, 128, 226, 0.18);
     border-radius: 0 12px 12px 0;
     transition: 0.3s;
 
@@ -115,7 +113,7 @@
         width: 120px;
         height: 123px;
         background: #ffffff;
-        border: 2px solid #eaecf0;
+        border: 2px solid #afc3eb;
         border-radius: 12px;
         transition: 0.3s;
 
@@ -155,16 +153,5 @@
     align-items: center;
     justify-content: flex-start;
     width: 100%;
-
-    a {
-      text-decoration: none;
-
-      &.active-route {
-        ::ng-deep .p-button {
-          background-color: #f1f5f9 !important;
-
-        }
-      }
-    }
   }
 }
