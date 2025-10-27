@@ -178,6 +178,7 @@ export class WagesRequestLipw  implements OnInit {
 
   initBreadcrumb() {
     this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
+      
     this.breadcrumbItems = [{ label: 'Wage Request For Lipw' }];
   }
 

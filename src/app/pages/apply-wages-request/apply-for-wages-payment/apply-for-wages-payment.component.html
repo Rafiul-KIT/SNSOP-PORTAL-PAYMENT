@@ -1,3 +1,11 @@
+
+@if (false) {
+<app-loader></app-loader>
+} @else {
+<div class="breadcrumb-wrapper">
+  <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
+</div>
+
 <div class="container-fluid py-4">
   <div class="row justify-content-center">
     <div class="col-12 col-xl-11">
@@ -8,9 +16,7 @@
             <i class="pi pi-wallet me-2"></i>
             Apply for Wages Payment
           </h3>
-          <button pButton type="button" label="Look Up" icon="pi pi-search" class="p-button-outlined p-button-info"
-            (click)="onLookUp()" [disabled]="loading">
-          </button>
+         
         </div>
       </p-card>
 
@@ -165,4 +171,4 @@
       </p-card>
     </div>
   </div>
-</div>
+</div>}

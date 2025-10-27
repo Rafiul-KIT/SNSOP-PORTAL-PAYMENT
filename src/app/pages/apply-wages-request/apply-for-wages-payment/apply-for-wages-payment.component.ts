@@ -12,6 +12,8 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { DividerModule } from 'primeng/divider';
 import { ApiService } from '../../../services/api.service';
 import { SelectModule } from 'primeng/select';
+import { Loader } from "../../../components/loader/loader";
+import { Breadcrumb } from "primeng/breadcrumb";
 
 
 
@@ -28,8 +30,9 @@ import { SelectModule } from 'primeng/select';
     ButtonModule,
     InputNumberModule,
     DividerModule,
-    SelectModule
-   
+    SelectModule,
+    Loader,
+    Breadcrumb
 ],
   templateUrl: './apply-for-wages-payment.component.html'
 })
@@ -39,18 +42,24 @@ export class ApplyForWagesPaymentComponent implements OnInit {
   minDate: Date = new Date();
   loading = false;
   projectInfo: any;
-
+  breadcrumbItems: any[] = [];
+  breadcrumbHome: any;
   constructor(private fb: FormBuilder, private projectService: ApiService) {
     this.initializePaymentCycles();
   }
 
   ngOnInit(): void {
     this.initializeForm();
+    this.initBreadcrumb();
     // this.projectService.getProjectInfo().subscribe(data => {
     //   this.projectInfo = data;
     // });
   }
-
+  initBreadcrumb() {
+    this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
+    this.breadcrumbItems = [{ label: 'Create Wages Request' }];
+    
+  }
 initializeForm(): void {
   this.wagesForm = this.fb.group(
     {
