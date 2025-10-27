@@ -1,31 +1,33 @@
 <div class="header">
-  <div class="portals" (click)="showPortalOptions = !showPortalOptions">
-    <i class="fas fa-braille hand"></i>
-    <div><small>Portal</small><span class="name">Payment</span></div>
-    <i class="fas fa-angle-{{showPortalOptions ? 'down' : 'right'}} hand"></i>
-    <span class="vertical-line"></span>
+<div class="portals" (click)="showPortalOptions = !showPortalOptions">
+  <i class="fas fa-braille hand"></i>
+  <div>
+    <small>Portal</small>
+    <span class="name">Beneficiary</span>
   </div>
+  <i class="fas fa-angle-{{ showPortalOptions ? 'down' : 'right' }} hand"></i>
+  <span class="vertical-line"></span>
+</div>
 
-  @if(menuList && menuList.length > 0){
-  <div class="menues">
-    @for(menu of menuList; track menu){
-    <a [routerLink]="menu.routerLink" routerLinkActive="active-route">
-      <p-button label="{{ menu.label }}" variant="text" severity="secondary" size="small" [icon]="menu.icon" />
-    </a>
-    }
-  </div>
-  }
+<div class="menues">
+  <p-menubar [model]="menuList"></p-menubar>
+</div>
 
-  <div class="portals-option-wrapper {{showPortalOptions ? 'show' : ''}}" (mouseleave)="showPortalOptions = false">
-    <div class="portal-items">
-      @for(portal of portalList;track portal){
-      <a class="item" [href]="portal.link">
-        <i class="{{ portal.icon }}"></i>
+<div
+  class="portals-option-wrapper"
+  [class.show]="showPortalOptions"
+  (mouseleave)="showPortalOptions = false"
+>
+  <div class="portal-items">
+    @for (portal of portalList; track portal) {
+      <a class="item" [href]="portal.link" target="_blank">
+        <i class="{{ portal.icon }} w-50"></i>
         <span>{{ portal.label }}</span>
       </a>
-      }
-    </div>
+    }
   </div>
+</div>
+
 
   <p-button variant="text" icon="fas fa-user-circle" severity="info" (onClick)="showUsermenu = !showUsermenu" />
 
