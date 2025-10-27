@@ -99,7 +99,7 @@ export class Header {
       {
         label: 'Beneficiary Attendance',
         icon: 'fas fa-users',
-        routerLink: 'dashboard',
+         routerLink: 'beneficiary-attendance',
         routerLinkActiveOptions: 'active',
       },
       {
