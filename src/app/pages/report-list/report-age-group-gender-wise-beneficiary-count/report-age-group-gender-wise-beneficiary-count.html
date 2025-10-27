@@ -1,0 +1,68 @@
+<div class="report-container">
+  <p-table [value]="beneficiaryList()" [tableStyle]="{ 'width': '100%' }">
+    <ng-template pTemplate="caption">
+      <div class="d-flex justify-content-start align-items-center">
+        <button
+          type="button"
+          class="btn btn-success btn-sm me-2"
+          (click)="exportExcel()"
+          pTooltip="XLS"
+          tooltipPosition="bottom"
+        >
+          <i class="fas fa-file-excel me-2"></i>Export as XLS
+        </button>
+        <button
+          type="button"
+          class="btn btn-warning btn-sm"
+          (click)="exportPdf()"
+          pTooltip="PDF"
+          tooltipPosition="bottom"
+        >
+          <i class="fas fa-file-pdf me-2"></i>Export as PDF
+        </button>
+      </div>
+    </ng-template>
+
+ 
+    <ng-template pTemplate="header">
+      <tr style="border: 2px">
+        <th colspan="4" class="text-center" style="background-color: cadetblue; color: white">LOCATION</th>
+        <th colspan="6" class="text-center" style="background-color: cornflowerblue; color: white">MALE</th>
+        <th colspan="6" class="text-center" style="background-color: greenyellow; color: black">FEMALE</th>
+      </tr>
+      <tr style="border: 2px">
+        @for (col of cols(); track col.field) {
+          <th class="text-center">{{ col.header }}</th>
+        }
+      </tr>
+    </ng-template>
+
+ 
+    <ng-template pTemplate="body" let-beneficiary>
+      <tr>
+        <td>{{ beneficiary.stateId > 0 ? lookupService.getStateNameById(beneficiary.stateId) : '-' }}</td>
+        <td>{{ beneficiary.countyId > 0 ? lookupService.getCountyNameById(beneficiary.countyId) : '-' }}</td>
+        <td>{{ beneficiary.payamId > 0 ? lookupService.getPayamNameById(beneficiary.payamId) : '-' }}</td>
+        <td>{{ beneficiary.bomaId > 0 ? lookupService.getBomaNameById(beneficiary.bomaId) : '-' }}</td>
+        <td class="text-center">{{ beneficiary.male?._0_to_2 }}</td>
+        <td class="text-center">{{ beneficiary.male?._3_to_5 }}</td>
+        <td class="text-center">{{ beneficiary.male?._6_to_17 }}</td>
+        <td class="text-center">{{ beneficiary.male?._18_to_35 }}</td>
+        <td class="text-center">{{ beneficiary.male?._36_to_64 }}</td>
+        <td class="text-center">{{ beneficiary.male?._64_and_above }}</td>
+        <td class="text-center">{{ beneficiary.female?._0_to_2 }}</td>
+        <td class="text-center">{{ beneficiary.female?._3_to_5 }}</td>
+        <td class="text-center">{{ beneficiary.female?._6_to_17 }}</td>
+        <td class="text-center">{{ beneficiary.female?._18_to_35 }}</td>
+        <td class="text-center">{{ beneficiary.female?._36_to_64 }}</td>
+        <td class="text-center">{{ beneficiary.female?._64_and_above }}</td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="16">Nothing Found.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

@@ -80,6 +80,22 @@ export class Header {
           },
         ],
       },
+          {
+        label: 'Repot',
+        icon: 'fas fa-chart-line',
+        items: [
+          {
+            label: ' Reconciliation Detail',
+            icon: 'fas fa-list',
+            routerLink: '/report/details',
+          },
+          {
+            label: 'Reconciliation Summary',
+            icon: 'fas fa-list',
+            routerLink: '/report/summary' ,
+          },
+        ],
+      },
       {
         label: 'Beneficiary Attendance',
         icon: 'fas fa-users',
