@@ -1,0 +1,54 @@
+<div class="report-container">
+  <p-table [value]="nomineeCountList()" [tableStyle]="{ 'width': '100%' }">
+ 
+    <ng-template pTemplate="caption">
+      <div class="d-flex justify-content-start align-items-center">
+        <button
+          type="button"
+          class="btn btn-success btn-sm me-2"
+          (click)="exportExcel()"
+          pTooltip="XLS"
+          tooltipPosition="bottom"
+        >
+          <i class="fas fa-file-excel me-2"></i>Export as XLS
+        </button>
+        <button
+          type="button"
+          class="btn btn-warning btn-sm"
+          (click)="exportPdf()"
+          pTooltip="PDF"
+          tooltipPosition="bottom"
+        >
+          <i class="fas fa-file-pdf me-2"></i>Export as PDF
+        </button>
+      </div>
+    </ng-template>
+
+
+    <ng-template pTemplate="header">
+      <tr class="text-center" style="background-color: cornflowerblue; color: white">
+        @for (col of cols(); track col.field) {
+          <th>{{ col.header }}</th>
+        }
+      </tr>
+    </ng-template>
+
+
+    <ng-template pTemplate="body" let-nominee>
+      <tr class="text-center">
+        <td>{{ nominee.stateId > 0 ? lookupService.getStateNameById(nominee.stateId) : '-' }}</td>
+        <td>{{ nominee.countyId > 0 ? lookupService.getCountyNameById(nominee.countyId) : '-' }}</td>
+        <td>{{ nominee.payamId > 0 ? lookupService.getPayamNameById(nominee.payamId) : '-' }}</td>
+        <td>{{ nominee.bomaId > 0 ? lookupService.getBomaNameById(nominee.bomaId) : '-' }}</td>
+        <td>{{ nominee.householdCount }}</td>
+      </tr>
+    </ng-template>
+
+  
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="5">Nothing Found.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>

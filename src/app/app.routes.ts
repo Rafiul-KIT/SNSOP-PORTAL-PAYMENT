@@ -54,6 +54,22 @@ export const routes: Routes = [
 
     ],
   },
+    {
+    path: 'report',
+   children: [
+    {
+      path: 'details',
+      loadComponent: () => import('./pages/report/report').then(m => m.ReportComponent),
+      data: { reportType: 9, reportTitle: 'Reconciliation Detail Report' }
+    },
+    {
+      path: 'summary',
+      loadComponent: () => import('./pages/report/report').then(m => m.ReportComponent),
+      data: { reportType: 10, reportTitle: 'Reconciliation Summary Report' }
+    }
+  ]
+  },
+  
    {
     component: BeneficiaryAttendance,
     path: 'beneficiary-attendance',  

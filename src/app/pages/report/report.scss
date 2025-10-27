@@ -1,0 +1,16 @@
+/* Custom outline button with color #0EA5E9 */
+.btn-outline-custom {
+  color: #0EA5E9;
+  border-color: #0EA5E9;
+  background-color: transparent;
+  transition: all 0.2s ease-in-out;
+
+  &:hover,
+  &:focus,
+  &:active {
+    color: #fff !important;
+    background-color: #0EA5E9 !important;
+    border-color: #0EA5E9 !important;
+    box-shadow: none !important;
+  }
+}

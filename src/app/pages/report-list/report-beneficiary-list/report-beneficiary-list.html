@@ -1,0 +1,44 @@
+<div class="report-container">
+  <!-- Export Buttons -->
+  <div class="export-buttons">
+    <button class="btn btn-primary" (click)="exportExcel()">Export as XLS (Detail Report)</button>
+    <button class="btn btn-secondary" (click)="exportPdf()">Export as PDF (Summary Report)</button>
+  </div>
+
+  <!-- Beneficiary Table -->
+  @if (beneficiaryList().length > 0) {
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          @for (col of cols(); track col.field) {
+            <th>{{ col.header }}</th>
+          }
+          <th>State</th>
+          <th>County</th>
+          <th>Payam</th>
+          <th>Boma</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (beneficiary of beneficiaryList(); track beneficiary.applicationId) {
+          <tr>
+            <td>{{ beneficiary.applicationId }}</td>
+            <td>{{ beneficiary.respondentFirstName }}</td>
+            <td>{{ beneficiary.respondentMiddleName }}</td>
+            <td>{{ beneficiary.respondentLastName }}</td>
+            <td>{{ beneficiary.respondentNickName }}</td>
+            <td>{{ lookupService.getGenderEnumByValue(beneficiary.respondentGender) }}</td>
+            <td>{{ beneficiary.respondentAge }}</td>
+            <td>{{ beneficiary.registrationPhase }}</td>
+            <td>{{ lookupService.getStateNameById(beneficiary.address?.stateId) }}</td>
+            <td>{{ lookupService.getCountyNameById(beneficiary.address?.countyId) }}</td>
+            <td>{{ lookupService.getPayamNameById(beneficiary.address?.payam) }}</td>
+            <td>{{ lookupService.getBomaNameById(beneficiary.address?.boma) }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  } @else {
+    <p>Nothing Found.</p>
+  }
+</div>

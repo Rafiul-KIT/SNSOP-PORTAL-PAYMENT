@@ -1,0 +1,276 @@
+<div class="breadcrumb-wrapper">
+    <p-breadcrumb class="max-w-full" [model]="items" [home]="home"></p-breadcrumb>
+</div>
+
+@if (isLoading) {
+<app-loading-spinner />
+} @else {
+<div class="mt-1 wrapper-scroller">
+    @if (!isReportGenerating) {
+    @if (reportOptions) {
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-6 mt-5">
+            <h3 class="text-center">Select Report Type</h3>
+            <hr>
+            <div class="row g-2">
+          
+         
+                <div class="col-12 col-md-12 col-lg-12">
+                    <button class="btn btn-outline-custom btn-lg w-100"
+                        (click)="showReportForm(9, 'Reconciliation Detail Report')">
+                        Reconciliation Detail Report
+                    </button>
+                </div>
+                <div class="col-12 col-md-12 col-lg-12">
+                    <button class="btn btn-outline-custom btn-lg w-100"
+                        (click)="showReportForm(10, 'Reconciliation Summary Report')">
+                        Reconciliation Summary Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    } @else {
+    <div class="row justify-content-center mt-2">
+        <div class="col-12 col-md-8">
+            <div class="bg-light p-2 d-flex justify-content-between align-items-center w-100">
+                <h6 class="mb-0"><b>Report Type:</b> {{selectedReportTypeTitle}}</h6>
+                <button class="btn btn-outline-dark btn-sm" (click)="reportOptions = true;">
+                    <i class="fas fa-arrow-left me-2"></i>Change Report Type
+                </button>
+            </div>
+            <form novalidate [formGroup]="reportForm" class="row mt-2">
+                @if (reportForm.get('staffUserName')) {
+                <div class="col-12 col-md-4 col-lg-3">
+                    <div class="form-floating mb-3">
+                        <select class="form-select" id="staffUserName" formControlName="staffUserName">
+                            <option value="">Select Staff</option>
+                            @for (staff of userList; track staff.userName) {
+                            <option [value]="staff.userName">
+                                {{staff.firstName}} {{staff.middleName}} {{staff.lastName}}
+                            </option>
+                            }
+                        </select>
+                        <label for="staffUserName">Staff</label>
+                    </div>
+                </div>
+                }
+                @if (reportForm.get('fromDate')) {
+                <div class="col-12 col-md-4 col-lg-3">
+                    <div class="form-floating mb-3">
+                        <input type="date" class="form-control" id="fromDate" formControlName="fromDate">
+                        <label for="fromDate">From Date</label>
+                    </div>
+                </div>
+                }
+                @if (reportForm.get('toDate')) {
+                <div class="col-12 col-md-4 col-lg-3">
+                    <div class="form-floating mb-3">
+                        <input type="date" class="form-control" id="toDate" formControlName="toDate">
+                        <label for="toDate">To Date</label>
+                    </div>
+                </div>
+                }
+                @if (reportForm.get('stateId')) {
+                <div class="col-12 col-md-4 col-lg-3">
+                    <div class="form-floating mb-3">
+                        <select class="form-select" id="stateId" formControlName="stateId"
+                            (change)="getCountyLookupByStateId($event)">
+                            <option value="">Select State</option>
+                            @if (selectedReportTypeId !== 1 && selectedReportTypeId !== 9 && selectedReportTypeId !==
+                            10) {
+                            <option value="-1">ALL</option>
+                            }
+                            @for (state of lookupService.getStateList(); track state.id) {
+                            <option [value]="state.id">{{state.name}}</option>
+                            }
+                        </select>
+                        <label for="stateId">State Name</label>
+                    </div>
+                </div>
+                }
+                @if (reportForm.get('countyId')) {
+                <div class="col-12 col-md-4 col-lg-3">
+                    <div class="form-floating mb-3">
+                        <select class="form-select" id="countyId" formControlName="countyId"
+                            (change)="getPayamLookupByCountyId($event)">
+                            <option value="">Select County</option>
+                            @if (selectedReportTypeId !== 1 && selectedReportTypeId !== 9 && selectedReportTypeId !==
+                            10) {
+                            <option value="-1">ALL</option>
+                            }
+                            @for (county of countyList; track county.id) {
+                            <option [value]="county.id">{{county.name}}</option>
+                            }
+                        </select>
+                        <label for="countyId">County Name</label>
+                    </div>
+                </div>
+                }
+                @if (reportForm.get('payamId')) {
+                <div class="col-12 col-md-4 col-lg-3">
+                    <div class="form-floating mb-3">
+                        <select class="form-select" id="payamId" formControlName="payamId"
+                            (change)="getBomaLookupByPayamId($event)">
+                            <option value="">Select Payam</option>
+                            @if (selectedReportTypeId !== 1 && selectedReportTypeId !== 9 && selectedReportTypeId !==
+                            10) {
+                            <option value="-1">ALL</option>
+                            }
+                            @for (payam of payamList; track payam.id) {
+                            <option [value]="payam.id">{{payam.name}}</option>
+                            }
+                        </select>
+                        <label for="payamId">Payam Name</label>
+                    </div>
+                </div>
+                }
+                @if (reportForm.get('bomaId')) {
+                <div class="col-12 col-md-4 col-lg-3">
+                    <div class="form-floating mb-3">
+                        <select class="form-select" id="bomaId" formControlName="bomaId">
+                            <option value="">Select Boma</option>
+                            @if (selectedReportTypeId !== 1 && selectedReportTypeId !== 9 && selectedReportTypeId !==
+                            10) {
+                            <option value="-1">ALL</option>
+                            }
+                            @for (boma of bomaList; track boma.id) {
+                            <option [value]="boma.id">{{boma.name}}</option>
+                            }
+                        </select>
+                        <label for="bomaId">Boma Name</label>
+                    </div>
+                </div>
+                }
+                @if (reportForm.get('status')) {
+                <div class="col-12 col-md-4 col-lg-3">
+                    <div class="form-floating mb-3">
+                        <select class="form-select" id="status" formControlName="status">
+                            <option value="">Select Status</option>
+                            <option value="0">Successfull</option>
+                            <option value="1">Pending</option>
+                            <option value="2">Failed</option>
+                        </select>
+                        <label for="status">Beneficiary Status</label>
+                    </div>
+                </div>
+                }
+                @if (reportForm.get('size')) {
+                <div class="col-12 col-md-4 col-lg-3">
+                    <div class="form-floating mb-3">
+                        <select class="form-select" id="size" formControlName="size">
+                            <option value="-1">All</option>
+                            <option value="10">10</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="500">500</option>
+                            <option value="1000">1000</option>
+                            <option value="5000">5000</option>
+                            <option value="10000">10000</option>
+                            <option value="20000">20000</option>
+                            <option value="50000">50000</option>
+                            <option value="100000">100000</option>
+                        </select>
+                        <label for="size">Report Size</label>
+                    </div>
+                </div>
+                }
+                @if (reportForm.get('scheme')) {
+                <div class="col-12 col-md-4 col-lg-3">
+                    <div class="form-floating mb-3">
+                        <select class="form-select" id="scheme" formControlName="scheme">
+                            <option value="ALL">ALL</option>
+                            <option value="LIPW">LIPW</option>
+                            <option value="DIS">DIS</option>
+                        </select>
+                        <label for="scheme">Scheme</label>
+                    </div>
+                </div>
+                }
+                @if (reportForm.get('paymentStatus')) {
+                <div class="col-12 col-md-4 col-lg-3">
+                    <div class="form-floating mb-3">
+                        <select class="form-select" id="paymentStatus" formControlName="paymentStatus">
+                            <option value="ALL">ALL</option>
+                            <option value="PAID">Paid</option>
+                            <option value="UNPAID">Unpaid</option>
+                        </select>
+                        <label for="paymentStatus">Payment Status</label>
+                    </div>
+                </div>
+                }
+                @if (reportForm.get('paymentCycle')) {
+                <div class="col-12 col-md-4 col-lg-3">
+                    <div class="form-floating mb-3">
+                        <select class="form-select" id="paymentCycle" formControlName="paymentCycle">
+                            <option value="1">Payment Cycle 1</option>
+                            <option value="2">Payment Cycle 2</option>
+                            <option value="3">Payment Cycle 3</option>
+                            <option value="4">Payment Cycle 4</option>
+                            <option value="5">Payment Cycle 5</option>
+                        </select>
+                        <label for="paymentCycle">Payment Cycle</label>
+                    </div>
+                </div>
+                }
+                @if (reportForm.get('registrationPhase')) {
+                <div class="col-12 col-md-4 col-lg-3">
+                    <div class="form-floating mb-3">
+                        <select class="form-select" id="registrationPhase" formControlName="registrationPhase">
+                            <option value="">Select Registration Phase</option>
+                            <option value="AF">AF</option>
+                            <option value="PARENT">PARENT</option>
+                        </select>
+                        <label for="registrationPhase">Registration Phase</label>
+                    </div>
+                </div>
+                }
+                <div class="col-12">
+                    <div class="bg-light p-2 text-end">
+
+                        <p-button label="Reset" size="small" icon="fas fa-refresh" severity="danger" class="me-2"
+                            (click)="resetForm(reportForm)" outlined="true"></p-button>
+                        <p-button label=" Generate" [disabled]="reportForm.invalid" size="small"
+                            icon="fas fa-line-chart me-2" (click)="generateReport()"></p-button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    }
+
+    <div class="mt-3">
+        @if (!reportOptions) {
+        @if (reportBeneficiaryListResult) {
+        <app-report-beneficiary-list [reportResult]="reportBeneficiaryListResult" />
+        }
+        @if (reportStaffWiseBeneficiaryCountResult) {
+        <app-report-staff-wise-beneficiary-count [reportResult]="reportStaffWiseBeneficiaryCountResult" />
+        }
+        @if (reportAgeGroupGenderWiseCountResult) {
+        <app-report-age-group-gender-wise-beneficiary-count [reportResult]="reportAgeGroupGenderWiseCountResult" />
+        }
+        @if (reportMatchListResult) {
+        <app-report-match-list [reportResult]="reportMatchListResult" />
+        }
+        @if (reportLocationWiseNomineeCount) {
+        <app-report-location-wise-nominee-count [reportResult]="reportLocationWiseNomineeCount" />
+        }
+        @if (reportHouseholdSurvery) {
+        <app-report-complete-household-survey [reportResult]="reportHouseholdSurvery" />
+        }
+        @if (reportReconciledSummaryResult) {
+        <app-report-reconciled-summary-result [reportReconciledSummaryResult]="reportReconciledSummaryResult"
+            [reportReconciledSummaryTotals]="reportReconciledSummaryTotals" />
+        }
+        @if (reportReconciliationSummaryCount) {
+        <app-report-reconciliation-summary-count
+            [reportReconciliationSummaryCount]="reportReconciliationSummaryCount" />
+        }
+        }
+    </div>
+    } @else {
+    <app-loader MESSAGE="Generating..." />
+    }
+</div>
+}

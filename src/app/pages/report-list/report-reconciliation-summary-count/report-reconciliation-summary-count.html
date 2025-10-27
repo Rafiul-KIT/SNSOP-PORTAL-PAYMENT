@@ -1,0 +1,75 @@
+<div class="report-container">
+  <p-table
+    [value]="reportReconciliationSummaryCount()"
+    [paginator]="true"
+    [rows]="10"
+    [rowsPerPageOptions]="[10, 20, 50, 100]"
+    [tableStyle]="{ 'width': '100%' }"
+  >
+   
+    <ng-template pTemplate="caption">
+      <div class="d-flex justify-content-start align-items-center">
+        <button
+          type="button"
+          class="btn btn-success btn-sm me-2"
+          (click)="exportExcel()"
+          pTooltip="XLS"
+          tooltipPosition="bottom"
+        >
+          <i class="fas fa-file-excel me-2"></i>Export as XLS
+        </button>
+        <button
+          type="button"
+          class="btn btn-warning btn-sm me-2"
+          (click)="exportPdf()"
+          pTooltip="PDF"
+          tooltipPosition="bottom"
+        >
+          <i class="fas fa-file-pdf me-2"></i>Export as PDF
+        </button>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="header">
+      <tr class="text-center header-row">
+        <th rowspan="2" class="bordered">Serial No</th>
+        <th rowspan="2" class="bordered">Name of Boma</th>
+        <th colspan="2" class="bordered">Approved/Payrolled Beneficiary</th>
+        <th colspan="2" class="bordered">DIS</th>
+        <th colspan="2" class="bordered">LIPW</th>
+        <th rowspan="2" class="bordered">Total Paid (DIS + LIPW)</th>
+        <th rowspan="2" class="bordered">Total Unpaid (DIS + LIPW)</th>
+      </tr>
+      <tr class="text-center header-row">
+        <th class="bordered">DIS</th>
+        <th class="bordered">LIPW</th>
+        <th class="bordered">Paid</th>
+        <th class="bordered">Unpaid</th>
+        <th class="bordered">Paid</th>
+        <th class="bordered">Unpaid</th>
+      </tr>
+    </ng-template>
+
+  
+    <ng-template pTemplate="body" let-rowData let-rowIndex="rowIndex">
+      <tr class="text-center data-row" [class.grey-row]="rowIndex % 2 === 0">
+        <td class="bordered">{{ rowIndex + 1 }}</td>
+        <td class="bordered">{{ lookupService.getBomaNameById(rowData.boma) }}</td>
+        <td class="bordered">{{ rowData.totalDISPaid + rowData.totalDISUnpaid }}</td>
+        <td class="bordered">{{ rowData.totalLIPWPaid + rowData.totalLIPWUnpaid }}</td>
+        <td class="bordered">{{ rowData.totalDISPaid }}</td>
+        <td class="bordered">{{ rowData.totalDISUnpaid }}</td>
+        <td class="bordered">{{ rowData.totalLIPWPaid }}</td>
+        <td class="bordered">{{ rowData.totalLIPWUnpaid }}</td>
+        <td class="bordered font-weight-bold">{{ rowData.totalDISPaid + rowData.totalLIPWPaid }}</td>
+        <td class="bordered font-weight-bold">{{ rowData.totalDISUnpaid + rowData.totalLIPWUnpaid }}</td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="10" class="text-center">No data available.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
