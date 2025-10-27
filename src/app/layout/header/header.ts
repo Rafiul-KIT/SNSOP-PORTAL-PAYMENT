@@ -65,10 +65,20 @@ export class Header {
         routerLinkActiveOptions: 'active',
       },
       {
-        label: 'Creating Wage Request',
+        label: 'Creating Wage Request ',
         icon: 'fas fa-hand-holding-usd',
-        routerLink: 'dashboard',
-        routerLinkActiveOptions: 'active',
+        items: [
+          {
+            label: 'Wages Request For LIPW',
+            icon: 'fas fa-list',
+            routerLink: '/apply-wage-request/lipw',
+          },
+          {
+            label: 'Wages Request For DIS',
+            icon: 'fas fa-list',
+            routerLink: '/apply-wage-request/dis',
+          },
+        ],
       },
       {
         label: 'Beneficiary Attendance',
@@ -88,30 +98,30 @@ export class Header {
         routerLink: 'dashboard',
         routerLinkActiveOptions: 'active',
       },
-      {
-        label: 'Sub Payroll',
-        icon: 'fas fa-list-alt',
-        routerLink: 'dashboard',
-        routerLinkActiveOptions: 'active',
-      },
-      {
-        label: 'Supplementary Payroll',
-        icon: 'fas fa-clipboard-check',
-        routerLink: 'dashboard',
-        routerLinkActiveOptions: 'active',
-      },
-      {
-        label: 'Payroll for Mobile Wallet',
-        icon: 'fas fa-mobile-alt',
-        routerLink: 'dashboard',
-        routerLinkActiveOptions: 'active',
-      },
-      {
-        label: 'Payroll Reconcile',
-        icon: 'fas fa-sync-alt',
-        routerLink: 'dashboard',
-        routerLinkActiveOptions: 'active',
-      },
+      // {
+      //   label: 'Sub Payroll',
+      //   icon: 'fas fa-list-alt',
+      //   routerLink: 'dashboard',
+      //   routerLinkActiveOptions: 'active',
+      // },
+      // {
+      //   label: 'Supplementary Payroll',
+      //   icon: 'fas fa-clipboard-check',
+      //   routerLink: 'dashboard',
+      //   routerLinkActiveOptions: 'active',
+      // },
+      // {
+      //   label: 'Payroll for Mobile Wallet',
+      //   icon: 'fas fa-mobile-alt',
+      //   routerLink: 'dashboard',
+      //   routerLinkActiveOptions: 'active',
+      // },
+      // {
+      //   label: 'Payroll Reconcile',
+      //   icon: 'fas fa-sync-alt',
+      //   routerLink: 'dashboard',
+      //   routerLinkActiveOptions: 'active',
+      // },
     ];
 
     effect(() => {

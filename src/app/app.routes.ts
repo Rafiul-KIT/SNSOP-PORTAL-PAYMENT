@@ -7,6 +7,11 @@ import { SubProject } from './pages/sub-project/sub-project';
 import { BeneficiaryAttendance } from './pages/beneficiary-attendance/beneficiary-attendance';
 import { SubProjectList } from './pages/sub-project-list/sub-project-list';
 import { SubProjectDetails } from './pages/sub-project-details/sub-project-details';
+import { WagesRequestLipw } from './pages/apply-wages-request/wages-request-lipw/wages-request-lipw';
+import { WagesRequestDis } from './pages/apply-wages-request/wages-request-dis/wages-request-dis';
+import { ApplyForWagesPaymentComponent } from './pages/apply-wages-request/apply-for-wages-payment/apply-for-wages-payment.component';
+
+
 
 export const routes: Routes = [
   {
@@ -28,6 +33,25 @@ export const routes: Routes = [
   {
     component: SubProject,
     path: 'sub-project/:id',
+  },
+  {
+    path: 'apply-wage-request',
+    children: [
+      {
+        path: 'lipw',
+        component:  WagesRequestLipw,
+      },
+        {
+        path: 'dis',
+        component: WagesRequestDis ,
+      },
+         {
+        path: 'create',
+        component: ApplyForWagesPaymentComponent ,
+      },
+       
+
+    ],
   },
    {
     component: BeneficiaryAttendance,
