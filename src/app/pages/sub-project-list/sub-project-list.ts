@@ -19,8 +19,8 @@ interface SubProjectItemDto {
   stateName: string;
   countyName: string;
   payamName: string;
-  bomaName: string; 
-  status: string | null;           
+  bomaName: string;
+  status: string | null;
 }
 
 
@@ -131,9 +131,9 @@ export class SubProjectList implements OnInit {
   editProject(id: number) {
     this.router.navigate(['/sub-project', id]);
   }
-viewProject(id: number) {
-  this.router.navigate(['/sub-project-details', id]);
-}
+  /*viewProject(id: number) {
+    this.router.navigate(['/sub-project-details', id]);
+  }*/
 
   async deleteProject(id: number) {
     if (!confirm('Are you sure you want to delete this project?')) return;
