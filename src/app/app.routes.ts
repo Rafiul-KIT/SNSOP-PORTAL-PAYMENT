@@ -92,7 +92,7 @@ export const routes: Routes = [
     path: 'project/:id',
     component: Project, 
   },
-  { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+  { path: '', pathMatch: 'full', redirectTo: 'project-list' },
   {
     component: NotFound,
     path: '**',

@@ -15,27 +15,42 @@
             <label class="col-md-4 col-form-label text-md-end">Project Name :</label>
             <div class="col-md-8">
               <input type="text" class="form-control" formControlName="projectName" />
+              @if (projectForm.get('projectName')?.invalid && projectForm.get('projectName')?.touched) {
+                <small class="text-danger">
+                  Project name is required
+                </small>
+              }
             </div>
           </div>
 
           <div class="row mb-2">
             <label class="col-md-4 col-form-label text-md-end">Start Date :</label>
             <div class="col-md-8">
-              <p-datePicker formControlName="startDate" dateFormat="dd/mm/yy"></p-datePicker>
+              <p-datePicker formControlName="startDate" dateFormat="dd/mm/yy" [showIcon]="true"></p-datePicker>
+              @if (projectForm.get('startDate')?.invalid && projectForm.get('startDate')?.touched) {
+                <small class="text-danger">
+                  Start date is required
+                </small>
+              }
             </div>
           </div>
 
           <div class="row mb-2">
             <label class="col-md-4 col-form-label text-md-end">End Date :</label>
             <div class="col-md-8">
-              <p-datePicker formControlName="endDate" dateFormat="dd/mm/yy"></p-datePicker>
+              <p-datePicker formControlName="endDate" dateFormat="dd/mm/yy" [showIcon]="true"></p-datePicker>
+              @if (projectForm.get('endDate')?.invalid && projectForm.get('endDate')?.touched) {
+                <small class="text-danger">
+                  End date is required
+                </small>
+              }
             </div>
           </div>
 
           <div class="row mb-2">
             <label class="col-md-4 col-form-label text-md-end">Project Sanction Date :</label>
             <div class="col-md-8">
-              <p-datePicker formControlName="sanctionDate" dateFormat="dd/mm/yy"></p-datePicker>
+              <p-datePicker formControlName="sanctionDate" dateFormat="dd/mm/yy" [showIcon]="true"></p-datePicker>
             </div>
           </div>
         </div>
@@ -45,14 +60,24 @@
           <div class="row mb-2">
             <label class="col-md-4 col-form-label text-md-end">Target Beneficiaries :</label>
             <div class="col-md-8">
-              <input type="number" class="form-control" formControlName="targetBeneficiaries" />
+              <input type="number" class="form-control" formControlName="targetBeneficiaries" min="1" />
+              @if (projectForm.get('targetBeneficiaries')?.invalid && projectForm.get('targetBeneficiaries')?.touched) {
+                <small class="text-danger">
+                  Target beneficiaries is required (min: 1)
+                </small>
+              }
             </div>
           </div>
 
           <div class="row mb-2">
             <label class="col-md-4 col-form-label text-md-end">Project Cost (USD) :</label>
             <div class="col-md-8">
-              <input type="number" class="form-control" formControlName="cost" />
+              <input type="number" class="form-control" formControlName="cost" min="0" step="0.01" />
+              @if (projectForm.get('cost')?.invalid && projectForm.get('cost')?.touched) {
+                <small class="text-danger">
+                  Project cost is required
+                </small>
+              }
             </div>
           </div>
 
@@ -60,6 +85,11 @@
             <label class="col-md-4 col-form-label text-md-end">Person Incharge :</label>
             <div class="col-md-8">
               <input type="text" class="form-control" formControlName="inchargeName" />
+              @if (projectForm.get('inchargeName')?.invalid && projectForm.get('inchargeName')?.touched) {
+                <small class="text-danger">
+                  Person incharge name is required
+                </small>
+              }
             </div>
           </div>
 
@@ -67,13 +97,23 @@
             <label class="col-md-4 col-form-label text-md-end">Mobile :</label>
             <div class="col-md-8">
               <input type="text" class="form-control" formControlName="inchargeMobile" />
+              @if (projectForm.get('inchargeMobile')?.invalid && projectForm.get('inchargeMobile')?.touched) {
+                <small class="text-danger">
+                  Valid mobile number required 9 digits
+                </small>
+              }
             </div>
           </div>
 
           <div class="row mb-2">
             <label class="col-md-4 col-form-label text-md-end">Email :</label>
             <div class="col-md-8">
-              <input type="email" class="form-control" formControlName="inchargeEmail" />
+              <input type="email" class="form-control" formControlName="inchargeEmail" placeholder="example@email.com" />
+              @if (projectForm.get('inchargeEmail')?.invalid && projectForm.get('inchargeEmail')?.touched) {
+                <small class="text-danger">
+                  Valid email address is required
+                </small>
+              }
             </div>
           </div>
 
@@ -82,8 +122,15 @@
             <div class="col-md-8">
               <select class="form-select" formControlName="status">
                 <option value="">--Select--</option>
-                <option *ngFor="let s of statusList" [value]="s">{{ s }}</option>
+                @for (s of statusList; track s) {
+                  <option [value]="s">{{ s }}</option>
+                }
               </select>
+              @if (projectForm.get('status')?.invalid && projectForm.get('status')?.touched) {
+                <small class="text-danger">
+                  Status is required
+                </small>
+              }
             </div>
           </div>
         </div>
@@ -97,9 +144,11 @@
     <form [formGroup]="targetForm" class="row g-3 align-items-end mb-3">
       <div class="col-12 col-md-5">
         <label class="form-label">State</label>
-        <select class="form-select" formControlName="state">
+        <select class="form-select" formControlName="state" (change)="onStateChange($event)">
           <option value="">--Select--</option>
-          <option *ngFor="let st of states" [value]="st">{{ st }}</option>
+          @for (st of states; track st.id) {
+            <option [value]="st.id">{{ st.name }}</option>
+          }
         </select>
       </div>
 
@@ -107,7 +156,9 @@
         <label class="form-label">County</label>
         <select class="form-select" formControlName="county">
           <option value="">--Select--</option>
-          <option *ngFor="let c of counties" [value]="c">{{ c }}</option>
+          @for (c of counties; track c.id) {
+            <option [value]="c.id">{{ c.name }}</option>
+          }
         </select>
       </div>
 
@@ -118,31 +169,30 @@
 
     <!-- Table of added locations -->
     <div class="table-responsive">
-      <table class="table table-bordered table-striped mt-3" *ngIf="targets.length > 0">
-        <thead>
-        <tr>
-          <th>#</th>
-          <th>State</th>
-          <th>County</th>
-          <th>Action</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr *ngFor="let t of targets; let i = index">
-          <td>{{ i + 1 }}</td>
-          <td>{{ t.state }}</td>
-          <td>{{ t.county }}</td>
-          <td>
-            <p-button
-              icon="pi pi-trash"
-              severity="danger"
-              (click)="removeTarget(i)"
-              label="Remove">
-            </p-button>
-          </td>
-        </tr>
-        </tbody>
-      </table>
+      @if (targets.length > 0) {
+        <table class="table table-bordered table-striped mt-3">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>State</th>
+              <th>County</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (t of targets; track $index) {
+              <tr>
+                <td>{{ $index + 1 }}</td>
+                <td>{{ t.state }}</td>
+                <td>{{ t.county }}</td>
+                <td>
+                  <p-button icon="pi pi-trash" severity="danger" (click)="removeTarget($index)" label="Remove"></p-button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
     </div>
 
     <!-- Buttons -->
@@ -153,8 +203,10 @@
     </div>
 
     <!-- Status message -->
-    <div *ngIf="statusMsg" class="text-center small text-muted mb-3">
-      {{ statusMsg }}
-    </div>
+    @if (statusMsg) {
+      <div class="text-center small text-muted mb-3">
+        {{ statusMsg }}
+      </div>
+    }
   </div>
 </div>
