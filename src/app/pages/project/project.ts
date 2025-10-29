@@ -302,7 +302,6 @@ export class Project implements OnInit {
         status: this.projectForm.value.status,
       };
 
-      console.log('Payload for project save:', projectPayload); // Log payload
 
       // If in edit mode (existing project), include the project ID in the payload
       if (this.isEditMode && this.savedProjectId) {
@@ -317,7 +316,6 @@ export class Project implements OnInit {
       const projectData = projectRes.data;
 
       if (projectData.code === 200) {
-        console.log(projectData.entityId, this.projectId);
         // Get the project ID from the response (entityId will be returned)
         this.savedProjectId = projectData.entityId || this.projectId;
 
@@ -330,8 +328,6 @@ export class Project implements OnInit {
               countyId: t.countyId,
             })),
           };
-
-          console.log('Saving targets with payload:', targetPayload);
 
           const targetRes = await this.apiService.POST(
             this.PROJECT_TARGET_SAVE,
