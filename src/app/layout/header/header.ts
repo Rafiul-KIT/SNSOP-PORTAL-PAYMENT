@@ -81,7 +81,7 @@ export class Header {
         ],
       },
           {
-        label: 'Repot',
+        label: 'Report',
         icon: 'fas fa-chart-line',
         items: [
           {

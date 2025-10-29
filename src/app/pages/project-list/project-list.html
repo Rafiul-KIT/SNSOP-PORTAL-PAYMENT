@@ -10,15 +10,20 @@
     <div class="col-12 col-md-6 col-lg-8">
       <h5 class="m-0">Project List</h5>
     </div>
-    <div class="col-12 col-md-6 col-lg-4 text-end">
-      <div class="d-flex align-items-center gap-2">
-        <input type="text" [(ngModel)]="searchText" (keyup.enter)="onSearch()" placeholder="Search Projects..."
-          class="form-control form-control-sm" />
-        <p-button label="Search" icon="fas fa-search" (onClick)="onSearch()" size="small" />
-        <p-button label="Add New" pTooltip="Create New Project" tooltipPosition="top" icon="fas fa-plus"
-          (onClick)="newProject()" size="small" class="w-100" />
-      </div>
-    </div>
+    <div class="col-lg-4 d-flex justify-content-end">
+  <div class="d-flex align-items-center gap-2">
+    <p-button 
+      label="Add New" 
+      pTooltip="Create New Project" 
+      tooltipPosition="top" 
+      icon="fas fa-plus"
+      (onClick)="newProject()" 
+      size="small" 
+      class="w-auto" 
+    />
+  </div>
+</div>
+
   </div>
 </div>
 
@@ -47,11 +52,11 @@
       <td class="text-center ">
 
 
-        <button pButton type="button" icon="fas fa-pen-square"
-          class="p-button-sm p-button-rounded p-button-secondary " pTooltip="Edit Project" tooltipPosition="top"
+        <button pButton type="button" icon="fas fa-pencil-alt"
+         class="p-button-sm p-button-rounded p-button-secondary me-2" pTooltip="View & Edit" tooltipPosition="top"
           appendTo="body" (click)="editProject(project.id)"
-          style="font-size: 1rem; padding: 1px; margin-right: 10px; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
-          class="btn-custom"></button>
+         
+          ></button>
 
 
         <button pButton type="button" icon="fas fa-trash" class="p-button-sm p-button-rounded p-button-danger"
