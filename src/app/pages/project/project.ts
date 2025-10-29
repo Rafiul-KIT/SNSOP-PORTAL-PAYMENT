@@ -45,6 +45,7 @@ export class Project implements OnInit {
   breadcrumbHome = { icon: 'pi pi-home', routerLink: '/' };
 
   targets: {
+    id: number;
     state: string;
     county: string;
     stateId: number;
@@ -189,6 +190,7 @@ export class Project implements OnInit {
 
       if (data && data.code === 200 && Array.isArray(data.content)) {
         this.targets = data.content.map((item: any) => ({
+          id: item.id || 0,
           state: item.stateName,
           county: item.countyName,
           stateId: item.stateId,
@@ -243,6 +245,7 @@ export class Project implements OnInit {
       county: countyName,
       stateId: stateIdNum,
       countyId: countyIdNum,
+      id: 0,
     });
 
     this.targetForm.reset();
@@ -302,7 +305,6 @@ export class Project implements OnInit {
         status: this.projectForm.value.status,
       };
 
-
       // If in edit mode (existing project), include the project ID in the payload
       if (this.isEditMode && this.savedProjectId) {
         projectPayload.id = this.savedProjectId;
@@ -320,10 +322,11 @@ export class Project implements OnInit {
         this.savedProjectId = projectData.entityId || this.projectId;
 
         // Step 2: Save Project Targets (if any)
-        if ( this.savedProjectId) {
+        if (this.targets.length > 0 && this.savedProjectId) {
           const targetPayload = {
             projectId: this.savedProjectId,
             list: this.targets.map((t) => ({
+              id: t.id !== 0 ? t.id : undefined,
               stateId: t.stateId,
               countyId: t.countyId,
             })),
