@@ -222,9 +222,9 @@
                                 <!-- Type of Equipment -->
                                 <div class="col-md-6">
                                   <label class="form-label text-secondary fw-semibold">Type of Equipment Required</label>
-                                  <input type="file" class="form-control" (change)="onFileSelect($event, i)" accept="image/*" />
-                                  <small *ngIf="getFileName(i)" class="text-muted">
-                                    Selected: {{ getFileName(i) }}
+                                  <input type="file" class="form-control" (change)="onEquipmentPhotoSelect($event, i)" accept="image/*" />
+                                  <small *ngIf="getEquipmentPhotoName(i)" class="text-muted">
+                                    Selected: {{ getEquipmentPhotoName(i) }}
                                   </small>
                                 </div>
 
@@ -240,9 +240,9 @@
                                 <!-- Work Photo -->
                                 <div class="col-md-6">
                                   <label class="form-label text-secondary fw-semibold">Work Photo</label>
-                                  <input type="file" class="form-control" (change)="onFileSelect($event, i)" accept="image/*" />
-                                  <small *ngIf="getFileName(i)" class="text-muted">
-                                    Selected: {{ getFileName(i) }}
+                                  <input type="file" class="form-control" (change)="onWorkPhotoSelect($event, i)" accept="image/*" />
+                                  <small *ngIf="getWorkPhotoName(i)" class="text-muted">
+                                    Selected: {{ getWorkPhotoName(i) }}
                                   </small>
                                 </div>
 
