@@ -24,7 +24,7 @@ import { SelectModule } from 'primeng/select';
 
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { LookupItem, LookupService, TypeOfMeetingEnum, StatusEnum, ScreeningStatusEnum } from '../../services/lookup.service';
+import { LookupItem, LookupService, TypeOfMeetingEnum, StatusEnum, ScreeningStatusEnum, ProjectNameDescription } from '../../services/lookup.service';
 import { ApiService } from '../../services/api.service';
 import { Loader } from "../../components/loader/loader";
 
@@ -82,7 +82,7 @@ export class WorkApproval implements OnInit {
   payams: LookupItem[] = [];
   bomas: LookupItem[] = [];
 
-  projects: LookupItem[] = [];
+  projects: ProjectNameDescription[] = [];
   workTypes: any[] = [];
   workActivities: LookupItem[] = [];
   implementingPartners: LookupItem[] = [];
@@ -116,23 +116,25 @@ export class WorkApproval implements OnInit {
       this.lookup.fetchAllCountyList(),
       this.lookup.fetchAllPayamList(),
       this.lookup.fetchAllBomaList(),
+      this.lookup.getProjectNameDescription()
     ]);
 
     this.states = this.lookup.getStateList();
     this.counties = this.lookup.getAllCountyList();
     this.payams = this.lookup.getAllPayamList();
     this.bomas = this.lookup.getAllBomaList();
+    this.projects = this.lookup.projectNameDescriptionList;
 
     this.cdr.markForCheck();
   }
 
   async ngOnInit() {
-    this.initForm();
     this.workTypes = TypeOfMeetingEnum;
     this.statuses = StatusEnum;
     this.screeningStatuses = ScreeningStatusEnum;
     this.initBreadcrumb();
     await this.loadLookups();
+    this.initForm();
     this.fetchPage(this.currentPage, this.pageSize);
   }
 
