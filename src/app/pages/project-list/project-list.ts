@@ -91,9 +91,9 @@ export class ProjectList implements OnInit {
     this.isLoading = true;
     try {
       const query = this.qs({
-        page: this.currentPage,       // if API is 1-based: this.currentPage + 1
+        page: this.currentPage,       
         size: this.pageSize,
-        id: this.selectedProjectId,   // 👈 include id only when defined
+        id: this.selectedProjectId,   
       });
 
       const url = `${this.PROJECTS_ENDPOINT}?${query}`;
