@@ -13,6 +13,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TooltipModule } from 'primeng/tooltip';
 import { ApiService } from '../../services/api.service';
 import { LookupService } from '../../services/lookup.service';
+import { Loader } from "../../components/loader/loader";
+import { Toast } from "primeng/toast";
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-project',
@@ -24,7 +27,10 @@ import { LookupService } from '../../services/lookup.service';
     DatePickerModule,
     TooltipModule,
     Button,
-  ],
+    Loader,
+    Toast
+],
+providers: [MessageService],
   templateUrl: './project.html',
   styleUrls: ['./project.scss'],
 })
@@ -64,9 +70,12 @@ export class Project implements OnInit {
     private fb: FormBuilder,
     private lookupService: LookupService,
     private apiService: ApiService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private messageService: MessageService  
   ) {}
-
+private showToast(severity: 'success' | 'info' | 'warn' | 'error', summary: string, detail: string): void {
+  this.messageService.add({ severity, summary, detail, life: 3000 });
+}
   private qs(params: Record<string, any>): string {
     const usp = new URLSearchParams();
     Object.entries(params).forEach(([k, v]) => {
@@ -167,13 +176,13 @@ export class Project implements OnInit {
           status: project.status,
         });
 
-        this.statusMsg = 'Project details loaded successfully.';
+       this.showToast('success', 'Success', 'Project details loaded successfully.');
       } else {
         this.statusMsg = 'No project data found.';
       }
     } catch (err) {
       console.error('Failed to load project data:', err);
-      this.statusMsg = 'Error loading project data.';
+     this.showToast('error', 'Error', 'Error loading project data.');
     } finally {
       this.isLoading = false;
       this.cdr.detectChanges();
@@ -214,7 +223,7 @@ export class Project implements OnInit {
   addTarget(): void {
     if (!this.targetForm.valid) {
       this.targetForm.markAllAsTouched();
-      this.statusMsg = 'Please select both state and county.';
+    this.showToast('warn', 'Warning', 'Please select both state and county.');
       return;
     }
 
@@ -250,7 +259,7 @@ export class Project implements OnInit {
 
     this.targetForm.reset();
     this.counties = [];
-    this.statusMsg = 'Target added successfully.';
+   this.showToast('info', 'Info', 'Target added successfully.');
     this.cdr.detectChanges();
   }
 

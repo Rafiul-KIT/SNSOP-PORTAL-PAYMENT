@@ -1,0 +1,178 @@
+@if (isLoading) {
+<app-loader></app-loader>
+} @else {
+<div class="breadcrumb-wrapper">
+  <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
+</div>
+
+<div class="card p-3 mb-2">
+  <form [formGroup]="searchForm" class="row g-3">
+    @if (advanceSearchPanelVisible) {
+    <!-- Implementing Partner -->
+    <div class="col-md-3">
+      <p-floatlabel variant="on" class="w-100">
+        <p-select [options]="implementingPartners" optionLabel="name" optionValue="id" formControlName="implementingPartner"></p-select>
+        <label>Implementing Partner</label>
+      </p-floatlabel>
+    </div>
+    
+    <!-- State -->
+    <div class="col-md-3">
+      <p-floatlabel variant="on" class="w-100">
+        <p-select [options]="states" optionLabel="name" formControlName="state"
+          (onChange)="onStateChange($event.value)" />
+        <label>State Name</label>
+      </p-floatlabel>
+    </div>
+    
+    <!-- County -->
+    <div class="col-md-3">
+      <p-floatlabel variant="on" class="w-100">
+        <p-select [options]="counties" optionLabel="name" formControlName="county"
+          (onChange)="onCountyChange($event.value)" [disabled]="!searchForm.get('state')?.value" />
+        <label>County Name</label>
+      </p-floatlabel>
+    </div>
+    
+    <!-- Project Name -->
+    <div class="col-md-3">
+      <p-floatlabel variant="on" class="w-100">
+        <p-select [options]="projects" optionLabel="name" optionValue="id" formControlName="projectName"></p-select>
+        <label>Project Name</label>
+      </p-floatlabel>
+    </div>
+    
+    <!-- Type of Work -->
+    <div class="col-md-3">
+      <p-floatlabel variant="on" class="w-100">
+        <p-select [options]="workTypes" optionLabel="name" optionValue="id" formControlName="typeOfWork"></p-select>
+        <label>Type of Work</label>
+      </p-floatlabel>
+    </div>
+    
+    <!-- Payam -->
+    <div class="col-md-3">
+      <p-floatlabel variant="on" class="w-100">
+        <p-select [options]="payams" optionLabel="name" formControlName="payam" (onChange)="onPayamChange($event.value)"
+          [disabled]="!searchForm.get('county')?.value" />
+        <label>Payam Name</label>
+      </p-floatlabel>
+    </div>
+    
+    <!-- Boma -->
+    <div class="col-md-3">
+      <p-floatlabel variant="on" class="w-100">
+        <p-select [options]="bomas" optionLabel="name" formControlName="boma"
+          [disabled]="!searchForm.get('payam')?.value" />
+        <label>Boma Name</label>
+      </p-floatlabel>
+    </div>
+    
+    <!-- Status -->
+    <div class="col-md-3">
+      <p-floatlabel variant="on" class="w-100">
+        <p-select [options]="statuses" optionLabel="name" optionValue="id" formControlName="status"></p-select>
+        <label>Status</label>
+      </p-floatlabel>
+    </div>
+    
+    <!-- Work Code -->
+    <div class="col-md-3">
+      <p-floatlabel variant="on" class="w-100">
+        <input pInputText class="form-control" formControlName="workCode" />
+        <label>Work Code</label>
+      </p-floatlabel>
+    </div>
+    
+    <!-- Work Activity -->
+    <div class="col-md-3">
+      <p-floatlabel variant="on" class="w-100">
+        <p-select [options]="workActivities" optionLabel="name" optionValue="id" formControlName="workActivity"></p-select>
+        <label>Work Activity</label>
+      </p-floatlabel>
+    </div>
+    }
+    
+    <div class="col-12 text-end">
+      <p-button [label]="advanceSearchPanelVisible ? 'Close Lookup' : 'Open Lookup'" icon="fas fa-filter"
+        severity="warn" class="me-2" size="small" outlined="true"
+        (onClick)="advanceSearchPanelVisible = !advanceSearchPanelVisible"></p-button>
+      <p-button label="Reset" icon="fas fa-refresh" severity="danger" class="me-2" size="small" (onClick)="resetForm()"
+        outlined="true"></p-button>
+      <p-button label="Search" icon="fas fa-search" severity="primary" size="small"
+        (onClick)="searchBeneficiaries()"></p-button>
+    </div>
+  </form>
+</div>
+
+<p-table [value]="subProjects" [scrollable]="true" [scrollHeight]="advanceSearchPanelVisible ? '52vh' : '64vh'"
+  [tableStyle]="{ 'min-width': '100%', 'margin-bottom': '5px' }" dataKey="id" [rowTrackBy]="trackById"
+  size="small">
+
+  <ng-template pTemplate="header">
+    <tr>
+      <th colspan="14" class="text-end">
+        <p class="fw-bold mb-2">
+          Showing <kbd>{{ subProjects.length }}</kbd> of
+          <kbd>{{ totalRecords }}</kbd> sub-projects
+        </p>
+      </th>
+    </tr>
+    <tr>
+      <th>ID</th>
+      <th>Work Code</th>
+      <th>Project Name</th>
+      <th>State</th>
+      <th>County</th>
+      <th>Payam</th>
+      <th>Boma</th>
+      <th>Type of Meeting</th>
+      <th>Meeting Date</th>
+      <th>Screening Status</th>
+      <th>Status</th>
+      <th class="text-center" [style]="{ width: '185px' }">Action</th>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-item>
+    <tr>
+      <td>{{ item.id }}</td>
+      <td>{{ item.workCode }}</td>
+      <td>{{ item.projectName }}</td>
+      <td>{{ item.stateName }}</td>
+      <td>{{ item.countyName }}</td>
+      <td>{{ item.payamName }}</td>
+      <td>{{ item.bomaName }}</td>
+      <td>{{ item.typeOfMeeting }}</td>
+      <td>{{ item.meetingDate | date: 'dd/MM/yyyy' }}</td>
+      <td>{{ item.screeningStatus }}</td>
+      <td>
+        <span [class]="'badge ' + (item.status === 'Approved' ? 'bg-success' : item.status === 'Rejected' ? 'bg-danger' : 'bg-warning')">
+          {{ item.status }}
+        </span>
+      </td>
+      <td class="text-center">
+        <p-button type="button" icon="fa-regular fa-circle-check fa-lg" pTooltip="Edit" tooltipPosition="top"
+          appendTo="body" (onClick)="editBeneficiary(item)" size="small" outlined="true" severity="secondary"
+          class="me-2 big-icon-btn" />
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td colspan="12" class="text-center text-danger">
+        <b>No sub-projects found!</b>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+<p-paginator class="paginator-sticky" [rows]="pageSize" [totalRecords]="totalRecords"
+  [rowsPerPageOptions]="[10, 25, 50]" (onPageChange)="onPageChange($event)" [first]="(currentPage) * pageSize"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
+</p-paginator>
+
+}
+
+<p-toast position="bottom-right"></p-toast>
