@@ -894,4 +894,96 @@ export class LookupService {
       return '--';
     }
   };
+
+  // ---------- New methods for Sub-project page ----------
+
+  private projectList: LookupItem[] = [];
+  private areaOfWorkList: LookupItem[] = [];
+  private workActivityList: LookupItem[] = [];
+
+  getOrFetchProjectList(): Promise<LookupItem[]> {
+    if (this.projectList.length) return Promise.resolve(this.projectList);
+    // Assuming a generic POST endpoint that takes a body.
+    return this.api.POST('api/lookup/project/search', { size: -1 }).then((res: any) => {
+        const data: GetLookupResponse = res?.data;
+        if (data?.operationResult) {
+          this.projectList = data.lookups ?? [];
+          return this.projectList;
+        }
+        return [];
+      }).catch(() => []);
+  }
+
+  getOrFetchAreaOfWorkList(): Promise<LookupItem[]> {
+    if (this.areaOfWorkList.length) return Promise.resolve(this.areaOfWorkList);
+    return this.api.POST('api/lookup/areaofwork/search', { size: -1 }).then((res: any) => {
+        const data: GetLookupResponse = res?.data;
+        if (data?.operationResult) {
+          this.areaOfWorkList = data.lookups ?? [];
+          return this.areaOfWorkList;
+        }
+        return [];
+      }).catch(() => []);
+  }
+
+  getOrFetchWorkActivityList(): Promise<LookupItem[]> {
+    if (this.workActivityList.length) return Promise.resolve(this.workActivityList);
+    return this.api.POST('api/lookup/workactivity/search', { size: -1 }).then((res: any) => {
+        const data: GetLookupResponse = res?.data;
+        if (data?.operationResult) {
+          this.workActivityList = data.lookups ?? [];
+          return this.workActivityList;
+        }
+        return [];
+      }).catch(() => []);
+  }
+
+  async getProjectIdByName(name: string): Promise<number | null> {
+    if (!name) return null;
+    await this.getOrFetchProjectList();
+    const found = this.projectList.find(i => i.name.toLowerCase() === name.toLowerCase());
+    return found ? parseInt(found.id, 10) : null;
+  }
+
+  async getAreaOfWorkIdByName(name: string): Promise<number | null> {
+    if (!name) return null;
+    await this.getOrFetchAreaOfWorkList();
+    const found = this.areaOfWorkList.find(i => i.name.toLowerCase() === name.toLowerCase());
+    return found ? parseInt(found.id, 10) : null;
+  }
+
+  async getWorkActivityIdByName(name: string): Promise<number | null> {
+    if (!name) return null;
+    await this.getOrFetchWorkActivityList();
+    const found = this.workActivityList.find(i => i.name.toLowerCase() === name.toLowerCase());
+    return found ? parseInt(found.id, 10) : null;
+  }
+
+  async getStateIdByName(name: string): Promise<number | null> {
+    if (!name) return null;
+    await this.getOrFetchStateList();
+    const found = this.stateList.find(i => i.name.toLowerCase() === name.toLowerCase());
+    return found ? parseInt(found.id, 10) : null;
+  }
+
+  async getCountyIdByName(name: string): Promise<number | null> {
+    if (!name) return null;
+    await this.fetchAllCountyList();
+    const found = this.allCountyList.find(i => i.name.toLowerCase() === name.toLowerCase());
+    return found ? parseInt(found.id, 10) : null;
+  }
+
+  async getPayamIdByName(name: string): Promise<number | null> {
+    if (!name) return null;
+    await this.fetchAllPayamList();
+    const found = this.allPayamList.find(i => i.name.toLowerCase() === name.toLowerCase());
+    return found ? parseInt(found.id, 10) : null;
+  }
+
+  async getBomaIdByName(name: string): Promise<number | null> {
+    if (!name) return null;
+    await this.fetchAllBomaList();
+    const found = this.allBomaList.find(i => i.name.toLowerCase() === name.toLowerCase());
+    return found ? parseInt(found.id, 10) : null;
+  }
 }

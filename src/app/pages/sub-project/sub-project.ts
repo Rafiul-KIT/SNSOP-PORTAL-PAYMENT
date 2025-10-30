@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   ReactiveFormsModule,
@@ -7,10 +7,11 @@ import {
   FormArray,
   FormControl,
 } from '@angular/forms';
-import { Loader } from '../../components/loader/loader';
 import { ActivatedRoute } from '@angular/router';
-import { ApiService } from '../../services/api.service';
 import { Breadcrumb } from 'primeng/breadcrumb';
+import { Loader } from '../../components/loader/loader';
+import { ApiService } from '../../services/api.service';
+import { LookupService } from '../../services/lookup.service'; // Assuming this service exists
 
 @Component({
   selector: 'app-root',
@@ -19,11 +20,9 @@ import { Breadcrumb } from 'primeng/breadcrumb';
   templateUrl: './sub-project.html',
   styleUrl: './sub-project.scss',
 })
-export class SubProject {
-  // 🔎 modern reactive control for search
+export class SubProject implements OnInit {
   searchCtrl = new FormControl<string>('');
   isLoading = false;
-  materialsPhotoName = '';
   proposalForm: FormGroup;
   breadcrumbItems: any[] = [];
   breadcrumbHome: any;
@@ -32,65 +31,13 @@ export class SubProject {
   availableActivities: string[] = [];
   workActivitiesList: { id: string; name: string }[] = [];
 
-  ngOnInit(): void {
-    this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
-    this.breadcrumbItems = [{ label: 'Project List' }];
-    this.breadcrumbItems = [{ label: 'Sub-Project' }];
-
-    this.subprojectId = this.route.snapshot.paramMap.get('id');
-    if (this.subprojectId) {
-      this.loadSubProject(this.subprojectId);
-    }
-    this.loadAvailableActivities();
-  }
-
-  async loadSubProject(id: string) {
-    this.isLoading = true;
-    try {
-      const res = await this.api.GET(`/api/subproject/work-details/get?subprojectId=${id}`);
-
-      // Mapping the response content to the form
-      const subProjectData = res.data.content[0];  // Assuming single subproject response
-
-      // Patch form values for available fields
-      this.proposalForm.patchValue({
-        ip: subProjectData.areaOfWork,  // Assuming 'areaOfWork' maps to 'ip' field
-        projectName: '',  // Not available in the response, leave blank or handle
-        typeOfMeeting: '', // Not available in the response, leave blank or handle
-        meetingDate: '', // Not available in the response, leave blank or handle
-        targetBeneficiaries: '', // Not available in the response, leave blank or handle
-        projectCost: subProjectData.estCost,  // Assuming 'estCost' is the project cost
-        stateName: '',  // Not available in the response, leave blank or handle
-        countyName: '', // Not available in the response, leave blank or handle
-        payamName: '', // Not available in the response, leave blank or handle
-        bomaName: '', // Not available in the response, leave blank or handle
-        workActivities: []  // Clear any existing activities
-      });
-
-      // Map work activities from the response
-      const workActivitiesArray = subProjectData.map((activity: any) => this.fb.group({
-        name: [activity.workName],
-        code: [activity.workCode],
-        typeOfWork: activity.areaOfWork, // Adjust based on what is available
-        secondaryActivity: activity.workActivity, // Adjust based on what is available
-        estimatedManpower: activity.estManPower,
-        estimatedManDays: activity.estDay,
-        typeOfEquipment: '', // Not available in the response, leave blank or handle
-        estimatedCostOfEquipment: activity.equipmentCost,
-        workPhoto: null,  // Handle file uploads separately
-        workPhotoName: '', // Handle file uploads separately
-      }));
-
-      this.workActivities.clear(); // Clear any existing work activities
-      workActivitiesArray.forEach((activity: any) => this.workActivities.push(activity));
-
-    } catch (err) {
-      console.error('Failed to load sub-project', err);
-    } finally {
-      this.isLoading = false;
-    }
-  }
-  constructor(private fb: FormBuilder, private route: ActivatedRoute, private api: ApiService) {
+  constructor(
+    private fb: FormBuilder,
+    private route: ActivatedRoute,
+    private api: ApiService,
+    private cdr: ChangeDetectorRef,
+    private lookupService: LookupService // Injected
+  ) {
     this.proposalForm = this.fb.group({
       ip: [''],
       projectName: [''],
@@ -103,14 +50,64 @@ export class SubProject {
       payamName: [''],
       bomaName: [''],
       workActivities: this.fb.array([this.createWorkActivity()]),
-      workStartDate: [''],
-      workEndDate: [''],
-      startCoordinate: [''],
-      endCoordinate: [''],
-      estimatedCost: [0],
-      estimatedSkillLabour: [0],
-      paperScreeningStatus: [''],
+      materialsPhoto: [null], // Added
+      materialsPhotoName: [''], // Added
     });
+  }
+
+  ngOnInit(): void {
+    this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
+    this.breadcrumbItems = [{ label: 'Project List' }, { label: 'Sub-Project' }];
+
+    this.subprojectId = this.route.snapshot.paramMap.get('id');
+    if (this.subprojectId) {
+      this.loadSubProject(this.subprojectId);
+    }
+    this.loadAvailableActivities();
+  }
+
+  async loadSubProject(id: string) {
+    this.isLoading = true;
+    try {
+      const res = await this.api.GET(`/api/subproject/work-details/get?subprojectId=${id}`);
+      const activities = res.data.content;
+      if (activities && activities.length > 0) {
+        const firstActivity = activities[0];
+        this.proposalForm.patchValue({
+          ip: firstActivity.areaOfWork,
+          projectCost: firstActivity.estCost,
+        });
+        const workActivityControls = activities.map((activity: any) => {
+          return this.fb.group({
+            name: [activity.workName || ''],
+            code: [activity.workCode || ''],
+            typeOfWork: [activity.areaOfWork || ''],
+            secondaryActivity: [activity.workActivity || ''],
+            estimatedManpower: [activity.estManPower || 0],
+            estimatedManDays: [activity.estDay || 0],
+            estimatedCostOfEquipment: [activity.equipmentCost || 0],
+            workPhoto: [null],
+            workPhotoName: [''],
+            equipmentPhoto: [null],
+            equipmentPhotoName: [''],
+            startCoordinate: [activity.startCoordinate || ''],
+            endCoordinate: [activity.endCoordinate || ''],
+            paperScreeningStatus: [activity.paperScreeningStatus || ''],
+            workStartDate: [activity.estStartAt || ''],
+            workEndDate: [activity.estEndAt || ''],
+            estimatedCost: [activity.estCost || 0],
+            estimatedSkillLabour: [activity.estSkilledLabourDay || 0],
+          });
+        });
+        this.workActivities.clear();
+        workActivityControls.forEach((control: FormGroup) => this.workActivities.push(control));
+        this.cdr.detectChanges();
+      }
+    } catch (err) {
+      console.error('Failed to load sub-project', err);
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   get workActivities(): FormArray<FormGroup> {
@@ -125,15 +122,24 @@ export class SubProject {
       secondaryActivity: [''],
       estimatedManpower: [0],
       estimatedManDays: [0],
-      typeOfEquipment: [''],
       estimatedCostOfEquipment: [0],
       workPhoto: [null],
       workPhotoName: [''],
+      equipmentPhoto: [null],
+      equipmentPhotoName: [''],
+      startCoordinate: [''],
+      endCoordinate: [''],
+      paperScreeningStatus: [''],
+      workStartDate: [''],
+      workEndDate: [''],
+      estimatedCost: [0],
+      estimatedSkillLabour: [0],
     });
   }
 
   addWorkActivity(): void {
     this.workActivities.push(this.createWorkActivity());
+    this.cdr.detectChanges();
   }
 
   removeWorkActivity(index: number): void {
@@ -142,7 +148,7 @@ export class SubProject {
     }
   }
 
-  onFileSelect(event: Event, index: number): void {
+  onWorkPhotoSelect(event: Event, index: number): void {
     const input = event.target as HTMLInputElement;
     const file = input?.files?.[0];
     if (file) {
@@ -151,23 +157,151 @@ export class SubProject {
     }
   }
 
-  getFileName(index: number): string {
-    return this.workActivities.at(index).get('workPhotoName')?.value || '';
+  onEquipmentPhotoSelect(event: Event, index: number): void {
+    const input = event.target as HTMLInputElement;
+    const file = input?.files?.[0];
+    if (file) {
+      const activity = this.workActivities.at(index);
+      activity.patchValue({ equipmentPhoto: file, equipmentPhotoName: file.name });
+    }
   }
 
   onMaterialsPhotoSelect(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input?.files?.[0];
-    if (file) this.materialsPhotoName = file.name;
+    if (file) {
+      this.proposalForm.patchValue({ materialsPhoto: file, materialsPhotoName: file.name });
+    }
   }
 
-  onSubmit(): void {
-    if (this.proposalForm.valid) {
-      console.log('Form submitted:', this.proposalForm.value);
-      alert('Work proposal saved successfully!');
-    } else {
+  getWorkPhotoName(index: number): string {
+    return this.workActivities.at(index).get('workPhotoName')?.value || '';
+  }
+
+  getEquipmentPhotoName(index: number): string {
+    return this.workActivities.at(index).get('equipmentPhotoName')?.value || '';
+  }
+
+  get materialsPhotoName(): string {
+    return this.proposalForm.get('materialsPhotoName')?.value || '';
+  }
+
+  async onSubmit(): Promise<void> {
+    if (!this.proposalForm.valid) {
       alert('Please fill in all required fields');
       this.proposalForm.markAllAsTouched();
+      return;
+    }
+
+    this.isLoading = true;
+
+    try {
+      const formValue = this.proposalForm.value;
+
+      // --- ID Lookups with validation ---
+      const projectId = await this.lookupService.getProjectIdByName(formValue.projectName);
+      if (projectId === null) throw new Error(`Project '${formValue.projectName}' not found.`);
+
+      const stateId = await this.lookupService.getStateIdByName(formValue.stateName);
+      if (stateId === null) throw new Error(`State '${formValue.stateName}' not found.`);
+
+      const countyId = await this.lookupService.getCountyIdByName(formValue.countyName);
+      if (countyId === null) throw new Error(`County '${formValue.countyName}' not found.`);
+
+      const payamId = await this.lookupService.getPayamIdByName(formValue.payamName);
+      if (payamId === null) throw new Error(`Payam '${formValue.payamName}' not found.`);
+
+      const bomaId = await this.lookupService.getBomaIdByName(formValue.bomaName);
+      if (bomaId === null) throw new Error(`Boma '${formValue.bomaName}' not found.`);
+
+      // --- API Call 1: Save Sub-project ---
+      const subProjectPayload = {
+        id: this.subprojectId ? parseInt(this.subprojectId, 10) : 0,
+        workCode: `W-CODE-${Date.now()}`,
+        projectId: projectId,
+        projectName: formValue.projectName,
+        stateId: stateId,
+        stateName: formValue.stateName,
+        countyId: countyId,
+        countyName: formValue.countyName,
+        payamId: payamId,
+        payamName: formValue.payamName,
+        bomaId: bomaId,
+        bomaName: formValue.bomaName,
+        typeOfMeeting: formValue.typeOfMeeting,
+        meetingDate: formValue.meetingDate,
+        screeningStatus: 'Pending',
+        status: 'true',
+      };
+
+      const subProjectResponse = await this.api.POST('/api/subproject/save', subProjectPayload);
+      const newSubProjectId = subProjectResponse.data.id;
+      if (!newSubProjectId) throw new Error('Failed to get sub-project ID after saving.');
+
+      // --- API Calls 2 & 3: Save Work Details and Attachments ---
+      for (const activityControl of this.workActivities.controls) {
+        const activityValue = activityControl.value;
+
+        const areaOfWorkId = await this.lookupService.getAreaOfWorkIdByName(activityValue.typeOfWork);
+        if (areaOfWorkId === null) throw new Error(`Area of Work '${activityValue.typeOfWork}' not found.`);
+
+        const workActivityId = await this.lookupService.getWorkActivityIdByName(activityValue.secondaryActivity);
+        if (workActivityId === null) throw new Error(`Work Activity '${activityValue.secondaryActivity}' not found.`);
+
+        const workDetailPayload = {
+          subprojectId: newSubProjectId,
+          id: 0,
+          workName: activityValue.name,
+          workCode: activityValue.code,
+          areaOfWorkId: areaOfWorkId,
+          workActivityId: workActivityId,
+          estManPower: activityValue.estimatedManpower,
+          estDay: activityValue.estimatedManDays,
+          estSkilledLabourDay: activityValue.estimatedSkillLabour,
+          estStartAt: activityValue.workStartDate,
+          estEndAt: activityValue.workEndDate,
+          estCost: activityValue.estimatedCost,
+          equipmentCost: activityValue.estimatedCostOfEquipment,
+          materialCost: 0,
+          status: true,
+        };
+
+        const workDetailResponse = await this.api.POST('/api/subproject/work-details/save', workDetailPayload);
+        const newWorkDetailId = workDetailResponse.data.id;
+        if (!newWorkDetailId) throw new Error('Failed to get work detail ID after saving.');
+
+        const formData = new FormData();
+        let hasFiles = false;
+
+        if (activityValue.workPhoto) {
+          formData.append('workPhoto', activityValue.workPhoto, activityValue.workPhotoName);
+          hasFiles = true;
+        }
+        if (activityValue.equipmentPhoto) {
+          formData.append('equipmentPhoto', activityValue.equipmentPhoto, activityValue.equipmentPhotoName);
+          hasFiles = true;
+        }
+        if (formValue.materialsPhoto) {
+          formData.append('materialPhoto', formValue.materialsPhoto, formValue.materialsPhotoName);
+          hasFiles = true;
+        }
+
+        if (hasFiles) {
+          formData.append('projectId', projectId.toString()); // No longer possibly null
+          formData.append('subprojectId', newSubProjectId.toString());
+          formData.append('subprojectWorkDetailId', newWorkDetailId.toString());
+          await this.api.POST('/api/subproject/work-details/attachment/save', formData);
+        }
+      }
+
+      alert('Work proposal saved successfully!');
+      this.onAddNew();
+    } catch (err: any) { // Catch as any to access err.message
+      console.error('Failed to save sub-project', err);
+      // Display the specific error message from the thrown Error
+      alert(`Failed to save work proposal: ${err.message}`);
+    } finally {
+      this.isLoading = false;
     }
   }
 
@@ -175,15 +309,10 @@ export class SubProject {
     this.proposalForm.reset();
     this.workActivities.clear();
     this.addWorkActivity();
-    this.materialsPhotoName = '';
   }
 
   onCancel(): void {
-    if (
-      confirm(
-        'Are you sure you want to cancel? All unsaved changes will be lost.'
-      )
-    ) {
+    if (confirm('Are you sure you want to cancel? All unsaved changes will be lost.')) {
       this.onAddNew();
     }
   }
@@ -194,12 +323,11 @@ export class SubProject {
     }
   }
 
-  trackByIndex(index: number, activity: any): number {
-    return index;  // Using the index as the unique identifier
+  trackByIndex(index: number): number {
+    return index;
   }
 
   loadAvailableActivities(): void {
-    // Dynamically create activities, you can adjust the number based on your requirements
     this.availableActivities = Array.from({ length: 10 }, (_, i) => `Activity ${i + 1}`);
   }
 }
