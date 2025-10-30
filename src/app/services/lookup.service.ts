@@ -1,6 +1,31 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
 
+// Define Enum for typeOfMeeting
+export const TypeOfMeetingEnum = [
+  { id: '0', value: 'CC', label: 'CC - Community Committee' },
+  { id: '1', value: 'AM', label: 'AM - Assessment Meeting' },
+  { id: '2', value: 'OT', label: 'OT - On-site Training' }
+];
+ // Define Enum for status
+export const StatusEnum = [
+  { id: '0', value: 'IP_Submitted', label: 'IP Submitted' },
+  { id: '1', value: 'QE_Approved', label: 'QE Approved' },
+  { id: '2', value: 'QE_Rejected', label: 'QE Rejected' },
+  { id: '3', value: 'ES_Approved', label: 'ES Approved' },
+  { id: '4', value: 'ES_Rejected', label: 'ES Rejected' },
+  { id: '5', value: 'TST_Approved', label: 'TST Approved' },
+  { id: '6', value: 'TST_Rejected', label: 'TST Rejected' },
+  { id: '7', value: 'InProgress', label: 'In Progress' },
+  { id: '8', value: 'Completed', label: 'Completed' }
+];
+
+// Define Enum for Screening Status
+export const ScreeningStatusEnum = [
+  { id: '0', value: 'Accepted', label: 'Accepted' },
+  { id: '1', value: 'Rejected', label: 'Rejected' }
+];
+
 export interface GetLookupRequest {
   lookupType: 'STATE' | 'COUNTY' | 'PAYAM' | 'BOMA';
   id?: string;
