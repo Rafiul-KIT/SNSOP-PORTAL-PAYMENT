@@ -1,8 +1,11 @@
+@if (isLoading) {
+<app-loader></app-loader>
+} @else {
 <!-- Breadcrumb -->
 <div class="breadcrumb-wrapper mb-3">
   <p-breadcrumb [model]="breadCrumbItems" [home]="breadcrumbHome" class="max-w-full"></p-breadcrumb>
 </div>
-
+<p-toast position="bottom-right"></p-toast>
 <!-- Outer panel -->
 <div class="card shadow-sm project-container">
   <div class="card-body">
@@ -177,19 +180,19 @@
           <thead>
             <tr>
               <th>#</th>
-              <th>State</th>
-              <th>County</th>
-              <th>Action</th>
+              <th class="text-center">State</th>
+              <th class="text-center">County</th>
+              <th class="text-center">Action</th>
             </tr>
           </thead>
           <tbody>
             @for (t of targets; track $index) {
               <tr>
-                <td>{{ $index + 1 }}</td>
-                <td>{{ t.state }}</td>
-                <td>{{ t.county }}</td>
-                <td>
-                  <p-button icon="pi pi-trash" severity="danger" (click)="removeTarget($index)" label="Remove"></p-button>
+                <td class="text-center">{{ $index + 1 }}</td>
+                <td class="text-center">{{ t.state }}</td>
+                <td class="text-center">{{ t.county }}</td>
+                <td class="d-flex justify-content-center">
+                  <p-button icon="pi pi-trash" class="margin-auto" severity="danger" (click)="removeTarget($index)" label="Remove"></p-button>
                 </td>
               </tr>
             }
@@ -205,11 +208,6 @@
       <p-button label="Cancel" icon="fas fa-times" severity="secondary" (click)="onCancel()"></p-button>
     </div>
 
-    <!-- Status message -->
-    @if (statusMsg) {
-      <div class="text-center small text-muted mb-3">
-        {{ statusMsg }}
-      </div>
-    }
+
   </div>
-</div>
+</div>}
