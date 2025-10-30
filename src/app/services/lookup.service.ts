@@ -56,6 +56,20 @@ interface RegistrationTarget {
   DIS: number;
 }
 
+export interface ProjectNameDescription {
+  id: string;
+  projectName: string;
+}
+
+export interface GetProjectNameDescriptionResponse {
+  code: number;
+  message: string;
+  content: ProjectNameDescription[];
+  pageNumber: number;
+  pageSize: number;
+  totalElements: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -67,6 +81,7 @@ export class LookupService {
   private countyList: LookupItem[] = [];
   private payamList: LookupItem[] = [];
   private bomaList: LookupItem[] = [];
+  public projectNameDescriptionList: ProjectNameDescription[] = []; // Made public for direct access in work-approval.ts
 
   constructor(private api: ApiService) { }
 
@@ -205,6 +220,39 @@ export class LookupService {
       return list;
     });
   }
+
+  // ---------- Project Name/Description ----------
+async getProjectNameDescription(): Promise<ProjectNameDescription[]> {
+  // If the list is already populated, return it as a resolved promise
+  if (this.projectNameDescriptionList.length) {
+    return this.projectNameDescriptionList;
+  }
+
+  try {
+    // Make API call to fetch project descriptions
+    const res = await this.api.GET('api/project/get');
+    const data: GetProjectNameDescriptionResponse = res?.data;
+
+    // Check if response code is valid
+    if (data?.code === 0) {
+      // Map over the response data and convert `id` to string
+      this.projectNameDescriptionList = data.content.map(item => ({
+        ...item,
+        id: String(item.id) // Convert `id` to string for consistency
+      })) ?? [];
+
+      // Return the list
+      return this.projectNameDescriptionList;
+    }
+
+    // Return empty array if API response is invalid
+    return [];
+  } catch (error) {
+    console.error('Error fetching project name descriptions:', error);
+    return [];
+  }
+}
+
 
   // ---------- Central fetcher ----------
   private fetchLookup(req: GetLookupRequest): Promise<LookupItem[]> {
@@ -900,9 +948,9 @@ export class LookupService {
 
 
   MobileMoneyProviderEnum = [
-    { id: 1, value: 'MOMO', label: 'MOMO' },
-    { id: 2, value: 'MGURUSH', label: 'MGURUSH' },
-    { id: 3, value: 'DIGICASH', label: 'DIGICASH' },
+    { id: 1, value: "MOMO", label: "MOMO" },
+    { id: 2, value: "MGURUSH", label: "MGURUSH" },
+    { id: 3, value: "DIGICASH", label: "DIGICASH" },
   ];
 
   getMobileMoneyProviderEnum = () => {
@@ -916,7 +964,7 @@ export class LookupService {
     if (dataFound) {
       return dataFound.label;
     } else {
-      return '--';
+      return "--";
     }
   };
 }
