@@ -24,7 +24,7 @@ import { SelectModule } from 'primeng/select';
 
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { LookupItem, LookupService } from '../../services/lookup.service';
+import { LookupItem, LookupService, TypeOfMeetingEnum, StatusEnum, ScreeningStatusEnum } from '../../services/lookup.service';
 import { ApiService } from '../../services/api.service';
 import { Loader } from "../../components/loader/loader";
 
@@ -83,19 +83,11 @@ export class WorkApproval implements OnInit {
   bomas: LookupItem[] = [];
 
   projects: LookupItem[] = [];
-  workTypes: LookupItem[] = [
-    { id: 'CC', name: 'CC - Community Committee' },
-    { id: 'TM', name: 'TM - Technical Meeting' },
-    { id: 'SM', name: 'SM - Site Meeting' }
-  ];
+  workTypes: any[] = [];
   workActivities: LookupItem[] = [];
   implementingPartners: LookupItem[] = [];
-  statuses: LookupItem[] = [
-    { id: 'IP_Submitted', name: 'IP Submitted' },
-    { id: 'Approved', name: 'Approved' },
-    { id: 'Rejected', name: 'Rejected' },
-    { id: 'Pending', name: 'Pending' }
-  ];
+  statuses: any[] = [];
+  screeningStatuses: any[] = [];
 
   subProjects: SubProjectDto[] = [];
   totalRecords = 0;
@@ -136,6 +128,9 @@ export class WorkApproval implements OnInit {
 
   async ngOnInit() {
     this.initForm();
+    this.workTypes = TypeOfMeetingEnum;
+    this.statuses = StatusEnum;
+    this.screeningStatuses = ScreeningStatusEnum;
     this.initBreadcrumb();
     await this.loadLookups();
     this.fetchPage(this.currentPage, this.pageSize);
@@ -152,7 +147,8 @@ export class WorkApproval implements OnInit {
   boma: [{ value: null, disabled: true }],
   status: [null],
   workCode: [''],
-  workActivity: [null]
+  workActivity: [null],
+  screeningStatus: [null]
 });
 
   }
@@ -205,7 +201,7 @@ onPayamChange(payam: LookupItem | null) {
       bomaName: null,
       typeOfMeeting: f.typeOfWork || null,
       meetingDate: null,
-      screeningStatus: null,
+      screeningStatus: f.screeningStatus || null,
       status: f.status || null
     };
   }
