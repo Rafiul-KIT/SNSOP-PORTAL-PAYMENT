@@ -81,7 +81,7 @@ export class Header {
         ],
       },
           {
-        label: 'Repot',
+        label: 'Report',
         icon: 'fas fa-chart-line',
         items: [
           {
@@ -106,6 +106,12 @@ export class Header {
         label: 'Creating Payroll',
         icon: 'fas fa-file-invoice-dollar',
         routerLink: 'dashboard',
+        routerLinkActiveOptions: 'active',
+      },
+         {
+        label: 'work approval',
+        icon: 'fa fa-check',
+        routerLink: 'work-approval',
         routerLinkActiveOptions: 'active',
       },
       {
