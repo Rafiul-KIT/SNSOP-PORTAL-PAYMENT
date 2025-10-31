@@ -65,7 +65,7 @@ export class Header {
         routerLinkActiveOptions: 'active',
       },
       {
-        label: 'Creating Wage Request ',
+        label: ' Wage Request ',
         icon: 'fas fa-hand-holding-usd',
         items: [
           {
@@ -74,7 +74,7 @@ export class Header {
             routerLink: '/apply-wage-request/lipw',
           },
           {
-            label: 'Wages Request For DIS',
+            label: 'Benefits For DIS',
             icon: 'fas fa-list',
             routerLink: '/apply-wage-request/dis',
           },
