@@ -12,6 +12,7 @@ import { WagesRequestDis } from './pages/apply-wages-request/wages-request-dis/w
 import { ApplyForWagesPaymentComponent } from './pages/apply-wages-request/apply-for-wages-payment/apply-for-wages-payment.component';
 import { BeneficiaryAttendancePerform } from './pages/beneficiay-attendance/beneficiary-attendance-perform/beneficiary-attendance-perform';
 import { WorkApproval } from './pages/work-approval/work-approval';
+import { WorkReview } from './pages/work-review/work-review';
 
 
 
@@ -35,6 +36,10 @@ export const routes: Routes = [
    {
     component: WorkApproval,
     path: 'work-approval',
+  },
+    {
+    component: WorkReview,
+    path: 'work-review',
   },
   {
     component: SubProject,

@@ -1,149 +1,293 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import {
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
-import { FormsModule } from '@angular/forms';
-import { TooltipModule } from 'primeng/tooltip';
+import { ToastModule } from 'primeng/toast';
 import { PaginatorModule } from 'primeng/paginator';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { InputTextModule } from 'primeng/inputtext';
+import { TooltipModule } from 'primeng/tooltip';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { FloatLabelModule } from 'primeng/floatlabel';
-import { Loader } from '../../components/loader/loader';
+import { SelectModule } from 'primeng/select';
+
+import { MessageService, ConfirmationService } from 'primeng/api';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import {
+  LookupItem,
+  LookupService,
+  TypeOfMeetingEnum,
+  StatusEnum,
+  ScreeningStatusEnum,
+  ProjectNameDescription,
+} from '../../services/lookup.service';
 import { ApiService } from '../../services/api.service';
-import { ChangeDetectorRef } from '@angular/core';
+import { Loader } from '../../components/loader/loader';
 
-interface SubProjectItemDto {
+interface SubProjectDto {
   id: number;
+  workCode: string;
+  projectId: number;
   projectName: string;
+  stateId: number;
   stateName: string;
+  countyId: number;
   countyName: string;
+  payamId: number;
   payamName: string;
+  bomaId: number;
   bomaName: string;
-  status: string | null;
+  typeOfMeeting: string;
+  meetingDate: string;
+  screeningStatus: string;
+  status: string;
 }
 
-
-interface PagedResponseProjectDto {
-  code: number;
-  message: string;
-  content: SubProjectItemDto[];
-  pageNumber: number;
-  pageSize: number;
-  totalElements: number;
-}
 
 @Component({
   selector: 'app-sub-project-list',
-  standalone: true,
-  imports: [
-    CommonModule,
-    TableModule,
-    ButtonModule,
-    FormsModule,
-    BreadcrumbModule,
-    PaginatorModule,
-    InputTextModule,
-    TooltipModule,
-    FloatLabelModule,
-    Loader,
-  ],
+
   templateUrl: './sub-project-list.html',
   styleUrl: './sub-project-list.scss',
+   standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    TableModule,
+    ButtonModule,
+    ToastModule,
+    ConfirmDialogModule,
+    PaginatorModule,
+    BreadcrumbModule,
+    FloatLabelModule,
+    InputTextModule,
+    SelectModule,
+    RouterModule,
+    TooltipModule,
+    Loader,
+  ],
+  providers: [MessageService, ConfirmationService],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SubProjectList implements OnInit {
-  rows: SubProjectItemDto[] = [];
-  searchText = '';
-  isLoading = false;
+  isLoading = true;
+  searchForm!: FormGroup;
+
+  // geo lookup lists
+  states: LookupItem[] = [];
+  counties: LookupItem[] = [];
+  payams: LookupItem[] = [];
+  bomas: LookupItem[] = [];
+
+  projects: ProjectNameDescription[] = [];
+  workTypes: any[] = [];
+  workActivities: LookupItem[] = [];
+
+  statuses: any[] = [];
+  screeningStatuses: any[] = [];
+
+  subProjects: SubProjectDto[] = [];
   totalRecords = 0;
 
   breadcrumbItems: any[] = [];
   breadcrumbHome: any;
 
-  currentPage = 0;
+  currentPage = 0; // 0-based
   pageSize = 10;
-
-  selectedProjectId?: number;
-
-  private readonly SUBPROJECTS_ENDPOINT = '/api/subproject/get';
+  advanceSearchPanelVisible = false;
 
   constructor(
+    private fb: FormBuilder,
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService,
     private router: Router,
+    private route: ActivatedRoute,
     private api: ApiService,
+    private lookup: LookupService,
     private cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit(): void {
-    this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
-    this.breadcrumbItems = [{ label: ' Sub-Project List' }];
-    this.loadSubProjects();
+  private async loadLookups() {
+    await Promise.all([
+      this.lookup.getOrFetchStateList(),
+      this.lookup.fetchAllCountyList(),
+      this.lookup.fetchAllPayamList(),
+      this.lookup.fetchAllBomaList(),
+      this.lookup.getProjectNameDescription(),
+    ]);
+
+    this.states = this.lookup.getStateList();
+    this.counties = this.lookup.getAllCountyList();
+    this.payams = this.lookup.getAllPayamList();
+    this.bomas = this.lookup.getAllBomaList();
+    this.projects = this.lookup.projectNameDescriptionList;
+
+    this.cdr.markForCheck();
   }
 
-  private qs(params: Record<string, any>): string {
-    const usp = new URLSearchParams();
-    Object.entries(params).forEach(([k, v]) => {
-      if (v !== undefined && v !== null && v !== '') usp.set(k, String(v));
+  async ngOnInit() {
+    this.workTypes = TypeOfMeetingEnum;
+    this.statuses = StatusEnum;
+    this.screeningStatuses = ScreeningStatusEnum;
+    this.initBreadcrumb();
+    await this.loadLookups();
+    this.initForm();
+    this.fetchPage(this.currentPage, this.pageSize);
+  }
+
+
+  initForm() {
+    this.searchForm = this.fb.group({
+      projectId: [null],
+      state: [null],
+      county: [{ value: null, disabled: true }],
+      projectName: [null],
+      typeOfWork: [null],
+      payam: [{ value: null, disabled: true }],
+      boma: [{ value: null, disabled: true }],
+      status: [null],
+      workCode: [''],
+      workActivity: [null],
+      screeningStatus: [null],
     });
-    return usp.toString();
   }
 
-  async loadSubProjects() {
-    this.isLoading = true;
-    try {
-      const query = this.qs({
-        page: this.currentPage,
-        size: this.pageSize,
-      });
+  initBreadcrumb() {
+    this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
+    this.breadcrumbItems = [{ label: 'Work Approval' }];
+  }
 
-      const url = `${this.SUBPROJECTS_ENDPOINT}?${query}`;
-
-      const payload = {};
-
-      const res = await this.api.POST(url, payload);
-      const data = res.data as PagedResponseProjectDto;
-
-      this.rows = data?.content ?? [];
-      this.totalRecords = data?.totalElements ?? 0;
-    } catch (err) {
-      console.error('Failed to load subprojects', err);
-      this.rows = [];
-      this.totalRecords = 0;
-    } finally {
-      this.isLoading = false;
-      this.cdr.detectChanges();
+  // ---------- dependent dropdowns ----------
+  onStateChange(state: LookupItem | null) {
+    if (state?.id) {
+      this.searchForm.get('county')?.enable();
+    } else {
+      this.searchForm.get('county')?.disable();
     }
+  }
+
+  onCountyChange(county: LookupItem | null) {
+    if (county?.id) {
+      this.searchForm.get('payam')?.enable();
+    } else {
+      this.searchForm.get('payam')?.disable();
+    }
+  }
+
+  onPayamChange(payam: LookupItem | null) {
+    if (payam?.id) {
+      this.searchForm.get('boma')?.enable();
+    } else {
+      this.searchForm.get('boma')?.disable();
+    }
+  }
+
+  // ---------- Request building ----------
+  private buildSearchBody(page: number, size: number) {
+    const f = this.searchForm.value;
+    return {
+      id: null,
+      workCode: f.workCode ? f.workCode.trim() : null,
+      projectId: f.projectId ? Number(f.projectId) : null,
+
+      projectName: f.projectName || null,
+      stateId: f.state?.id || null,
+      stateName: null,
+      countyId: f.county?.id || null,
+      countyName: null,
+      payamId: f.payam?.id || null,
+      payamName: null,
+      bomaId: f.boma?.id || null,
+      bomaName: null,
+      typeOfMeeting: f.typeOfWork || null,
+      meetingDate: null,
+      screeningStatus: f.screeningStatus || null,
+      status: f.status || null,
+    };
+  }
+
+  // ---------- Data loading ----------
+  fetchPage(page: number, size: number) {
+    this.isLoading = true;
+    const body = this.buildSearchBody(page, size);
+
+    this.api
+      .POST(`api/subproject/get?page=${page}&size=${size}`, body)
+      .then((res: any) => {
+      
+
+        if (!res) throw new Error('Empty response');
+
+        // Access data from nested structure: res.data.content
+        const data = res.data || res;
+        const content = data.content || [];
+        this.subProjects = content;
+        this.totalRecords = data.totalElements || 0;
+
+        if (content.length === 0) {
+          this.messageService.add({
+            severity: 'info',
+            summary: 'Search',
+            detail: 'No sub-projects found',
+          });
+        }
+      })
+      .catch((err) => {
+        console.error('Fetch sub-projects error:', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to fetch sub-projects',
+        });
+      })
+      .finally(() => {
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      });
   }
 
   onPageChange(event: any) {
     this.currentPage = event.page;
     this.pageSize = event.rows;
-    this.loadSubProjects();
+    this.fetchPage(this.currentPage, this.pageSize);
   }
 
-  onSearch(): void {
+  searchBeneficiaries() {
     this.currentPage = 0;
-    this.loadSubProjects();
+    this.fetchPage(this.currentPage, this.pageSize);
   }
 
-  newProject() {
-    this.router.navigate(['/sub-project']);
+  resetForm() {
+    this.searchForm.reset();
+    this.counties = this.lookup.getAllCountyList(); // Reset to full list
+    this.payams = [];
+    this.bomas = [];
+    this.currentPage = 0;
+    this.fetchPage(this.currentPage, this.pageSize);
+    this.cdr.markForCheck();
   }
-  editProject(id: number) {
+
+  // ---------- Actions ----------
+  editSubProject(id: number) {
     this.router.navigate(['/sub-project', id]);
   }
-  /*viewProject(id: number) {
-    this.router.navigate(['/sub-project-details', id]);
-  }*/
-
-  async deleteProject(id: number) {
-    if (!confirm('Are you sure you want to delete this project?')) return;
-    try {
-      await this.api.DELETE(`${this.SUBPROJECTS_ENDPOINT}/${id}`);
-      this.loadSubProjects();
-    } catch (e) {
-      console.error('Delete failed', e);
-    }
+    newProject() {
+    this.router.navigate(['/sub-project']);
   }
-
-  //trackById(_i: number, r: ProjectItemDto) { return r.id; }
+  async deleteProject(item: SubProjectDto) {
+ console.log(item)
+  }
+  trackById = (_: number, row: SubProjectDto) => row.id;
 }
