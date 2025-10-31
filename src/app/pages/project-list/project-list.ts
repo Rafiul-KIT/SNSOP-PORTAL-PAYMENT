@@ -158,7 +158,7 @@ export class ProjectList implements OnInit {
     try {
       await this.api.POST(this.PROJECT_SAVE_ENDPOINT, payload);
 
-      console.log(`Project "${row.projectName}" closed successfully.`);
+
       await this.loadProjects(); // refresh table after update
     } catch (error) {
       console.error('Failed to close project:', error);
