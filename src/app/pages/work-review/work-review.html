@@ -1,0 +1,431 @@
+@if (false) {
+  <app-loader></app-loader>
+} @else {
+  <div class="breadcrumb-wrapper">
+    <p-breadcrumb
+      [model]="breadcrumbItems"
+      [home]="breadcrumbHome"
+      class="w-100"
+    ></p-breadcrumb>
+  </div>
+}
+
+<div class="min-vh-100">
+  <!-- Header -->
+  <div class="px-6">
+    <nav class="navbar navbar-expand-lg text-secondary navbar-dark">
+      <div class="container-fluid">
+        <span class="navbar-brand text-secondary mb-0 h1">
+          <i class="fas fa-briefcase me-2"></i>Work Proposals
+        </span>
+
+        <div class="d-flex align-items-center gap-3">
+          <input type="search" class="form-control" placeholder="Search..." [formControl]="searchCtrl"
+            style="width: 250px;" />
+          <button type="button" class="btn btn-primary">
+            Look up
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid py-4">
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          <form [formGroup]="proposalForm" (ngSubmit)="onSubmit()">
+
+            <!-- Basic Information -->
+            <div class="mb-5">
+              <h4 class="text-secondary border-bottom border-1 pb-2 mb-4">
+                <i class="fas fa-info-circle me-2"></i>Basic Information
+              </h4>
+              <div class="row g-3">
+                <div class="col-md-6 col-lg-3">
+                  <label class="form-label text-secondary fw-semibold">IP <span class="text-danger">*</span></label>
+                  <select class="form-select" formControlName="ip">
+                    <option value="">UNOPS Field Office</option>
+                    <option value="melut">Melut Field Office</option>
+                    <option value="office1">Field Office 1</option>
+                    <option value="office2">Field Office 2</option>
+                  </select>
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                  <label class="form-label text-secondary fw-semibold">Project Name <span class="text-danger">*</span></label>
+                  <select class="form-select" formControlName="projectName">
+                    <option value="">Melut Field Office</option>
+                    <option value="project1">Project Alpha</option>
+                    <option value="project2">Project Beta</option>
+                  </select>
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                  <label class="form-label text-secondary fw-semibold">Work Activity Code</label>
+                  <input type="text" class="form-control" formControlName="workActivityCode" 
+                         placeholder="2024-SNSOP-Melut Field Office-3226" />
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                  <label class="form-label text-secondary fw-semibold">Target Beneficiaries <span class="text-danger">*</span></label>
+                  <input type="number" class="form-control" formControlName="targetbeneficiaries" 
+                         placeholder="5500" />
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                  <label class="form-label text-secondary fw-semibold">Project Cost (In USD) <span class="text-danger">*</span></label>
+                  <div class="input-group">
+                    <span class="input-group-text"><i class="fas text-secondary fa-dollar-sign"></i></span>
+                    <input type="number" class="form-control" formControlName="projectCost"
+                           placeholder="2.70" step="0.01" />
+                  </div>
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                  <label class="form-label text-secondary fw-semibold">Type of Meeting <span class="text-danger">*</span></label>
+                  <select class="form-select" formControlName="typeOfMeeting">
+                    <option value="">Approval Meeting</option>
+                    <option value="CC">CC</option>
+                    <option value="planning">Planning</option>
+                    <option value="review">Review</option>
+                  </select>
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                  <label class="form-label text-secondary fw-semibold">Meeting Date <span class="text-danger">*</span></label>
+                  <input type="date" class="form-control" formControlName="meetingDate" 
+                         placeholder="04-06-2024" />
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                  <label class="form-label text-secondary fw-semibold">Screening Status</label>
+                  <select class="form-select" formControlName="screeningStatus">
+                    <option value="">--Select--</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Work Proposal Location -->
+            <div class="mb-5">
+              <h4 class="text-secondary border-bottom border-secondary border-1 pb-2 mb-4">
+                <i class="fas fa-map-marker-alt me-2"></i>Work Proposed Location
+              </h4>
+              <div class="row g-3">
+                <div class="col-md-6 col-lg-3">
+                  <label class="form-label text-secondary fw-semibold">State Name <span class="text-danger">*</span></label>
+                  <select class="form-select" formControlName="stateName">
+                    <option value="">UPPER NILE</option>
+                    <option value="state1">State 1</option>
+                    <option value="state2">State 2</option>
+                  </select>
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                  <label class="form-label text-secondary fw-semibold">County / Municipality Name <span class="text-danger">*</span></label>
+                  <select class="form-select" formControlName="countyName">
+                    <option value="">MELUTH</option>
+                    <option value="county1">County 1</option>
+                    <option value="county2">County 2</option>
+                  </select>
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                  <label class="form-label text-secondary fw-semibold">Payam / Block Name <span class="text-danger">*</span></label>
+                  <select class="form-select" formControlName="payamName">
+                    <option value="">BIMCHUK</option>
+                    <option value="payam1">Payam 1</option>
+                    <option value="payam2">Payam 2</option>
+                  </select>
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                  <label class="form-label text-secondary fw-semibold">Boma / Quarter Council Name <span class="text-danger">*</span></label>
+                  <select class="form-select" formControlName="bomaName">
+                    <option value="">THAAK</option>
+                    <option value="boma1">Boma 1</option>
+                    <option value="boma2">Boma 2</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Proposed Public Work Activities -->
+            <div class="mb-5">
+              <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 class="text-secondary border-bottom border-secondary border-1 pb-2 mb-0">
+                  <i class="fas fa-tasks me-2"></i>Proposed Public Work Activities
+                </h4>
+                <button type="button" class="btn btn-primary" (click)="addWorkActivity()">
+                  <i class="fas fa-plus me-2"></i>Add Activity
+                </button>
+              </div>
+
+              <div formArrayName="workActivities">
+                <div *ngFor="let activity of workActivities.controls; trackBy: trackByIndex; let i = index" 
+                     [formGroupName]="i" class="card mb-4 border-secondary">
+                  <div class="card-header bg-opacity-10 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-secondary">
+                      <i class="fas fa-wrench me-2"></i>Activity {{ i + 1 }}
+                    </h5>
+
+                    <button *ngIf="workActivities.length > 1" type="button" 
+                            class="btn btn-danger rounded-circle btn-icon ms-2 me-1" 
+                            (click)="removeWorkActivity(i)" 
+                            aria-label="Remove activity {{ i + 1 }}">
+                      <i class="fas fa-times fa-sm"></i>
+                    </button>
+                  </div>
+
+                  <div class="card-body">
+                    <div class="row g-3">
+                      <!-- Work Name -->
+                      <div class="col-md-6">
+                        <label class="form-label text-secondary fw-semibold">
+                          Work Name <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control" formControlName="name" 
+                               placeholder="Enter work name" />
+                      </div>
+
+                      <!-- Work Activity Code (Internal) -->
+                      <div class="col-md-6">
+                        <label class="form-label text-secondary fw-semibold">
+                          Work Activity Code (Internal)
+                        </label>
+                        <input type="text" class="form-control" formControlName="code" 
+                               placeholder="Internal reference code" />
+                      </div>
+
+                      <!-- Type of Work (Area of Work) -->
+                      <div class="col-md-6">
+                        <label class="form-label text-secondary fw-semibold">
+                          Type of Work <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select" formControlName="typeOfWork">
+                          <option value="">--Select--</option>
+                          <option value="construction">Construction</option>
+                          <option value="maintenance">Maintenance</option>
+                          <option value="renovation">Renovation</option>
+                          <option value="infrastructure">Infrastructure</option>
+                        </select>
+                      </div>
+
+                      <!-- Work Activity -->
+                      <div class="col-md-6">
+                        <label class="form-label text-secondary fw-semibold">
+                          Work Activity <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select" formControlName="secondaryActivity">
+                          <option value="">--Select--</option>
+                       
+                        </select>
+                      </div>
+
+                      <!-- Estimated Manpower -->
+                      <div class="col-md-6 col-lg-4">
+                        <label class="form-label text-secondary fw-semibold">
+                          Estimated Manpower <span class="text-danger">*</span>
+                        </label>
+                        <input type="number" class="form-control" formControlName="estimatedManpower" 
+                               placeholder="Number of workers" />
+                      </div>
+
+                      <!-- Estimated Man Days -->
+                      <div class="col-md-6 col-lg-4">
+                        <label class="form-label text-secondary fw-semibold">
+                          Estimated Man Days <span class="text-danger">*</span>
+                        </label>
+                        <input type="number" class="form-control" formControlName="estimatedManDays" 
+                               placeholder="Total man days" />
+                      </div>
+
+                      <!-- Estimated Skilled Labour Days -->
+                      <div class="col-md-6 col-lg-4">
+                        <label class="form-label text-secondary fw-semibold">
+                          Estimated Skill Labour Required <span class="text-danger">*</span>
+                        </label>
+                        <input type="number" class="form-control" formControlName="estimatedSkillLabour" 
+                               placeholder="Skilled labour days" />
+                      </div>
+
+                      <!-- Type of Equipment -->
+                      <div class="col-md-6">
+                        <label class="form-label text-secondary fw-semibold">
+                          Type of Equipment Required
+                        </label>
+                        <input type="file" class="form-control" 
+                               (change)="onEquipmentPhotoSelect($event, i)" accept="image/*" />
+                        <small *ngIf="getEquipmentFileName(i)" class="text-muted">
+                          Selected: {{ getEquipmentFileName(i) }}
+                        </small>
+                      </div>
+
+                      <!-- Estimated Cost of Equipment -->
+                      <div class="col-md-6">
+                        <label class="form-label text-secondary fw-semibold">
+                          Estimated Cost of Hand Tools and Equipment (In USD) <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                          <span class="input-group-text">
+                            <i class="fas text-secondary fa-dollar-sign"></i>
+                          </span>
+                          <input type="number" class="form-control" formControlName="estimatedCostOfEquipment" 
+                                 placeholder="0.00" step="0.01" />
+                        </div>
+                      </div>
+
+                      <!-- Work Photo -->
+                      <div class="col-md-6">
+                        <label class="form-label text-secondary fw-semibold">Work Photo</label>
+                        <input type="file" class="form-control" 
+                               (change)="onWorkPhotoSelect($event, i)" accept="image/*" />
+                        <small *ngIf="getWorkPhotoName(i)" class="text-muted">
+                          Selected: {{ getWorkPhotoName(i) }}
+                        </small>
+                      </div>
+
+                      <!-- Materials Photo -->
+                      <div class="col-md-6">
+                        <label class="form-label text-secondary fw-semibold">Materials Photo</label>
+                        <input type="file" class="form-control" 
+                               (change)="onMaterialsPhotoSelect($event, i)" accept="image/*" />
+                        <small *ngIf="getMaterialsPhotoName(i)" class="text-muted">
+                          Selected: {{ getMaterialsPhotoName(i) }}
+                        </small>
+                      </div>
+
+                      <!-- Estimated Cost of Materials -->
+                      <div class="col-md-6">
+                        <label class="form-label text-secondary fw-semibold">
+                          Estimated Cost of Materials Required (In USD) <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                          <span class="input-group-text">
+                            <i class="fas text-secondary fa-dollar-sign"></i>
+                          </span>
+                          <input type="number" class="form-control" formControlName="estimatedCost" 
+                                 placeholder="0.00" step="0.01" />
+                        </div>
+                      </div>
+
+                      <!-- Estimated Total Cost (In USD) - Calculated Field -->
+                      <div class="col-md-6">
+                        <label class="form-label text-secondary fw-semibold">
+                          Estimated Cost (In USD) <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                          <span class="input-group-text">
+                            <i class="fas text-secondary fa-calculator"></i>
+                          </span>
+                          <input type="number" class="form-control" formControlName="totalEstimatedCost" 
+                                 placeholder="0.00" step="0.01" readonly />
+                        </div>
+                        <small class="text-muted">
+                          Auto-calculated: Equipment + Materials
+                        </small>
+                      </div>
+                    </div>
+
+                    <br>
+                    <h5 class="text-secondary border-bottom border-secondary border-1 pb-2 mb-4">
+                      <i class="fas fa-calendar-alt me-2"></i>Work Timeline & Coordinates
+                    </h5>
+                    <div class="row g-3">
+                      <!-- Estimated Work Start Date -->
+                      <div class="col-md-6 col-lg-3">
+                        <label class="form-label text-secondary fw-semibold">
+                          Estimated Work Start Date <span class="text-danger">*</span>
+                        </label>
+                        <input type="date" class="form-control" formControlName="workStartDate" />
+                      </div>
+
+                      <!-- Estimated Work End Date -->
+                      <div class="col-md-6 col-lg-3">
+                        <label class="form-label text-secondary fw-semibold">
+                          Estimated Work End Date <span class="text-danger">*</span>
+                        </label>
+                        <input type="date" class="form-control" formControlName="workEndDate" />
+                      </div>
+
+                      <!-- Start Coordinate -->
+                      <div class="col-md-6 col-lg-3">
+                        <label class="form-label text-secondary fw-semibold">Start Coordinate</label>
+                        <div class="input-group">
+                          <span class="input-group-text">
+                            <i class="fas text-secondary fa-location-arrow"></i>
+                          </span>
+                          <input type="text" class="form-control" formControlName="startCoordinate" 
+                                 placeholder="Lat, Long" />
+                        </div>
+                      </div>
+
+                      <!-- End Coordinate -->
+                      <div class="col-md-6 col-lg-3">
+                        <label class="form-label text-secondary fw-semibold">End Coordinate</label>
+                        <div class="input-group">
+                          <span class="input-group-text">
+                            <i class="fas text-secondary fa-location-arrow"></i>
+                          </span>
+                          <input type="text" class="form-control" formControlName="endCoordinate" 
+                                 placeholder="Lat, Long" />
+                        </div>
+                      </div>
+
+                      <!-- Paper Screening Status -->
+                      <div class="col-md-6">
+                        <label class="form-label text-secondary fw-semibold">Paper Screening Status</label>
+                        <select class="form-select" formControlName="paperScreeningStatus">
+                          <option value="">--Select--</option>
+                          <option value="pending">Pending</option>
+                          <option value="approved">Approved</option>
+                          <option value="rejected">Rejected</option>
+                        </select>
+                      </div>
+
+                      <!-- Status -->
+                      <div class="col-md-6">
+                        <label class="form-label text-secondary fw-semibold">Status</label>
+                        <select class="form-select" formControlName="status">
+                          <option value="">--Select--</option>
+                          <option value="IP_Submitted">IP Submitted</option>
+                          <option value="In_Review">In Review</option>
+                          <option value="Approved">Approved</option>
+                          <option value="Rejected">Rejected</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="card bg-light">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                  <button type="button" class="btn btn-outline-danger" (click)="onClearAll()">
+                    <i class="fas fa-eraser me-2"></i>Clear All
+                  </button>
+                  <div class="d-flex gap-2 flex-wrap">
+                    <button type="button" class="btn btn-outline-secondary" (click)="onCancel()">
+                      <i class="fas fa-times me-2"></i>Cancel
+                    </button>
+
+                    <button type="submit" class="btn btn-success">
+                      <i class="fas fa-save me-2"></i>Save
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

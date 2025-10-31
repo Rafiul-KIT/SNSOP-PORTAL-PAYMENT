@@ -280,7 +280,7 @@ export class WorkApproval implements OnInit {
   // ---------- Actions ----------
   editBeneficiary(item: SubProjectDto) {
     if (!item?.id) return;
-    this.router.navigate(['/apply-wage-request/create'], {
+    this.router.navigate(['/work-review'], {
       queryParams: { id: item.id },
     });
   }
