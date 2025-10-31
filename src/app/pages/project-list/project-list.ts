@@ -10,7 +10,7 @@ import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { InputTextModule } from 'primeng/inputtext';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { Loader } from '../../components/loader/loader';
-import { ApiService} from '../../services/api.service';
+import { ApiService } from '../../services/api.service';
 import { ChangeDetectorRef } from '@angular/core';
 
 interface ProjectItemDto {
@@ -31,7 +31,7 @@ interface PagedResponseProjectDto {
   code: number;
   message: string;
   content: ProjectItemDto[];
-  pageNumber: number;   
+  pageNumber: number;
   pageSize: number;
   totalElements: number;
 }
@@ -56,22 +56,26 @@ interface PagedResponseProjectDto {
 })
 export class ProjectList implements OnInit {
   rows: ProjectItemDto[] = [];
-  searchText = '';          // kept for UI; gateway will read it downstream
+  searchText = ''; // kept for UI; gateway will read it downstream
   isLoading = false;
   totalRecords = 0;
 
   breadcrumbItems: any[] = [];
   breadcrumbHome: any;
 
-  currentPage = 0;          // UI state (PrimeNG is 0-based)
+  currentPage = 0; // UI state (PrimeNG is 0-based)
   pageSize = 10;
 
   selectedProjectId?: number;
 
   // 🔧 Update to your real gateway path
   private readonly PROJECTS_ENDPOINT = '/api/project/get';
-
-  constructor(private router: Router, private api: ApiService, private cdr: ChangeDetectorRef) {}
+  private readonly PROJECT_SAVE_ENDPOINT = '/api/project/save';
+  constructor(
+    private router: Router,
+    private api: ApiService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
@@ -91,9 +95,10 @@ export class ProjectList implements OnInit {
     this.isLoading = true;
     try {
       const query = this.qs({
-        page: this.currentPage,       
+        page: this.currentPage,
         size: this.pageSize,
-        id: this.selectedProjectId,   
+        id: this.selectedProjectId,
+        status: 'InProgress',
       });
 
       const url = `${this.PROJECTS_ENDPOINT}?${query}`;
@@ -112,28 +117,51 @@ export class ProjectList implements OnInit {
     }
   }
   onPageChange(event: any) {
-    this.currentPage = event.page;  // 0-based from PrimeNG
-    this.pageSize = event.rows;     // update for correct numbering & [first]
-    this.loadProjects();            // backend/gateway figures out the page
+    this.currentPage = event.page; // 0-based from PrimeNG
+    this.pageSize = event.rows; // update for correct numbering & [first]
+    this.loadProjects(); // backend/gateway figures out the page
   }
-
 
   onSearch(): void {
     // Trigger reload; gateway reads search from its own source
     this.loadProjects();
   }
 
-  newProject() { this.router.navigate(['/project']); }
-  editProject(id: number) { this.router.navigate(['/project', id]); }
-  viewProject(id: number) { this.router.navigate(['/project', id]); }
+  newProject() {
+    this.router.navigate(['/project']);
+  }
+  editProject(id: number) {
+    this.router.navigate(['/project', id]);
+  }
+  viewProject(id: number) {
+    this.router.navigate(['/project', id]);
+  }
 
   async deleteProject(id: number) {
-    if (!confirm('Are you sure you want to delete this project?')) return;
+    const row = this.rows.find((r) => r.id === id);
+    if (!row) return;
+
+    const payload = {
+      id: row.id,
+      projectName: row.projectName,
+      startAt: row.startAt,
+      endAt: row.endAt,
+      sanctionedAt: row.sanctionedAt,
+      targetBeneficiary: row.targetBeneficiary,
+      estimatedCost: row.estimatedCost,
+      inchargeName: row.inchargeName,
+      inchargeMobile: row.inchargeMobile,
+      inchargeEmail: row.inchargeEmail,
+      status: 'Closed',
+    };
+
     try {
-      await this.api.DELETE(`${this.PROJECTS_ENDPOINT}/${id}`);
-      this.loadProjects();
-    } catch (e) {
-      console.error('Delete failed', e);
+      await this.api.POST(this.PROJECT_SAVE_ENDPOINT, payload);
+
+      console.log(`Project "${row.projectName}" closed successfully.`);
+      await this.loadProjects(); // refresh table after update
+    } catch (error) {
+      console.error('Failed to close project:', error);
     }
   }
 
