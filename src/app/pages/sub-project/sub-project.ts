@@ -29,6 +29,9 @@ export class SubProject {
   breadcrumbHome: any;
   subprojectId: string | null = null;
 
+  availableActivities: string[] = [];
+  workActivitiesList: { id: string; name: string }[] = [];
+
   ngOnInit(): void {
     this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
     this.breadcrumbItems = [{ label: 'Project List' }];
@@ -38,13 +41,49 @@ export class SubProject {
     if (this.subprojectId) {
       this.loadSubProject(this.subprojectId);
     }
+    this.loadAvailableActivities();
   }
 
   async loadSubProject(id: string) {
     this.isLoading = true;
     try {
-      const res = await this.api.GET(`/api/subproject/${id}`);
-      this.proposalForm.patchValue(res.data);
+      const res = await this.api.GET(`/api/subproject/work-details/get?subprojectId=${id}`);
+
+      // Mapping the response content to the form
+      const subProjectData = res.data.content[0];  // Assuming single subproject response
+
+      // Patch form values for available fields
+      this.proposalForm.patchValue({
+        ip: subProjectData.areaOfWork,  // Assuming 'areaOfWork' maps to 'ip' field
+        projectName: '',  // Not available in the response, leave blank or handle
+        typeOfMeeting: '', // Not available in the response, leave blank or handle
+        meetingDate: '', // Not available in the response, leave blank or handle
+        targetBeneficiaries: '', // Not available in the response, leave blank or handle
+        projectCost: subProjectData.estCost,  // Assuming 'estCost' is the project cost
+        stateName: '',  // Not available in the response, leave blank or handle
+        countyName: '', // Not available in the response, leave blank or handle
+        payamName: '', // Not available in the response, leave blank or handle
+        bomaName: '', // Not available in the response, leave blank or handle
+        workActivities: []  // Clear any existing activities
+      });
+
+      // Map work activities from the response
+      const workActivitiesArray = subProjectData.map((activity: any) => this.fb.group({
+        name: [activity.workName],
+        code: [activity.workCode],
+        typeOfWork: activity.areaOfWork, // Adjust based on what is available
+        secondaryActivity: activity.workActivity, // Adjust based on what is available
+        estimatedManpower: activity.estManPower,
+        estimatedManDays: activity.estDay,
+        typeOfEquipment: '', // Not available in the response, leave blank or handle
+        estimatedCostOfEquipment: activity.equipmentCost,
+        workPhoto: null,  // Handle file uploads separately
+        workPhotoName: '', // Handle file uploads separately
+      }));
+
+      this.workActivities.clear(); // Clear any existing work activities
+      workActivitiesArray.forEach((activity: any) => this.workActivities.push(activity));
+
     } catch (err) {
       console.error('Failed to load sub-project', err);
     } finally {
@@ -153,5 +192,14 @@ export class SubProject {
     if (confirm('Are you sure you want to clear all fields?')) {
       this.onAddNew();
     }
+  }
+
+  trackByIndex(index: number, activity: any): number {
+    return index;  // Using the index as the unique identifier
+  }
+
+  loadAvailableActivities(): void {
+    // Dynamically create activities, you can adjust the number based on your requirements
+    this.availableActivities = Array.from({ length: 10 }, (_, i) => `Activity ${i + 1}`);
   }
 }

@@ -28,11 +28,15 @@
         <tr>
             <th>Serial</th>
             <th>Project Name</th>
+            <th>Work Code</th>
             <th>State </th>
             <th>County</th>
             <th>Payam</th>
             <th>Boma</th>
+            <th>Type of Meeting</th>
+            <th>Meeting Date</th>
             <th>Status</th>
+            <th>Screening Status</th>
 
             <th style="width:140px" class="text-center">Actions</th>
         </tr>
@@ -42,15 +46,21 @@
         <tr>
             <td>{{ (currentPage * pageSize) + i + 1 }}</td>
             <td>{{ project.projectName }}</td>
+            <td>{{project.workCode}}</td>
             <td>{{ project.stateName }}</td>
             <td>{{ project.countyName }}</td>
             <td>{{ project.payamName }}</td>
             <td>{{ project.bomaName }}</td>
+            <td>{{ project.typeOfMeeting }}</td>
+            <td>{{ project.meetingDate }}</td>
             <td>{{ project.status }}</td>
+            <td>
+              {{ project.screeningStatus === 1 ? 'Accepted' : 'Rejected' }}
+            </td>
             <td class="text-center">
-                <button pButton type="button" icon="fas fa-eye" class="p-button-sm p-button-rounded p-button-info me-2"
+                <!--<button pButton type="button" icon="fas fa-eye" class="p-button-sm p-button-rounded p-button-info me-2"
                     pTooltip="View Details" tooltipPosition="top" appendTo="body"
-                    (click)="viewProject(project.id)"></button>
+                    (click)="viewProject(project.id)"></button>-->
 
                 <button pButton type="button" icon="fas fa-pencil-alt"
                     class="p-button-sm p-button-rounded p-button-secondary me-2" pTooltip="Edit Project"
