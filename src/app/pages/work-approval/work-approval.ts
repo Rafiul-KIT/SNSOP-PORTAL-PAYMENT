@@ -24,9 +24,16 @@ import { SelectModule } from 'primeng/select';
 
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { LookupItem, LookupService, TypeOfMeetingEnum, StatusEnum, ScreeningStatusEnum, ProjectNameDescription } from '../../services/lookup.service';
+import {
+  LookupItem,
+  LookupService,
+  TypeOfMeetingEnum,
+  StatusEnum,
+  ScreeningStatusEnum,
+  ProjectNameDescription,
+} from '../../services/lookup.service';
 import { ApiService } from '../../services/api.service';
-import { Loader } from "../../components/loader/loader";
+import { Loader } from '../../components/loader/loader';
 
 interface SubProjectDto {
   id: number;
@@ -67,7 +74,7 @@ interface SubProjectDto {
     SelectModule,
     RouterModule,
     TooltipModule,
-    Loader
+    Loader,
   ],
   providers: [MessageService, ConfirmationService],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -85,7 +92,7 @@ export class WorkApproval implements OnInit {
   projects: ProjectNameDescription[] = [];
   workTypes: any[] = [];
   workActivities: LookupItem[] = [];
-  implementingPartners: LookupItem[] = [];
+
   statuses: any[] = [];
   screeningStatuses: any[] = [];
 
@@ -108,7 +115,7 @@ export class WorkApproval implements OnInit {
     private api: ApiService,
     private lookup: LookupService,
     private cdr: ChangeDetectorRef
-  ) { }
+  ) {}
 
   private async loadLookups() {
     await Promise.all([
@@ -116,7 +123,7 @@ export class WorkApproval implements OnInit {
       this.lookup.fetchAllCountyList(),
       this.lookup.fetchAllPayamList(),
       this.lookup.fetchAllBomaList(),
-      this.lookup.getProjectNameDescription()
+      this.lookup.getProjectNameDescription(),
     ]);
 
     this.states = this.lookup.getStateList();
@@ -138,21 +145,21 @@ export class WorkApproval implements OnInit {
     this.fetchPage(this.currentPage, this.pageSize);
   }
 
-  initForm() {
- this.searchForm = this.fb.group({
-  implementingPartner: [null],
-  state: [null],
-  county: [{ value: null, disabled: true }],
-  projectName: [null],
-  typeOfWork: [null],
-  payam: [{ value: null, disabled: true }],
-  boma: [{ value: null, disabled: true }],
-  status: [null],
-  workCode: [''],
-  workActivity: [null],
-  screeningStatus: [null]
-});
 
+  initForm() {
+    this.searchForm = this.fb.group({
+      projectId: [null],
+      state: [null],
+      county: [{ value: null, disabled: true }],
+      projectName: [null],
+      typeOfWork: [null],
+      payam: [{ value: null, disabled: true }],
+      boma: [{ value: null, disabled: true }],
+      status: [null],
+      workCode: [''],
+      workActivity: [null],
+      screeningStatus: [null],
+    });
   }
 
   initBreadcrumb() {
@@ -161,29 +168,29 @@ export class WorkApproval implements OnInit {
   }
 
   // ---------- dependent dropdowns ----------
-onStateChange(state: LookupItem | null) {
-  if (state?.id) {
-    this.searchForm.get('county')?.enable();
-  } else {
-    this.searchForm.get('county')?.disable();
+  onStateChange(state: LookupItem | null) {
+    if (state?.id) {
+      this.searchForm.get('county')?.enable();
+    } else {
+      this.searchForm.get('county')?.disable();
+    }
   }
-}
 
-onCountyChange(county: LookupItem | null) {
-  if (county?.id) {
-    this.searchForm.get('payam')?.enable();
-  } else {
-    this.searchForm.get('payam')?.disable();
+  onCountyChange(county: LookupItem | null) {
+    if (county?.id) {
+      this.searchForm.get('payam')?.enable();
+    } else {
+      this.searchForm.get('payam')?.disable();
+    }
   }
-}
 
-onPayamChange(payam: LookupItem | null) {
-  if (payam?.id) {
-    this.searchForm.get('boma')?.enable();
-  } else {
-    this.searchForm.get('boma')?.disable();
+  onPayamChange(payam: LookupItem | null) {
+    if (payam?.id) {
+      this.searchForm.get('boma')?.enable();
+    } else {
+      this.searchForm.get('boma')?.disable();
+    }
   }
-}
 
   // ---------- Request building ----------
   private buildSearchBody(page: number, size: number) {
@@ -191,8 +198,9 @@ onPayamChange(payam: LookupItem | null) {
     return {
       id: null,
       workCode: f.workCode ? f.workCode.trim() : null,
-      projectId: f.projectName || null,
-      projectName: null,
+      projectId: f.projectId ? Number(f.projectId) : null,
+
+      projectName: f.projectName || null,
       stateId: f.state?.id || null,
       stateName: null,
       countyId: f.county?.id || null,
@@ -204,7 +212,7 @@ onPayamChange(payam: LookupItem | null) {
       typeOfMeeting: f.typeOfWork || null,
       meetingDate: null,
       screeningStatus: f.screeningStatus || null,
-      status: f.status || null
+      status: f.status || null,
     };
   }
 
@@ -212,20 +220,20 @@ onPayamChange(payam: LookupItem | null) {
   fetchPage(page: number, size: number) {
     this.isLoading = true;
     const body = this.buildSearchBody(page, size);
-    
+
     this.api
       .POST(`api/subproject/get?page=${page}&size=${size}`, body)
       .then((res: any) => {
-        console.log('API Response:', res);
-        
+      
+
         if (!res) throw new Error('Empty response');
-        
+
         // Access data from nested structure: res.data.content
         const data = res.data || res;
         const content = data.content || [];
         this.subProjects = content;
         this.totalRecords = data.totalElements || 0;
-        
+
         if (content.length === 0) {
           this.messageService.add({
             severity: 'info',
@@ -259,24 +267,25 @@ onPayamChange(payam: LookupItem | null) {
     this.fetchPage(this.currentPage, this.pageSize);
   }
 
-resetForm() {
-  this.searchForm.reset();
-  this.counties = this.lookup.getAllCountyList();  // Reset to full list
-  this.payams = [];
-  this.bomas = [];
-  this.currentPage = 0;
-  this.fetchPage(this.currentPage, this.pageSize);
-  this.cdr.markForCheck();
-}
-
+  resetForm() {
+    this.searchForm.reset();
+    this.counties = this.lookup.getAllCountyList(); // Reset to full list
+    this.payams = [];
+    this.bomas = [];
+    this.currentPage = 0;
+    this.fetchPage(this.currentPage, this.pageSize);
+    this.cdr.markForCheck();
+  }
 
   // ---------- Actions ----------
   editBeneficiary(item: SubProjectDto) {
     if (!item?.id) return;
     this.router.navigate(['/apply-wage-request/create'], {
-      queryParams: { id: item.id }
+      queryParams: { id: item.id },
     });
   }
-
+  async deleteProject(item: SubProjectDto) {
+ console.log(item)
+  }
   trackById = (_: number, row: SubProjectDto) => row.id;
 }

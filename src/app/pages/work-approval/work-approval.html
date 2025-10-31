@@ -9,12 +9,7 @@
   <form [formGroup]="searchForm" class="row g-3">
     @if (advanceSearchPanelVisible) {
     <!-- Implementing Partner -->
-    <div class="col-md-3">
-      <p-floatlabel variant="on" class="w-100">
-        <p-select [options]="implementingPartners" optionLabel="name" optionValue="id" formControlName="implementingPartner"></p-select>
-        <label>Implementing Partner</label>
-      </p-floatlabel>
-    </div>
+
     
     <!-- State -->
     <div class="col-md-3">
@@ -35,12 +30,18 @@
     </div>
     
     <!-- Project Name -->
-    <div class="col-md-3">
-      <p-floatlabel variant="on" class="w-100">
-        <p-select [options]="projects" optionLabel="projectName" optionValue="id" formControlName="projectName"></p-select>
-        <label>Project Name</label>
-      </p-floatlabel>
-    </div>
+   <div class="col-md-3">
+  <p-floatlabel variant="on" class="w-100">
+    <p-select
+      [options]="projects"
+      optionLabel="projectName"
+      optionValue="id"
+      formControlName="projectId"
+    ></p-select>
+    <label>Project Name</label>
+  </p-floatlabel>
+</div>
+
     
     <!-- Type of Work -->
     <div class="col-md-3">
@@ -77,7 +78,7 @@
     <!-- Screening Status -->
     <div class="col-md-3">
       <p-floatlabel variant="on" class="w-100">
-        <p-select [options]="screeningStatuses" optionLabel="label" optionValue="value" formControlName="screeningStatus"></p-select>
+        <p-select [options]="screeningStatuses" optionLabel="label" optionValue="id" formControlName="screeningStatus"></p-select>
         <label>Screening Status</label>
       </p-floatlabel>
     </div>
@@ -155,6 +156,10 @@
         <p-button type="button" icon="fa-regular fa-circle-check fa-lg" pTooltip="Edit" tooltipPosition="top"
           appendTo="body" (onClick)="editBeneficiary(item)" size="small" outlined="true" severity="secondary"
           class="me-2 big-icon-btn" />
+            <p-button type="button" icon="fa-regular fa-circle-check fa-lg" pTooltip="Edit" tooltipPosition="top"
+          appendTo="body" (onClick)="deleteProject(item)" size="small" outlined="true" severity="secondary"
+          class="me-2 big-icon-btn" />
+          
       </td>
     </tr>
   </ng-template>

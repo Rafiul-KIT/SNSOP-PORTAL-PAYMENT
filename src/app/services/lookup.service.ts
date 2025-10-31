@@ -22,8 +22,9 @@ export const StatusEnum = [
 
 // Define Enum for Screening Status
 export const ScreeningStatusEnum = [
-  { id: '0', value: 'Accepted', label: 'Accepted' },
-  { id: '1', value: 'Rejected', label: 'Rejected' }
+ 
+  { id: '0', value: 'Rejected', label: 'Rejected' },
+   { id: '1', value: 'Accepted', label: 'Accepted' }
 ];
 
 export interface GetLookupRequest {
@@ -222,36 +223,37 @@ export class LookupService {
   }
 
   // ---------- Project Name/Description ----------
-async getProjectNameDescription(): Promise<ProjectNameDescription[]> {
-  // If the list is already populated, return it as a resolved promise
-  if (this.projectNameDescriptionList.length) {
-    return this.projectNameDescriptionList;
-  }
+// lookup.service.ts
+async getProjectNameDescription(): Promise<ProjectNameDescription[] | []> {
+  // cache hit
+  if (this.projectNameDescriptionList.length) return this.projectNameDescriptionList;
 
   try {
-    // Make API call to fetch project descriptions
-    const res = await this.api.GET('api/project/get');
-    const data: GetProjectNameDescriptionResponse = res?.data;
+    // if your API is paged, request enough rows; otherwise drop the query
+    const res = await this.api.GET('api/project/get?page=0&size=100');
+    const payload = res?.data ?? res;
 
-    // Check if response code is valid
-    if (data?.code === 0) {
-      // Map over the response data and convert `id` to string
-      this.projectNameDescriptionList = data.content.map(item => ({
-        ...item,
-        id: String(item.id) // Convert `id` to string for consistency
-      })) ?? [];
+    // handle both {code:200, content:[...]} and plain {content:[...]}
+    const codeOk = payload?.code === 0 || payload?.code === 200 || payload?.status === 'OK';
+    const content = Array.isArray(payload?.content) ? payload.content : [];
 
-      // Return the list
-      return this.projectNameDescriptionList;
-    }
+    if (!codeOk && !content.length) return [];
 
-    // Return empty array if API response is invalid
-    return [];
-  } catch (error) {
-    console.error('Error fetching project name descriptions:', error);
+    // keep id as number for backend sanity
+    this.projectNameDescriptionList = content.map((it: any) => ({
+      id: Number(it.id),
+      projectName: it.projectName,
+      description: it.description ?? it.projectDescription ?? null
+    }));
+
+
+    return this.projectNameDescriptionList;
+  } catch (e) {
+    console.error('getProjectNameDescription failed:', e);
     return [];
   }
 }
+
 
 
   // ---------- Central fetcher ----------
