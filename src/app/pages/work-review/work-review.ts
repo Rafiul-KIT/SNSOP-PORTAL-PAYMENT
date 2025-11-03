@@ -14,7 +14,8 @@ import { Loader } from '../../components/loader/loader';
 import { ApiService } from '../../services/api.service';
 import { ChangeDetectorRef } from '@angular/core';
 import { Validators } from '@angular/forms';
-// Interfaces
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 interface WorkActivity {
   id?: number;
   workName: string;
@@ -43,9 +44,10 @@ interface WorkActivity {
 @Component({
   selector: 'app-work-review',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, BreadcrumbModule, Loader],
+  imports: [CommonModule, ReactiveFormsModule, BreadcrumbModule, Loader, ToastModule],
   templateUrl: './work-review.html',
   styleUrls: ['./work-review.scss'],
+   providers: [MessageService]
 })
 export class WorkReview implements OnInit, OnDestroy {
   // Dependency Injection
@@ -54,17 +56,17 @@ export class WorkReview implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private api = inject(ApiService);
   private cdr = inject(ChangeDetectorRef);
-
-  // Signals
+  private msg = inject(MessageService);
+ 
   isLoading = signal<boolean>(false);
   subprojectId = signal<number | null>(null);
 
-  // Form (for display purposes only)
+
   proposalForm!: FormGroup;
   roleId!: number | null;
   approvalForm!: FormGroup;
   private attachedFile: File | null = null;
-  // Breadcrumb
+
   breadcrumbItems: MenuItem[] = [
     { label: 'Dashboard', routerLink: '/dashboard' },
     { label: 'Work Proposals', routerLink: '/work-proposals' },
@@ -72,7 +74,7 @@ export class WorkReview implements OnInit, OnDestroy {
   ];
   breadcrumbHome: MenuItem = { icon: 'pi pi-home', routerLink: '/' };
 
-  // Cleanup
+
   private destroy$ = new Subject<void>();
 
   ngOnInit(): void {
@@ -96,18 +98,31 @@ export class WorkReview implements OnInit, OnDestroy {
       input?.files && input.files.length ? input.files[0] : null;
   }
 
-  // submit
+
   async submitApproval(): Promise<void> {
     if (!this.subprojectId()) {
-      alert('Missing subproject id.');
+      this.msg.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Missing subproject ID.',
+      });
       return;
     }
-    if ( !this.roleId) {
-      alert('Missing user or role. Please login again.');
+    if (!this.roleId) {
+      this.msg.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Missing user or role. Please login again.',
+      });
       return;
     }
     if (this.approvalForm.invalid) {
       this.approvalForm.markAllAsTouched();
+      this.msg.add({
+        severity: 'error',
+        summary: 'Validation Error',
+        detail: 'Please fill all required fields, including comments.',
+      });
       return;
     }
 
@@ -119,20 +134,23 @@ export class WorkReview implements OnInit, OnDestroy {
     };
     const endpoint = endpointMap[this.roleId];
     if (!endpoint) {
-      alert('Your role is not allowed to approve here.');
+      this.msg.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Your role is not allowed to approve here.',
+      });
       return;
     }
 
-    // build form-data
+   
     const fd = new FormData();
-    fd.append('subprojectId', String(this.subprojectId())); // required
-    // only append date for role 12 and if provided
+    fd.append('subprojectId', String(this.subprojectId())); 
     if (this.roleId === 12) {
       const d = this.approvalForm.get('pdcApproveDate')?.value;
-      if (d) fd.append('pdcApproveDate', d); // yyyy-mm-dd
+      if (d) fd.append('pdcApproveDate', d); 
     }
     fd.append('comments', this.approvalForm.get('comments')?.value);
-    // approved comes as string from select → convert to boolean-like
+
     const approvedStr = this.approvalForm.get('approved')?.value;
     fd.append('approved', approvedStr === 'true' ? 'true' : 'false');
 
@@ -142,14 +160,20 @@ export class WorkReview implements OnInit, OnDestroy {
 
     this.isLoading.set(true);
     try {
-      // send with headers X-User-Id and X-Role-Id
-      await this.api.axiosInstance.post(`/${endpoint}`, fd, {
-       
+ 
+      await this.api.axiosInstance.post(`/${endpoint}`, fd, {});
+      this.msg.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'Approval submitted successfully.',
       });
-      alert('Approval submitted successfully.');
     } catch (err) {
       console.error(err);
-      alert('Failed to submit approval.');
+      this.msg.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to submit approval.',
+      });
     } finally {
       this.isLoading.set(false);
     }
@@ -159,9 +183,7 @@ export class WorkReview implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  /**
-   * Load data based on route parameter
-   */
+ 
   private loadData(): void {
     this.route.queryParams
       .pipe(takeUntil(this.destroy$))
@@ -171,15 +193,12 @@ export class WorkReview implements OnInit, OnDestroy {
           this.subprojectId.set(+id);
           await this.loadSubprojectData(+id);
         } else {
-          // No ID provided, redirect back
+        
           this.router.navigate(['/work-proposals']);
         }
       });
   }
 
-  /**
-   * Load subproject data from API
-   */
   private async loadSubprojectData(id: number): Promise<void> {
     this.isLoading.set(true);
     try {
@@ -198,9 +217,6 @@ export class WorkReview implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Fetch subproject basic information
-   */
   private async fetchSubprojectInfo(id: number): Promise<any> {
     try {
       const requestBody = { id };
@@ -226,9 +242,7 @@ export class WorkReview implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Fetch work details for subproject
-   */
+
   private async fetchWorkDetails(
     subprojectId: number
   ): Promise<WorkActivity[]> {
@@ -250,9 +264,6 @@ export class WorkReview implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Initialize the form (for display only)
-   */
   private initializeForm(): void {
     this.proposalForm = this.fb.group({
       projectName: [''],
@@ -270,16 +281,14 @@ export class WorkReview implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * Populate form with fetched data
-   */
+
   private populateForm(subprojectData: any, workDetails: WorkActivity[]): void {
     if (!subprojectData) {
       console.error('No subproject data to populate');
       return;
     }
 
-    // Populate basic information
+ 
     const basicInfo = {
       projectName: subprojectData.projectName || '',
       workActivityCode: subprojectData.workCode || '',
@@ -301,7 +310,7 @@ export class WorkReview implements OnInit, OnDestroy {
 
     this.proposalForm.patchValue(basicInfo, { emitEvent: false });
 
-    // Clear and populate work activities
+   
     this.workActivities.clear();
 
     if (workDetails && workDetails.length > 0) {
@@ -333,9 +342,7 @@ export class WorkReview implements OnInit, OnDestroy {
     }
   }
 
-  /**
-   * Format screening status
-   */
+
   private formatScreeningStatus(status: number | string | undefined): string {
     if (status === undefined || status === null) return '';
     if (typeof status === 'number') {
@@ -349,32 +356,24 @@ export class WorkReview implements OnInit, OnDestroy {
     return String(status);
   }
 
-  /**
-   * Format status value
-   */
+
   private formatStatus(status: boolean | string | undefined): string {
     if (status === undefined || status === null) return '';
     if (typeof status === 'boolean') return status ? 'Active' : 'Inactive';
     return String(status);
   }
 
-  /**
-   * Get work activities form array
-   */
+
   get workActivities(): FormArray {
     return this.proposalForm.get('workActivities') as FormArray;
   }
 
-  /**
-   * Track by function for ngFor performance
-   */
+
   trackByIndex(index: number): number {
     return index;
   }
 
-  /**
-   * Navigate back to list
-   */
+
   onCancel(): void {
     this.router.navigate(['/work-proposals']);
   }

@@ -1,10 +1,11 @@
+
 @if (isLoading()) {
 <app-loader></app-loader>
 } @else {
 <div class="breadcrumb-wrapper">
   <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
 </div>
-
+<p-toast position="bottom-right"></p-toast>
 <div class="min-vh-100 d-flex">
   <div class="content mx-auto ">
     <!-- Header -->
