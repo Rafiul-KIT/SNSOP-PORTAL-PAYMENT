@@ -314,7 +314,7 @@
               <!-- Proposed Public Work table -->
 
               <div class="mb-5">
-             
+
 
                 <div class="table-responsive">
                   <table class="table table-bordered align-middle shadow-sm">
@@ -408,58 +408,59 @@
 
 
 
-           
-                
-                  <!-- Approval Section -->
-                  <div class="card bg-light ">
-                    <div class="card-body">
-                      <h5 class="text-secondary border-bottom border-1 pb-2 mb-4">
-                        <i class="fas fa-clipboard-check me-2"></i>Approval Details
-                      </h5>
 
-                      <div class="row g-3">
-                        <!-- PDC Approve Date -->
-                        <div class="col-md-6 col-lg-3">
-                          <label class="form-label text-secondary fw-semibold">PDC Approve Date</label>
-                          <input type="date" class="form-control" name="pdcApproveDate" />
-                        </div>
 
-                        <!-- Attachment -->
-                        <div class="col-md-6 col-lg-3">
-                          <label class="form-label text-secondary fw-semibold">Attachment</label>
-                          <input type="file" class="form-control" name="attachment" accept=".pdf,image/*" />
-                        </div>
+              <!-- Approval Section -->
+              <!-- Approval Section -->
+              <div class="card bg-light mt-3" [formGroup]="approvalForm">
+                <div class="card-body">
+                  <h5 class="text-secondary border-bottom border-1 pb-2 mb-4">
+                    <i class="fas fa-clipboard-check me-2"></i>Approval Details
+                  </h5>
 
-                        <!-- Status Dropdown -->
-                        <div class="col-md-6 col-lg-3">
-                          <label class="form-label text-secondary fw-semibold">Status</label>
-                          <select class="form-select" name="approved">
-                            <option value="">-- Select Status --</option>
-                            <option value="true">Approved</option>
-                            <option value="false">Rejected</option>
-                          </select>
-                        </div>
+                  <div class="row g-3">
+                    <!-- PDC Approve Date (enabled only if roleId === 12) -->
+                    <div class="col-md-6 col-lg-3">
+                      <label class="form-label text-secondary fw-semibold">PDC Approve Date</label>
+                      <input type="date" class="form-control" formControlName="pdcApproveDate" />
 
-                        <!-- Comments -->
-                        <div class="col-12">
-                          <label class="form-label text-secondary fw-semibold">Comments <span
-                              class="text-danger">*</span></label>
-                          <textarea class="form-control" name="comments" rows="3" placeholder="Enter comments here..."
-                            required></textarea>
-                        </div>
-                      </div>
+                    </div>
 
-                      <div class="mt-4 text-end">
-                        <button type="button" class="btn btn-success me-2">
-                          <i class="fas fa-check me-2"></i>Submit Approval
-                        </button>
-                      
-                      </div>
+                    <!-- Attachment -->
+                    <div class="col-md-6 col-lg-3">
+                      <label class="form-label text-secondary fw-semibold">Attachment</label>
+                      <input type="file" class="form-control" accept=".pdf,image/*"
+                        (change)="onApprovalFileSelect($event)" />
+                    </div>
+
+                    <!-- Status Dropdown -->
+                    <div class="col-md-6 col-lg-3">
+                      <label class="form-label text-secondary fw-semibold">Status</label>
+                      <select class="form-select" formControlName="approved">
+                        <option value="">-- Select Status --</option>
+                        <option value="true">Approved</option>
+                        <option value="false">Rejected</option>
+                      </select>
+                    </div>
+
+                    <!-- Comments -->
+                    <div class="col-12">
+                      <label class="form-label text-secondary fw-semibold">
+                        Comments <span class="text-danger">*</span>
+                      </label>
+                      <textarea class="form-control" rows="3" placeholder="Enter comments here..."
+                        formControlName="comments"></textarea>
                     </div>
                   </div>
 
-             
-         
+                  <div class="mt-4 text-end">
+                    <button type="button" class="btn btn-success me-2" (click)="submitApproval()">
+                      <i class="fas fa-check me-2"></i>Submit Approval
+                    </button>
+                  </div>
+                </div>
+              </div>
+
 
             </form>
           </div>

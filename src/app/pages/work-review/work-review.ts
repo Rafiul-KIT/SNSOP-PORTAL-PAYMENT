@@ -13,7 +13,7 @@ import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { Loader } from '../../components/loader/loader';
 import { ApiService } from '../../services/api.service';
 import { ChangeDetectorRef } from '@angular/core';
-
+import { Validators } from '@angular/forms';
 // Interfaces
 interface WorkActivity {
   id?: number;
@@ -61,7 +61,9 @@ export class WorkReview implements OnInit, OnDestroy {
 
   // Form (for display purposes only)
   proposalForm!: FormGroup;
-
+  roleId!: number | null;
+  approvalForm!: FormGroup;
+  private attachedFile: File | null = null;
   // Breadcrumb
   breadcrumbItems: MenuItem[] = [
     { label: 'Dashboard', routerLink: '/dashboard' },
@@ -74,10 +76,84 @@ export class WorkReview implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
   ngOnInit(): void {
+    this.roleId = this.api.getUserRole();
+
     this.initializeForm();
+    this.initApprovalForm();
     this.loadData();
   }
+  private initApprovalForm(): void {
+    this.approvalForm = this.fb.group({
+      pdcApproveDate: [{ value: '', disabled: this.roleId !== 12 }],
+      attachment: [''],
+      comments: ['', Validators.required],
+      approved: ['', Validators.required],
+    });
+  }
+  onApprovalFileSelect(evt: Event) {
+    const input = evt.target as HTMLInputElement;
+    this.attachedFile =
+      input?.files && input.files.length ? input.files[0] : null;
+  }
 
+  // submit
+  async submitApproval(): Promise<void> {
+    if (!this.subprojectId()) {
+      alert('Missing subproject id.');
+      return;
+    }
+    if ( !this.roleId) {
+      alert('Missing user or role. Please login again.');
+      return;
+    }
+    if (this.approvalForm.invalid) {
+      this.approvalForm.markAllAsTouched();
+      return;
+    }
+
+    // decide endpoint by roleId
+    const endpointMap: Record<number, string> = {
+      9: 'api/subproject/review/first',
+      3: 'api/subproject/review/second',
+      12: 'api/subproject/review/third',
+    };
+    const endpoint = endpointMap[this.roleId];
+    if (!endpoint) {
+      alert('Your role is not allowed to approve here.');
+      return;
+    }
+
+    // build form-data
+    const fd = new FormData();
+    fd.append('subprojectId', String(this.subprojectId())); // required
+    // only append date for role 12 and if provided
+    if (this.roleId === 12) {
+      const d = this.approvalForm.get('pdcApproveDate')?.value;
+      if (d) fd.append('pdcApproveDate', d); // yyyy-mm-dd
+    }
+    fd.append('comments', this.approvalForm.get('comments')?.value);
+    // approved comes as string from select → convert to boolean-like
+    const approvedStr = this.approvalForm.get('approved')?.value;
+    fd.append('approved', approvedStr === 'true' ? 'true' : 'false');
+
+    if (this.attachedFile) {
+      fd.append('attachment', this.attachedFile);
+    }
+
+    this.isLoading.set(true);
+    try {
+      // send with headers X-User-Id and X-Role-Id
+      await this.api.axiosInstance.post(`/${endpoint}`, fd, {
+       
+      });
+      alert('Approval submitted successfully.');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to submit approval.');
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
