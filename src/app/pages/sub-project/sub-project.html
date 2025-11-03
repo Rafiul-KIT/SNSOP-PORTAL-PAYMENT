@@ -21,7 +21,7 @@
                     <i class="fas fa-briefcase   me-2"></i>Work Proposals
                 </span>
 
-  
+
 
             </div>
         </nav>
@@ -39,7 +39,7 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <div class="row g-3">
-                                        
+
                                         <div class="col-md-12">
                                             <label class="form-label text-secondary fw-semibold">Project Name</label>
                                             <select class="form-select" formControlName="projectName">
@@ -47,17 +47,7 @@
                                                 <option *ngFor="let project of availableProjects" [value]="project.id">{{ project.name }}</option>
                                             </select>
                                         </div>
-                                        <div class="col-md-12">
-                                            <label class="form-label text-secondary fw-semibold">Target Beneficiaries</label>
-                                            <input type="number" class="form-control" formControlName="targetBeneficiaries" />
-                                        </div>
-                                        <div class="col-md-12">
-                                            <label class="form-label text-secondary fw-semibold">Project Cost </label>
-                                            <div class="input-group">
-                                                <span class="input-group-text"><i class="fas text-secondary fa-dollar-sign"></i></span>
-                                                <input type="number" class="form-control" formControlName="projectCost" placeholder="0.00" />
-                                            </div>
-                                        </div>
+
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -66,8 +56,9 @@
                                             <label class="form-label text-secondary fw-semibold">Type of Meeting</label>
                                             <select class="form-select" formControlName="typeOfMeeting">
                                                 <option value="">--Select--</option>
-                                                <option value="planning">Planning</option>
-                                                <option value="review">Review</option>
+                                                <option value="CC">Community Consultancy</option>
+                                                <option value="AM">Approval Meeting</option>
+                                              <option value="OT">Others</option>
                                             </select>
                                         </div>
                                         <div class="col-md-12">
@@ -78,9 +69,9 @@
                                             <label class="form-label text-secondary fw-semibold">Paper Screening Status</label>
                                             <select class="form-select" formControlName="paperScreeningStatus">
                                                 <option value="">--Select--</option>
-                                                <option value="pending">Pending</option>
-                                                <option value="approved">Approved</option>
-                                                <option value="rejected">Rejected</option>
+
+                                                <option value="1">Approved</option>
+                                                <option value="0">Rejected</option>
                                             </select>
                                         </div>
                                     </div>
@@ -95,29 +86,26 @@
                         <div class="row g-3">
                           <div class="col-md-6 col-lg-3">
                             <label class="form-label text-secondary fw-semibold">State Name</label>
-                            <select class="form-select" formControlName="stateName">
+                            <select class="form-select" formControlName="stateName" (change)="onStateChange($event)">
                               <option value="">--Select--</option>
-                              <option value="state1">State 1</option>
-                              <option value="state2">State 2</option>
+                              <option *ngFor="let state of availableStates" [value]="state.name">{{ state.name }}</option>
                             </select>
                           </div>
 
                           <div class="col-md-6 col-lg-3">
                             <label class="form-label text-secondary fw-semibold">County / Municipality
                               Name</label>
-                            <select class="form-select" formControlName="countyName">
+                            <select class="form-select" formControlName="countyName" (change)="onCountyChange($event)">
                               <option value="">--Select--</option>
-                              <option value="county1">County 1</option>
-                              <option value="county2">County 2</option>
+                              <option *ngFor="let county of availableCounties" [value]="county.name">{{ county.name }}</option>
                             </select>
                           </div>
 
                           <div class="col-md-6 col-lg-3">
                             <label class="form-label text-secondary fw-semibold">Payam / Block Name</label>
-                            <select class="form-select" formControlName="payamName">
+                            <select class="form-select" formControlName="payamName" (change)="onPayamChange($event)">
                               <option value="">--Select--</option>
-                              <option value="payam1">Payam 1</option>
-                              <option value="payam2">Payam 2</option>
+                              <option *ngFor="let payam of availablePayams" [value]="payam.name">{{ payam.name }}</option>
                             </select>
                           </div>
 
@@ -126,22 +114,13 @@
                               Name</label>
                             <select class="form-select" formControlName="bomaName">
                               <option value="">--Select--</option>
-                              <option value="boma1">Boma 1</option>
-                              <option value="boma2">Boma 2</option>
+                              <option *ngFor="let boma of availableBomas" [value]="boma.name">{{ boma.name }}</option>
                             </select>
                           </div>
                         </div>
                       </div>
 
-                        <!-- Target Beneficiaries -->
-                        <div class="mb-5">
-                            <h4 class="text-secondary  border-bottom border-secondary  border-1 pb-2 mb-4">
-                                <i class="fas fa-users me-2 "></i>Target Beneficiaries
-                            </h4>
-                            <div class="row g-3">
 
-                            </div>
-                        </div>
 
                       <!-- Activities and Timeline combined -->
                       <div class="mb-5">
@@ -186,9 +165,9 @@
                                 <!-- Type of Work -->
                                 <div class="col-md-6 col-lg-3">
                                   <label class="form-label text-secondary fw-semibold">Type of Work</label>
-                                  <select class="form-select" formControlName="typeOfWork">
+                                  <select class="form-select" formControlName="typeOfWork" (change)="onTypeOfWorkChange($event, i)">
                                     <option value="">--Select--</option>
-                                    <option *ngFor="let type of availableTypesOfWork" [value]="type">{{ type }}</option>
+                                    <option *ngFor="let type of availableTypesOfWork" [value]="type.name">{{ type.name }}</option>
                                   </select>
                                 </div>
 
@@ -197,7 +176,9 @@
                                   <label class="form-label text-secondary fw-semibold">Work Activity</label>
                                   <select class="form-select" formControlName="secondaryActivity">
                                     <option value="">--Select--</option>
-                                    <option *ngFor="let activity of availableActivities" [value]="activity">{{ activity }}</option>
+                                    <ng-container *ngIf="isNgForBeingEvaluated()">
+                                      <option *ngFor="let secondaryActivityOption of availableActivities.get(activity.get('typeOfWork')?.value)" [value]="secondaryActivityOption.name">{{ secondaryActivityOption.name }}</option>
+                                    </ng-container>
                                   </select>
                                 </div>
 
@@ -227,7 +208,7 @@
                                   <label class="form-label text-secondary fw-semibold">Estimated cost of hand tools and equipment(In USD)</label>
                                   <div class="input-group">
                                     <span class="input-group-text"><i class="fas text-secondary fa-dollar-sign"></i></span>
-                                    <input type="number" class="form-control" formControlName="estimatedCostOfEquipment" />
+                                    <input type="number" class="form-control" formControlName="estimatedCostOfEquipment" placeholder="0.00"/>
                                   </div>
                                 </div>
 
@@ -248,25 +229,34 @@
                                 </div>
 
                                 <!-- Estimated Cost -->
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                   <label class="form-label text-secondary fw-semibold">Estimated cost of materials required (In USD)</label>
                                   <div class="input-group">
                                     <span class="input-group-text"><i class="fas text-secondary fa-dollar-sign"></i></span>
-                                    <input type="number" class="form-control" formControlName="estimatedCost" placeholder="0.00" />
+                                    <input type="number" class="form-control" formControlName="estimatedMaterialCost" placeholder="0.00" />
                                   </div>
                                 </div>
 
                                 <!-- Estimated Skill Labour Required -->
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                   <label class="form-label text-secondary fw-semibold">Estimated Skill Labour Required</label>
                                   <div class="input-group">
                                     <span class="input-group-text"><i class="fas text-secondary fa-users"></i></span>
                                     <input type="number" class="form-control" formControlName="estimatedSkillLabour" />
                                   </div>
                                 </div>
+                                <!-- Estimated Skill Labour Required -->
+                                <div class="col-md-4">
+                                  <label class="form-label text-secondary fw-semibold">Estimated Cost (In USD)</label>
+                                  <div class="input-group">
+                                    <span class="input-group-text"><i class="fas text-secondary fa-users"></i></span>
+                                    <input type="number" class="form-control" formControlName="estimatedCost" placeholder="0.00"/>
+                                  </div>
+                                </div>
 
 
                               </div>
+
                               <br>
                               <div class="row g-3">
                                 <!-- Estimated Work Start Date -->
@@ -281,27 +271,8 @@
                                   <input type="date" class="form-control" formControlName="workEndDate" />
                                 </div>
 
-                                <!-- Start Coordinate -->
-                                <div class="col-md-6 col-lg-3">
-                                  <label class="form-label text-secondary fw-semibold">Start Coordinate</label>
-                                  <div class="input-group">
-                                    <span class="input-group-text"><i class="fas text-secondary fa-location-arrow"></i></span>
-                                    <input type="text" class="form-control" formControlName="startCoordinate" placeholder="Lat, Long" />
-                                  </div>
-                                </div>
-
-                                <!-- End Coordinate -->
-                                <div class="col-md-6 col-lg-3">
-                                  <label class="form-label text-secondary fw-semibold">End Coordinate</label>
-                                  <div class="input-group">
-                                    <span class="input-group-text"><i class="fas text-secondary fa-location-arrow"></i></span>
-                                    <input type="text" class="form-control" formControlName="endCoordinate" placeholder="Lat, Long" />
-                                  </div>
-                                </div>
 
 
-
-                            
                               </div>
                             </div>
                           </div>

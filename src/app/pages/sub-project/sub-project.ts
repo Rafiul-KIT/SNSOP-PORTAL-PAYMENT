@@ -29,8 +29,12 @@ export class SubProject implements OnInit {
   subprojectId: string | null = null;
 
   availableProjects: { id: number; name: string }[] = [];
-  availableActivities: string[] = [];
-  availableTypesOfWork: string[] = [];
+  availableTypesOfWork: { id: string; name: string }[] = [];
+  availableActivities: Map<string, { id: string; name: string }[]> = new Map();
+  availableStates: { id: string; name: string }[] = [];
+  availableCounties: { id: string; name: string }[] = [];
+  availablePayams: { id: string; name: string }[] = [];
+  availableBomas: { id: string; name: string }[] = [];
   workActivitiesList: { id: string; name: string }[] = [];
 
   constructor(
@@ -41,7 +45,6 @@ export class SubProject implements OnInit {
     private lookupService: LookupService // Injected
   ) {
     this.proposalForm = this.fb.group({
-      ip: [''],
       projectName: [''],
       typeOfMeeting: [''],
       meetingDate: [''],
@@ -62,87 +65,147 @@ export class SubProject implements OnInit {
     this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
     this.breadcrumbItems = [{ label: 'Project List' }, { label: 'Sub-Project' }];
 
+    this.loadAvailableProjects();
+    this.loadAvailableTypesOfWork();
+    this.loadAvailableStates();
+
     this.subprojectId = this.route.snapshot.paramMap.get('id');
     if (this.subprojectId) {
       this.loadSubProject(this.subprojectId);
     }
-    this.loadAvailableProjects();
-    this.loadAvailableActivities();
-    this.loadAvailableTypesOfWork();
+  }
+
+  async loadAvailableStates(): Promise<void> {
+    try {
+      this.availableStates = await this.lookupService.getOrFetchStateList();
+    } catch (err) {
+      console.error('Failed to load available states', err);
+    }
+  }
+
+  async onStateChange(event: Event): Promise<void> {
+    const stateName = (event.target as HTMLSelectElement).value;
+    try {
+      const stateId = await this.lookupService.getStateIdByName(stateName);
+      if (stateId) {
+        this.availableCounties = await this.lookupService.getCountyListByStateId(String(stateId));
+        this.cdr.detectChanges();
+      }
+    } catch (err) {
+      console.error('Failed to load available counties', err);
+    }
+  }
+
+  async onCountyChange(event: Event): Promise<void> {
+    const countyName = (event.target as HTMLSelectElement).value;
+    try {
+      const countyId = await this.lookupService.getCountyIdByName(countyName);
+      if (countyId) {
+        this.availablePayams = await this.lookupService.getPayamListByCountyId(String(countyId));
+        this.cdr.detectChanges();
+      }
+    } catch (err) {
+      console.error('Failed to load available payams', err);
+    }
+  }
+
+  async onPayamChange(event: Event): Promise<void> {
+    const payamName = (event.target as HTMLSelectElement).value;
+    try {
+      const payamId = await this.lookupService.getPayamIdByName(payamName);
+      if (payamId) {
+        this.availableBomas = await this.lookupService.getBomaListByPayamId(String(payamId));
+        this.cdr.detectChanges();
+      }
+    } catch (err) {
+      console.error('Failed to load available bomas', err);
+    }
   }
 
   async loadSubProject(id: string) {
     this.isLoading = true;
     try {
-      const res = await this.api.GET(`/api/subproject/work-details/get?subprojectId=${id}`);
-      const activities = res.data.content;
+      const subProjectPromise = this.api.POST(`/api/subproject/get?page=0&size=1`, { id: parseInt(id, 10) });
+      const workDetailsPromise = this.api.GET(`/api/subproject/work-details/get?subprojectId=${id}`);
 
-      if (!activities || !Array.isArray(activities) || activities.length === 0) {
-        this.workActivities.clear();
-        this.cdr.detectChanges();
+      const [subProjectRes, workDetailsRes] = await Promise.all([subProjectPromise, workDetailsPromise]);
+
+      const subProjectData = subProjectRes.data.content[0];
+      const activities = workDetailsRes.data.content;
+
+      if (!subProjectData) {
+        console.error(`Sub-project with id ${id} not found.`);
         this.isLoading = false;
         return;
       }
 
-      const firstActivity = activities[0];
-      const projectDto = firstActivity.projectDto || {};
-      const subprojectDto = firstActivity.subprojectDto || {};
-
-      if (projectDto.id && projectDto.projectName) {
-        const projectExists = this.availableProjects.some(p => p.id === projectDto.id);
+      // Populate basic info
+      if (subProjectData.projectId && subProjectData.projectName) {
+        const projectExists = this.availableProjects.some(p => p.id === subProjectData.projectId);
         if (!projectExists) {
-            this.availableProjects.push({ id: Number(projectDto.id), name: String(projectDto.projectName) });
+            this.availableProjects.push({ id: Number(subProjectData.projectId), name: String(subProjectData.projectName) });
         }
       }
-      activities.forEach(activity => {
-        if (activity && activity.areaOfWork && !this.availableTypesOfWork.includes(activity.areaOfWork)) {
-          this.availableTypesOfWork.push(activity.areaOfWork);
-        }
-        if (activity && activity.workActivity && !this.availableActivities.includes(activity.workActivity)) {
-          this.availableActivities.push(activity.workActivity);
-        }
-      });
 
       this.proposalForm.patchValue({
-        ip: 'UNOPS Field Office',
-        projectName: projectDto.id,
-        typeOfMeeting: subprojectDto.typeOfMeeting,
-        meetingDate: subprojectDto.meetingDate,
-        targetBeneficiaries: projectDto.targetBeneficiary,
-        projectCost: projectDto.estimatedCost,
-        stateName: subprojectDto.stateName,
-        countyName: subprojectDto.countyName,
-        payamName: subprojectDto.payamName,
-        bomaName: subprojectDto.bomaName,
-        paperScreeningStatus: subprojectDto.screeningStatus,
+        projectName: subProjectData.projectId,
+        typeOfMeeting: subProjectData.typeOfMeeting,
+        meetingDate: subProjectData.meetingDate,
+        stateName: subProjectData.stateName,
+        countyName: subProjectData.countyName,
+        payamName: subProjectData.payamName,
+        bomaName: subProjectData.bomaName,
+        paperScreeningStatus: subProjectData.screeningStatus,
       });
 
-      const workActivityControls = activities
-        .filter(activity => activity)
-        .map((activity: any) => {
-          return this.fb.group({
-            name: [activity.workName || ''],
-            code: [activity.workCode || ''],
-            typeOfWork: [activity.areaOfWork || ''],
-            secondaryActivity: [activity.workActivity || ''],
-            estimatedManpower: [activity.estManPower || 0],
-            estimatedManDays: [activity.estDay || 0],
-            estimatedCostOfEquipment: [activity.equipmentCost || 0],
-            workPhoto: [null],
-            workPhotoName: [''],
-            equipmentPhoto: [null],
-            equipmentPhotoName: [''],
-            startCoordinate: [activity.startCoordinate || ''],
-            endCoordinate: [activity.endCoordinate || ''],
-        
-            workStartDate: [activity.estStartAt || ''],
-            workEndDate: [activity.estEndAt || ''],
-            estimatedCost: [activity.estCost || 0],
-            estimatedSkillLabour: [activity.estSkilledLabourDay || 0],
-          });
-        });
+      if (subProjectData.stateName) {
+        this.onStateChange({ target: { value: subProjectData.stateName } } as any);
+      }
+      if (subProjectData.countyName) {
+        this.onCountyChange({ target: { value: subProjectData.countyName } } as any);
+      }
+      if (subProjectData.payamName) {
+        this.onPayamChange({ target: { value: subProjectData.payamName } } as any);
+      }
 
-      this.proposalForm.setControl('workActivities', this.fb.array(workActivityControls));
+
+
+      if (!activities || !Array.isArray(activities) || activities.length === 0) {
+        this.workActivities.clear();
+      } else {
+        // Clear existing activities to repopulate
+        this.workActivities.clear();
+
+        for (let i = 0; i < activities.length; i++) {
+          const activity = activities[i];
+          if (activity) {
+            // Add a new form group for each activity
+            this.addWorkActivity();
+            const currentActivityControl = this.workActivities.at(i);
+
+            // Patch values for the current activity
+            currentActivityControl.patchValue({
+              name: activity.workName || '',
+              code: activity.workCode || '',
+              typeOfWork: activity.areaOfWork || '',
+              secondaryActivity: activity.workActivity || '',
+              estimatedManpower: activity.estManPower || 0,
+              estimatedManDays: activity.estDay || 0,
+              estimatedCostOfEquipment: activity.equipmentCost || 0,
+              workStartDate: activity.estStartAt || '',
+              workEndDate: activity.estEndAt || '',
+              estimatedMaterialCost: activity.materialCost || 0,
+              estimatedSkillLabour: activity.estSkilledLabourDay || 0,
+              estimatedCost: activity.estCost || 0,
+            });
+
+            // If typeOfWork exists, load its secondary activities
+            if (activity.areaOfWork) {
+              await this.onTypeOfWorkChange({ target: { value: activity.areaOfWork } } as any, i);
+            }
+          }
+        }
+      }
 
       this.cdr.detectChanges();
 
@@ -172,11 +235,12 @@ export class SubProject implements OnInit {
       equipmentPhotoName: [''],
       startCoordinate: [''],
       endCoordinate: [''],
-  
+
       workStartDate: [''],
       workEndDate: [''],
       estimatedCost: [0],
       estimatedSkillLabour: [0],
+      estimatedMaterialCost: [0],
     });
   }
 
@@ -218,11 +282,13 @@ export class SubProject implements OnInit {
   }
 
   getWorkPhotoName(index: number): string {
-    return this.workActivities.at(index).get('workPhotoName')?.value || '';
+    const activity = this.workActivities.at(index);
+    return activity ? activity.get('workPhotoName')?.value || '' : '';
   }
 
   getEquipmentPhotoName(index: number): string {
-    return this.workActivities.at(index).get('equipmentPhotoName')?.value || '';
+    const activity = this.workActivities.at(index);
+    return activity ? activity.get('equipmentPhotoName')?.value || '' : '';
   }
 
   get materialsPhotoName(): string {
@@ -373,7 +439,7 @@ export class SubProject implements OnInit {
 
   async loadAvailableProjects(): Promise<void> {
     try {
-      const res = await this.api.GET('api/project/get?page=0&size=100');
+      const res = await this.api.GET('api/project/get?page=0&size=100',);
       if (res.data && Array.isArray(res.data.content)) {
         const projects = res.data.content.map((project: any) => ({
           id: Number(project.id),
@@ -390,11 +456,38 @@ export class SubProject implements OnInit {
     }
   }
 
-  loadAvailableTypesOfWork(): void {
-    this.availableTypesOfWork = ['Construction', 'Maintenance', 'Renovation'];
+  async loadAvailableTypesOfWork(): Promise<void> {
+    try {
+      this.availableTypesOfWork = await this.lookupService.getOrFetchAreaOfWorkList();
+    } catch (err) {
+      console.error('Failed to load available types of work', err);
+    }
   }
 
-  loadAvailableActivities(): void {
-    this.availableActivities = Array.from({ length: 10 }, (_, i) => `Activity ${i + 1}`);
+  async onTypeOfWorkChange(event: Event, index: number): Promise<void> {
+    const typeOfWorkName = (event.target as HTMLSelectElement).value;
+    console.log(`onTypeOfWorkChange called for index ${index} with typeOfWorkName: ${typeOfWorkName}`);
+    if (!typeOfWorkName) {
+      this.availableActivities.set(typeOfWorkName, []);
+      return;
+    }
+    try {
+      const areaOfWorkId = await this.lookupService.getAreaOfWorkIdByName(typeOfWorkName);
+      if (areaOfWorkId) {
+        const activities = await this.lookupService.getWorkActivityListByAreaOfWorkId(areaOfWorkId);
+        this.availableActivities.set(typeOfWorkName, activities);
+        console.log(`availableActivities map updated for ${typeOfWorkName}:`, activities);
+        this.cdr.detectChanges();
+      }
+    } catch (err) {
+      console.error('Failed to load available activities', err);
+    }
   }
+
+  isNgForBeingEvaluated(): boolean {
+    console.log('isNgForBeingEvaluated is being called');
+    return true;
+  }
+
+
 }
