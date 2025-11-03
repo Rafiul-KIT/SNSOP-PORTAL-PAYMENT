@@ -53,8 +53,9 @@ export class SubProject implements OnInit {
       bomaName: [''],
       workActivities: this.fb.array([this.createWorkActivity()]),
       materialsPhoto: [null], // Added
-      materialsPhotoName: [''], // Added
-    });
+            materialsPhotoName: [''], // Added
+            paperScreeningStatus: [''],
+          });
   }
 
   ngOnInit(): void {
@@ -90,7 +91,7 @@ export class SubProject implements OnInit {
       if (projectDto.id && projectDto.projectName) {
         const projectExists = this.availableProjects.some(p => p.id === projectDto.id);
         if (!projectExists) {
-            this.availableProjects.push({ id: projectDto.id, name: projectDto.projectName });
+            this.availableProjects.push({ id: Number(projectDto.id), name: String(projectDto.projectName) });
         }
       }
       activities.forEach(activity => {
@@ -113,6 +114,7 @@ export class SubProject implements OnInit {
         countyName: subprojectDto.countyName,
         payamName: subprojectDto.payamName,
         bomaName: subprojectDto.bomaName,
+        paperScreeningStatus: subprojectDto.screeningStatus,
       });
 
       const workActivityControls = activities
@@ -132,7 +134,7 @@ export class SubProject implements OnInit {
             equipmentPhotoName: [''],
             startCoordinate: [activity.startCoordinate || ''],
             endCoordinate: [activity.endCoordinate || ''],
-            paperScreeningStatus: [activity.paperScreeningStatus || ''],
+        
             workStartDate: [activity.estStartAt || ''],
             workEndDate: [activity.estEndAt || ''],
             estimatedCost: [activity.estCost || 0],
@@ -170,7 +172,7 @@ export class SubProject implements OnInit {
       equipmentPhotoName: [''],
       startCoordinate: [''],
       endCoordinate: [''],
-      paperScreeningStatus: [''],
+  
       workStartDate: [''],
       workEndDate: [''],
       estimatedCost: [0],
@@ -272,7 +274,7 @@ export class SubProject implements OnInit {
         bomaName: formValue.bomaName,
         typeOfMeeting: formValue.typeOfMeeting,
         meetingDate: formValue.meetingDate,
-        screeningStatus: 'Pending',
+        screeningStatus: formValue.screeningStatus,
         status: 'true',
       };
 
@@ -373,10 +375,13 @@ export class SubProject implements OnInit {
     try {
       const res = await this.api.GET('api/project/get?page=0&size=100');
       if (res.data && Array.isArray(res.data.content)) {
-        const projects = res.data.content.map((project: any) => ({ id: project.id, name: project.projectName }));
+        const projects = res.data.content.map((project: any) => ({
+          id: Number(project.id),
+          name: String(project.projectName)
+        }));
         const projectMap = new Map<number, string>();
-        this.availableProjects.forEach(p => projectMap.set(p.id, p.name));
-        projects.forEach(p => projectMap.set(p.id, p.name));
+        this.availableProjects.forEach((p: { id: number; name: string }) => projectMap.set(p.id, p.name));
+        projects.forEach((p: { id: number; name: string }) => projectMap.set(p.id, p.name));
         this.availableProjects = Array.from(projectMap, ([id, name]) => ({ id, name }));
       }
     } catch (err) {

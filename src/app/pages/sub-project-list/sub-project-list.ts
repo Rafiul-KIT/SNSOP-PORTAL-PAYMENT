@@ -166,7 +166,7 @@ export class SubProjectList implements OnInit {
 
   initBreadcrumb() {
     this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
-    this.breadcrumbItems = [{ label: 'Work Approval' }];
+    this.breadcrumbItems = [{ label: 'Sub-Project List' }];
   }
 
   // ---------- dependent dropdowns ----------
