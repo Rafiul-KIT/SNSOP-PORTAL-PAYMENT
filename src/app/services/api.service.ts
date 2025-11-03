@@ -62,6 +62,18 @@ export class ApiService {
       }
     );
   }
+getUserRole(): number | null {
+  const token = this.cookieService.get(this.ACCESS_TOKEN);
+  if (!token) return null;
+
+  try {
+    const decoded: any = jwtDecode(token);
+    return decoded?.roleId || null;
+  } catch (err) {
+    console.error('Invalid token:', err);
+    return null;
+  }
+}
 
   logout = () => {
     const host = (() => {
