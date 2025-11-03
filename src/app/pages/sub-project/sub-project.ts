@@ -28,7 +28,9 @@ export class SubProject implements OnInit {
   breadcrumbHome: any;
   subprojectId: string | null = null;
 
+  availableProjects: { id: number; name: string }[] = [];
   availableActivities: string[] = [];
+  availableTypesOfWork: string[] = [];
   workActivitiesList: { id: string; name: string }[] = [];
 
   constructor(
@@ -63,7 +65,9 @@ export class SubProject implements OnInit {
     if (this.subprojectId) {
       this.loadSubProject(this.subprojectId);
     }
+    this.loadAvailableProjects();
     this.loadAvailableActivities();
+    this.loadAvailableTypesOfWork();
   }
 
   async loadSubProject(id: string) {
@@ -71,13 +75,49 @@ export class SubProject implements OnInit {
     try {
       const res = await this.api.GET(`/api/subproject/work-details/get?subprojectId=${id}`);
       const activities = res.data.content;
-      if (activities && activities.length > 0) {
-        const firstActivity = activities[0];
-        this.proposalForm.patchValue({
-          ip: firstActivity.areaOfWork,
-          projectCost: firstActivity.estCost,
-        });
-        const workActivityControls = activities.map((activity: any) => {
+
+      if (!activities || !Array.isArray(activities) || activities.length === 0) {
+        this.workActivities.clear();
+        this.cdr.detectChanges();
+        this.isLoading = false;
+        return;
+      }
+
+      const firstActivity = activities[0];
+      const projectDto = firstActivity.projectDto || {};
+      const subprojectDto = firstActivity.subprojectDto || {};
+
+      if (projectDto.id && projectDto.projectName) {
+        const projectExists = this.availableProjects.some(p => p.id === projectDto.id);
+        if (!projectExists) {
+            this.availableProjects.push({ id: projectDto.id, name: projectDto.projectName });
+        }
+      }
+      activities.forEach(activity => {
+        if (activity && activity.areaOfWork && !this.availableTypesOfWork.includes(activity.areaOfWork)) {
+          this.availableTypesOfWork.push(activity.areaOfWork);
+        }
+        if (activity && activity.workActivity && !this.availableActivities.includes(activity.workActivity)) {
+          this.availableActivities.push(activity.workActivity);
+        }
+      });
+
+      this.proposalForm.patchValue({
+        ip: 'UNOPS Field Office',
+        projectName: projectDto.id,
+        typeOfMeeting: subprojectDto.typeOfMeeting,
+        meetingDate: subprojectDto.meetingDate,
+        targetBeneficiaries: projectDto.targetBeneficiary,
+        projectCost: projectDto.estimatedCost,
+        stateName: subprojectDto.stateName,
+        countyName: subprojectDto.countyName,
+        payamName: subprojectDto.payamName,
+        bomaName: subprojectDto.bomaName,
+      });
+
+      const workActivityControls = activities
+        .filter(activity => activity)
+        .map((activity: any) => {
           return this.fb.group({
             name: [activity.workName || ''],
             code: [activity.workCode || ''],
@@ -99,10 +139,11 @@ export class SubProject implements OnInit {
             estimatedSkillLabour: [activity.estSkilledLabourDay || 0],
           });
         });
-        this.workActivities.clear();
-        workActivityControls.forEach((control: FormGroup) => this.workActivities.push(control));
-        this.cdr.detectChanges();
-      }
+
+      this.proposalForm.setControl('workActivities', this.fb.array(workActivityControls));
+
+      this.cdr.detectChanges();
+
     } catch (err) {
       console.error('Failed to load sub-project', err);
     } finally {
@@ -198,9 +239,10 @@ export class SubProject implements OnInit {
     try {
       const formValue = this.proposalForm.value;
 
-      // --- ID Lookups with validation ---
-      const projectId = await this.lookupService.getProjectIdByName(formValue.projectName);
-      if (projectId === null) throw new Error(`Project '${formValue.projectName}' not found.`);
+      const projectId = formValue.projectName;
+      if (projectId === null || projectId === undefined) throw new Error(`Project not selected.`);
+      const selectedProject = this.availableProjects.find(p => p.id === projectId);
+      const projectName = selectedProject ? selectedProject.name : '';
 
       const stateId = await this.lookupService.getStateIdByName(formValue.stateName);
       if (stateId === null) throw new Error(`State '${formValue.stateName}' not found.`);
@@ -219,7 +261,7 @@ export class SubProject implements OnInit {
         id: this.subprojectId ? parseInt(this.subprojectId, 10) : 0,
         workCode: `W-CODE-${Date.now()}`,
         projectId: projectId,
-        projectName: formValue.projectName,
+        projectName: projectName,
         stateId: stateId,
         stateName: formValue.stateName,
         countyId: countyId,
@@ -325,6 +367,26 @@ export class SubProject implements OnInit {
 
   trackByIndex(index: number): number {
     return index;
+  }
+
+  async loadAvailableProjects(): Promise<void> {
+    try {
+      const res = await this.api.GET('api/project/get?page=0&size=100');
+      if (res.data && Array.isArray(res.data.content)) {
+        const projects = res.data.content.map((project: any) => ({ id: project.id, name: project.projectName }));
+        const projectMap = new Map<number, string>();
+        this.availableProjects.forEach(p => projectMap.set(p.id, p.name));
+        projects.forEach(p => projectMap.set(p.id, p.name));
+        this.availableProjects = Array.from(projectMap, ([id, name]) => ({ id, name }));
+      }
+    } catch (err) {
+      console.error('Failed to load available projects', err);
+      this.availableProjects = [{id: 1, name: 'Project Alpha'}, {id: 2, name: 'Project Beta'}];
+    }
+  }
+
+  loadAvailableTypesOfWork(): void {
+    this.availableTypesOfWork = ['Construction', 'Maintenance', 'Renovation'];
   }
 
   loadAvailableActivities(): void {

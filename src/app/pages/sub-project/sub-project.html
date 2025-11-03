@@ -46,7 +46,7 @@
                                 <div class="col-md-6 col-lg-3">
                                     <label class="form-label text-secondary fw-semibold">IP</label>
                                     <select class="form-select" formControlName="ip">
-                                        <option value="">UNDP Field Office</option>
+                                        <option value="UNOPS Field Office">UNOPS Field Office</option>
                                         <option value="office1">Field Office 1</option>
                                         <option value="office2">Field Office 2</option>
                                     </select>
@@ -56,8 +56,7 @@
                                     <label class="form-label text-secondary fw-semibold">Project Name</label>
                                     <select class="form-select" formControlName="projectName">
                                         <option value="">--Select--</option>
-                                        <option value="project1">Project Alpha</option>
-                                        <option value="project2">Project Beta</option>
+                                        <option *ngFor="let project of availableProjects" [value]="project.id">{{ project.name }}</option>
                                     </select>
                                 </div>
 
@@ -77,7 +76,7 @@
 
                               <div class="col-md-6">
                                 <label class="form-label text-secondary fw-semibold">Target Beneficiaries</label>
-                                <input type="number" class="form-control" formControlName="targetbeneficiaries" />
+                                <input type="number" class="form-control" formControlName="targetBeneficiaries" />
                               </div>
 
                               <div class="col-md-6">
@@ -192,9 +191,7 @@
                                   <label class="form-label text-secondary fw-semibold">Type of Work</label>
                                   <select class="form-select" formControlName="typeOfWork">
                                     <option value="">--Select--</option>
-                                    <option value="construction">Construction</option>
-                                    <option value="maintenance">Maintenance</option>
-                                    <option value="renovation">Renovation</option>
+                                    <option *ngFor="let type of availableTypesOfWork" [value]="type">{{ type }}</option>
                                   </select>
                                 </div>
 
