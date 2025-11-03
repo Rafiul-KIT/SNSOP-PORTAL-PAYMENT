@@ -22,7 +22,7 @@ export const StatusEnum = [
 
 // Define Enum for Screening Status
 export const ScreeningStatusEnum = [
- 
+
   { id: '0', value: 'Rejected', label: 'Rejected' },
    { id: '1', value: 'Accepted', label: 'Accepted' }
 ];
@@ -84,15 +84,18 @@ export class LookupService {
   private bomaList: LookupItem[] = [];
   public projectNameDescriptionList: ProjectNameDescription[] = []; // Made public for direct access in work-approval.ts
 
-  constructor(private api: ApiService) { }
+  constructor(private api: ApiService) {
+  }
 
   // ---------- State ----------
   setStateList(states: LookupItem[]) {
     this.stateList = states;
   }
+
   getStateList() {
     return this.stateList;
   }
+
   getStateNameById(stateId: string) {
     const state = this.stateList.find(
       (sl) => String(sl.id) === String(stateId)
@@ -102,7 +105,7 @@ export class LookupService {
 
   getOrFetchStateList(): Promise<LookupItem[]> {
     if (this.stateList.length) return Promise.resolve(this.stateList);
-    return this.fetchLookup({ lookupType: 'STATE', size: -1 }).then((list) => {
+    return this.fetchLookup({lookupType: 'STATE', size: -1}).then((list) => {
       this.setStateList(list);
       return list;
     });
@@ -110,7 +113,7 @@ export class LookupService {
 
   fetchAllCountyList(): Promise<LookupItem[]> {
     if (this.allCountyList.length) return Promise.resolve(this.allCountyList);
-    return this.fetchLookup({ lookupType: 'COUNTY', size: -1 }).then((list) => {
+    return this.fetchLookup({lookupType: 'COUNTY', size: -1}).then((list) => {
       this.countyList = list;
       this.allCountyList = list;
       return list;
@@ -119,7 +122,7 @@ export class LookupService {
 
   fetchAllPayamList(): Promise<LookupItem[]> {
     if (this.allPayamList.length) return Promise.resolve(this.allPayamList);
-    return this.fetchLookup({ lookupType: 'PAYAM', size: -1 }).then((list) => {
+    return this.fetchLookup({lookupType: 'PAYAM', size: -1}).then((list) => {
       this.payamList = list;
       this.allPayamList = list;
       return list;
@@ -128,7 +131,7 @@ export class LookupService {
 
   fetchAllBomaList(): Promise<LookupItem[]> {
     if (this.allBomaList.length) return Promise.resolve(this.allBomaList);
-    return this.fetchLookup({ lookupType: 'BOMA', size: -1 }).then((list) => {
+    return this.fetchLookup({lookupType: 'BOMA', size: -1}).then((list) => {
       this.bomaList = list;
       this.allBomaList = list;
       return list;
@@ -149,9 +152,11 @@ export class LookupService {
   setCountyList(counties: LookupItem[]) {
     this.countyList = counties;
   }
+
   getCountyList() {
     return this.countyList;
   }
+
   getCountyNameById(countyId: string) {
     const id = String(countyId);
     const fromAll = this.allCountyList.find((x) => String(x.id) === id);
@@ -159,6 +164,7 @@ export class LookupService {
     const fromFiltered = this.countyList.find((x) => String(x.id) === id);
     return fromFiltered ? fromFiltered.name : '--';
   }
+
   getCountyListByStateId(stateId: string): Promise<LookupItem[]> {
     return this.fetchLookup({
       lookupType: 'COUNTY',
@@ -174,9 +180,11 @@ export class LookupService {
   setPayamList(payams: LookupItem[]) {
     this.payamList = payams;
   }
+
   getPayamList() {
     return this.payamList;
   }
+
   getPayamNameById(payamId: string) {
     const id = String(payamId);
     const fromAll = this.allPayamList.find((x) => String(x.id) === id);
@@ -200,9 +208,11 @@ export class LookupService {
   setBomaList(bomas: LookupItem[]) {
     this.bomaList = bomas;
   }
+
   getBomaList() {
     return this.bomaList;
   }
+
   getBomaNameById(bomaId: string) {
     const id = String(bomaId);
     const fromAll = this.allBomaList.find((x) => String(x.id) === id);
@@ -224,36 +234,35 @@ export class LookupService {
 
   // ---------- Project Name/Description ----------
 // lookup.service.ts
-async getProjectNameDescription(): Promise<ProjectNameDescription[] | []> {
-  // cache hit
-  if (this.projectNameDescriptionList.length) return this.projectNameDescriptionList;
+  async getProjectNameDescription(): Promise<ProjectNameDescription[] | []> {
+    // cache hit
+    if (this.projectNameDescriptionList.length) return this.projectNameDescriptionList;
 
-  try {
-    // if your API is paged, request enough rows; otherwise drop the query
-    const res = await this.api.GET('api/project/get?page=0&size=100');
-    const payload = res?.data ?? res;
+    try {
+      // if your API is paged, request enough rows; otherwise drop the query
+      const res = await this.api.GET('api/project/get?page=0&size=100');
+      const payload = res?.data ?? res;
 
-    // handle both {code:200, content:[...]} and plain {content:[...]}
-    const codeOk = payload?.code === 0 || payload?.code === 200 || payload?.status === 'OK';
-    const content = Array.isArray(payload?.content) ? payload.content : [];
+      // handle both {code:200, content:[...]} and plain {content:[...]}
+      const codeOk = payload?.code === 0 || payload?.code === 200 || payload?.status === 'OK';
+      const content = Array.isArray(payload?.content) ? payload.content : [];
 
-    if (!codeOk && !content.length) return [];
+      if (!codeOk && !content.length) return [];
 
-    // keep id as number for backend sanity
-    this.projectNameDescriptionList = content.map((it: any) => ({
-      id: Number(it.id),
-      projectName: it.projectName,
-      description: it.description ?? it.projectDescription ?? null
-    }));
+      // keep id as number for backend sanity
+      this.projectNameDescriptionList = content.map((it: any) => ({
+        id: Number(it.id),
+        projectName: it.projectName,
+        description: it.description ?? it.projectDescription ?? null
+      }));
 
 
-    return this.projectNameDescriptionList;
-  } catch (e) {
-    console.error('getProjectNameDescription failed:', e);
-    return [];
+      return this.projectNameDescriptionList;
+    } catch (e) {
+      console.error('getProjectNameDescription failed:', e);
+      return [];
+    }
   }
-}
-
 
 
   // ---------- Central fetcher ----------
@@ -274,28 +283,28 @@ async getProjectNameDescription(): Promise<ProjectNameDescription[] | []> {
 
   getGenderList(): LookupItem[] {
     return [
-      { id: 'MALE', name: 'Male' },
-      { id: 'FEMALE', name: 'Female' },
+      {id: 'MALE', name: 'Male'},
+      {id: 'FEMALE', name: 'Female'},
     ];
   }
 
   getGenderListbyId(): LookupItem[] {
     return [
-      { id: '0', name: 'Male' },
-      { id: '1', name: 'Female' },
+      {id: '0', name: 'Male'},
+      {id: '1', name: 'Female'},
     ];
   }
 
   getRegistrationPhaseList(): LookupItem[] {
     return [
-      { id: 'PARENT', name: 'Parent' },
-      { id: 'AF', name: 'AF' },
+      {id: 'PARENT', name: 'Parent'},
+      {id: 'AF', name: 'AF'},
     ];
   }
 
   SelectionCriteriaEnum = [
-    { id: 0, value: 'LIPW', label: 'Public Works' },
-    { id: 1, value: 'DIS', label: 'Direct Income Support' },
+    {id: 0, value: 'LIPW', label: 'Public Works'},
+    {id: 1, value: 'DIS', label: 'Direct Income Support'},
   ];
   getSelectionCriteriaEnum = () => {
     return this.SelectionCriteriaEnum;
@@ -312,17 +321,17 @@ async getProjectNameDescription(): Promise<ProjectNameDescription[] | []> {
     }
   };
   HouseHoldIncomeSourceEnum = [
-    { id: 0, value: 'NONE', label: "None" },
-    { id: 1, value: 'SELLING_OF_FARM', label: "Selling of farm" },
-    { id: 2, value: 'SELLING_OF_NON_FARM', label: "Selling of non farm" },
-    { id: 3, value: 'CAUSAL_LABOUR', label: "Casual Labour" },
-    { id: 4, value: 'FORMAL_EMPLOYMENT', label: "Formal Employement" },
-    { id: 5, value: 'REMITTANCES', label: "Remittances" },
-    { id: 6, value: 'GIFT', label: "Gift" },
-    { id: 7, value: 'FROM_GOVT', label: "From Govt." },
-    { id: 8, value: 'FROM_NGO', label: "From NGO" },
-    { id: 9, value: 'PENSION', label: "Pension" },
-    { id: 10, value: 'OTHER', label: "Other" },
+    {id: 0, value: 'NONE', label: "None"},
+    {id: 1, value: 'SELLING_OF_FARM', label: "Selling of farm"},
+    {id: 2, value: 'SELLING_OF_NON_FARM', label: "Selling of non farm"},
+    {id: 3, value: 'CAUSAL_LABOUR', label: "Casual Labour"},
+    {id: 4, value: 'FORMAL_EMPLOYMENT', label: "Formal Employement"},
+    {id: 5, value: 'REMITTANCES', label: "Remittances"},
+    {id: 6, value: 'GIFT', label: "Gift"},
+    {id: 7, value: 'FROM_GOVT', label: "From Govt."},
+    {id: 8, value: 'FROM_NGO', label: "From NGO"},
+    {id: 9, value: 'PENSION', label: "Pension"},
+    {id: 10, value: 'OTHER', label: "Other"},
   ];
   getHouseHoldIncomeSourceEnum = () => {
     return this.HouseHoldIncomeSourceEnum;
@@ -336,8 +345,8 @@ async getProjectNameDescription(): Promise<ProjectNameDescription[] | []> {
     }
   }
   GenderEnum = [
-    { id: 0, value: 'MALE', label: "Male" },
-    { id: 1, value: 'FEMALE', label: "Female" }
+    {id: 0, value: 'MALE', label: "Male"},
+    {id: 1, value: 'FEMALE', label: "Female"}
   ];
   getGenderEnum = () => {
     return this.GenderEnum;
@@ -351,8 +360,8 @@ async getProjectNameDescription(): Promise<ProjectNameDescription[] | []> {
     }
   }
   RegistrationPhaseEnum = [
-    { id: 0, value: 'PARENT', label: "PP (Parent Project)" },
-    { id: 1, value: 'AF', label: "AF (Additional Financing)" }
+    {id: 0, value: 'PARENT', label: "PP (Parent Project)"},
+    {id: 1, value: 'AF', label: "AF (Additional Financing)"}
   ];
   getRegistrationPhaseEnum = () => {
     return this.RegistrationPhaseEnum;
@@ -402,7 +411,7 @@ async getProjectNameDescription(): Promise<ProjectNameDescription[] | []> {
       value: 'REASON_6',
       label: 'All eligible household members have already been nominated',
     },
-    { id: 7, value: 'REASON_OTHER', label: 'Other' },
+    {id: 7, value: 'REASON_OTHER', label: 'Other'},
   ];
   getNotParticipationReasonEnum = () => {
     return this.NotParticipationReasonEnum;
@@ -535,18 +544,18 @@ async getProjectNameDescription(): Promise<ProjectNameDescription[] | []> {
   };
 
   RelationshipEnum = [
-    { id: 1, value: 'HOUSEHOLD_HEAD', label: 'Household Head' },
-    { id: 2, value: 'SPOUSE', label: 'Spouse' },
-    { id: 3, value: 'SON_DAUGHTER', label: 'Son/Daughter' },
-    { id: 4, value: 'SON_DAUGHTER_IN_LAW', label: 'Son/daughter in law' },
-    { id: 5, value: 'GRANDCHILD', label: 'Grandchild' },
-    { id: 6, value: 'PARENT', label: 'Parent' },
-    { id: 7, value: 'PARENT_IN_LAW', label: 'Parent-in-law' },
-    { id: 8, value: 'SIBLING_IN_LAW', label: 'Sibling-in-law' },
-    { id: 9, value: 'SIBLING', label: 'Sibling' },
-    { id: 10, value: 'OTHER', label: 'Other' },
-    { id: 11, value: 'DOMESTIC_WORKER', label: 'Domestic Worker' },
-    { id: 12, value: 'NO_RELATION', label: 'No Relation' },
+    {id: 1, value: 'HOUSEHOLD_HEAD', label: 'Household Head'},
+    {id: 2, value: 'SPOUSE', label: 'Spouse'},
+    {id: 3, value: 'SON_DAUGHTER', label: 'Son/Daughter'},
+    {id: 4, value: 'SON_DAUGHTER_IN_LAW', label: 'Son/daughter in law'},
+    {id: 5, value: 'GRANDCHILD', label: 'Grandchild'},
+    {id: 6, value: 'PARENT', label: 'Parent'},
+    {id: 7, value: 'PARENT_IN_LAW', label: 'Parent-in-law'},
+    {id: 8, value: 'SIBLING_IN_LAW', label: 'Sibling-in-law'},
+    {id: 9, value: 'SIBLING', label: 'Sibling'},
+    {id: 10, value: 'OTHER', label: 'Other'},
+    {id: 11, value: 'DOMESTIC_WORKER', label: 'Domestic Worker'},
+    {id: 12, value: 'NO_RELATION', label: 'No Relation'},
   ];
   getRelationshipEnum = () => {
     return this.RelationshipEnum;
@@ -563,11 +572,11 @@ async getProjectNameDescription(): Promise<ProjectNameDescription[] | []> {
   };
 
   MaritalStatusEnum = [
-    { id: 0, value: 'SINGLE', label: 'Single' },
-    { id: 1, value: 'MARRIED', label: 'Married' },
-    { id: 2, value: 'WIDOW', label: 'Widow' },
-    { id: 3, value: 'SEPARATED', label: 'Separated' },
-    { id: 4, value: 'DIVORCE', label: 'Divorce' },
+    {id: 0, value: 'SINGLE', label: 'Single'},
+    {id: 1, value: 'MARRIED', label: 'Married'},
+    {id: 2, value: 'WIDOW', label: 'Widow'},
+    {id: 3, value: 'SEPARATED', label: 'Separated'},
+    {id: 4, value: 'DIVORCE', label: 'Divorce'},
   ];
   getMaritalStatusEnum = () => {
     return this.MaritalStatusEnum;
@@ -584,10 +593,10 @@ async getProjectNameDescription(): Promise<ProjectNameDescription[] | []> {
   };
 
   LegalStatusEnum = [
-    { id: 0, value: 'HOST', label: 'Host' },
-    { id: 1, value: 'RETURNEE', label: 'Returnee' },
-    { id: 2, value: 'REFUGEE', label: 'Refugee' },
-    { id: 3, value: 'IDP', label: 'IDP' },
+    {id: 0, value: 'HOST', label: 'Host'},
+    {id: 1, value: 'RETURNEE', label: 'Returnee'},
+    {id: 2, value: 'REFUGEE', label: 'Refugee'},
+    {id: 3, value: 'IDP', label: 'IDP'},
   ];
   getLegalStatusEnum = () => {
     return this.LegalStatusEnum;
@@ -604,18 +613,18 @@ async getProjectNameDescription(): Promise<ProjectNameDescription[] | []> {
   };
 
   BiometricTypeEnum = [
-    { id: 1, value: 'PHOTO', label: 'Photo' },
-    { id: 2, value: 'LT', label: 'Left Thumb' },
-    { id: 3, value: 'LI', label: 'Left Index' },
-    { id: 4, value: 'LM', label: 'Left Middle' },
-    { id: 5, value: 'LR', label: 'Left Ring' },
-    { id: 6, value: 'LL', label: 'Left Little' },
-    { id: 7, value: 'RT', label: 'Right Thumb' },
-    { id: 8, value: 'RI', label: 'Right Index' },
-    { id: 9, value: 'RM', label: 'Right Middle' },
-    { id: 10, value: 'RR', label: 'Right Ring' },
-    { id: 11, value: 'RL', label: 'Right Little' },
-    { id: 12, value: 'NA', label: 'NA' },
+    {id: 1, value: 'PHOTO', label: 'Photo'},
+    {id: 2, value: 'LT', label: 'Left Thumb'},
+    {id: 3, value: 'LI', label: 'Left Index'},
+    {id: 4, value: 'LM', label: 'Left Middle'},
+    {id: 5, value: 'LR', label: 'Left Ring'},
+    {id: 6, value: 'LL', label: 'Left Little'},
+    {id: 7, value: 'RT', label: 'Right Thumb'},
+    {id: 8, value: 'RI', label: 'Right Index'},
+    {id: 9, value: 'RM', label: 'Right Middle'},
+    {id: 10, value: 'RR', label: 'Right Ring'},
+    {id: 11, value: 'RL', label: 'Right Little'},
+    {id: 12, value: 'NA', label: 'NA'},
   ];
   getBiometricTypeEnum = () => {
     return this.BiometricTypeEnum;
@@ -632,9 +641,9 @@ async getProjectNameDescription(): Promise<ProjectNameDescription[] | []> {
   };
 
   BiometricUserTypeEnum = [
-    { id: 1, value: 'BENEFICIARY', label: 'BENEFICIARY' },
-    { id: 2, value: 'NOMINEE', label: 'NOMINEE' },
-    { id: 3, value: 'ALTERNATE', label: 'ALTERNATE' },
+    {id: 1, value: 'BENEFICIARY', label: 'BENEFICIARY'},
+    {id: 2, value: 'NOMINEE', label: 'NOMINEE'},
+    {id: 3, value: 'ALTERNATE', label: 'ALTERNATE'},
   ];
   getBiometricUserTypeEnum = () => {
     return this.BiometricUserTypeEnum;
@@ -651,10 +660,10 @@ async getProjectNameDescription(): Promise<ProjectNameDescription[] | []> {
   };
 
   CurrencyEnum = [
-    { id: 0, value: 'SUDANESE_POUND', label: 'SDG' },
-    { id: 1, value: 'USD', label: 'USD' },
-    { id: 1, value: 'POUND', label: 'POUND' },
-    { id: 1, value: 'EURO', label: 'EURO' },
+    {id: 0, value: 'SUDANESE_POUND', label: 'SDG'},
+    {id: 1, value: 'USD', label: 'USD'},
+    {id: 1, value: 'POUND', label: 'POUND'},
+    {id: 1, value: 'EURO', label: 'EURO'},
   ];
   getCurrencyEnum = () => {
     return this.CurrencyEnum;
@@ -669,12 +678,12 @@ async getProjectNameDescription(): Promise<ProjectNameDescription[] | []> {
   };
 
   DocumentTypeEnum = [
-    { id: 0, value: 'PASSPORT', label: 'Passport' },
-    { id: 1, value: 'NATIONAL_ID', label: 'National Id' },
-    { id: 2, value: 'OTHER', label: 'Other' },
-    { id: 3, value: 'NONE', label: 'None' },
-    { id: 4, value: 'REFUGEE_RATION_CARD', label: 'Refugee Ration Card' },
-    { id: 5, value: 'REFUGEE_ID_CARD', label: 'Refugee Id Card' },
+    {id: 0, value: 'PASSPORT', label: 'Passport'},
+    {id: 1, value: 'NATIONAL_ID', label: 'National Id'},
+    {id: 2, value: 'OTHER', label: 'Other'},
+    {id: 3, value: 'NONE', label: 'None'},
+    {id: 4, value: 'REFUGEE_RATION_CARD', label: 'Refugee Ration Card'},
+    {id: 5, value: 'REFUGEE_ID_CARD', label: 'Refugee Id Card'},
     {
       id: 6,
       value: 'REFUGEE_PROOF_OF_REGISTRATION',
@@ -696,16 +705,16 @@ async getProjectNameDescription(): Promise<ProjectNameDescription[] | []> {
   };
 
   OccupationEnum = [
-    { id: 1, value: 'FORMAL_JOB', label: 'Formal Job' },
-    { id: 2, value: 'CASUAL_WORK', label: 'Casual Word' },
-    { id: 3, value: 'SELF_EMPLOYED', label: 'Self Employed' },
-    { id: 4, value: 'AGRICULTURAL_WORK', label: 'Agricultural Work' },
-    { id: 5, value: 'HOMEMAKER', label: 'Homemaker' },
-    { id: 6, value: 'UNEMPLOYED', label: 'Unemployed' },
-    { id: 7, value: 'STUDENT', label: 'Student' },
-    { id: 8, value: 'DISABLED', label: 'Disabled' },
-    { id: 9, value: 'RETIRED', label: 'Retired' },
-    { id: 10, value: 'OTHER', label: 'Other' },
+    {id: 1, value: 'FORMAL_JOB', label: 'Formal Job'},
+    {id: 2, value: 'CASUAL_WORK', label: 'Casual Word'},
+    {id: 3, value: 'SELF_EMPLOYED', label: 'Self Employed'},
+    {id: 4, value: 'AGRICULTURAL_WORK', label: 'Agricultural Work'},
+    {id: 5, value: 'HOMEMAKER', label: 'Homemaker'},
+    {id: 6, value: 'UNEMPLOYED', label: 'Unemployed'},
+    {id: 7, value: 'STUDENT', label: 'Student'},
+    {id: 8, value: 'DISABLED', label: 'Disabled'},
+    {id: 9, value: 'RETIRED', label: 'Retired'},
+    {id: 10, value: 'OTHER', label: 'Other'},
   ];
   getOccupationEnum = () => {
     return this.OccupationEnum;
@@ -722,17 +731,17 @@ async getProjectNameDescription(): Promise<ProjectNameDescription[] | []> {
   };
 
   IncomeSourceEnum = [
-    { id: 1, value: 'NONE', label: 'None' },
-    { id: 2, value: 'SELLING_OF_FARM', label: 'Selling of farm' },
-    { id: 3, value: 'SELLING_OF_NON_FARM', label: 'Selling of non farm' },
-    { id: 4, value: 'CAUSAL_LABOUR', label: 'Causal labour' },
-    { id: 5, value: 'FORMAL_EMPLOYMENT', label: 'Formal employment' },
-    { id: 6, value: 'REMITTANCES', label: 'Remittances' },
-    { id: 7, value: 'GIFT', label: 'Gift' },
-    { id: 8, value: 'FROM_GOVT', label: 'From govt' },
-    { id: 9, value: 'FROM_NGO', label: 'From ngo' },
-    { id: 10, value: 'PENSION', label: 'Pension' },
-    { id: 11, value: 'OTHER', label: 'Other' },
+    {id: 1, value: 'NONE', label: 'None'},
+    {id: 2, value: 'SELLING_OF_FARM', label: 'Selling of farm'},
+    {id: 3, value: 'SELLING_OF_NON_FARM', label: 'Selling of non farm'},
+    {id: 4, value: 'CAUSAL_LABOUR', label: 'Causal labour'},
+    {id: 5, value: 'FORMAL_EMPLOYMENT', label: 'Formal employment'},
+    {id: 6, value: 'REMITTANCES', label: 'Remittances'},
+    {id: 7, value: 'GIFT', label: 'Gift'},
+    {id: 8, value: 'FROM_GOVT', label: 'From govt'},
+    {id: 9, value: 'FROM_NGO', label: 'From ngo'},
+    {id: 10, value: 'PENSION', label: 'Pension'},
+    {id: 11, value: 'OTHER', label: 'Other'},
   ];
 
   getIncomeSourceEnum = () => {
@@ -752,7 +761,7 @@ async getProjectNameDescription(): Promise<ProjectNameDescription[] | []> {
 
 
   NomineeOccupationEnum = [
-    { id: 0, value: 'FORMAL_JOB', label: 'Employed in a formal job' },
+    {id: 0, value: 'FORMAL_JOB', label: 'Employed in a formal job'},
     {
       id: 1,
       value: 'CASUAL_WORK_OR_DAILY_WAGE_LABOR',
@@ -778,10 +787,10 @@ async getProjectNameDescription(): Promise<ProjectNameDescription[] | []> {
       value: 'UNEMPLOYED_AND_ACTIVELY_SEEKING_WORK',
       label: 'Unemployed and actively seeking work',
     },
-    { id: 6, value: 'STUDENT', label: 'Student or in education' },
-    { id: 7, value: 'DISABLE', label: 'Disabled or chronically ill' },
-    { id: 8, value: 'RETIRED', label: 'Retired or not working' },
-    { id: 9, value: 'OTHERS', label: 'Other (specify)' },
+    {id: 6, value: 'STUDENT', label: 'Student or in education'},
+    {id: 7, value: 'DISABLE', label: 'Disabled or chronically ill'},
+    {id: 8, value: 'RETIRED', label: 'Retired or not working'},
+    {id: 9, value: 'OTHERS', label: 'Other (specify)'},
   ];
   getNomineeOccupationEnum = () => {
     return this.NomineeOccupationEnum;
@@ -798,12 +807,12 @@ async getProjectNameDescription(): Promise<ProjectNameDescription[] | []> {
   };
 
   NoFingerprintImpressionEnum = [
-    { id: 0, value: 'NoFingerprintImpression', label: 'No Fingerprint' },
-    { id: 1, value: 'NoFinger', label: 'Missing Finger' },
-    { id: 2, value: 'NoLeftHand', label: 'Missing Left Hand' },
-    { id: 3, value: 'NoRightHand', label: 'Missing Right Hand' },
-    { id: 4, value: 'NoBothHand', label: 'Missing Both Hand' },
-    { id: 5, value: 'Other', label: 'Other' },
+    {id: 0, value: 'NoFingerprintImpression', label: 'No Fingerprint'},
+    {id: 1, value: 'NoFinger', label: 'Missing Finger'},
+    {id: 2, value: 'NoLeftHand', label: 'Missing Left Hand'},
+    {id: 3, value: 'NoRightHand', label: 'Missing Right Hand'},
+    {id: 4, value: 'NoBothHand', label: 'Missing Both Hand'},
+    {id: 5, value: 'Other', label: 'Other'},
   ];
   getNoFingerprintImpressionEnum = () => {
     return this.NoFingerprintImpressionEnum;
@@ -820,101 +829,101 @@ async getProjectNameDescription(): Promise<ProjectNameDescription[] | []> {
   };
 
   counyWisePpRegistrationTarget: RegistrationTarget[] = [
-    { "id": "7101", "name": "RENK", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "7102", "name": "MANYO", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "7103", "name": "FASHODA", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "7104", "name": "MELUTH", "TOTAL": 5500, "LIPW": 3850, "DIS": 1650 },
-    { "id": "7105", "name": "MABAN", "TOTAL": 8750, "LIPW": 6125, "DIS": 2625 },
-    { "id": "7106", "name": "MAIWUT", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "7107", "name": "LUAKPINY", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "7108", "name": "LONGOCHUK", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "7109", "name": "ULANG", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "7110", "name": "BAILIET", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "7111", "name": "MALAKAL", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "7112", "name": "PANYIKANG", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "7201", "name": "FANGAK", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "7202", "name": "KHORFLUS", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "7203", "name": "AYOD", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "7204", "name": "DUK", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "7205", "name": "UROR", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "7206", "name": "NYIROL", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "7207", "name": "AKOBO", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "7210", "name": "TWIC EAST", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "7211", "name": "BOR SOUTH", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "7301", "name": "PARIANG", "TOTAL": 8750, "LIPW": 6125, "DIS": 2625 },
-    { "id": "7302", "name": "ABIEMNHOM", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "7303", "name": "MAYOM", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "7304", "name": "RUBKONA", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "7305", "name": "GUIT", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "7306", "name": "KOCH", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "7307", "name": "LEER", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "7308", "name": "MAYENDIT", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "7309", "name": "PANYIJIAR", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "7401", "name": "JAMJANG", "TOTAL": 8750, "LIPW": 6699, "DIS": 2051 },
-    { "id": "8101", "name": "ABYEI", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "8102", "name": "TWIC", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "8103", "name": "GOGRIAL WEST", "TOTAL": 5500, "LIPW": 3850, "DIS": 1650 },
-    { "id": "8104", "name": "GOGRIAL EAST", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "8105", "name": "TONJ NORTH", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "8106", "name": "TONJ EAST", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "8107", "name": "TONJ SOUTH", "TOTAL": 5500, "LIPW": 3850, "DIS": 1650 },
-    { "id": "8201", "name": "AWEIL NORTH", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "8202", "name": "AWEIL EAST", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "8203", "name": "AWEIL SOUTH", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "8204", "name": "AWEIL WEST", "TOTAL": 5500, "LIPW": 3850, "DIS": 1650 },
-    { "id": "8205", "name": "AWEIL CENTRE", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "8301", "name": "RAJA", "TOTAL": 5500, "LIPW": 3850, "DIS": 1650 },
-    { "id": "8302", "name": "JUR RIVER", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "8303", "name": "WAU", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "8401", "name": "CUEIBET", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "8402", "name": "RUMBEK NORTH", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "8403", "name": "RUMBEK CENTRE", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "8404", "name": "WULU", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "8405", "name": "RUMBEK EAST", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "8406", "name": "YIROL WEST", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "8407", "name": "YIROL EAST", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "8408", "name": "AWERIAL", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "9101", "name": "TAMBURA", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "9102", "name": "NAGERO", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "9103", "name": "NZARA", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "9104", "name": "EZO", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "9105", "name": "YAMBIO", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "9106", "name": "IBBA", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "9107", "name": "MARIDI", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "9108", "name": "MVOLO", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "9109", "name": "MUNDRI WEST", "TOTAL": 5500, "LIPW": 3850, "DIS": 1650 },
-    { "id": "9110", "name": "MUNDRI EAST", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "9201", "name": "TEREKEKA", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "9202", "name": "JUBA", "TOTAL": 12500, "LIPW": 8750, "DIS": 3750 },
-    { "id": "9203", "name": "LAINYA", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "9204", "name": "YEI", "TOTAL": 5500, "LIPW": 3850, "DIS": 1650 },
-    { "id": "9205", "name": "MAROBO", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "9206", "name": "KAJO KEJI", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "9301", "name": "TORIT", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "9302", "name": "LOPA/LAFON", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "9303", "name": "KAPOTEA NORTH", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "9304", "name": "KAPOTEA EAST", "TOTAL": 5500, "LIPW": 3850, "DIS": 1650 },
-    { "id": "9305", "name": "KAPOTEA SOUTH", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "9306", "name": "BUWAGI", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "9307", "name": "MAGWI", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "9309", "name": "TORIT MUNICIPAL COUNCIL", "TOTAL": 5500, "LIPW": 3850, "DIS": 1650 },
-    { "id": "9310", "name": "POCHALLA", "TOTAL": 5500, "LIPW": 3850, "DIS": 1650 },
-    { "id": "9311", "name": "PIBOR", "TOTAL": 5500, "LIPW": 3850, "DIS": 1650 },
-    { "id": "9312", "name": "BOR MUNICIPAL", "TOTAL": 5500, "LIPW": 3850, "DIS": 1650 },
-    { "id": "9405", "name": "BUDA", "TOTAL": 0, "LIPW": 0, "DIS": 0 },
-    { "id": "9406", "name": "BUWAGI", "TOTAL": 0, "LIPW": 0, "DIS": 0 }
+    {"id": "7101", "name": "RENK", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "7102", "name": "MANYO", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "7103", "name": "FASHODA", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "7104", "name": "MELUTH", "TOTAL": 5500, "LIPW": 3850, "DIS": 1650},
+    {"id": "7105", "name": "MABAN", "TOTAL": 8750, "LIPW": 6125, "DIS": 2625},
+    {"id": "7106", "name": "MAIWUT", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "7107", "name": "LUAKPINY", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "7108", "name": "LONGOCHUK", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "7109", "name": "ULANG", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "7110", "name": "BAILIET", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "7111", "name": "MALAKAL", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "7112", "name": "PANYIKANG", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "7201", "name": "FANGAK", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "7202", "name": "KHORFLUS", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "7203", "name": "AYOD", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "7204", "name": "DUK", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "7205", "name": "UROR", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "7206", "name": "NYIROL", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "7207", "name": "AKOBO", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "7210", "name": "TWIC EAST", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "7211", "name": "BOR SOUTH", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "7301", "name": "PARIANG", "TOTAL": 8750, "LIPW": 6125, "DIS": 2625},
+    {"id": "7302", "name": "ABIEMNHOM", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "7303", "name": "MAYOM", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "7304", "name": "RUBKONA", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "7305", "name": "GUIT", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "7306", "name": "KOCH", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "7307", "name": "LEER", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "7308", "name": "MAYENDIT", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "7309", "name": "PANYIJIAR", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "7401", "name": "JAMJANG", "TOTAL": 8750, "LIPW": 6699, "DIS": 2051},
+    {"id": "8101", "name": "ABYEI", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "8102", "name": "TWIC", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "8103", "name": "GOGRIAL WEST", "TOTAL": 5500, "LIPW": 3850, "DIS": 1650},
+    {"id": "8104", "name": "GOGRIAL EAST", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "8105", "name": "TONJ NORTH", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "8106", "name": "TONJ EAST", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "8107", "name": "TONJ SOUTH", "TOTAL": 5500, "LIPW": 3850, "DIS": 1650},
+    {"id": "8201", "name": "AWEIL NORTH", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "8202", "name": "AWEIL EAST", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "8203", "name": "AWEIL SOUTH", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "8204", "name": "AWEIL WEST", "TOTAL": 5500, "LIPW": 3850, "DIS": 1650},
+    {"id": "8205", "name": "AWEIL CENTRE", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "8301", "name": "RAJA", "TOTAL": 5500, "LIPW": 3850, "DIS": 1650},
+    {"id": "8302", "name": "JUR RIVER", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "8303", "name": "WAU", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "8401", "name": "CUEIBET", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "8402", "name": "RUMBEK NORTH", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "8403", "name": "RUMBEK CENTRE", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "8404", "name": "WULU", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "8405", "name": "RUMBEK EAST", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "8406", "name": "YIROL WEST", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "8407", "name": "YIROL EAST", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "8408", "name": "AWERIAL", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "9101", "name": "TAMBURA", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "9102", "name": "NAGERO", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "9103", "name": "NZARA", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "9104", "name": "EZO", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "9105", "name": "YAMBIO", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "9106", "name": "IBBA", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "9107", "name": "MARIDI", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "9108", "name": "MVOLO", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "9109", "name": "MUNDRI WEST", "TOTAL": 5500, "LIPW": 3850, "DIS": 1650},
+    {"id": "9110", "name": "MUNDRI EAST", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "9201", "name": "TEREKEKA", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "9202", "name": "JUBA", "TOTAL": 12500, "LIPW": 8750, "DIS": 3750},
+    {"id": "9203", "name": "LAINYA", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "9204", "name": "YEI", "TOTAL": 5500, "LIPW": 3850, "DIS": 1650},
+    {"id": "9205", "name": "MAROBO", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "9206", "name": "KAJO KEJI", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "9301", "name": "TORIT", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "9302", "name": "LOPA/LAFON", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "9303", "name": "KAPOTEA NORTH", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "9304", "name": "KAPOTEA EAST", "TOTAL": 5500, "LIPW": 3850, "DIS": 1650},
+    {"id": "9305", "name": "KAPOTEA SOUTH", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "9306", "name": "BUWAGI", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "9307", "name": "MAGWI", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "9309", "name": "TORIT MUNICIPAL COUNCIL", "TOTAL": 5500, "LIPW": 3850, "DIS": 1650},
+    {"id": "9310", "name": "POCHALLA", "TOTAL": 5500, "LIPW": 3850, "DIS": 1650},
+    {"id": "9311", "name": "PIBOR", "TOTAL": 5500, "LIPW": 3850, "DIS": 1650},
+    {"id": "9312", "name": "BOR MUNICIPAL", "TOTAL": 5500, "LIPW": 3850, "DIS": 1650},
+    {"id": "9405", "name": "BUDA", "TOTAL": 0, "LIPW": 0, "DIS": 0},
+    {"id": "9406", "name": "BUWAGI", "TOTAL": 0, "LIPW": 0, "DIS": 0}
   ];
 
   counyWiseAfRegistrationTarget: RegistrationTarget[] = [
-    { id: "9202", name: "JUBA", TOTAL: 7500, LIPW: 5250, DIS: 2250 },
-    { id: "7105", name: "MABAN", TOTAL: 9600, LIPW: 6720, DIS: 2880 },
-    { id: "7401", name: "JAMJANG", TOTAL: 9600, LIPW: 6720, DIS: 2880 },
-    { id: "9105", name: "YAMBIO", TOTAL: 6400, LIPW: 4480, DIS: 1920 },
-    { id: "8204", name: "AWEIL WEST", TOTAL: 6400, LIPW: 4480, DIS: 1920 },
-    { id: "7304", name: "RUBKONA", TOTAL: 5500, LIPW: 3850, DIS: 1650 },
-    { id: "7307", name: "LEER", TOTAL: 5500, LIPW: 3850, DIS: 1650 },
-    { id: "7111", name: "MALAKAL", TOTAL: 5500, LIPW: 3850, DIS: 1650 },
-    { id: "8403", name: "RUMBEK CENTRE", TOTAL: 5500, LIPW: 3850, DIS: 1650 },
+    {id: "9202", name: "JUBA", TOTAL: 7500, LIPW: 5250, DIS: 2250},
+    {id: "7105", name: "MABAN", TOTAL: 9600, LIPW: 6720, DIS: 2880},
+    {id: "7401", name: "JAMJANG", TOTAL: 9600, LIPW: 6720, DIS: 2880},
+    {id: "9105", name: "YAMBIO", TOTAL: 6400, LIPW: 4480, DIS: 1920},
+    {id: "8204", name: "AWEIL WEST", TOTAL: 6400, LIPW: 4480, DIS: 1920},
+    {id: "7304", name: "RUBKONA", TOTAL: 5500, LIPW: 3850, DIS: 1650},
+    {id: "7307", name: "LEER", TOTAL: 5500, LIPW: 3850, DIS: 1650},
+    {id: "7111", name: "MALAKAL", TOTAL: 5500, LIPW: 3850, DIS: 1650},
+    {id: "8403", name: "RUMBEK CENTRE", TOTAL: 5500, LIPW: 3850, DIS: 1650},
   ];
 
 
@@ -922,7 +931,7 @@ async getProjectNameDescription(): Promise<ProjectNameDescription[] | []> {
     const combinedMap: { [key: string]: RegistrationTarget } = {};
 
     this.counyWisePpRegistrationTarget.forEach((item: RegistrationTarget) => {
-      combinedMap[item.id] = { ...item };
+      combinedMap[item.id] = {...item};
     });
 
     this.counyWiseAfRegistrationTarget.forEach((item: RegistrationTarget) => {
@@ -931,7 +940,7 @@ async getProjectNameDescription(): Promise<ProjectNameDescription[] | []> {
         combinedMap[item.id].LIPW += item.LIPW;
         combinedMap[item.id].DIS += item.DIS;
       } else {
-        combinedMap[item.id] = { ...item };
+        combinedMap[item.id] = {...item};
       }
     });
 
@@ -950,9 +959,9 @@ async getProjectNameDescription(): Promise<ProjectNameDescription[] | []> {
 
 
   MobileMoneyProviderEnum = [
-    { id: 1, value: "MOMO", label: "MOMO" },
-    { id: 2, value: "MGURUSH", label: "MGURUSH" },
-    { id: 3, value: "DIGICASH", label: "DIGICASH" },
+    {id: 1, value: "MOMO", label: "MOMO"},
+    {id: 2, value: "MGURUSH", label: "MGURUSH"},
+    {id: 3, value: "DIGICASH", label: "DIGICASH"},
   ];
 
   getMobileMoneyProviderEnum = () => {
@@ -979,39 +988,46 @@ async getProjectNameDescription(): Promise<ProjectNameDescription[] | []> {
   getOrFetchProjectList(): Promise<LookupItem[]> {
     if (this.projectList.length) return Promise.resolve(this.projectList);
     // Assuming a generic POST endpoint that takes a body.
-    return this.api.POST('api/lookup/project/search', { size: -1 }).then((res: any) => {
-        const data: GetLookupResponse = res?.data;
-        if (data?.operationResult) {
-          this.projectList = data.lookups ?? [];
-          return this.projectList;
-        }
-        return [];
-      }).catch(() => []);
+    return this.api.POST('api/lookup/project/search', {size: -1}).then((res: any) => {
+      const data: GetLookupResponse = res?.data;
+      if (data?.operationResult) {
+        this.projectList = data.lookups ?? [];
+        return this.projectList;
+      }
+      return [];
+    }).catch(() => []);
   }
 
   getOrFetchAreaOfWorkList(): Promise<LookupItem[]> {
-    if (this.areaOfWorkList.length) return Promise.resolve(this.areaOfWorkList);
-    return this.api.POST('api/lookup/areaofwork/search', { size: -1 }).then((res: any) => {
-        const data: GetLookupResponse = res?.data;
-        if (data?.operationResult) {
-          this.areaOfWorkList = data.lookups ?? [];
-          return this.areaOfWorkList;
-        }
-        return [];
-      }).catch(() => []);
+    if (this.areaOfWorkList.length) {
+      return Promise.resolve(this.areaOfWorkList);
+    }
+
+    return this.api.GET('api/lookup/generic/area-of-work').then((res: any) => {
+      const data: GetLookupResponse = res?.data;
+      if (data?.operationResult) {
+        this.areaOfWorkList = data.lookups ?? [];
+        return this.areaOfWorkList;
+      }
+      return [];
+    }).catch(() => []);
   }
 
   getOrFetchWorkActivityList(): Promise<LookupItem[]> {
-    if (this.workActivityList.length) return Promise.resolve(this.workActivityList);
-    return this.api.POST('api/lookup/workactivity/search', { size: -1 }).then((res: any) => {
-        const data: GetLookupResponse = res?.data;
-        if (data?.operationResult) {
-          this.workActivityList = data.lookups ?? [];
-          return this.workActivityList;
-        }
-        return [];
-      }).catch(() => []);
+    if (this.workActivityList.length) {
+      return Promise.resolve(this.workActivityList);
+    }
+
+    return this.api.GET('api/lookup/generic/work-activity').then((res: any) => {
+      const data: GetLookupResponse = res?.data;
+      if (data?.operationResult) {
+        this.workActivityList = data.lookups ?? [];
+        return this.workActivityList;
+      }
+      return [];
+    }).catch(() => []);
   }
+
 
   async getProjectIdByName(name: string): Promise<number | null> {
     if (!name) return null;
@@ -1060,5 +1076,17 @@ async getProjectNameDescription(): Promise<ProjectNameDescription[] | []> {
     await this.fetchAllBomaList();
     const found = this.allBomaList.find(i => i.name.toLowerCase() === name.toLowerCase());
     return found ? parseInt(found.id, 10) : null;
+  }
+
+  async getWorkActivityListByAreaOfWorkId(areaOfWorkId: number): Promise<LookupItem[]> {
+    if (!areaOfWorkId) return [];
+    return this.api.GET('api/lookup/generic/work-activity').then((res: any) => {
+      const data: GetLookupResponse = res?.data;
+      if (data?.operationResult) {
+        this.workActivityList = data.lookups ?? [];
+        return this.workActivityList;
+      }
+      return [];
+    }).catch(() => []);
   }
 }
