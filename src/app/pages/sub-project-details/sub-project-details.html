@@ -127,6 +127,7 @@
           <th>  Work Activity</th>
           <th>  Est ManPower</th>
           <th>  Est Cost</th>
+          <th>Paper Screening Status</th>
           <th>Action</th>
         </tr>
         </thead>
@@ -138,6 +139,7 @@
           <td>{{ t.workActivity }}</td>
           <td>{{ t.estManPower }}</td>
           <td>{{ t.estCost }}</td>
+          <td>{{ t.status ? 'Active' : 'Inactive' }}</td>
           <td>
             <p-button
               icon="pi pi-trash"

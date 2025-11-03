@@ -54,6 +54,7 @@ workActivity: any;
   countyId?: number;
   workCode?: string;
   id?: number;
+  status?: boolean;
 }
 
 @Component({
@@ -167,7 +168,8 @@ export class SubProjectDetails implements OnInit {
           state: (item as any).stateName || '',
           county: (item as any).countyName || '',
           stateId: (item as any).stateId,
-          countyId: (item as any).countyId
+          countyId: (item as any).countyId,
+          status: item.status
         }));
 
         this.statusMsg = `Loaded ${this.targets.length} work detail(s) successfully.`;

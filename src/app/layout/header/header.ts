@@ -64,6 +64,12 @@ export class Header {
         routerLink: 'sub-project-list',
         routerLinkActiveOptions: 'active',
       },
+       {
+        label: 'work approval',
+        icon: 'fa fa-check',
+        routerLink: 'work-approval',
+        routerLinkActiveOptions: 'active',
+      },
       {
         label: ' Wage Request ',
         icon: 'fas fa-hand-holding-usd',
@@ -108,12 +114,7 @@ export class Header {
         routerLink: 'dashboard',
         routerLinkActiveOptions: 'active',
       },
-         {
-        label: 'work approval',
-        icon: 'fa fa-check',
-        routerLink: 'work-approval',
-        routerLinkActiveOptions: 'active',
-      },
+        
       {
         label: 'Payroll Download',
         icon: 'fas fa-download',
