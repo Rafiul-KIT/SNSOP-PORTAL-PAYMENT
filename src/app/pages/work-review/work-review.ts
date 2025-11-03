@@ -1,11 +1,12 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule, FormControl } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 import { MenuItem } from 'primeng/api';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { Loader } from "../../components/loader/loader";
+import { ApiService } from "../../services/api.service";
 
 // Interfaces
 interface WorkProposal {
@@ -31,6 +32,7 @@ interface WorkProposal {
 }
 
 interface WorkActivity {
+  id?: number;
   workName: string;
   workCode: string;
   areaOfWorkId: number;
@@ -51,7 +53,7 @@ interface WorkActivity {
   startCoordinate?: string;
   endCoordinate?: string;
   paperScreeningStatus?: string;
-  status?: string;
+  status?: boolean | string;
 }
 
 interface FileUpload {
@@ -59,6 +61,15 @@ interface FileUpload {
   fileName: string;
   activityIndex: number;
   type: 'equipment' | 'work' | 'materials';
+}
+
+interface ApiResponse<T> {
+  code: number;
+  message: string;
+  content: T;
+  pageNumber?: number;
+  pageSize?: number;
+  totalElements?: number;
 }
 
 @Component({
@@ -72,9 +83,13 @@ export class WorkReview implements OnInit, OnDestroy {
   // Dependency Injection using inject()
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private api = inject(ApiService);
   
   // Signals for reactive state management
   isLoading = signal<boolean>(false);
+  isViewMode = signal<boolean>(false);
+  subprojectId = signal<number | null>(null);
   availableActivities = signal<string[]>([
     'Road Construction',
     'Bridge Building',
@@ -109,6 +124,7 @@ export class WorkReview implements OnInit, OnDestroy {
   
   ngOnInit(): void {
     this.initializeForm();
+    this.checkViewMode();
     this.setupSearchListener();
     this.setupFormValueChanges();
   }
@@ -119,12 +135,236 @@ export class WorkReview implements OnInit, OnDestroy {
   }
   
   /**
+   * Check if component is in view mode and load data
+   */
+  private checkViewMode(): void {
+    this.route.queryParams
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(async params => {
+        const id = params['id'];
+        if (id) {
+          this.subprojectId.set(+id);
+          this.isViewMode.set(true);
+          await this.loadSubprojectData(+id);
+        }
+      });
+  }
+  
+  /**
+   * Load subproject data from API
+   */
+  private async loadSubprojectData(id: number): Promise<void> {
+    this.isLoading.set(true);
+    
+    try {
+      // Fetch subproject basic info and work details in parallel
+      const [subprojectData, workDetails] = await Promise.all([
+        this.fetchSubprojectInfo(id),
+        this.fetchWorkDetails(id)
+      ]);
+      
+      console.log('Subproject Data:', subprojectData);
+      console.log('Work Details:', workDetails);
+      
+      // Populate form with data FIRST
+      this.populateForm(subprojectData, workDetails);
+      
+      // THEN disable form for view mode after a small delay to ensure data is set
+      setTimeout(() => {
+        this.proposalForm.disable();
+      }, 100);
+      
+    } catch (error) {
+      console.error('Error loading subproject data:', error);
+      alert('Failed to load work proposal data. Please try again.');
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+  
+  /**
+   * Fetch subproject basic information
+   */
+  private async fetchSubprojectInfo(id: number): Promise<any> {
+    try {
+      const requestBody = { id };
+      const queryParams = `page=0&size=1`;
+      
+      const response: any = await this.api.POST(
+        `api/subproject/get?${queryParams}`,
+        requestBody
+      );
+      
+      const responseData = response.data;
+
+      // Handle response structure
+      if (responseData?.content && Array.isArray(responseData.content)) {
+        return responseData.content[0];
+      } else if (responseData?.content) {
+        return responseData.content;
+      }
+      
+      return responseData;
+      
+    } catch (error) {
+      console.error('Error fetching subproject info:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Fetch work details for subproject
+   */
+  private async fetchWorkDetails(subprojectId: number): Promise<WorkActivity[]> {
+    try {
+      const response: any = await this.api.GET(
+        `api/subproject/work-details/get?subprojectId=${subprojectId}`
+      );
+      
+      const responseData = response.data;
+
+      // Handle response structure
+      if (responseData?.content && Array.isArray(responseData.content)) {
+        return responseData.content;
+      }
+      
+      return [];
+      
+    } catch (error) {
+      console.error('Error fetching work details:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Populate form with fetched data
+   */
+  private populateForm(subprojectData: any, workDetails: WorkActivity[]): void {
+    if (!subprojectData) {
+      console.error('No subproject data to populate');
+      return;
+    }
+    
+    console.log('Populating form with:', { subprojectData, workDetails });
+    
+    // Populate basic information - map API fields to form fields
+    const basicInfo = {
+      projectName: subprojectData.projectName || '',
+      workActivityCode: subprojectData.workCode || '',
+      targetbeneficiaries: subprojectData.targetBeneficiaries || subprojectData.targetBeneficiary || 0,
+      projectCost: subprojectData.projectCost || 0,
+      typeOfMeeting: subprojectData.typeOfMeeting || '',
+      meetingDate: subprojectData.meetingDate || '',
+      screeningStatus: this.formatScreeningStatus(subprojectData.screeningStatus),
+      stateName: subprojectData.stateName || '',
+      countyName: subprojectData.countyName || '',
+      payamName: subprojectData.payamName || '',
+      bomaName: subprojectData.bomaName || ''
+    };
+    
+    console.log('Setting basic info:', basicInfo);
+    this.proposalForm.patchValue(basicInfo, { emitEvent: false });
+    
+    // Clear existing work activities
+    while (this.workActivities.length > 0) {
+      this.workActivities.removeAt(0);
+    }
+    
+    // Populate work activities - map API fields to form fields
+    if (workDetails && workDetails.length > 0) {
+      workDetails.forEach((activity, index) => {
+        console.log(`Adding activity ${index + 1}:`, activity);
+        
+        const activityGroup = this.fb.group({
+          // Work identification
+          name: [activity.workName || ''],
+          code: [activity.workCode || ''],
+          
+          // Work type and activity
+          typeOfWork: [activity.areaOfWork || ''],
+          secondaryActivity: [activity.workActivity || ''],
+          
+          // Manpower estimates
+          estimatedManpower: [activity.estManPower || 0],
+          estimatedManDays: [activity.estDay || 0],
+          estimatedSkillLabour: [activity.estSkilledLabourDay || 0],
+          
+          // Cost estimates
+          estimatedCostOfEquipment: [activity.equipmentCost || 0],
+          estimatedCost: [activity.materialCost || 0],
+          totalEstimatedCost: [activity.estCost || 0],
+          
+          // Timeline
+          workStartDate: [activity.estStartAt || ''],
+          workEndDate: [activity.estEndAt || ''],
+          
+          // Coordinates
+          startCoordinate: [activity.startCoordinate || ''],
+          endCoordinate: [activity.endCoordinate || ''],
+          
+          // Status fields
+          paperScreeningStatus: [activity.paperScreeningStatus || ''],
+          status: [this.formatStatus(activity.status)],
+          
+          // Photo URLs
+          equipmentPhotoUrl: [activity.equipmentPhotoUrl || ''],
+          workPhotoUrl: [activity.workPhotoUrl || ''],
+          materialPhotoUrl: [activity.materialPhotoUrl || '']
+        });
+        
+        this.workActivities.push(activityGroup);
+      });
+    } else {
+      console.log('No work details, adding empty activity');
+      // Add at least one empty activity if no data
+      this.workActivities.push(this.createWorkActivityGroup());
+    }
+    
+    console.log('Form value after population:', this.proposalForm.getRawValue());
+    
+    // Update breadcrumb for view mode
+    if (this.isViewMode()) {
+      this.breadcrumbItems = [
+        { label: 'Dashboard', routerLink: '/dashboard' },
+        { label: 'Work Proposals', routerLink: '/work-proposals' },
+        { label: 'View Proposal' }
+      ];
+    }
+  }
+  
+  /**
+   * Format screening status (handle number or string)
+   */
+  private formatScreeningStatus(status: number | string | undefined): string {
+    if (status === undefined || status === null) return '';
+    if (typeof status === 'number') {
+      // Map number to status string if needed
+      const statusMap: { [key: number]: string } = {
+        0: 'Pending',
+        1: 'Approved',
+        2: 'Rejected'
+      };
+      return statusMap[status] || String(status);
+    }
+    return String(status);
+  }
+  
+  /**
+   * Format status value (handle boolean or string)
+   */
+  private formatStatus(status: boolean | string | undefined): string {
+    if (status === undefined || status === null) return '';
+    if (typeof status === 'boolean') return status ? 'Active' : 'Inactive';
+    return String(status);
+  }
+  
+  /**
    * Initialize the reactive form with validators
    */
   private initializeForm(): void {
     this.proposalForm = this.fb.group({
       // Basic Information
-      ip: ['', Validators.required],
+      ip: [''],
       projectName: ['', Validators.required],
       workActivityCode: [''],
       targetbeneficiaries: [null, [Validators.required, Validators.min(1)]],
@@ -147,7 +387,7 @@ export class WorkReview implements OnInit, OnDestroy {
   /**
    * Create a single work activity form group
    */
-  private createWorkActivityGroup(): FormGroup {
+  private createWorkActivityGroup(skipValueChanges: boolean = false): FormGroup {
     const group = this.fb.group({
       name: ['', Validators.required],
       code: [''],
@@ -164,17 +404,23 @@ export class WorkReview implements OnInit, OnDestroy {
       startCoordinate: ['', Validators.pattern(/^-?\d+\.?\d*,\s*-?\d+\.?\d*$/)],
       endCoordinate: ['', Validators.pattern(/^-?\d+\.?\d*,\s*-?\d+\.?\d*$/)],
       paperScreeningStatus: [''],
-      status: ['']
+      status: [''],
+      equipmentPhotoUrl: [''],
+      workPhotoUrl: [''],
+      materialPhotoUrl: ['']
     });
     
-    // Auto-calculate total cost when equipment or material cost changes
-    group.get('estimatedCostOfEquipment')?.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => this.calculateTotalCost(group));
-      
-    group.get('estimatedCost')?.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => this.calculateTotalCost(group));
+    // Only set up value change listeners if not skipping (i.e., not in view mode)
+    if (!skipValueChanges) {
+      // Auto-calculate total cost when equipment or material cost changes
+      group.get('estimatedCostOfEquipment')?.valueChanges
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(() => this.calculateTotalCost(group));
+        
+      group.get('estimatedCost')?.valueChanges
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(() => this.calculateTotalCost(group));
+    }
     
     return group;
   }
@@ -200,6 +446,7 @@ export class WorkReview implements OnInit, OnDestroy {
    * Add a new work activity
    */
   addWorkActivity(): void {
+    if (this.isViewMode()) return;
     this.workActivities.push(this.createWorkActivityGroup());
   }
   
@@ -207,6 +454,8 @@ export class WorkReview implements OnInit, OnDestroy {
    * Remove work activity at index
    */
   removeWorkActivity(index: number): void {
+    if (this.isViewMode()) return;
+    
     if (this.workActivities.length > 1) {
       this.workActivities.removeAt(index);
       
@@ -345,7 +594,9 @@ export class WorkReview implements OnInit, OnDestroy {
       )
       .subscribe(values => {
         // Auto-save draft or perform other actions
-        console.log('Form values changed:', values);
+        if (!this.isViewMode()) {
+          console.log('Form values changed:', values);
+        }
       });
   }
   
@@ -416,6 +667,10 @@ export class WorkReview implements OnInit, OnDestroy {
    * Handle form submission
    */
   async onSubmit(): Promise<void> {
+    if (this.isViewMode()) {
+      return;
+    }
+    
     if (this.proposalForm.invalid) {
       this.markFormGroupTouched(this.proposalForm);
       alert('Please fill in all required fields correctly.');
@@ -438,7 +693,7 @@ export class WorkReview implements OnInit, OnDestroy {
       console.log('Submitting proposal:', proposalData);
       
       // TODO: Implement API call
-      // await this.workProposalService.createProposal(proposalData);
+      // await this.api.POST('api/subproject/create', proposalData);
       
       // Upload files if any
       await this.uploadFiles();
@@ -508,6 +763,8 @@ export class WorkReview implements OnInit, OnDestroy {
    * Clear all form data
    */
   onClearAll(): void {
+    if (this.isViewMode()) return;
+    
     if (confirm('Are you sure you want to clear all data?')) {
       this.proposalForm.reset();
       this.workActivities.clear();
@@ -522,6 +779,11 @@ export class WorkReview implements OnInit, OnDestroy {
    * Cancel and navigate back
    */
   onCancel(): void {
+    if (this.isViewMode()) {
+      this.router.navigate(['/work-proposals']);
+      return;
+    }
+    
     if (this.proposalForm.dirty) {
       if (confirm('You have unsaved changes. Are you sure you want to cancel?')) {
         this.router.navigate(['/work-proposals']);
