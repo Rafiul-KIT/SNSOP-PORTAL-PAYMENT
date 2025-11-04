@@ -248,7 +248,7 @@ export class Dashboard {
       datasets: [
         {
           label: 'Paid',
-          backgroundColor: '#26A69A',
+          backgroundColor: '#10b981',
           data: paidAmounts,
         },
         {
