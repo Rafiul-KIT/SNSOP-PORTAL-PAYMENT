@@ -16,6 +16,7 @@ import { LookupService } from '../../services/lookup.service';
 import { Loader } from "../../components/loader/loader";
 import { Toast } from "primeng/toast";
 import { MessageService } from 'primeng/api';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-project',
@@ -176,7 +177,7 @@ private showToast(severity: 'success' | 'info' | 'warn' | 'error', summary: stri
           status: project.status,
         });
 
-       this.showToast('success', 'Success', 'Project details loaded successfully.');
+    
       } else {
         this.statusMsg = 'No project data found.';
       }
@@ -280,109 +281,112 @@ private showToast(severity: 'success' | 'info' | 'warn' | 'error', summary: stri
   }
 
   // Save project details
-  async onSave(): Promise<void> {
-    // Mark all fields as touched to show validation errors
-    this.projectForm.markAllAsTouched();
+async onSave(): Promise<void> {
+ 
+  this.projectForm.markAllAsTouched();
 
-    if (!this.projectForm.valid) {
-      this.statusMsg = 'Please fill all required fields correctly.';
-      // Log which fields are invalid for debugging
-      Object.keys(this.projectForm.controls).forEach((key) => {
-        const control = this.projectForm.get(key);
-        if (control?.invalid) {
-          console.log(`Invalid field: ${key}`, control.errors);
+  if (!this.projectForm.valid) {
+  
+    const invalidFields = Object.keys(this.projectForm.controls).filter(
+      (key) => this.projectForm.get(key)?.invalid
+    );
+   
+
+    Swal.fire({
+      title: 'Validation Error',
+      html: 'Please fill all required fields correctly.<br>' +
+            invalidFields.join('<br>'),
+      icon: 'warning',
+    });
+    return;
+  }
+
+
+  try {
+    const projectPayload: any = {
+      projectName: this.projectForm.value.projectName,
+      startAt: this.formatDate(this.projectForm.value.startDate),
+      endAt: this.formatDate(this.projectForm.value.endDate),
+      sanctionedAt: this.formatDate(this.projectForm.value.sanctionDate),
+      targetBeneficiary: parseInt(this.projectForm.value.targetBeneficiaries),
+      estimatedCost: parseFloat(this.projectForm.value.cost),
+      inchargeName: this.projectForm.value.inchargeName,
+      inchargeMobile: this.projectForm.value.inchargeMobile,
+      inchargeEmail: this.projectForm.value.inchargeEmail,
+      status: this.projectForm.value.status,
+    };
+
+    if (this.isEditMode && this.savedProjectId) {
+      projectPayload.id = this.savedProjectId;
+    }
+
+    // Save/Update Project
+    const projectRes = await this.apiService.POST(
+      this.PROJECT_SAVE,
+      projectPayload
+    );
+    const projectData = projectRes.data;
+
+    if (projectData.code === 200) {
+      this.savedProjectId = projectData.entityId || this.projectId;
+
+      // Save Project Targets if any
+      if (this.targets.length > 0 && this.savedProjectId) {
+        const targetPayload = {
+          projectId: this.savedProjectId,
+          list: this.targets.map((t) => ({
+            id: t.id !== 0 ? t.id : undefined,
+            stateId: t.stateId,
+            countyId: t.countyId,
+          })),
+        };
+
+        const targetRes = await this.apiService.POST(
+          this.PROJECT_TARGET_SAVE,
+          targetPayload
+        );
+        const targetData = targetRes.data;
+
+        if (!(targetData && targetData.code === 200)) {
+          Swal.fire({
+            title: 'Partial Success',
+            text: `Project saved but failed to save targets: ${targetData?.message || 'Unknown error'}`,
+            icon: 'warning',
+          });
+        }
+      }
+
+      // Success modal
+      Swal.fire({
+        title: 'Success!',
+        text: `Project ${this.isEditMode ? 'updated' : 'saved'} successfully!`,
+        icon: 'success',
+      }).then(() => {
+        if (!this.isEditMode) {
+          this.router.navigate(['/project-list']);
         }
       });
-      return;
+    } else {
+      // Failure modal
+      Swal.fire({
+        title: 'Error',
+        text: `Failed to save project: ${projectData?.message || 'Unknown error'}`,
+        icon: 'error',
+      });
     }
-
-    this.isLoading = true;
-    this.statusMsg = 'Saving project...';
-
-    try {
-      // Prepare the project payload
-      const projectPayload: any = {
-        projectName: this.projectForm.value.projectName,
-        startAt: this.formatDate(this.projectForm.value.startDate),
-        endAt: this.formatDate(this.projectForm.value.endDate),
-        sanctionedAt: this.formatDate(this.projectForm.value.sanctionDate),
-        targetBeneficiary: parseInt(this.projectForm.value.targetBeneficiaries),
-        estimatedCost: parseFloat(this.projectForm.value.cost),
-        inchargeName: this.projectForm.value.inchargeName,
-        inchargeMobile: this.projectForm.value.inchargeMobile,
-        inchargeEmail: this.projectForm.value.inchargeEmail,
-        status: this.projectForm.value.status,
-      };
-
-      // If in edit mode (existing project), include the project ID in the payload
-      if (this.isEditMode && this.savedProjectId) {
-        projectPayload.id = this.savedProjectId;
-      }
-
-      // Step 1: Save/Update Project Details
-      const projectRes = await this.apiService.POST(
-        this.PROJECT_SAVE,
-        projectPayload
-      );
-      const projectData = projectRes.data;
-
-      if (projectData.code === 200) {
-        // Get the project ID from the response (entityId will be returned)
-        this.savedProjectId = projectData.entityId || this.projectId;
-
-        // Step 2: Save Project Targets (if any)
-        if (this.targets.length > 0 && this.savedProjectId) {
-          const targetPayload = {
-            projectId: this.savedProjectId,
-            list: this.targets.map((t) => ({
-              id: t.id !== 0 ? t.id : undefined,
-              stateId: t.stateId,
-              countyId: t.countyId,
-            })),
-          };
-
-          const targetRes = await this.apiService.POST(
-            this.PROJECT_TARGET_SAVE,
-            targetPayload
-          );
-          const targetData = targetRes.data;
-
-          if (targetData && targetData.code === 200) {
-            this.statusMsg = `Project ${
-              this.isEditMode ? 'updated' : 'saved'
-            } successfully with ${this.targets.length} target(s)!`;
-          } else {
-            this.statusMsg = `Project saved but failed to save targets: ${
-              targetData?.message || 'Unknown error'
-            }`;
-          }
-        } else {
-          this.statusMsg = `Project ${
-            this.isEditMode ? 'updated' : 'saved'
-          } successfully!`;
-        }
-
-        // Optionally redirect to the project details page after saving
-        if (!this.isEditMode) {
-          setTimeout(() => {
-            this.router.navigate(['/project', this.savedProjectId]);
-          }, 2000);
-        }
-      } else {
-        this.statusMsg = `Failed to save project: ${
-          projectData?.message || 'Unknown error'
-        }`;
-      }
-    } catch (err: any) {
-      console.error('Failed to save project:', err);
-      this.statusMsg = `Error saving project: ${
-        err.message || 'Unknown error'
-      }`;
-    } finally {
-      this.isLoading = false;
-      this.cdr.detectChanges();
-    }
+  } catch (err: any) {
+    console.error('Failed to save project:', err);
+    Swal.fire({
+      title: 'Error',
+      text: `Error saving project: ${err.message || 'Unknown error'}`,
+      icon: 'error',
+    });
+  } finally {
+    this.isLoading = false;
+    this.cdr.detectChanges();
   }
+}
+
 
   // Clear all form fields
   onClear(): void {
