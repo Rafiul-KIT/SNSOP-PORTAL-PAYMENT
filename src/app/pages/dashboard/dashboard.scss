@@ -1,14 +1,592 @@
-.under-development {
+.dashboard-container {
+  padding: 2rem 10rem;
+
+  background: #f8f9fa;
+  min-height: 100vh;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: #6c757d;
+  margin: 0;
+}
+
+.stat-card {
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+  height: 100%;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.stat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+
+.stat-card-white .stat-icon {
+  background: #f6f7f8;
+  color: #2196f3;
+}
+
+
+
+.stat-content {
+  flex: 1;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.stat-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #2c3e50;
+  line-height: 1.2;
+}
+
+.stat-detail {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-top: 0.25rem;
+}
+
+::ng-deep .approval-card {
+  height: 100%;
+}
+
+::ng-deep .approval-card .p-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  height: 100%;
+}
+
+::ng-deep .approval-card .p-card-header {
+  background: white;
+  border-bottom: 1px solid #e9ecef;
+  padding: 1.25rem 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+::ng-deep .approval-card .p-card-body {
+  padding: 1.5rem;
+}
+
+.approval-stats {
   display: flex;
   flex-direction: column;
+  gap: 1.25rem;
+}
+
+.approval-label {
+  font-weight: 600;
+  color: #6c757d;
+}
+
+.approval-total {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.approval-item {
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+::ng-deep .approval-progress-success .p-progressbar-value {
+  background: #4caf50;
+}
+
+::ng-deep .approval-progress-warning .p-progressbar-value {
+  background: #ffc107;
+}
+
+::ng-deep .approval-progress-danger .p-progressbar-value {
+  background: #f44336;
+}
+
+::ng-deep .p-progressbar {
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 4px;
+}
+
+.info-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+  height: 100%;
+}
+
+.info-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.info-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.info-card-white .info-icon {
+  background: #f6f7f8;
+
+}
+
+.info-content {
+  flex: 1;
+}
+
+.info-label {
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.info-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #2c3e50;
+  line-height: 1.2;
+}
+
+.info-detail {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 1rem;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .info-value {
+    font-size: 1.5rem;
+  }
+}
+
+////////////2nd 
+::ng-deep .summary-card .p-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  height: 100%;
+}
+
+::ng-deep .summary-card .p-card-header {
+  background: white;
+  border-bottom: 1px solid #e9ecef;
+  padding: 1.25rem 1.5rem;
+}
+
+::ng-deep .summary-card .p-card-body {
+  padding: 1.5rem;
+}
+
+.card-header-custom {
+  width: 100%;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.payment-cycle-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #495057;
+  margin-bottom: 0.5rem;
+}
+
+::ng-deep .p-dropdown {
+  width: 100%;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+}
+
+::ng-deep .p-dropdown:not(.p-disabled):hover {
+  border-color: #2196f3;
+}
+
+::ng-deep .p-dropdown-panel {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.summary-box {
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.summary-box-blue {
+  background: #e3f2fd;
+  border-left: 4px solid #2196f3;
+}
+
+.summary-box-green {
+  background: #e8f5e9;
+  border-left: 4px solid #4caf50;
+}
+
+.summary-box-yellow {
+  background: #fff9e6;
+  border-left: 4px solid #ffc107;
+}
+
+.summary-box-purple {
+  background: #f3e5f5;
+  border-left: 4px solid #9c27b0;
+}
+
+.summary-label {
+  font-size: 0.8rem;
+  color: #6c757d;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.summary-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.support-type-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.support-type-item {
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.support-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.support-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.support-beneficiaries {
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.support-amounts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.amount-item {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
+.amount-label {
+  font-size: 0.75rem;
+  color: #6c757d;
+  margin-bottom: 0.25rem;
+}
+
+.amount-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.support-progress {
+  margin-top: 0.5rem;
+}
+
+::ng-deep .support-progressbar .p-progressbar-value {
+  background: #4caf50;
+}
+
+::ng-deep .support-progressbar {
+  height: 10px;
+  background: #e9ecef;
+  border-radius: 5px;
+}
+
+.progress-label {
+  font-size: 0.8rem;
+  color: #6c757d;
+  text-align: right;
+  margin-top: 0.25rem;
+}
+
+//bottom sectioin
+.analytics-container {
+  padding-top: 2rem;
+  background: #f8f9fa;
+  min-height: 100vh;
+}
+
+::ng-deep .chart-card .p-card,
+::ng-deep .table-card .p-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  height: 100%;
+}
+
+::ng-deep .chart-card .p-card-header,
+::ng-deep .table-card .p-card-header {
+  background: white;
+  border-bottom: 1px solid #e9ecef;
+  padding: 1.25rem 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 1.1rem;
+}
+
+::ng-deep .chart-card .p-card-body,
+::ng-deep .table-card .p-card-body {
+  padding: 1.5rem;
+}
+
+.chart-wrapper {
+  display: flex;
   justify-content: center;
   align-items: center;
-  height: 80vh;
-  text-align: center;
-  color: #666;
+  min-height: 300px;
+  margin-bottom: 1.5rem;
+}
 
-  .dev-gif {
-    max-width: 300px;
-    margin-bottom: 20px;
+.chart-wrapper-bar {
+  display: flex;
+
+  min-height: 410px;
+  padding: 4rem;
+  background-color: #fff;
+
+}
+
+p-chart {
+  width: 100%;
+
+
+}
+
+.gender-stats {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.gender-item {
+  text-align: center;
+}
+
+.gender-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.gender-male .gender-label {
+  color: #5DA5DA;
+}
+
+.gender-female .gender-label {
+  color: #F06292;
+}
+
+.gender-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.gender-male .gender-value {
+  color: #5DA5DA;
+}
+
+.gender-female .gender-value {
+  color: #F06292;
+}
+
+::ng-deep .custom-table .p-datatable-wrapper {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+::ng-deep .custom-table .p-datatable-thead>tr>th {
+  background: #f8f9fa;
+  color: #6c757d;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 1rem;
+  border: none;
+}
+
+::ng-deep .custom-table .p-datatable-tbody>tr {
+  transition: background-color 0.2s;
+}
+
+::ng-deep .custom-table .p-datatable-tbody>tr:hover {
+  background-color: #f8f9fa;
+}
+
+::ng-deep .custom-table .p-datatable-tbody>tr>td {
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+  font-size: 0.95rem;
+}
+
+.table-header {
+  white-space: nowrap;
+}
+
+.boma-name {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.amount-total {
+  color: #495057;
+  font-weight: 500;
+}
+
+.amount-paid {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.amount-unpaid {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+.beneficiaries {
+  color: #495057;
+  font-weight: 500;
+}
+
+.gender-split {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.gender-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.gender-badge.male {
+  background: #E3F2FD;
+  color: #1976D2;
+}
+
+.gender-badge.female {
+  background: #FCE4EC;
+  color: #C2185B;
+}
+
+@media (max-width: 768px) {
+  .analytics-container {
+    padding: 1rem;
+  }
+
+  .chart-wrapper {
+    min-height: 250px;
+  }
+
+  .gender-stats {
+    gap: 2rem;
+  }
+
+  .gender-value {
+    font-size: 1.5rem;
+  }
+
+  ::ng-deep .custom-table .p-datatable-thead>tr>th,
+  ::ng-deep .custom-table .p-datatable-tbody>tr>td {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.85rem;
+  }
+
+  .gender-badge {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
   }
 }
