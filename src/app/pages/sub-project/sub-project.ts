@@ -5,18 +5,18 @@ import {
   FormBuilder,
   FormGroup,
   FormArray,
-  FormControl,
+  FormControl, FormsModule,
 } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Breadcrumb } from 'primeng/breadcrumb';
 import { Loader } from '../../components/loader/loader';
 import { ApiService } from '../../services/api.service';
-import { LookupService } from '../../services/lookup.service'; // Assuming this service exists
+import {LookupItem, LookupService} from '../../services/lookup.service'; // Assuming this service exists
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, Loader, Breadcrumb],
+  imports: [CommonModule, ReactiveFormsModule, Loader, Breadcrumb, FormsModule],
   templateUrl: './sub-project.html',
   styleUrl: './sub-project.scss',
 })
@@ -29,13 +29,16 @@ export class SubProject implements OnInit {
   subprojectId: string | null = null;
 
   availableProjects: { id: number; name: string }[] = [];
-  availableTypesOfWork: { id: string; name: string }[] = [];
-  availableActivities: Map<string, { id: string; name: string }[]> = new Map();
+  availableTypesOfWork: { id: string; description: string }[] = [];
+  availableActivities: Map<string, { id: string; description: string }[]> = new Map();
   availableStates: { id: string; name: string }[] = [];
   availableCounties: { id: string; name: string }[] = [];
   availablePayams: { id: string; name: string }[] = [];
   availableBomas: { id: string; name: string }[] = [];
   workActivitiesList: { id: string; name: string }[] = [];
+
+  targets: any[] = [];  // List to hold targets
+  selectedTargetId: number | null = null; // To store the selected target's ID
 
   constructor(
     private fb: FormBuilder,
@@ -122,6 +125,60 @@ export class SubProject implements OnInit {
     }
   }
 
+  async onProjectSelect(event: Event): Promise<void> {
+    const projectId = (event.target as HTMLSelectElement).value;
+    if (!projectId) {
+      this.targets = [];
+      this.cdr.detectChanges();
+      return;
+    }
+
+    try {
+      const res: any = await this.api.GET(
+        `/api/project/target/get?projectId=${projectId}`
+      );
+      if (res.data && Array.isArray(res.data.content)) {
+        this.targets = res.data.content;
+      } else {
+        this.targets = [];
+      }
+      this.cdr.detectChanges();
+    } catch (err) {
+      console.error('Failed to load targets', err);
+      this.targets = [];
+      this.cdr.detectChanges();
+    }
+  }
+
+  async onTargetSelect(): Promise<void> {
+    if (this.selectedTargetId === null) {
+      return;
+    }
+
+    const selectedTarget = this.targets.find(
+      (target) => target.id === this.selectedTargetId
+    );
+
+    if (selectedTarget) {
+      this.proposalForm.patchValue({
+        stateName: selectedTarget.stateName,
+        countyName: selectedTarget.countyName,
+        payamName: '', // Reset payam and boma
+        bomaName: '',
+      });
+
+      // Trigger updates for dependent dropdowns
+      await this.onStateChange({
+        target: { value: selectedTarget.stateName },
+      } as any);
+      await this.onCountyChange({
+        target: { value: selectedTarget.countyName },
+      } as any);
+
+      this.cdr.detectChanges();
+    }
+  }
+
   async loadSubProject(id: string) {
     this.isLoading = true;
     try {
@@ -183,12 +240,25 @@ export class SubProject implements OnInit {
             this.addWorkActivity();
             const currentActivityControl = this.workActivities.at(i);
 
+            const typeOfWork = this.availableTypesOfWork.find(t => t.description === activity.areaOfWork);
+            const typeOfWorkId = typeOfWork ? typeOfWork.id : '';
+
+            // If typeOfWork exists, load its secondary activities
+            if (typeOfWorkId) {
+              await this.onTypeOfWorkChange({ target: { value: typeOfWorkId } } as any, i);
+            }
+
+            const secondaryActivityList = this.availableActivities.get(typeOfWorkId) || [];
+            const secondaryActivity = secondaryActivityList.find(a => a.description === activity.workActivity);
+            const secondaryActivityId = secondaryActivity ? secondaryActivity.id : '';
+
+
             // Patch values for the current activity
             currentActivityControl.patchValue({
               name: activity.workName || '',
               code: activity.workCode || '',
-              typeOfWork: activity.areaOfWork || '',
-              secondaryActivity: activity.workActivity || '',
+              typeOfWork: activity.areaOfWork,
+              secondaryActivity: activity.workActivity,
               estimatedManpower: activity.estManPower || 0,
               estimatedManDays: activity.estDay || 0,
               estimatedCostOfEquipment: activity.equipmentCost || 0,
@@ -198,11 +268,6 @@ export class SubProject implements OnInit {
               estimatedSkillLabour: activity.estSkilledLabourDay || 0,
               estimatedCost: activity.estCost || 0,
             });
-
-            // If typeOfWork exists, load its secondary activities
-            if (activity.areaOfWork) {
-              await this.onTypeOfWorkChange({ target: { value: activity.areaOfWork } } as any, i);
-            }
           }
         }
       }
@@ -307,10 +372,14 @@ export class SubProject implements OnInit {
     try {
       const formValue = this.proposalForm.value;
 
-      const projectId = formValue.projectName;
-      if (projectId === null || projectId === undefined) throw new Error(`Project not selected.`);
+      const rawProjectId = formValue.projectName;
+      if (!rawProjectId) throw new Error(`Project not selected.`);
+      const projectId = parseInt(rawProjectId, 10);
+      if (isNaN(projectId)) throw new Error(`Invalid Project ID.`);
+
       const selectedProject = this.availableProjects.find(p => p.id === projectId);
       const projectName = selectedProject ? selectedProject.name : '';
+      if (!projectName) throw new Error(`Project name not found for ID: ${projectId}.`);
 
       const stateId = await this.lookupService.getStateIdByName(formValue.stateName);
       if (stateId === null) throw new Error(`State '${formValue.stateName}' not found.`);
@@ -326,7 +395,7 @@ export class SubProject implements OnInit {
 
       // --- API Call 1: Save Sub-project ---
       const subProjectPayload = {
-        id: this.subprojectId ? parseInt(this.subprojectId, 10) : 0,
+        id: this.subprojectId ? parseInt(this.subprojectId, 10) : null,
         workCode: `W-CODE-${Date.now()}`,
         projectId: projectId,
         projectName: projectName,
@@ -340,23 +409,26 @@ export class SubProject implements OnInit {
         bomaName: formValue.bomaName,
         typeOfMeeting: formValue.typeOfMeeting,
         meetingDate: formValue.meetingDate,
-        screeningStatus: formValue.screeningStatus,
-        status: 'true',
+        screeningStatus: formValue.paperScreeningStatus ? parseInt(formValue.paperScreeningStatus, 10) : null,
+        status: 'IP_Submitted',
       };
 
       const subProjectResponse = await this.api.POST('/api/subproject/save', subProjectPayload);
-      const newSubProjectId = subProjectResponse.data.id;
+
+      console.log('Response from /api/subproject/save:', JSON.stringify(subProjectResponse, null, 2));
+
+      const newSubProjectId = subProjectResponse.data.entityId;
       if (!newSubProjectId) throw new Error('Failed to get sub-project ID after saving.');
 
       // --- API Calls 2 & 3: Save Work Details and Attachments ---
       for (const activityControl of this.workActivities.controls) {
         const activityValue = activityControl.value;
 
-        const areaOfWorkId = await this.lookupService.getAreaOfWorkIdByName(activityValue.typeOfWork);
-        if (areaOfWorkId === null) throw new Error(`Area of Work '${activityValue.typeOfWork}' not found.`);
+        const areaOfWorkId = activityValue.typeOfWork;
+        if (!areaOfWorkId) throw new Error(`Area of Work not selected.`);
 
-        const workActivityId = await this.lookupService.getWorkActivityIdByName(activityValue.secondaryActivity);
-        if (workActivityId === null) throw new Error(`Work Activity '${activityValue.secondaryActivity}' not found.`);
+        const workActivityId = activityValue.secondaryActivity;
+        if (!workActivityId) throw new Error(`Work Activity not selected.`);
 
         const workDetailPayload = {
           subprojectId: newSubProjectId,
@@ -458,36 +530,46 @@ export class SubProject implements OnInit {
 
   async loadAvailableTypesOfWork(): Promise<void> {
     try {
-      this.availableTypesOfWork = await this.lookupService.getOrFetchAreaOfWorkList();
+      const res: any = await this.api.GET('api/lookup/generic/area-of-work');
+      if (res.data && Array.isArray(res.data.content)) {
+        this.availableTypesOfWork = res.data.content.map((item: any) => ({
+          id: item.id,
+          description: item.description,
+        }));
+      }
     } catch (err) {
       console.error('Failed to load available types of work', err);
     }
   }
 
+
   async onTypeOfWorkChange(event: Event, index: number): Promise<void> {
-    const typeOfWorkName = (event.target as HTMLSelectElement).value;
-    console.log(`onTypeOfWorkChange called for index ${index} with typeOfWorkName: ${typeOfWorkName}`);
-    if (!typeOfWorkName) {
-      this.availableActivities.set(typeOfWorkName, []);
+    const areaOfWorkId = (event.target as HTMLSelectElement).value;
+    const activityControl = this.workActivities.at(index);
+
+    if (!areaOfWorkId) {
+      this.availableActivities.set(areaOfWorkId, []);
+      activityControl.get('secondaryActivity')?.setValue('');
       return;
     }
     try {
-      const areaOfWorkId = await this.lookupService.getAreaOfWorkIdByName(typeOfWorkName);
-      if (areaOfWorkId) {
-        const activities = await this.lookupService.getWorkActivityListByAreaOfWorkId(areaOfWorkId);
-        this.availableActivities.set(typeOfWorkName, activities);
-        console.log(`availableActivities map updated for ${typeOfWorkName}:`, activities);
+      const res: any = await this.api.GET(
+        `/api/lookup/generic/work-activity?areaOfWorkId=${areaOfWorkId}`
+      );
+      if (res.data && Array.isArray(res.data.content)) {
+        const activities = res.data.content.map((item: any) => ({
+          id: item.id,
+          description: item.description,
+        }));
+        this.availableActivities.set(areaOfWorkId, activities);
         this.cdr.detectChanges();
+      } else {
+        this.availableActivities.set(areaOfWorkId, []);
       }
     } catch (err) {
       console.error('Failed to load available activities', err);
+      this.availableActivities.set(areaOfWorkId, []);
     }
   }
-
-  isNgForBeingEvaluated(): boolean {
-    console.log('isNgForBeingEvaluated is being called');
-    return true;
-  }
-
 
 }
