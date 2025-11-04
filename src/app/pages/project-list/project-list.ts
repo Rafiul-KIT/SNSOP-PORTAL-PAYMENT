@@ -12,6 +12,7 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { Loader } from '../../components/loader/loader';
 import { ApiService } from '../../services/api.service';
 import { ChangeDetectorRef } from '@angular/core';
+import Swal from 'sweetalert2';
 
 interface ProjectItemDto {
   id: number;
@@ -137,33 +138,60 @@ export class ProjectList implements OnInit {
     this.router.navigate(['/project', id]);
   }
 
-  async deleteProject(id: number) {
-    const row = this.rows.find((r) => r.id === id);
-    if (!row) return;
+async deleteProject(id: number) {
+  const row = this.rows.find((r) => r.id === id);
+  if (!row) return;
 
-    const payload = {
-      id: row.id,
-      projectName: row.projectName,
-      startAt: row.startAt,
-      endAt: row.endAt,
-      sanctionedAt: row.sanctionedAt,
-      targetBeneficiary: row.targetBeneficiary,
-      estimatedCost: row.estimatedCost,
-      inchargeName: row.inchargeName,
-      inchargeMobile: row.inchargeMobile,
-      inchargeEmail: row.inchargeEmail,
-      status: 'Closed',
-    };
+  // Show confirmation dialog
+  Swal.fire({
+    title: "Are you sure?",
+    text: "You won't be able to revert this!",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#3085d6",
+    cancelButtonColor: "#d33",
+    confirmButtonText: "Yes, delete it!"
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      const payload = {
+        id: row.id,
+        projectName: row.projectName,
+        startAt: row.startAt,
+        endAt: row.endAt,
+        sanctionedAt: row.sanctionedAt,
+        targetBeneficiary: row.targetBeneficiary,
+        estimatedCost: row.estimatedCost,
+        inchargeName: row.inchargeName,
+        inchargeMobile: row.inchargeMobile,
+        inchargeEmail: row.inchargeEmail,
+        status: 'Closed',
+      };
 
-    try {
-      await this.api.POST(this.PROJECT_SAVE_ENDPOINT, payload);
+      try {
+        await this.api.POST(this.PROJECT_SAVE_ENDPOINT, payload);
 
+        await this.loadProjects(); // refresh table after update
 
-      await this.loadProjects(); // refresh table after update
-    } catch (error) {
-      console.error('Failed to close project:', error);
+        // Show success message
+        Swal.fire({
+          title: "Deleted!",
+          text: "The project has been closed.",
+          icon: "success",
+        });
+      } catch (error) {
+        console.error('Failed to close project:', error);
+
+        // Show error message
+        Swal.fire({
+          title: "Error!",
+          text: "Failed to close the project.",
+          icon: "error",
+        });
+      }
     }
-  }
+  });
+}
+
 
   //trackById(_i: number, r: ProjectItemDto) { return r.id; }
 }
