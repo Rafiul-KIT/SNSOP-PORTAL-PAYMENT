@@ -24,6 +24,7 @@ export class SubProject implements OnInit {
   searchCtrl = new FormControl<string>('');
   isLoading = false;
   proposalForm: FormGroup;
+  public workActivities: FormArray;
   breadcrumbItems: any[] = [];
   breadcrumbHome: any;
   subprojectId: string | null = null;
@@ -62,6 +63,7 @@ export class SubProject implements OnInit {
             materialsPhotoName: [''], // Added
             paperScreeningStatus: [''],
           });
+    this.workActivities = this.proposalForm.get('workActivities') as FormArray;
   }
 
   ngOnInit(): void {
@@ -188,7 +190,10 @@ export class SubProject implements OnInit {
       const [subProjectRes, workDetailsRes] = await Promise.all([subProjectPromise, workDetailsPromise]);
 
       const subProjectData = subProjectRes.data.content[0];
-      const activities = workDetailsRes.data.content;
+      const workDetailsData = workDetailsRes.data;
+      const activities = Array.isArray(workDetailsData)
+        ? workDetailsData
+        : workDetailsData?.content ?? [];
 
       if (!subProjectData) {
         console.error(`Sub-project with id ${id} not found.`);
@@ -233,32 +238,25 @@ export class SubProject implements OnInit {
         // Clear existing activities to repopulate
         this.workActivities.clear();
 
-        for (let i = 0; i < activities.length; i++) {
-          const activity = activities[i];
+        for (const [i, activity] of activities.entries()) {
           if (activity) {
-            // Add a new form group for each activity
             this.addWorkActivity();
             const currentActivityControl = this.workActivities.at(i);
 
-            const typeOfWork = this.availableTypesOfWork.find(t => t.description === activity.areaOfWork);
-            const typeOfWorkId = typeOfWork ? typeOfWork.id : '';
+            const typeOfWorkId = activity.areaOfWorkId;
+            const workActivityId = activity.workActivityId;
 
-            // If typeOfWork exists, load its secondary activities
             if (typeOfWorkId) {
               await this.onTypeOfWorkChange({ target: { value: typeOfWorkId } } as any, i);
             }
 
-            const secondaryActivityList = this.availableActivities.get(typeOfWorkId) || [];
-            const secondaryActivity = secondaryActivityList.find(a => a.description === activity.workActivity);
-            const secondaryActivityId = secondaryActivity ? secondaryActivity.id : '';
-
-
-            // Patch values for the current activity
+            // Patch all values, ensuring IDs are strings for form binding
             currentActivityControl.patchValue({
+              id: activity.id,
               name: activity.workName || '',
               code: activity.workCode || '',
-              typeOfWork: activity.areaOfWork,
-              secondaryActivity: activity.workActivity,
+              typeOfWork: typeOfWorkId ? String(typeOfWorkId) : null,
+              secondaryActivity: workActivityId ? String(workActivityId) : null,
               estimatedManpower: activity.estManPower || 0,
               estimatedManDays: activity.estDay || 0,
               estimatedCostOfEquipment: activity.equipmentCost || 0,
@@ -268,29 +266,30 @@ export class SubProject implements OnInit {
               estimatedSkillLabour: activity.estSkilledLabourDay || 0,
               estimatedCost: activity.estCost || 0,
             });
-          }
         }
       }
 
       this.cdr.detectChanges();
 
-    } catch (err) {
+    } 
+    }
+    catch (err) {
       console.error('Failed to load sub-project', err);
-    } finally {
+    }
+     finally {
       this.isLoading = false;
     }
   }
 
-  get workActivities(): FormArray<FormGroup> {
-    return this.proposalForm.get('workActivities') as FormArray<FormGroup>;
-  }
+
 
   private createWorkActivity(): FormGroup {
     return this.fb.group({
+      id: [null],
       name: [''],
       code: [''],
-      typeOfWork: [''],
-      secondaryActivity: [''],
+      typeOfWork: [null],
+      secondaryActivity: [null],
       estimatedManpower: [0],
       estimatedManDays: [0],
       estimatedCostOfEquipment: [0],
@@ -432,11 +431,11 @@ export class SubProject implements OnInit {
 
         const workDetailPayload = {
           subprojectId: newSubProjectId,
-          id: 0,
+          id: activityValue.id ? parseInt(activityValue.id, 10) : null,
           workName: activityValue.name,
           workCode: activityValue.code,
-          areaOfWorkId: areaOfWorkId,
-          workActivityId: workActivityId,
+          areaOfWorkId: Number(activityValue.typeOfWork),
+          workActivityId: Number(activityValue.secondaryActivity),
           estManPower: activityValue.estimatedManpower,
           estDay: activityValue.estimatedManDays,
           estSkilledLabourDay: activityValue.estimatedSkillLabour,
@@ -449,7 +448,7 @@ export class SubProject implements OnInit {
         };
 
         const workDetailResponse = await this.api.POST('/api/subproject/work-details/save', workDetailPayload);
-        const newWorkDetailId = workDetailResponse.data.id;
+        const newWorkDetailId = workDetailResponse.data.entityId;
         if (!newWorkDetailId) throw new Error('Failed to get work detail ID after saving.');
 
         const formData = new FormData();
@@ -472,7 +471,7 @@ export class SubProject implements OnInit {
           formData.append('projectId', projectId.toString()); // No longer possibly null
           formData.append('subprojectId', newSubProjectId.toString());
           formData.append('subprojectWorkDetailId', newWorkDetailId.toString());
-          await this.api.POST('/api/subproject/work-details/attachment/save', formData);
+          await this.api.POST_FORM_DATA('/api/subproject/work-details/attachment/save', formData);
         }
       }
 
@@ -509,9 +508,11 @@ export class SubProject implements OnInit {
     return index;
   }
 
+
+
   async loadAvailableProjects(): Promise<void> {
     try {
-      const res = await this.api.GET('api/project/get?page=0&size=100',);
+      const res = await this.api.GET('api/project/get?page=0&size=100&status=InProgress',);
       if (res.data && Array.isArray(res.data.content)) {
         const projects = res.data.content.map((project: any) => ({
           id: Number(project.id),
@@ -533,7 +534,7 @@ export class SubProject implements OnInit {
       const res: any = await this.api.GET('api/lookup/generic/area-of-work');
       if (res.data && Array.isArray(res.data.content)) {
         this.availableTypesOfWork = res.data.content.map((item: any) => ({
-          id: item.id,
+          id: String(item.id),
           description: item.description,
         }));
       }
@@ -558,17 +559,17 @@ export class SubProject implements OnInit {
       );
       if (res.data && Array.isArray(res.data.content)) {
         const activities = res.data.content.map((item: any) => ({
-          id: item.id,
+          id: String(item.id),
           description: item.description,
         }));
-        this.availableActivities.set(areaOfWorkId, activities);
+        this.availableActivities.set(String(areaOfWorkId), activities);
         this.cdr.detectChanges();
       } else {
-        this.availableActivities.set(areaOfWorkId, []);
+        this.availableActivities.set(String(areaOfWorkId), []);
       }
     } catch (err) {
       console.error('Failed to load available activities', err);
-      this.availableActivities.set(areaOfWorkId, []);
+      this.availableActivities.set(String(areaOfWorkId), []);
     }
   }
 
