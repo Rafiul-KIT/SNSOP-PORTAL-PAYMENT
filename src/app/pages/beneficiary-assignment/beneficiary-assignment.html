@@ -1,1 +1,101 @@
-<p>beneficiary-assignment works!</p>
+@if (false) {
+<app-loader></app-loader>
+} @else {
+<div class="breadcrumb-wrapper">
+    <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
+</div>
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-11">
+            <p-card class="shadow-sm border-0">
+                @if (false) {
+                <app-loader></app-loader>
+                } @else {
+                <div class="row g-4 mb-4">
+
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-secondary mb-3 d-flex align-items-center">
+                                    <i class="pi pi-info-circle me-2"></i>
+                                    <span>Project Information</span>
+                                </h5>
+
+                                <div class="list-group list-group-flush">
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                        <span class="text-muted">Project Name:</span>
+                                        <span class="fw-semibold text-dark">{{ projectInfo?.projectName || '—' }}</span>
+                                    </div>
+
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                        <span class="text-muted">Work Code:</span>
+                                        <span class="fw-semibold text-dark">{{ projectInfo?.workCode || '—' }}</span>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-secondary mb-4 d-flex align-items-center">
+                                    <i class="pi pi-map-marker me-2"></i>
+                                    <span>Location & Schedule</span>
+                                </h5>
+
+                                <div class="row g-3">
+
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-1">
+                                        <span class="text-muted">Payam:</span>
+                                        <span class="fw-semibold text-dark">{{ projectInfo?.payamName || '—' }}</span>
+                                    </div>
+
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom">
+                                        <span class="text-muted">Boma Name:</span>
+                                        <span class="fw-semibold text-dark">{{ projectInfo?.bomaName || '—' }}</span>
+                                    </div>
+
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom">
+                                        <span class="text-muted">State:</span>
+                                        <span class="fw-semibold text-dark">{{ projectInfo?.stateName || '—' }}</span>
+                                    </div>
+
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom">
+                                        <span class="text-muted">County:</span>
+                                        <span class="fw-semibold text-dark">{{ projectInfo?.countyName || '—' }}</span>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <p-divider></p-divider>
+
+                <form>
+                    <fieldset [disabled]="loading">
+                        <div class="row">
+                            <div class="d-flex justify-content-center mt-3">
+                                <button pButton type="submit" label="Submit" class="p-button-primary px-5"
+                                    [disabled]="loading"></button>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+                }
+            </p-card>
+        </div>
+    </div>
+</div>
+}
