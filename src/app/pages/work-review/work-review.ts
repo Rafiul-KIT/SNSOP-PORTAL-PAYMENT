@@ -16,6 +16,7 @@ import { ChangeDetectorRef } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import Swal from 'sweetalert2';
 interface WorkActivity {
   id?: number;
   workName: string;
@@ -44,10 +45,16 @@ interface WorkActivity {
 @Component({
   selector: 'app-work-review',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, BreadcrumbModule, Loader, ToastModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    BreadcrumbModule,
+    Loader,
+    ToastModule,
+  ],
   templateUrl: './work-review.html',
   styleUrls: ['./work-review.scss'],
-   providers: [MessageService]
+  providers: [MessageService],
 })
 export class WorkReview implements OnInit, OnDestroy {
   // Dependency Injection
@@ -57,10 +64,9 @@ export class WorkReview implements OnInit, OnDestroy {
   private api = inject(ApiService);
   private cdr = inject(ChangeDetectorRef);
   private msg = inject(MessageService);
- 
+
   isLoading = signal<boolean>(false);
   subprojectId = signal<number | null>(null);
-
 
   proposalForm!: FormGroup;
   roleId!: number | null;
@@ -73,7 +79,6 @@ export class WorkReview implements OnInit, OnDestroy {
     { label: 'View Proposal' },
   ];
   breadcrumbHome: MenuItem = { icon: 'pi pi-home', routerLink: '/' };
-
 
   private destroy$ = new Subject<void>();
 
@@ -98,92 +103,94 @@ export class WorkReview implements OnInit, OnDestroy {
       input?.files && input.files.length ? input.files[0] : null;
   }
 
-
-  async submitApproval(): Promise<void> {
-    if (!this.subprojectId()) {
-      this.msg.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Missing subproject ID.',
-      });
-      return;
-    }
-    if (!this.roleId) {
-      this.msg.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Missing user or role. Please login again.',
-      });
-      return;
-    }
-    if (this.approvalForm.invalid) {
-      this.approvalForm.markAllAsTouched();
-      this.msg.add({
-        severity: 'error',
-        summary: 'Validation Error',
-        detail: 'Please fill all required fields, including comments.',
-      });
-      return;
-    }
-
-    // decide endpoint by roleId
-    const endpointMap: Record<number, string> = {
-      9: 'api/subproject/review/first',
-      3: 'api/subproject/review/second',
-      12: 'api/subproject/review/third',
-    };
-    const endpoint = endpointMap[this.roleId];
-    if (!endpoint) {
-      this.msg.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Your role is not allowed to approve here.',
-      });
-      return;
-    }
-
-   
-    const fd = new FormData();
-    fd.append('subprojectId', String(this.subprojectId())); 
-    if (this.roleId === 12) {
-      const d = this.approvalForm.get('pdcApproveDate')?.value;
-      if (d) fd.append('pdcApproveDate', d); 
-    }
-    fd.append('comments', this.approvalForm.get('comments')?.value);
-
-    const approvedStr = this.approvalForm.get('approved')?.value;
-    fd.append('approved', approvedStr === 'true' ? 'true' : 'false');
-
-    if (this.attachedFile) {
-      fd.append('attachment', this.attachedFile);
-    }
-
-    this.isLoading.set(true);
-    try {
- 
-      await this.api.axiosInstance.post(`/${endpoint}`, fd, {});
-      this.msg.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Approval submitted successfully.',
-      });
-    } catch (err) {
-      console.error(err);
-      this.msg.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to submit approval.',
-      });
-    } finally {
-      this.isLoading.set(false);
-    }
+async submitApproval(): Promise<void> {
+  if (!this.subprojectId()) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Missing subproject ID.',
+    });
+    return;
   }
+
+  if (!this.roleId) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Missing user or role. Please login again.',
+    });
+    return;
+  }
+
+  if (this.approvalForm.invalid) {
+    this.approvalForm.markAllAsTouched();
+    Swal.fire({
+      icon: 'warning',
+      title: 'Validation Error',
+      text: 'Please fill all required fields, including comments.',
+    });
+    return;
+  }
+
+  const endpointMap: Record<number, string> = {
+    9: 'api/subproject/review/first',
+    3: 'api/subproject/review/second',
+    12: 'api/subproject/review/third',
+  };
+  const endpoint = endpointMap[this.roleId];
+
+  if (!endpoint) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Your role is not allowed to approve here.',
+    });
+    return;
+  }
+
+  const fd = new FormData();
+  fd.append('subprojectId', String(this.subprojectId()));
+
+  if (this.roleId === 12) {
+    const d = this.approvalForm.get('pdcApproveDate')?.value;
+    if (d) fd.append('pdcApproveDate', d);
+  }
+
+  fd.append('comments', this.approvalForm.get('comments')?.value);
+
+  const approvedStr = this.approvalForm.get('approved')?.value;
+  fd.append('approved', approvedStr === 'true' ? 'true' : 'false');
+
+  if (this.attachedFile) {
+    fd.append('attachment', this.attachedFile);
+  }
+
+
+  try {
+    await this.api.axiosInstance.post(`/${endpoint}`, fd, {});
+    
+    Swal.fire({
+      icon: 'success',
+      title: 'Success',
+      text: 'Approval submitted successfully!',
+    });
+  } catch (err) {
+    console.error(err);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Failed to submit approval.',
+    });
+  } finally {
+    this.isLoading.set(false);
+  }
+}
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
- 
   private loadData(): void {
     this.route.queryParams
       .pipe(takeUntil(this.destroy$))
@@ -193,7 +200,6 @@ export class WorkReview implements OnInit, OnDestroy {
           this.subprojectId.set(+id);
           await this.loadSubprojectData(+id);
         } else {
-        
           this.router.navigate(['/work-proposals']);
         }
       });
@@ -242,7 +248,6 @@ export class WorkReview implements OnInit, OnDestroy {
     }
   }
 
-
   private async fetchWorkDetails(
     subprojectId: number
   ): Promise<WorkActivity[]> {
@@ -281,14 +286,12 @@ export class WorkReview implements OnInit, OnDestroy {
     });
   }
 
-
   private populateForm(subprojectData: any, workDetails: WorkActivity[]): void {
     if (!subprojectData) {
       console.error('No subproject data to populate');
       return;
     }
 
- 
     const basicInfo = {
       projectName: subprojectData.projectName || '',
       workActivityCode: subprojectData.workCode || '',
@@ -310,7 +313,6 @@ export class WorkReview implements OnInit, OnDestroy {
 
     this.proposalForm.patchValue(basicInfo, { emitEvent: false });
 
-   
     this.workActivities.clear();
 
     if (workDetails && workDetails.length > 0) {
@@ -342,7 +344,6 @@ export class WorkReview implements OnInit, OnDestroy {
     }
   }
 
-
   private formatScreeningStatus(status: number | string | undefined): string {
     if (status === undefined || status === null) return '';
     if (typeof status === 'number') {
@@ -356,23 +357,19 @@ export class WorkReview implements OnInit, OnDestroy {
     return String(status);
   }
 
-
   private formatStatus(status: boolean | string | undefined): string {
     if (status === undefined || status === null) return '';
     if (typeof status === 'boolean') return status ? 'Active' : 'Inactive';
     return String(status);
   }
 
-
   get workActivities(): FormArray {
     return this.proposalForm.get('workActivities') as FormArray;
   }
 
-
   trackByIndex(index: number): number {
     return index;
   }
-
 
   onCancel(): void {
     this.router.navigate(['/work-proposals']);

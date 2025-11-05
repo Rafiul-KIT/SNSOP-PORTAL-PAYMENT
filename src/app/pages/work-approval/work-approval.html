@@ -142,8 +142,9 @@
       <td>{{ item.payamName }}</td>
       <td>{{ item.bomaName }}</td>
       <td>{{ item.typeOfMeeting }}</td>
+
       <td>{{ item.meetingDate | date: 'dd/MM/yyyy' }}</td>
-      <td>{{ item.screeningStatus }}</td>
+      <td>{{ item.screeningStatus === 0 ? 'Rejected' : 'Accepted' }}</td>
       <td>
         <span
           [class]="'badge ' + (item.status === 'Approved' ? 'bg-success' : item.status === 'Rejected' ? 'bg-danger' : 'bg-warning')">
@@ -151,12 +152,10 @@
         </span>
       </td>
       <td class="text-center">
-        <p-button type="button" icon="fa-regular fa-circle-check fa-lg" pTooltip="Edit" tooltipPosition="top"
+        <p-button type="button" icon="fa-regular fa-circle-check fa-lg" pTooltip="Select" tooltipPosition="top"
           appendTo="body" (onClick)="editBeneficiary(item)" size="small" outlined="true" severity="secondary"
           class="me-2 big-icon-btn" />
-        <p-button type="button" icon="fas fa-trash" pTooltip="Close Project" tooltipPosition="top" appendTo="body"
-          (onClick)="deleteProject(item.id)" size="small" [outlined]="true" severity="danger"
-          class="me-2 " />
+
 
       </td>
     </tr>
