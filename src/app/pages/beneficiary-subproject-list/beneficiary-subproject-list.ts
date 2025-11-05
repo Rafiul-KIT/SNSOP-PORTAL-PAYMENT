@@ -279,9 +279,7 @@ export class BeneficiarySubprojectList implements OnInit {
   // ---------- Actions ----------
   beneficiaryAssignment(item: SubProjectDto) {
     if (!item?.id) return;
-    this.router.navigate(['/beneficiary-assignment'], {
-      queryParams: { id: item.id },
-    });
+    this.router.navigate(['/beneficiary-assignment', item.id]);
   }
   async deleteProject(item: SubProjectDto) {
  console.log(item)

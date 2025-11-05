@@ -92,7 +92,7 @@ export const routes: Routes = [
   },
    {
     component: BeneficiaryAssignment,
-    path: 'beneficiary-assignment',  
+    path: 'beneficiary-assignment/:id',  
   },
      {
     component: BeneficiaryAttendancePerform,
