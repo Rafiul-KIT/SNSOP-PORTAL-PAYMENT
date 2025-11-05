@@ -193,4 +193,16 @@
 
 }
 
+<p-dialog header="Confirm Deletion" [(visible)]="displayDeleteDialog" [modal]="true" [style]="{width: '450px'}">
+    <div class="confirmation-content d-flex align-items-center">
+        <i class="pi pi-exclamation-triangle me-3" style="font-size: 2rem"></i>
+        <span>Are you sure you want to close this sub-project?</span>
+    </div>
+    <textarea pInputTextarea [(ngModel)]="deleteComment" placeholder="Add a comment..." rows="3" class="w-100 mt-3"></textarea>
+    <ng-template pTemplate="footer">
+        <p-button label="No" icon="pi pi-times" severity="danger" (click)="cancelDelete()"></p-button>
+        <p-button label="Yes" icon="pi pi-check" severity="success" (click)="confirmDelete()"></p-button>
+    </ng-template>
+</p-dialog>
+
 <p-toast position="bottom-right"></p-toast>

@@ -7,16 +7,17 @@ import {
   FormArray,
   FormControl, FormsModule,
 } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Breadcrumb } from 'primeng/breadcrumb';
 import { Loader } from '../../components/loader/loader';
 import { ApiService } from '../../services/api.service';
-import { LookupItem, LookupService } from '../../services/lookup.service'; // Assuming this service exists
+import { LookupItem, LookupService } from '../../services/lookup.service';
+import { ButtonModule } from "primeng/button"; // Assuming this service exists
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, Loader, Breadcrumb, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, Loader, Breadcrumb, FormsModule, ButtonModule],
   templateUrl: './sub-project.html',
   styleUrl: './sub-project.scss',
 })
@@ -28,6 +29,7 @@ export class SubProject implements OnInit {
   breadcrumbItems: any[] = [];
   breadcrumbHome: any;
   subprojectId: string | null = null;
+  workCode: string | null =null;
 
   availableProjects: { id: number; name: string }[] = [];
   availableTypesOfWork: { id: string; description: string }[] = [];
@@ -44,6 +46,7 @@ export class SubProject implements OnInit {
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
+    private router: Router,
     private api: ApiService,
     private cdr: ChangeDetectorRef,
     private lookupService: LookupService // Injected
@@ -68,7 +71,7 @@ export class SubProject implements OnInit {
 
   ngOnInit(): void {
     this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
-    this.breadcrumbItems = [{ label: 'Project List' }, { label: 'Sub-Project' }];
+    this.breadcrumbItems = [{ label: 'Project List', icon: 'fas fa-home', routerLink: 'sub-project-list'  }, { label: 'Sub-Project' }];
 
     this.loadAvailableProjects();
     this.loadAvailableTypesOfWork();
@@ -77,7 +80,9 @@ export class SubProject implements OnInit {
     this.subprojectId = this.route.snapshot.paramMap.get('id');
     if (this.subprojectId) {
       this.loadSubProject(this.subprojectId);
+       this.cdr.detectChanges();
     }
+     this.cdr.detectChanges();
   }
 
   async loadAvailableStates(): Promise<void> {
@@ -395,7 +400,8 @@ export class SubProject implements OnInit {
       // --- API Call 1: Save Sub-project ---
       const subProjectPayload = {
         id: this.subprojectId ? parseInt(this.subprojectId, 10) : null,
-        workCode: `W-CODE-${Date.now()}`,
+        // workCode: `W-CODE-${Date.now()}`,
+        workCode: this.workCode ? parseInt(this.workCode, 10) : null,
         projectId: projectId,
         projectName: projectName,
         stateId: stateId,
@@ -412,7 +418,7 @@ export class SubProject implements OnInit {
         status: 'IP_Submitted',
       };
 
-      const subProjectResponse = await this.api.POST('/api/subproject/save', subProjectPayload);
+      const subProjectResponse = await this.api.POST('api/subproject/save', subProjectPayload);
 
       console.log('Response from /api/subproject/save:', JSON.stringify(subProjectResponse, null, 2));
 
@@ -447,7 +453,7 @@ export class SubProject implements OnInit {
           status: true,
         };
 
-        const workDetailResponse = await this.api.POST('/api/subproject/work-details/save', workDetailPayload);
+        const workDetailResponse = await this.api.POST('api/subproject/work-details/save', workDetailPayload);
         const newWorkDetailId = workDetailResponse.data.entityId;
         if (!newWorkDetailId) throw new Error('Failed to get work detail ID after saving.');
 
@@ -471,11 +477,13 @@ export class SubProject implements OnInit {
           formData.append('projectId', projectId.toString()); // No longer possibly null
           formData.append('subprojectId', newSubProjectId.toString());
           formData.append('subprojectWorkDetailId', newWorkDetailId.toString());
-          await this.api.POST_FORM_DATA('/api/subproject/work-details/attachment/save', formData);
+          await this.api.POST_FORM_DATA('api/subproject/work-details/attachment/save', formData);
         }
       }
 
       alert('Work proposal saved successfully!');
+      this.router.navigate(['/sub-project-list']);
+      this.isLoading = false;
       this.onAddNew();
     } catch (err: any) { // Catch as any to access err.message
       console.error('Failed to save sub-project', err);
@@ -487,9 +495,11 @@ export class SubProject implements OnInit {
   }
 
   onAddNew(): void {
+
     this.proposalForm.reset();
     this.workActivities.clear();
     this.addWorkActivity();
+    this.isLoading = false;
   }
 
   onCancel(): void {
@@ -525,6 +535,7 @@ export class SubProject implements OnInit {
         projects.forEach((p: { id: number; name: string }) => projectMap.set(p.id, p.name));
         this.availableProjects = Array.from(projectMap, ([id, name]) => ({ id, name }));
       }
+       this.cdr.detectChanges();
     } catch (err) {
       console.error('Failed to load available projects', err);
       this.availableProjects = [{ id: 1, name: 'Project Alpha' }, { id: 2, name: 'Project Beta' }];
@@ -540,6 +551,7 @@ export class SubProject implements OnInit {
           description: item.description,
         }));
       }
+       this.cdr.detectChanges();
     } catch (err) {
       console.error('Failed to load available types of work', err);
     }
@@ -557,7 +569,7 @@ export class SubProject implements OnInit {
     }
     try {
       const res: any = await this.api.GET(
-        `/api/lookup/generic/work-activity?areaOfWorkId=${areaOfWorkId}`
+        `api/lookup/generic/work-activity?areaOfWorkId=${areaOfWorkId}`
       );
       if (res.data && Array.isArray(res.data.content)) {
         const activities = res.data.content.map((item: any) => ({
@@ -565,9 +577,11 @@ export class SubProject implements OnInit {
           description: item.description,
         }));
         this.availableActivities.set(String(areaOfWorkId), activities);
+         this.cdr.detectChanges();
       } else {
         this.availableActivities.set(String(areaOfWorkId), []);
       }
+       this.cdr.detectChanges();
     } catch (err) {
       console.error('Failed to load available activities', err);
       this.availableActivities.set(String(areaOfWorkId), []);
