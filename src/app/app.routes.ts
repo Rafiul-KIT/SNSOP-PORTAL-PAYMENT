@@ -13,6 +13,8 @@ import { ApplyForWagesPaymentComponent } from './pages/apply-wages-request/apply
 import { BeneficiaryAttendancePerform } from './pages/beneficiay-attendance/beneficiary-attendance-perform/beneficiary-attendance-perform';
 import { WorkApproval } from './pages/work-approval/work-approval';
 import { WorkReview } from './pages/work-review/work-review';
+import { BeneficiaryAssignment } from './pages/beneficiary-assignment/beneficiary-assignment';
+import { BeneficiarySubprojectList } from './pages/beneficiary-subproject-list/beneficiary-subproject-list';
 
 
 
@@ -83,6 +85,14 @@ export const routes: Routes = [
    {
     component: BeneficiaryAttendance,
     path: 'beneficiary-attendance',  
+  },
+  {
+    component: BeneficiarySubprojectList,
+    path: 'beneficiary-subproject-list',  
+  },
+   {
+    component: BeneficiaryAssignment,
+    path: 'beneficiary-assignment',  
   },
      {
     component: BeneficiaryAttendancePerform,

@@ -65,9 +65,15 @@ export class Header {
         routerLinkActiveOptions: 'active',
       },
        {
-        label: 'work approval',
+        label: 'Work Approval',
         icon: 'fa fa-check',
         routerLink: 'work-approval',
+        routerLinkActiveOptions: 'active',
+      },
+         {
+        label: 'Beneficiary Assignment',
+        icon: 'fa fa-check',
+        routerLink: 'beneficiary-subproject-list',
         routerLinkActiveOptions: 'active',
       },
       {
