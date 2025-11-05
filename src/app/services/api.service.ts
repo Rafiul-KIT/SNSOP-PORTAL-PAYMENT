@@ -91,6 +91,14 @@ export class ApiService {
     return this.axiosInstance.post(endpoint, payload, this.apiHeader);
   };
 
+  POST_FORM_DATA = (endpoint: string, payload: FormData) => {
+    return this.axiosInstance.post(endpoint, payload, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  };
+
   PUTWITHPAYLOAD = (endpoint: string, payload: {}) => {
     return this.axiosInstance.put(endpoint, payload, this.apiHeader);
   };
