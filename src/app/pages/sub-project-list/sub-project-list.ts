@@ -16,12 +16,11 @@ import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { PaginatorModule } from 'primeng/paginator';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
-import { InputTextModule } from 'primeng/inputtext';
 import { TooltipModule } from 'primeng/tooltip';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { SelectModule } from 'primeng/select';
-
+import { DialogModule } from 'primeng/dialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import {
@@ -68,17 +67,16 @@ interface SubProjectDto {
     TableModule,
     ButtonModule,
     ToastModule,
-    ConfirmDialogModule,
+    DialogModule,
     PaginatorModule,
     BreadcrumbModule,
     FloatLabelModule,
-    InputTextModule,
     SelectModule,
     RouterModule,
     TooltipModule,
     Loader,
   ],
-  providers: [MessageService, ConfirmationService],
+  providers: [MessageService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SubProjectList implements OnInit {
@@ -108,10 +106,13 @@ export class SubProjectList implements OnInit {
   pageSize = 10;
   advanceSearchPanelVisible = false;
 
+  displayDeleteDialog = false;
+  deleteComment = '';
+  currentProjectIdToDelete: number | null = null;
+
   constructor(
     private fb: FormBuilder,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService,
     private router: Router,
     private route: ActivatedRoute,
     private api: ApiService,
@@ -286,8 +287,66 @@ export class SubProjectList implements OnInit {
     newProject() {
     this.router.navigate(['/sub-project']);
   }
-  async deleteProject(id: number) {
- console.log(id)
+
+  deleteProject(id: number) {
+    this.currentProjectIdToDelete = id;
+    this.deleteComment = '';
+    this.displayDeleteDialog = true;
+    this.cdr.markForCheck();
   }
+
+  async confirmDelete() {
+    if (this.currentProjectIdToDelete === null) return;
+
+    try {
+      // 1. Fetch Sub-Project Details
+      const getPayload = { id: this.currentProjectIdToDelete };
+      const subProjectDetailsRes: any = await this.api.POST(`api/subproject/get?page=0&size=1`, getPayload);
+
+      if (!subProjectDetailsRes.data || !subProjectDetailsRes.data.content || subProjectDetailsRes.data.content.length === 0) {
+        throw new Error('Sub-project details not found.');
+      }
+
+      const subProjectToUpdate: SubProjectDto = subProjectDetailsRes.data.content[0];
+
+      // 2. Modify Details
+      subProjectToUpdate.status = 'Completed';
+      // Assuming 'remarks' can be added to the payload for the save endpoint
+      const finalPayload = {
+        ...subProjectToUpdate,
+        remarks: this.deleteComment
+      };
+
+      // 3. Send Updated Payload
+      const res: any = await this.api.POST(`api/subproject/save`, finalPayload);
+
+      if (res.data && res.data.entityId) {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Project Closed',
+          detail: `Sub-project with ID ${this.currentProjectIdToDelete} was successfully closed.`,
+        });
+        this.fetchPage(this.currentPage, this.pageSize);
+      } else {
+        throw new Error('API did not return entityId on successful save.');
+      }
+    } catch (err: any) {
+      console.error('Error closing project:', err);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: `Failed to close sub-project: ${err.message || 'Unknown error'}.`,
+      });
+    } finally {
+      this.cancelDelete(); // Close dialog and reset state
+    }
+  }
+
+  cancelDelete() {
+    this.displayDeleteDialog = false;
+    this.currentProjectIdToDelete = null;
+    this.deleteComment = '';
+  }
+
   trackById = (_: number, row: SubProjectDto) => row.id;
 }
