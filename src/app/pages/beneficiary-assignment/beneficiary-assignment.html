@@ -9,9 +9,6 @@
     <div class="row justify-content-center">
         <div class="col-12 col-xl-11">
             <p-card class="shadow-sm border-0">
-                @if (false) {
-                <app-loader></app-loader>
-                } @else {
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
                         <div class="card border-0 shadow-sm h-100">
@@ -33,13 +30,11 @@
                                         <span class="text-muted">Work Code:</span>
                                         <span class="fw-semibold text-dark">{{ projectInfo?.workCode || '—' }}</span>
                                     </div>
-
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Location & Schedule Card -->
                     <div class="col-md-6">
                         <div class="card border-0 shadow-sm h-100">
                             <div class="card-body">
@@ -49,7 +44,6 @@
                                 </h5>
 
                                 <div class="row g-3 p-4">
-
                                     <div
                                         class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-1">
                                         <span class="text-muted">Payam:</span>
@@ -73,7 +67,6 @@
                                         <span class="text-muted">County:</span>
                                         <span class="fw-semibold text-dark">{{ projectInfo?.countyName || '—' }}</span>
                                     </div>
-
                                 </div>
                             </div>
                         </div>
@@ -82,12 +75,9 @@
 
                 <p-divider></p-divider>
 
-
-                <form [formGroup]="projectForm" (ngSubmit)="onSubmit()">
+                <form [formGroup]="projectForm">
                     <fieldset [disabled]="loading">
                         <div class="row g-3 mb-3 p-4">
-
-
                             <div class="col-md-6">
                                 <label for="workStartAt" class="form-label">
                                     Work Start Date <span class="text-danger">*</span>
@@ -102,7 +92,6 @@
                                 <small class="text-danger">Work start date is required</small>
                                 }
                             </div>
-
 
                             <div class="col-md-6">
                                 <label for="inchargeName" class="form-label">Incharge Name</label>
@@ -127,23 +116,182 @@
                                 }
                             </div>
 
-
                             <div class="col-md-6">
                                 <label for="comments" class="form-label">Comments</label>
                                 <textarea id="comments" formControlName="comments" class="form-control" rows="1"
                                     placeholder="Enter comments"></textarea>
                             </div>
-
                         </div>
 
-                        <div class="d-flex justify-content-center mt-3">
-                            <button pButton type="submit" label="Submit" class="p-button-primary px-5"
-                                [disabled]="loading">
-                            </button>
+                        <p-divider></p-divider>
+
+                        <!-- Tabs for Beneficiaries -->
+                        <div class="p-4">
+                            <p-tabs [(value)]="activeTabIndex">
+                                <!-- Available Beneficiaries Tab -->
+                                <p-tabpanel [value]="0" header="Available for Assignment">
+                                    <ng-template pTemplate="header">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="pi pi-users"></i>
+                                            <span>Available for Assignment</span>
+                                            <span class="badge bg-primary">{{ canBeAssignedTotalRecords }}</span>
+                                        </div>
+                                    </ng-template>
+
+                                    <p-table 
+                                        [value]="canBeAssignedBeneficiaries" 
+                                        [lazy]="true"
+                                        [paginator]="true" 
+                                        [rows]="canBeAssignedRows" 
+                                        [totalRecords]="canBeAssignedTotalRecords"
+                                        [first]="canBeAssignedFirst"
+                                        [loading]="isLoadingCanBeAssigned"
+                                        (onLazyLoad)="onCanBeAssignedPageChange($event)"
+                                        [rowsPerPageOptions]="[10, 20, 50]"
+                                        [showCurrentPageReport]="true"
+                                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} beneficiaries"
+                                        styleClass="p-datatable-sm p-datatable-striped">
+                                        
+                                        <ng-template pTemplate="header">
+                                            <tr>
+                                                <th style="width: 3rem">Select</th>
+                                                <th>Household #</th>
+                                                <th>Beneficiary Name</th>
+                                                <th>Gender</th>
+                                                <th>Age</th>
+                                                <th>Phone</th>
+                                                <th>Monthly Income</th>
+                                            </tr>
+                                        </ng-template>
+
+                                        <ng-template pTemplate="body" let-beneficiary>
+                                            <tr>
+                                                <td>
+                                                    <p-checkbox 
+                                                        [(ngModel)]="beneficiary.isSelected"
+                                                        [ngModelOptions]="{standalone: true}"
+                                                        [binary]="true">
+                                                    </p-checkbox>
+                                                </td>
+                                                <td>{{ beneficiary.householdNumber || '—' }}</td>
+                                                <td>{{ beneficiary.beneficiaryName || '—' }}</td>
+                                                <td>
+                                                    <span [class]="'badge ' + (beneficiary.gender === 'MALE' ? 'bg-primary' : 'bg-success')">
+                                                        {{ beneficiary.gender }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ beneficiary.age || '—' }}</td>
+                                                <td>{{ beneficiary.phoneNo || '—' }}</td>
+                                                <td>{{ beneficiary.householdMonthlyAvgIncome | number }}</td>
+                                            </tr>
+                                        </ng-template>
+
+                                        <ng-template pTemplate="emptymessage">
+                                            <tr>
+                                                <td colspan="7" class="text-center py-4">
+                                                    <i class="pi pi-info-circle me-2"></i>
+                                                    No beneficiaries available for assignment
+                                                </td>
+                                            </tr>
+                                        </ng-template>
+                                    </p-table>
+
+                                    <div class="d-flex justify-content-center mt-4">
+                                        <button pButton type="button" label="Assign Selected" icon="pi pi-user-plus" 
+                                            class="p-button-success px-5" 
+                                            [disabled]="loading || getSelectedCanBeAssignedIds().length === 0"
+                                            (click)="assignBeneficiaries()">
+                                        </button>
+                                    </div>
+                                </p-tabpanel>
+
+                                <!-- Existing Assigned Beneficiaries Tab -->
+                                <p-tabpanel [value]="1" header="Currently Assigned">
+                                    <ng-template pTemplate="header">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="pi pi-check-circle"></i>
+                                            <span>Currently Assigned</span>
+                                            <span class="badge bg-success">{{ existingTotalRecords }}</span>
+                                        </div>
+                                    </ng-template>
+
+                                    <p-table 
+                                        [value]="existingBeneficiaries" 
+                                        [lazy]="true"
+                                        [paginator]="true" 
+                                        [rows]="existingRows" 
+                                        [totalRecords]="existingTotalRecords"
+                                        [first]="existingFirst"
+                                        [loading]="isLoadingExisting"
+                                        (onLazyLoad)="onExistingPageChange($event)"
+                                        [rowsPerPageOptions]="[10, 20, 50]"
+                                        [showCurrentPageReport]="true"
+                                        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} beneficiaries"
+                                        styleClass="p-datatable-sm p-datatable-striped">
+                                        
+                                        <ng-template pTemplate="header">
+                                            <tr>
+                                                <th style="width: 3rem">Select</th>
+                                                <th>Household #</th>
+                                                <th>Beneficiary Name</th>
+                                                <th>Gender</th>
+                                                <th>Age</th>
+                                                <th>Phone</th>
+                                                <th>Monthly Income</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </ng-template>
+
+                                        <ng-template pTemplate="body" let-beneficiary>
+                                            <tr>
+                                                <td>
+                                                    <p-checkbox 
+                                                        [(ngModel)]="beneficiary.isSelected"
+                                                        [ngModelOptions]="{standalone: true}"
+                                                        [binary]="true">
+                                                    </p-checkbox>
+                                                </td>
+                                                <td>{{ beneficiary.householdNumber || '—' }}</td>
+                                                <td>{{ beneficiary.beneficiaryName || '—' }}</td>
+                                                <td>
+                                                    <span [class]="'badge ' + (beneficiary.gender === 'MALE' ? 'bg-primary' : 'bg-success')">
+                                                        {{ beneficiary.gender }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ beneficiary.age || '—' }}</td>
+                                                <td>{{ beneficiary.phoneNo || '—' }}</td>
+                                                <td>{{ beneficiary.householdMonthlyAvgIncome | number }}</td>
+                                                <td>
+                                                    <span class="badge bg-success">
+                                                        <i class="pi pi-check me-1"></i>
+                                                        Assigned
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </ng-template>
+
+                                        <ng-template pTemplate="emptymessage">
+                                            <tr>
+                                                <td colspan="8" class="text-center py-4">
+                                                    <i class="pi pi-info-circle me-2"></i>
+                                                    No beneficiaries currently assigned
+                                                </td>
+                                            </tr>
+                                        </ng-template>
+                                    </p-table>
+
+                                    <div class="d-flex justify-content-center mt-4">
+                                        <button pButton type="button" label="Remove Selected" icon="pi pi-user-minus" 
+                                            class="p-button-danger px-5" 
+                                            [disabled]="loading || getSelectedExistingIds().length === 0"
+                                            (click)="removeBeneficiaries()">
+                                        </button>
+                                    </div>
+                                </p-tabpanel>
+                            </p-tabs>
                         </div>
                     </fieldset>
                 </form>
-                }
             </p-card>
         </div>
     </div>
