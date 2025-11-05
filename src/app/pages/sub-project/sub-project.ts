@@ -24,6 +24,7 @@ export class SubProject implements OnInit {
   searchCtrl = new FormControl<string>('');
   isLoading = false;
   proposalForm: FormGroup;
+  public workActivities: FormArray;
   breadcrumbItems: any[] = [];
   breadcrumbHome: any;
   subprojectId: string | null = null;
@@ -62,6 +63,7 @@ export class SubProject implements OnInit {
             materialsPhotoName: [''], // Added
             paperScreeningStatus: [''],
           });
+    this.workActivities = this.proposalForm.get('workActivities') as FormArray;
   }
 
   ngOnInit(): void {
@@ -188,7 +190,10 @@ export class SubProject implements OnInit {
       const [subProjectRes, workDetailsRes] = await Promise.all([subProjectPromise, workDetailsPromise]);
 
       const subProjectData = subProjectRes.data.content[0];
-      const activities = workDetailsRes.data.content;
+      const workDetailsData = workDetailsRes.data;
+      const activities = Array.isArray(workDetailsData)
+        ? workDetailsData
+        : workDetailsData?.content ?? [];
 
       if (!subProjectData) {
         console.error(`Sub-project with id ${id} not found.`);
@@ -241,12 +246,17 @@ export class SubProject implements OnInit {
             const typeOfWorkId = activity.areaOfWorkId;
             const workActivityId = activity.workActivityId;
 
-            // Patch all values except secondaryActivity first
+            if (typeOfWorkId) {
+              await this.onTypeOfWorkChange({ target: { value: typeOfWorkId } } as any, i);
+            }
+
+            // Patch all values, ensuring IDs are strings for form binding
             currentActivityControl.patchValue({
               id: activity.id,
               name: activity.workName || '',
               code: activity.workCode || '',
-              typeOfWork: typeOfWorkId,
+              typeOfWork: typeOfWorkId ? String(typeOfWorkId) : null,
+              secondaryActivity: workActivityId ? String(workActivityId) : null,
               estimatedManpower: activity.estManPower || 0,
               estimatedManDays: activity.estDay || 0,
               estimatedCostOfEquipment: activity.equipmentCost || 0,
@@ -256,30 +266,22 @@ export class SubProject implements OnInit {
               estimatedSkillLabour: activity.estSkilledLabourDay || 0,
               estimatedCost: activity.estCost || 0,
             });
-
-            if (typeOfWorkId) {
-              await this.onTypeOfWorkChange({ target: { value: typeOfWorkId } } as any, i);
-              // Now that the secondary activities are loaded, patch the value
-              currentActivityControl.patchValue({
-                secondaryActivity: workActivityId,
-              });
-            }
-          }
         }
       }
 
       this.cdr.detectChanges();
 
-    } catch (err) {
+    } 
+    }
+    catch (err) {
       console.error('Failed to load sub-project', err);
-    } finally {
+    }
+     finally {
       this.isLoading = false;
     }
   }
 
-  get workActivities(): FormArray<FormGroup> {
-    return this.proposalForm.get('workActivities') as FormArray<FormGroup>;
-  }
+
 
   private createWorkActivity(): FormGroup {
     return this.fb.group({
@@ -506,6 +508,8 @@ export class SubProject implements OnInit {
     return index;
   }
 
+
+
   async loadAvailableProjects(): Promise<void> {
     try {
       const res = await this.api.GET('api/project/get?page=0&size=100&status=InProgress',);
@@ -530,7 +534,7 @@ export class SubProject implements OnInit {
       const res: any = await this.api.GET('api/lookup/generic/area-of-work');
       if (res.data && Array.isArray(res.data.content)) {
         this.availableTypesOfWork = res.data.content.map((item: any) => ({
-          id: Number(item.id),
+          id: String(item.id),
           description: item.description,
         }));
       }
@@ -555,17 +559,17 @@ export class SubProject implements OnInit {
       );
       if (res.data && Array.isArray(res.data.content)) {
         const activities = res.data.content.map((item: any) => ({
-          id: Number(item.id),
+          id: String(item.id),
           description: item.description,
         }));
-        this.availableActivities.set(areaOfWorkId, activities);
+        this.availableActivities.set(String(areaOfWorkId), activities);
         this.cdr.detectChanges();
       } else {
-        this.availableActivities.set(areaOfWorkId, []);
+        this.availableActivities.set(String(areaOfWorkId), []);
       }
     } catch (err) {
       console.error('Failed to load available activities', err);
-      this.availableActivities.set(areaOfWorkId, []);
+      this.availableActivities.set(String(areaOfWorkId), []);
     }
   }
 
