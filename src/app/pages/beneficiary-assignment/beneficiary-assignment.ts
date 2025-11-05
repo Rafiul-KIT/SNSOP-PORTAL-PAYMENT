@@ -50,6 +50,9 @@ export class BeneficiaryAssignment implements OnInit {
   statusMsg = '';
   isLoading = false;
 
+  isSubmitted = false;
+  selectedFile: File | null = null;
+
   private readonly PROJECTS_ENDPOINT = '/api/subproject/get';
 
   constructor(
@@ -62,14 +65,26 @@ export class BeneficiaryAssignment implements OnInit {
 
   ngOnInit(): void {
     this.initBreadcrumb();
-
+    this.initializeForm();
     this.subprojectId = this.route.snapshot.paramMap.get('id');
 
     if (this.subprojectId) {
       this.loadProjectData(this.subprojectId);
     }
   }
-
+  onFileSelect(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+    }
+  }
+  initializeForm(): void {
+    this.projectForm = this.fb.group({
+      workStartAt: ['', Validators.required],
+      inchargeName: [''],
+      comments: [''],
+    });
+  }
   initBreadcrumb() {
     this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
     this.breadcrumbItems = [{ label: 'Beneficiary Assignment' }];
@@ -127,5 +142,76 @@ export class BeneficiaryAssignment implements OnInit {
       this.isLoading = false;
       this.cdr.detectChanges();
     }
+  }
+  onSubmit(): void {
+    this.isSubmitted = true;
+
+    // Validate form
+    if (this.projectForm.invalid) {
+      this.projectForm.markAllAsTouched();
+      return;
+    }
+
+    // Validate file attachment
+    if (!this.selectedFile) {
+      return;
+    }
+
+    this.loading = true;
+
+    // Prepare form data for API
+    const formData = new FormData();
+
+    // Add form fields
+    formData.append(
+      'workStartAt',
+      this.formatDate(this.projectForm.value.workStartAt)
+    );
+    formData.append('inchargeName', this.projectForm.value.inchargeName || '');
+    formData.append('comments', this.projectForm.value.comments || '');
+
+    // Add file attachment
+    formData.append('attachment', this.selectedFile);
+
+    // Add project info (these are for API, not shown in form)
+    formData.append('projectName', this.projectInfo.projectName);
+    formData.append('workCode', this.projectInfo.workCode);
+    formData.append('payamName', this.projectInfo.payamName);
+    formData.append('bomaName', this.projectInfo.bomaName);
+    formData.append('stateName', this.projectInfo.stateName);
+    formData.append('countyName', this.projectInfo.countyName);
+
+    // Call your API service here
+    // this.projectService.submitProject(formData).subscribe({
+    //   next: (response) => {
+    //     console.log('Success:', response);
+    //     this.loading = false;
+    //     // Show success message
+    //   },
+    //   error: (error) => {
+    //     console.error('Error:', error);
+    //     this.loading = false;
+    //     // Show error message
+    //   }
+    // });
+
+    // For demonstration
+    console.log('Form Data:', formData);
+    console.log('Form Values:', this.projectForm.value);
+    console.log('Selected File:', this.selectedFile);
+
+    setTimeout(() => {
+      this.loading = false;
+      alert('Form submitted successfully!');
+    }, 2000);
+  }
+
+  formatDate(date: Date): string {
+    if (!date) return '';
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }
