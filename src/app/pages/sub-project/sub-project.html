@@ -9,7 +9,7 @@
       class="w-100"
     ></p-breadcrumb>
   </div>
-}
+
 <div class="min-vh-100 ">
 
     <!-- Header -->
@@ -159,7 +159,7 @@
                                 </h5>
 
                                 @if (workActivities.length > 0) {
-                                  <button type="button" class="btn btn-danger rounded-circle btn-icon ms-2 me-1" (click)="removeWorkActivity(i)" aria-label="Remove activity {{ i + 1 }}">
+                                  <button type="button" class="btn btn-danger rounded-circle btn-icon ms-2 me-1" (click)="removeWorkActivity(i)" [attr.aria-label]="'Remove activity ' + (i + 1)">
                                     <i class="fas fa-times fa-sm"></i>
                                   </button>
                                 }
@@ -324,3 +324,4 @@
         </div>
     </div>
 </div>
+}

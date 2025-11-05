@@ -11,7 +11,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Breadcrumb } from 'primeng/breadcrumb';
 import { Loader } from '../../components/loader/loader';
 import { ApiService } from '../../services/api.service';
-import {LookupItem, LookupService} from '../../services/lookup.service'; // Assuming this service exists
+import { LookupItem, LookupService } from '../../services/lookup.service'; // Assuming this service exists
 
 @Component({
   selector: 'app-root',
@@ -60,9 +60,9 @@ export class SubProject implements OnInit {
       bomaName: [''],
       workActivities: this.fb.array([this.createWorkActivity()]),
       materialsPhoto: [null], // Added
-            materialsPhotoName: [''], // Added
-            paperScreeningStatus: [''],
-          });
+      materialsPhotoName: [''], // Added
+      paperScreeningStatus: [''],
+    });
     this.workActivities = this.proposalForm.get('workActivities') as FormArray;
   }
 
@@ -205,7 +205,7 @@ export class SubProject implements OnInit {
       if (subProjectData.projectId && subProjectData.projectName) {
         const projectExists = this.availableProjects.some(p => p.id === subProjectData.projectId);
         if (!projectExists) {
-            this.availableProjects.push({ id: Number(subProjectData.projectId), name: String(subProjectData.projectName) });
+          this.availableProjects.push({ id: Number(subProjectData.projectId), name: String(subProjectData.projectName) });
         }
       }
 
@@ -266,22 +266,23 @@ export class SubProject implements OnInit {
               estimatedSkillLabour: activity.estSkilledLabourDay || 0,
               estimatedCost: activity.estCost || 0,
             });
+          }
+          setTimeout(() => this.cdr.detectChanges(), 0);
+
         }
       }
 
-      this.cdr.detectChanges();
 
-    } 
     }
     catch (err) {
       console.error('Failed to load sub-project', err);
     }
-     finally {
+
+    finally {
       this.isLoading = false;
     }
+
   }
-
-
 
   private createWorkActivity(): FormGroup {
     return this.fb.group({
@@ -310,7 +311,6 @@ export class SubProject implements OnInit {
 
   addWorkActivity(): void {
     this.workActivities.push(this.createWorkActivity());
-    this.cdr.detectChanges();
   }
 
   removeWorkActivity(index: number): void {
@@ -510,6 +510,8 @@ export class SubProject implements OnInit {
 
 
 
+
+
   async loadAvailableProjects(): Promise<void> {
     try {
       const res = await this.api.GET('api/project/get?page=0&size=100&status=InProgress',);
@@ -525,7 +527,7 @@ export class SubProject implements OnInit {
       }
     } catch (err) {
       console.error('Failed to load available projects', err);
-      this.availableProjects = [{id: 1, name: 'Project Alpha'}, {id: 2, name: 'Project Beta'}];
+      this.availableProjects = [{ id: 1, name: 'Project Alpha' }, { id: 2, name: 'Project Beta' }];
     }
   }
 
@@ -563,7 +565,6 @@ export class SubProject implements OnInit {
           description: item.description,
         }));
         this.availableActivities.set(String(areaOfWorkId), activities);
-        this.cdr.detectChanges();
       } else {
         this.availableActivities.set(String(areaOfWorkId), []);
       }
