@@ -117,7 +117,7 @@
       </th>
     </tr>
     <tr>
-      <th>ID</th>
+      <th>Serial</th>
       <th>Work Code</th>
       <th>Project Name</th>
       <th>State</th>
@@ -132,9 +132,9 @@
     </tr>
   </ng-template>
 
-  <ng-template pTemplate="body" let-item>
+  <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
     <tr>
-      <td>{{ item.id }}</td>
+      <td>{{ rowIndex + 1 }}</td>
       <td>{{ item.workCode }}</td>
       <td>{{ item.projectName }}</td>
       <td>{{ item.stateName }}</td>
