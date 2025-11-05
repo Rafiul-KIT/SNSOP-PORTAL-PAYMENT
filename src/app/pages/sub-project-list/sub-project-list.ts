@@ -286,8 +286,8 @@ export class SubProjectList implements OnInit {
     newProject() {
     this.router.navigate(['/sub-project']);
   }
-  async deleteProject(item: SubProjectDto) {
- console.log(item)
+  async deleteProject(id: number) {
+ console.log(id)
   }
   trackById = (_: number, row: SubProjectDto) => row.id;
 }

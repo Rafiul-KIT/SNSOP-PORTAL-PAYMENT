@@ -151,7 +151,7 @@
                         </div>
 
                         <div formArrayName="workActivities">
-                          @for (activity of workActivities.controls; track trackByIndex; let i = $index) {
+                          @for (activity of workActivities.controls; track trackByIndex(i); let i = $index) {
                             <div [formGroupName]="i" class="card mb-4 border-secondary">
                               <div class="card-header bg-opacity-10 d-flex justify-content-between align-items-center">
                                 <h5 class="mb-0 text-secondary">
