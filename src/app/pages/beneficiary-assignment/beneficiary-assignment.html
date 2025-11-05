@@ -1,4 +1,4 @@
-@if (false) {
+@if (isLoading) {
 <app-loader></app-loader>
 } @else {
 <div class="breadcrumb-wrapper">
@@ -12,8 +12,7 @@
                 @if (false) {
                 <app-loader></app-loader>
                 } @else {
-                <div class="row g-4 mb-4">
-
+                <div class="row g-3 mb-3">
                     <div class="col-md-6">
                         <div class="card border-0 shadow-sm h-100">
                             <div class="card-body">
@@ -22,7 +21,7 @@
                                     <span>Project Information</span>
                                 </h5>
 
-                                <div class="list-group list-group-flush">
+                                <div class="list-group list-group-flush p-4">
                                     <div
                                         class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
                                         <span class="text-muted">Project Name:</span>
@@ -40,15 +39,16 @@
                         </div>
                     </div>
 
+                    <!-- Location & Schedule Card -->
                     <div class="col-md-6">
                         <div class="card border-0 shadow-sm h-100">
                             <div class="card-body">
-                                <h5 class="card-title text-secondary mb-4 d-flex align-items-center">
+                                <h5 class="card-title text-secondary mb-3 d-flex align-items-center">
                                     <i class="pi pi-map-marker me-2"></i>
                                     <span>Location & Schedule</span>
                                 </h5>
 
-                                <div class="row g-3">
+                                <div class="row g-3 p-4">
 
                                     <div
                                         class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-1">
@@ -75,7 +75,6 @@
                                     </div>
 
                                 </div>
-
                             </div>
                         </div>
                     </div>
@@ -83,13 +82,64 @@
 
                 <p-divider></p-divider>
 
-                <form>
+
+                <form [formGroup]="projectForm" (ngSubmit)="onSubmit()">
                     <fieldset [disabled]="loading">
-                        <div class="row">
-                            <div class="d-flex justify-content-center mt-3">
-                                <button pButton type="submit" label="Submit" class="p-button-primary px-5"
-                                    [disabled]="loading"></button>
+                        <div class="row g-3 mb-3 p-4">
+
+
+                            <div class="col-md-6">
+                                <label for="workStartAt" class="form-label">
+                                    Work Start Date <span class="text-danger">*</span>
+                                </label>
+
+                                <p-datePicker inputId="workStartAt" formControlName="workStartAt" [showIcon]="true"
+                                    dateFormat="yy-mm-dd" placeholder="Select date" class="w-100"
+                                    [class.ng-invalid]="projectForm.get('workStartAt')?.invalid && projectForm.get('workStartAt')?.touched">
+                                </p-datePicker>
+                                @if (projectForm.get('workStartAt')?.invalid && projectForm.get('workStartAt')?.touched)
+                                {
+                                <small class="text-danger">Work start date is required</small>
+                                }
                             </div>
+
+
+                            <div class="col-md-6">
+                                <label for="inchargeName" class="form-label">Incharge Name</label>
+                                <input type="text" id="inchargeName" formControlName="inchargeName" class="form-control"
+                                    placeholder="Enter incharge name">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="attachment" class="form-label">
+                                    Attachment <span class="text-danger">*</span>
+                                </label>
+                                <input type="file" id="attachment" class="form-control" (change)="onFileSelect($event)"
+                                    [class.is-invalid]="!selectedFile && isSubmitted"
+                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                                @if (!selectedFile && isSubmitted) {
+                                <small class="text-danger">Attachment is required</small>
+                                }
+                                @if (selectedFile) {
+                                <small class="text-muted d-block mt-1">
+                                    Selected: {{ selectedFile.name }}
+                                </small>
+                                }
+                            </div>
+
+
+                            <div class="col-md-6">
+                                <label for="comments" class="form-label">Comments</label>
+                                <textarea id="comments" formControlName="comments" class="form-control" rows="1"
+                                    placeholder="Enter comments"></textarea>
+                            </div>
+
+                        </div>
+
+                        <div class="d-flex justify-content-center mt-3">
+                            <button pButton type="submit" label="Submit" class="p-button-primary px-5"
+                                [disabled]="loading">
+                            </button>
                         </div>
                     </fieldset>
                 </form>
