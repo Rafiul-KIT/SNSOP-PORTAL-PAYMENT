@@ -22,7 +22,6 @@ export const StatusEnum = [
 
 // Define Enum for Screening Status
 export const ScreeningStatusEnum = [
- 
   { id: '0', value: 'Rejected', label: 'Rejected' },
    { id: '1', value: 'Accepted', label: 'Accepted' }
 ];
@@ -230,7 +229,7 @@ async getProjectNameDescription(): Promise<ProjectNameDescription[] | []> {
 
   try {
     // if your API is paged, request enough rows; otherwise drop the query
-    const res = await this.api.GET('api/project/get?page=0&size=100');
+    const res = await this.api.GET('api/project/get?page=0&size=100&status=InProgress');
     const payload = res?.data ?? res;
 
     // handle both {code:200, content:[...]} and plain {content:[...]}

@@ -87,7 +87,7 @@
                                     dateFormat="yy-mm-dd" placeholder="Select date" class="w-100"
                                     [class.ng-invalid]="projectForm.get('workStartAt')?.invalid && projectForm.get('workStartAt')?.touched">
                                 </p-datePicker>
-                                @if (projectForm.get('workStartAt')?.invalid && projectForm.get('workStartAt')?.touched)
+                                @if (isSubmitted && projectForm.get('workStartAt')?.invalid && projectForm.get('workStartAt')?.touched)
                                 {
                                 <small class="text-danger">Work start date is required</small>
                                 }
@@ -104,15 +104,13 @@
                                     Attachment <span class="text-danger">*</span>
                                 </label>
                                 <input type="file" id="attachment" class="form-control" (change)="onFileSelect($event)"
-                                    [class.is-invalid]="!selectedFile && isSubmitted"
-                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                    [class.is-invalid]="!selectedFile && isSubmitted" />
                                 @if (!selectedFile && isSubmitted) {
                                 <small class="text-danger">Attachment is required</small>
                                 }
                                 @if (selectedFile) {
-                                <small class="text-muted d-block mt-1">
-                                    Selected: {{ selectedFile.name }}
-                                </small>
+                                <small class="text-success">Selected: {{ selectedFile.name }}</small>
                                 }
                             </div>
 
@@ -125,36 +123,44 @@
 
                         <p-divider></p-divider>
 
-                        <!-- Tabs for Beneficiaries -->
-                        <div class="p-4">
-                            <p-tabs [(value)]="activeTabIndex">
-                                <!-- Available Beneficiaries Tab -->
-                                <p-tabpanel [value]="0" header="Available for Assignment">
-                                    <ng-template pTemplate="header">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <i class="pi pi-users"></i>
-                                            <span>Available for Assignment</span>
-                                            <span class="badge bg-primary">{{ canBeAssignedTotalRecords }}</span>
-                                        </div>
-                                    </ng-template>
 
-                                    <p-table 
-                                        [value]="canBeAssignedBeneficiaries" 
-                                        [lazy]="true"
-                                        [paginator]="true" 
-                                        [rows]="canBeAssignedRows" 
-                                        [totalRecords]="canBeAssignedTotalRecords"
-                                        [first]="canBeAssignedFirst"
-                                        [loading]="isLoadingCanBeAssigned"
+                        <div class="p-4">
+                            <div class="tabs">
+
+                                <div class="d-flex mb-3">
+                                    <button class="btn btn-outline-primary w-50"
+                                        [ngClass]="{ 'active': activeTabIndex === 0 }" (click)="activeTabIndex = 0">
+                                        Available for Assignment
+                                        <span class="badge bg-primary ms-2">{{ canBeAssignedTotalRecords }}</span>
+                                    </button>
+                                    <button class="btn btn-outline-success w-50"
+                                        [ngClass]="{ 'active': activeTabIndex === 1 }" (click)="activeTabIndex = 1">
+                                        Currently Assigned
+                                        <span class="badge bg-success ms-2">{{ existingTotalRecords }}</span>
+                                    </button>
+                                </div>
+
+                                <!-- Available for Assignment Tab -->
+                                <div *ngIf="activeTabIndex === 0">
+                                    <p-table [value]="canBeAssignedBeneficiaries" [lazy]="true" [paginator]="true"
+                                        [rows]="canBeAssignedRows" [totalRecords]="canBeAssignedTotalRecords"
+                                        [first]="canBeAssignedFirst" [loading]="isLoadingCanBeAssigned"
                                         (onLazyLoad)="onCanBeAssignedPageChange($event)"
-                                        [rowsPerPageOptions]="[10, 20, 50]"
-                                        [showCurrentPageReport]="true"
+                                        [rowsPerPageOptions]="[10, 20, 50]" [showCurrentPageReport]="true"
                                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} beneficiaries"
                                         class="p-datatable-sm p-datatable-striped">
-                                        
+
+                                        <!-- ✅ Table Header -->
                                         <ng-template pTemplate="header">
                                             <tr>
-                                                <th style="width: 3rem">Select</th>
+                                                <th style="width: 8rem ">
+                                                    <!-- Select All Checkbox -->
+                                                    <p-checkbox [(ngModel)]="selectAll"
+                                                        [ngModelOptions]="{standalone: true}" [binary]="true"
+                                                        (onChange)="toggleSelectAll($event)"></p-checkbox><span
+                                                        class="px-1">Select All</span>
+
+                                                </th>
                                                 <th>Household #</th>
                                                 <th>Beneficiary Name</th>
                                                 <th>Gender</th>
@@ -164,19 +170,20 @@
                                             </tr>
                                         </ng-template>
 
+                                        <!-- ✅ Table Body -->
                                         <ng-template pTemplate="body" let-beneficiary>
                                             <tr>
                                                 <td>
-                                                    <p-checkbox 
-                                                        [(ngModel)]="beneficiary.isSelected"
-                                                        [ngModelOptions]="{standalone: true}"
-                                                        [binary]="true">
-                                                    </p-checkbox>
+                                                    <p-checkbox [(ngModel)]="beneficiary.isSelected"
+                                                        [ngModelOptions]="{standalone: true}" [binary]="true"
+                                                        (onChange)="onRowSelectionChange()"></p-checkbox>
+
                                                 </td>
                                                 <td>{{ beneficiary.householdNumber || '—' }}</td>
                                                 <td>{{ beneficiary.beneficiaryName || '—' }}</td>
                                                 <td>
-                                                    <span [class]="'badge ' + (beneficiary.gender === 'MALE' ? 'bg-primary' : 'bg-success')">
+                                                    <span
+                                                        [class]="'badge ' + (beneficiary.gender === 'MALE' ? 'bg-primary' : 'bg-success')">
                                                         {{ beneficiary.gender }}
                                                     </span>
                                                 </td>
@@ -197,38 +204,24 @@
                                     </p-table>
 
                                     <div class="d-flex justify-content-center mt-4">
-                                        <button pButton type="button" label="Assign Selected" icon="pi pi-user-plus" 
-                                            class="p-button-success px-5" 
+                                        <button pButton type="button" label="Assign Selected" icon="pi pi-user-plus"
+                                            class="p-button-success px-5"
                                             [disabled]="loading || getSelectedCanBeAssignedIds().length === 0"
-                                            (click)="assignBeneficiaries()">
-                                        </button>
+                                            (click)="assignBeneficiaries()"></button>
                                     </div>
-                                </p-tabpanel>
+                                </div>
 
-                                <!-- Existing Assigned Beneficiaries Tab -->
-                                <p-tabpanel [value]="1" header="Currently Assigned">
-                                    <ng-template pTemplate="header">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <i class="pi pi-check-circle"></i>
-                                            <span>Currently Assigned</span>
-                                            <span class="badge bg-success">{{ existingTotalRecords }}</span>
-                                        </div>
-                                    </ng-template>
 
-                                    <p-table 
-                                        [value]="existingBeneficiaries" 
-                                        [lazy]="true"
-                                        [paginator]="true" 
-                                        [rows]="existingRows" 
-                                        [totalRecords]="existingTotalRecords"
-                                        [first]="existingFirst"
-                                        [loading]="isLoadingExisting"
-                                        (onLazyLoad)="onExistingPageChange($event)"
-                                        [rowsPerPageOptions]="[10, 20, 50]"
+                                <!-- Currently Assigned Tab -->
+                                <div *ngIf="activeTabIndex === 1">
+                                    <p-table [value]="existingBeneficiaries" [lazy]="true" [paginator]="true"
+                                        [rows]="existingRows" [totalRecords]="existingTotalRecords"
+                                        [first]="existingFirst" [loading]="isLoadingExisting"
+                                        (onLazyLoad)="onExistingPageChange($event)" [rowsPerPageOptions]="[10, 20, 50]"
                                         [showCurrentPageReport]="true"
                                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} beneficiaries"
                                         styleClass="p-datatable-sm p-datatable-striped">
-                                        
+
                                         <ng-template pTemplate="header">
                                             <tr>
                                                 <th style="width: 3rem">Select</th>
@@ -245,16 +238,15 @@
                                         <ng-template pTemplate="body" let-beneficiary>
                                             <tr>
                                                 <td>
-                                                    <p-checkbox 
-                                                        [(ngModel)]="beneficiary.isSelected"
-                                                        [ngModelOptions]="{standalone: true}"
-                                                        [binary]="true">
+                                                    <p-checkbox [(ngModel)]="beneficiary.isSelected"
+                                                        [ngModelOptions]="{standalone: true}" [binary]="true">
                                                     </p-checkbox>
                                                 </td>
                                                 <td>{{ beneficiary.householdNumber || '—' }}</td>
                                                 <td>{{ beneficiary.beneficiaryName || '—' }}</td>
                                                 <td>
-                                                    <span [class]="'badge ' + (beneficiary.gender === 'MALE' ? 'bg-primary' : 'bg-success')">
+                                                    <span
+                                                        [class]="'badge ' + (beneficiary.gender === 'MALE' ? 'bg-primary' : 'bg-success')">
                                                         {{ beneficiary.gender }}
                                                     </span>
                                                 </td>
@@ -281,15 +273,16 @@
                                     </p-table>
 
                                     <div class="d-flex justify-content-center mt-4">
-                                        <button pButton type="button" label="Remove Selected" icon="pi pi-user-minus" 
-                                            class="p-button-danger px-5" 
+                                        <button pButton type="button" label="Remove Selected" icon="pi pi-user-minus"
+                                            class="p-button-danger px-5"
                                             [disabled]="loading || getSelectedExistingIds().length === 0"
                                             (click)="removeBeneficiaries()">
                                         </button>
                                     </div>
-                                </p-tabpanel>
-                            </p-tabs>
+                                </div>
+                            </div>
                         </div>
+
                     </fieldset>
                 </form>
             </p-card>
