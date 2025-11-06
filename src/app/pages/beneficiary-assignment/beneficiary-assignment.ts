@@ -411,18 +411,22 @@ async removeBeneficiaries(): Promise<void> {
   this.loading = true;
 
   try {
-    const payload = {
-      subprojectId: Number(this.subprojectId),
-      workStartAt: this.formatDate(this.projectForm.value.workStartAt),
-      inchargeName: this.projectForm.value.inchargeName || '',
-      comments: this.projectForm.value.comments || '',
-      attachment: this.selectedFile.name,
-      beneficiaryIds: selectedIds,
-    };
+  
+    const formData = new FormData();
+    formData.append('subprojectId', this.subprojectId || '');
+    formData.append('workStartAt', this.formatDate(this.projectForm.value.workStartAt));
+    formData.append('inchargeName', this.projectForm.value.inchargeName || '');
+    formData.append('comments', this.projectForm.value.comments || '');
+    formData.append('attachment', this.selectedFile, this.selectedFile.name);
 
-    const response: any = await this.apiService.PATCH(
+    selectedIds.forEach(id => formData.append('beneficiaryIds', id.toString()));
+
+    const response: any = await this.apiService.axiosInstance.patch(
       'api/subproject/assign/progress/beneficiary/remove',
-      payload
+      formData,
+      {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      }
     );
 
     if (response?.data?.code === 200) {
@@ -467,6 +471,7 @@ async removeBeneficiaries(): Promise<void> {
     this.cdr.detectChanges();
   }
 }
+
 
 
   formatDate(date: Date): string {
