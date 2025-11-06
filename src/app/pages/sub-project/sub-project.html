@@ -36,13 +36,16 @@
                   <div class="row g-3">
 
                     <div class="col-md-12">
-                      <label class="form-label text-secondary fw-semibold">Project Name</label>
+                      <label class="form-label text-secondary fw-semibold">Project Name <span class="text-danger">*</span></label>
                       <select class="form-select" formControlName="projectName" (change)="onProjectSelect($event)">
                         <option value="">--Select--</option>
                         @for (project of availableProjects; track project.id) {
                         <option [value]="project.id">{{ project.name }}</option>
                         }
                       </select>
+                      @if (proposalForm.get('projectName')?.invalid && proposalForm.get('projectName')?.touched) {
+                      <div class="text-danger mt-1">Project Name is required.</div>
+                      }
                     </div>
                     <!-- New section to display targets -->
                     @if (targets && targets.length > 0) {
@@ -66,26 +69,35 @@
                 <div class="col-md-6">
                   <div class="row g-3">
                     <div class="col-md-12">
-                      <label class="form-label text-secondary fw-semibold">Type of Meeting</label>
+                      <label class="form-label text-secondary fw-semibold">Type of Meeting <span class="text-danger">*</span></label>
                       <select class="form-select" formControlName="typeOfMeeting">
                         <option value="">--Select--</option>
                         <option value="CC">Community Consultancy</option>
                         <option value="AM">Approval Meeting</option>
                         <option value="OT">Others</option>
                       </select>
+                      @if (proposalForm.get('typeOfMeeting')?.invalid && proposalForm.get('typeOfMeeting')?.touched) {
+                      <div class="text-danger mt-1">Type of Meeting is required.</div>
+                      }
                     </div>
                     <div class="col-md-12">
-                      <label class="form-label text-secondary fw-semibold">Meeting Date</label>
+                      <label class="form-label text-secondary fw-semibold">Meeting Date <span class="text-danger">*</span></label>
                       <input type="date" class="form-control" formControlName="meetingDate" />
+                      @if (proposalForm.get('meetingDate')?.invalid && proposalForm.get('meetingDate')?.touched) {
+                      <div class="text-danger mt-1">Meeting Date is required.</div>
+                      }
                     </div>
                     <div class="col-md-12">
-                      <label class="form-label text-secondary fw-semibold">Paper Screening Status</label>
+                      <label class="form-label text-secondary fw-semibold">Paper Screening Status <span class="text-danger">*</span></label>
                       <select class="form-select" formControlName="paperScreeningStatus">
                         <option value="">--Select--</option>
 
                         <option value="1">Approved</option>
                         <option value="0">Rejected</option>
                       </select>
+                      @if (proposalForm.get('paperScreeningStatus')?.invalid && proposalForm.get('paperScreeningStatus')?.touched) {
+                      <div class="text-danger mt-1">Paper Screening Status is required.</div>
+                      }
                     </div>
                   </div>
                 </div>
@@ -97,38 +109,38 @@
                 <i class="fas fa-map-marker-alt me-2"></i>Work Proposal Location
               </h4>
               <div class="row g-3">
-                <div class="col-md-6 col-lg-3">
-                  <label class="form-label text-secondary fw-semibold">State Name</label>
-                  <select class="form-select" formControlName="stateName" (change)="onStateChange($event)">
-                    <option value="">--Select--</option>
-                    <option *ngFor="let state of availableStates" [value]="state.name">{{ state.name }}</option>
-                  </select>
-                </div>
+                                <div class="col-md-6 col-lg-3">
+                                  <label class="form-label text-secondary fw-semibold">State Name</label>
+                                  <input type="text" class="form-control" formControlName="stateName" readonly>
+                                </div>
+                
+                                <div class="col-md-6 col-lg-3">
+                                  <label class="form-label text-secondary fw-semibold">County / Municipality
+                                    Name</label>
+                                  <input type="text" class="form-control" formControlName="countyName" readonly>
+                                </div>
 
                 <div class="col-md-6 col-lg-3">
-                  <label class="form-label text-secondary fw-semibold">County / Municipality
-                    Name</label>
-                  <select class="form-select" formControlName="countyName" (change)="onCountyChange($event)">
-                    <option value="">--Select--</option>
-                    <option *ngFor="let county of availableCounties" [value]="county.name">{{ county.name }}</option>
-                  </select>
-                </div>
-
-                <div class="col-md-6 col-lg-3">
-                  <label class="form-label text-secondary fw-semibold">Payam / Block Name</label>
+                  <label class="form-label text-secondary fw-semibold">Payam / Block Name <span class="text-danger">*</span></label>
                   <select class="form-select" formControlName="payamName" (change)="onPayamChange($event)">
                     <option value="">--Select--</option>
                     <option *ngFor="let payam of availablePayams" [value]="payam.name">{{ payam.name }}</option>
                   </select>
+                  @if (proposalForm.get('payamName')?.invalid && proposalForm.get('payamName')?.touched) {
+                  <div class="text-danger mt-1">Payam / Block Name is required.</div>
+                  }
                 </div>
 
                 <div class="col-md-6 col-lg-3">
                   <label class="form-label text-secondary fw-semibold">Boma / Quarter Council
-                    Name</label>
+                    Name <span class="text-danger">*</span></label>
                   <select class="form-select" formControlName="bomaName">
                     <option value="">--Select--</option>
                     <option *ngFor="let boma of availableBomas" [value]="boma.name">{{ boma.name }}</option>
                   </select>
+                  @if (proposalForm.get('bomaName')?.invalid && proposalForm.get('bomaName')?.touched) {
+                  <div class="text-danger mt-1">Boma / Quarter Council Name is required.</div>
+                  }
                 </div>
               </div>
             </div>
@@ -216,6 +228,13 @@
 
                       <div class="col-md-6">
                         <label class="form-label text-secondary fw-semibold">Type of Equipment Required</label>
+                        @if (activity.get('equipmentPhotoUrl')?.value) {
+                          <div class="mb-2">
+                            <button type="button" (click)="viewAttachment(activity.get('equipmentPhotoUrl')?.value)" class="btn btn-sm btn-outline-primary">
+                              <i class="fas fa-eye me-2"></i>View Current Equipment Photo
+                            </button>
+                          </div>
+                        }
                         <input type="file" class="form-control" (change)="onEquipmentPhotoSelect($event, i)"
                           accept="image/*" />
 
@@ -238,6 +257,13 @@
 
                       <div class="col-md-6">
                         <label class="form-label text-secondary fw-semibold">Work Photo</label>
+                        @if (activity.get('workPhotoUrl')?.value) {
+                          <div class="mb-2">
+                            <button type="button" (click)="viewAttachment(activity.get('workPhotoUrl')?.value)" class="btn btn-sm btn-outline-primary">
+                              <i class="fas fa-eye me-2"></i>View Current Photo
+                            </button>
+                          </div>
+                        }
                         <input type="file" class="form-control" (change)="onWorkPhotoSelect($event, i)"
                           accept="image/*" />
 
@@ -250,11 +276,18 @@
 
                       <div class="col-md-6">
                         <label class="form-label text-secondary fw-semibold">Materials Photo</label>
+                        @if (proposalForm.get('materialPhotoUrl')?.value) {
+                          <div class="mb-2">
+                            <button type="button" (click)="viewAttachment(proposalForm.get('materialPhotoUrl')?.value)" class="btn btn-sm btn-outline-primary">
+                              <i class="fas fa-eye me-2"></i>View Current Materials Photo
+                            </button>
+                          </div>
+                        }
                         <input type="file" class="form-control" (change)="onMaterialsPhotoSelect($event)"
                           accept="image/*" />
 
-                        @if (materialsPhotoName) {
-                        <small class="text-muted">Selected: {{ materialsPhotoName }}</small>
+                        @if (materialPhotoName) {
+                        <small class="text-muted">Selected: {{ materialPhotoName }}</small>
                         }
                       </div>
 

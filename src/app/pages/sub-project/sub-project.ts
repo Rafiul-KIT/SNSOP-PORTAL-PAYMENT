@@ -5,14 +5,17 @@ import {
   FormBuilder,
   FormGroup,
   FormArray,
-  FormControl, FormsModule,
+  FormControl, FormsModule, Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Breadcrumb } from 'primeng/breadcrumb';
 import { Loader } from '../../components/loader/loader';
 import { ApiService } from '../../services/api.service';
 import { LookupItem, LookupService } from '../../services/lookup.service';
-import { ButtonModule } from "primeng/button"; // Assuming this service exists
+import { ButtonModule } from "primeng/button";
+import { CookieService } from 'ngx-cookie-service';
+import { environment } from '../../../environments/environment';
+import axios from 'axios';
 
 @Component({
   selector: 'app-root',
@@ -34,8 +37,7 @@ export class SubProject implements OnInit {
   availableProjects: { id: number; name: string }[] = [];
   availableTypesOfWork: { id: string; description: string }[] = [];
   availableActivities: Map<string, { id: string; description: string }[]> = new Map();
-  availableStates: { id: string; name: string }[] = [];
-  availableCounties: { id: string; name: string }[] = [];
+
   availablePayams: { id: string; name: string }[] = [];
   availableBomas: { id: string; name: string }[] = [];
   workActivitiesList: { id: string; name: string }[] = [];
@@ -49,22 +51,24 @@ export class SubProject implements OnInit {
     private router: Router,
     private api: ApiService,
     private cdr: ChangeDetectorRef,
-    private lookupService: LookupService // Injected
+    private lookupService: LookupService, // Injected
+    private cookieService: CookieService // Injected
   ) {
     this.proposalForm = this.fb.group({
-      projectName: [''],
-      typeOfMeeting: [''],
-      meetingDate: [''],
+      projectName: ['', Validators.required],
+      typeOfMeeting: ['', Validators.required],
+      meetingDate: ['', Validators.required],
       targetBeneficiaries: [''],
       projectCost: [0],
       stateName: [''],
       countyName: [''],
-      payamName: [''],
-      bomaName: [''],
+      payamName: ['', Validators.required],
+      bomaName: ['', Validators.required],
       workActivities: this.fb.array([this.createWorkActivity()]),
-      materialsPhoto: [null], // Added
-      materialsPhotoName: [''], // Added
-      paperScreeningStatus: [''],
+      materialPhoto: [null],
+      materialPhotoName: [''],
+      materialPhotoUrl: [''],
+      paperScreeningStatus: ['', Validators.required],
     });
     this.workActivities = this.proposalForm.get('workActivities') as FormArray;
   }
@@ -75,7 +79,7 @@ export class SubProject implements OnInit {
 
     this.loadAvailableProjects();
     this.loadAvailableTypesOfWork();
-    this.loadAvailableStates();
+
 
     this.subprojectId = this.route.snapshot.paramMap.get('id');
     if (this.subprojectId) {
@@ -85,26 +89,7 @@ export class SubProject implements OnInit {
      this.cdr.detectChanges();
   }
 
-  async loadAvailableStates(): Promise<void> {
-    try {
-      this.availableStates = await this.lookupService.getOrFetchStateList();
-    } catch (err) {
-      console.error('Failed to load available states', err);
-    }
-  }
 
-  async onStateChange(event: Event): Promise<void> {
-    const stateName = (event.target as HTMLSelectElement).value;
-    try {
-      const stateId = await this.lookupService.getStateIdByName(stateName);
-      if (stateId) {
-        this.availableCounties = await this.lookupService.getCountyListByStateId(String(stateId));
-        this.cdr.detectChanges();
-      }
-    } catch (err) {
-      console.error('Failed to load available counties', err);
-    }
-  }
 
   async onCountyChange(event: Event): Promise<void> {
     const countyName = (event.target as HTMLSelectElement).value;
@@ -175,9 +160,7 @@ export class SubProject implements OnInit {
       });
 
       // Trigger updates for dependent dropdowns
-      await this.onStateChange({
-        target: { value: selectedTarget.stateName },
-      } as any);
+
       await this.onCountyChange({
         target: { value: selectedTarget.countyName },
       } as any);
@@ -225,9 +208,8 @@ export class SubProject implements OnInit {
         paperScreeningStatus: subProjectData.screeningStatus,
       });
 
-      if (subProjectData.stateName) {
-        this.onStateChange({ target: { value: subProjectData.stateName } } as any);
-      }
+      this.cdr.detectChanges();
+
       if (subProjectData.countyName) {
         this.onCountyChange({ target: { value: subProjectData.countyName } } as any);
       }
@@ -270,6 +252,9 @@ export class SubProject implements OnInit {
               estimatedMaterialCost: activity.materialCost || 0,
               estimatedSkillLabour: activity.estSkilledLabourDay || 0,
               estimatedCost: activity.estCost || 0,
+              workPhotoUrl: activity.workPhotoUrl || '',
+              equipmentPhotoUrl: activity.equipmentPhotoUrl || '',
+              materialPhotoUrl: activity.materialPhotoUrl || '',
             });
           }
           setTimeout(() => this.cdr.detectChanges(), 0);
@@ -303,6 +288,11 @@ export class SubProject implements OnInit {
       workPhotoName: [''],
       equipmentPhoto: [null],
       equipmentPhotoName: [''],
+      workPhotoUrl: [''],
+      equipmentPhotoUrl: [''],
+      materialPhoto: [''],
+      materialPhotoName: [''],
+      materialPhotoUrl: [''],
       startCoordinate: [''],
       endCoordinate: [''],
 
@@ -346,7 +336,7 @@ export class SubProject implements OnInit {
     const input = event.target as HTMLInputElement;
     const file = input?.files?.[0];
     if (file) {
-      this.proposalForm.patchValue({ materialsPhoto: file, materialsPhotoName: file.name });
+      this.proposalForm.patchValue({ materialPhoto: file, materialPhotoName: file.name });
     }
   }
 
@@ -360,8 +350,44 @@ export class SubProject implements OnInit {
     return activity ? activity.get('equipmentPhotoName')?.value || '' : '';
   }
 
-  get materialsPhotoName(): string {
-    return this.proposalForm.get('materialsPhotoName')?.value || '';
+  get materialPhotoName(): string {
+    return this.proposalForm.get('materialPhotoName')?.value || '';
+  }
+
+  async viewAttachment(path: string): Promise<void> {
+    if (!path) {
+      alert('No attachment path found.');
+      return;
+    }
+
+    this.isLoading = true;
+    try {
+      const baseUrl = 'https://devgwapp.southsudansafetynet.info/mis_server/';
+      const fullUrl = baseUrl + path;
+
+      const token = this.cookieService.get(environment.cookie_name);
+      if (!token) {
+        throw new Error('Authentication token not found.');
+      }
+
+      const response = await axios.get(fullUrl, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        responseType: 'blob'
+      });
+
+      const objectUrl = URL.createObjectURL(response.data);
+      window.open(objectUrl, '_blank');
+      // Revoke the object URL after a delay to give the browser time to open it
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 100);
+
+    } catch (err) {
+      console.error('Failed to fetch attachment', err);
+      alert('Could not load attachment. Please check the console for details.');
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   async onSubmit(): Promise<void> {
@@ -397,11 +423,12 @@ export class SubProject implements OnInit {
       const bomaId = await this.lookupService.getBomaIdByName(formValue.bomaName);
       if (bomaId === null) throw new Error(`Boma '${formValue.bomaName}' not found.`);
 
+      const year = new Date().getFullYear();
+
       // --- API Call 1: Save Sub-project ---
-      const subProjectPayload = {
+      const subProjectPayload: any = {
         id: this.subprojectId ? parseInt(this.subprojectId, 10) : null,
-        // workCode: `W-CODE-${Date.now()}`,
-        workCode: this.workCode ? parseInt(this.workCode, 10) : null,
+        workCode: this.subprojectId ? `${year}-SNSOP-${projectName}-${this.subprojectId}` : null,
         projectId: projectId,
         projectName: projectName,
         stateId: stateId,
@@ -425,59 +452,70 @@ export class SubProject implements OnInit {
       const newSubProjectId = subProjectResponse.data.entityId;
       if (!newSubProjectId) throw new Error('Failed to get sub-project ID after saving.');
 
+      if (!this.subprojectId) {
+        // This was a new sub-project, now we update it with the correct workCode
+        const workCode = `${year}-SNSOP-${projectName}-${newSubProjectId}`;
+        const updatePayload = { ...subProjectPayload, id: newSubProjectId, workCode: workCode };
+        await this.api.POST('api/subproject/save', updatePayload);
+      }
+
       // --- API Calls 2 & 3: Save Work Details and Attachments ---
-      for (const activityControl of this.workActivities.controls) {
+      for (const [index, activityControl] of this.workActivities.controls.entries()) {
         const activityValue = activityControl.value;
 
-        const areaOfWorkId = activityValue.typeOfWork;
-        if (!areaOfWorkId) throw new Error(`Area of Work not selected.`);
+        try {
+          const areaOfWorkId = activityValue.typeOfWork;
+          if (!areaOfWorkId) throw new Error(`"Area of Work" was not selected`);
 
-        const workActivityId = activityValue.secondaryActivity;
-        if (!workActivityId) throw new Error(`Work Activity not selected.`);
+          const workActivityId = activityValue.secondaryActivity;
+          if (!workActivityId) throw new Error(`"Work Activity" was not selected`);
 
-        const workDetailPayload = {
-          subprojectId: newSubProjectId,
-          id: activityValue.id ? parseInt(activityValue.id, 10) : null,
-          workName: activityValue.name,
-          workCode: activityValue.code,
-          areaOfWorkId: Number(activityValue.typeOfWork),
-          workActivityId: Number(activityValue.secondaryActivity),
-          estManPower: activityValue.estimatedManpower,
-          estDay: activityValue.estimatedManDays,
-          estSkilledLabourDay: activityValue.estimatedSkillLabour,
-          estStartAt: activityValue.workStartDate,
-          estEndAt: activityValue.workEndDate,
-          estCost: activityValue.estimatedCost,
-          equipmentCost: activityValue.estimatedCostOfEquipment,
-          materialCost: 0,
-          status: true,
-        };
+          const workDetailPayload = {
+            subprojectId: newSubProjectId,
+            id: activityValue.id ? parseInt(activityValue.id, 10) : null,
+            workName: activityValue.name,
+            workCode: activityValue.code,
+            areaOfWorkId: Number(activityValue.typeOfWork),
+            workActivityId: Number(activityValue.secondaryActivity),
+            estManPower: activityValue.estimatedManpower,
+            estDay: activityValue.estimatedManDays,
+            estSkilledLabourDay: activityValue.estimatedSkillLabour,
+            estStartAt: activityValue.workStartDate,
+            estEndAt: activityValue.workEndDate,
+            estCost: activityValue.estimatedCost,
+            equipmentCost: activityValue.estimatedCostOfEquipment,
+            materialCost: 0,
+            status: true,
+          };
 
-        const workDetailResponse = await this.api.POST('api/subproject/work-details/save', workDetailPayload);
-        const newWorkDetailId = workDetailResponse.data.entityId;
-        if (!newWorkDetailId) throw new Error('Failed to get work detail ID after saving.');
+          const workDetailResponse = await this.api.POST('api/subproject/work-details/save', workDetailPayload);
+          const newWorkDetailId = workDetailResponse.data.entityId;
+          if (!newWorkDetailId) throw new Error('Failed to get work detail ID after saving.');
 
-        const formData = new FormData();
-        let hasFiles = false;
+          const formData = new FormData();
+          let hasFiles = false;
 
-        if (activityValue.workPhoto) {
-          formData.append('workPhoto', activityValue.workPhoto, activityValue.workPhotoName);
-          hasFiles = true;
-        }
-        if (activityValue.equipmentPhoto) {
-          formData.append('equipmentPhoto', activityValue.equipmentPhoto, activityValue.equipmentPhotoName);
-          hasFiles = true;
-        }
-        if (formValue.materialsPhoto) {
-          formData.append('materialPhoto', formValue.materialsPhoto, formValue.materialsPhotoName);
-          hasFiles = true;
-        }
+          if (activityValue.workPhoto) {
+            formData.append('workPhoto', activityValue.workPhoto, activityValue.workPhotoName);
+            hasFiles = true;
+          }
+          if (activityValue.equipmentPhoto) {
+            formData.append('equipmentPhoto', activityValue.equipmentPhoto, activityValue.equipmentPhotoName);
+            hasFiles = true;
+          }
+          if (formValue.materialsPhoto) {
+            formData.append('materialPhoto', formValue.materialPhoto, formValue.materialPhotoName);
+            hasFiles = true;
+          }
 
-        if (hasFiles) {
-          formData.append('projectId', projectId.toString()); // No longer possibly null
-          formData.append('subprojectId', newSubProjectId.toString());
-          formData.append('subprojectWorkDetailId', newWorkDetailId.toString());
-          await this.api.POST_FORM_DATA('api/subproject/work-details/attachment/save', formData);
+          if (hasFiles) {
+            formData.append('projectId', projectId.toString());
+            formData.append('subprojectId', newSubProjectId.toString());
+            formData.append('subprojectWorkDetailId', newWorkDetailId.toString());
+            await this.api.POST_FORM_DATA('api/subproject/work-details/attachment/save', formData);
+          }
+        } catch (err: any) {
+          throw new Error(`Sub-project was saved, but saving work activity #${index + 1} (${activityValue.name || 'Untitled'}) failed. Please review the sub-project. Error: ${err.message}`);
         }
       }
 
