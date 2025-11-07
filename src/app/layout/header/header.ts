@@ -76,6 +76,12 @@ export class Header {
         routerLink: 'beneficiary-subproject-list',
         routerLinkActiveOptions: 'active',
       },
+       {
+        label: 'Beneficiary Attendance',
+        icon: 'fas fa-users',
+         routerLink: 'beneficiary-attendance',
+        routerLinkActiveOptions: 'active',
+      },
       {
         label: ' Wage Request ',
         icon: 'fas fa-hand-holding-usd',
@@ -108,12 +114,7 @@ export class Header {
           },
         ],
       },
-      {
-        label: 'Beneficiary Attendance',
-        icon: 'fas fa-users',
-         routerLink: 'beneficiary-attendance',
-        routerLinkActiveOptions: 'active',
-      },
+     
       {
         label: 'Creating Payroll',
         icon: 'fas fa-file-invoice-dollar',
