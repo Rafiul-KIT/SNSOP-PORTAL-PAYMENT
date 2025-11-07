@@ -276,18 +276,18 @@
 
                       <div class="col-md-6">
                         <label class="form-label text-secondary fw-semibold">Materials Photo</label>
-                        @if (proposalForm.get('materialPhotoUrl')?.value) {
+                        @if (activity.get('materialPhotoUrl')?.value) {
                           <div class="mb-2">
-                            <button type="button" (click)="viewAttachment(proposalForm.get('materialPhotoUrl')?.value)" class="btn btn-sm btn-outline-primary">
+                            <button type="button" (click)="viewAttachment(activity.get('materialPhotoUrl')?.value)" class="btn btn-sm btn-outline-primary">
                               <i class="fas fa-eye me-2"></i>View Current Materials Photo
                             </button>
                           </div>
                         }
-                        <input type="file" class="form-control" (change)="onMaterialsPhotoSelect($event)"
+                        <input type="file" class="form-control" (change)="onMaterialsPhotoSelect($event, i)"
                           accept="image/*" />
 
-                        @if (materialPhotoName) {
-                        <small class="text-muted">Selected: {{ materialPhotoName }}</small>
+                        @if (getMaterialPhotoName(i); as photoName) {
+                        <small class="text-muted">Selected: {{ photoName }}</small>
                         }
                       </div>
 

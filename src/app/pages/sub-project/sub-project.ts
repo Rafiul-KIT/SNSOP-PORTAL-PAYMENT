@@ -44,6 +44,7 @@ export class SubProject implements OnInit {
 
   targets: any[] = [];  // List to hold targets
   selectedTargetId: number | null = null; // To store the selected target's ID
+  private removedWorkActivities: any[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -65,9 +66,6 @@ export class SubProject implements OnInit {
       payamName: ['', Validators.required],
       bomaName: ['', Validators.required],
       workActivities: this.fb.array([this.createWorkActivity()]),
-      materialPhoto: [null],
-      materialPhotoName: [''],
-      materialPhotoUrl: [''],
       paperScreeningStatus: ['', Validators.required],
     });
     this.workActivities = this.proposalForm.get('workActivities') as FormArray;
@@ -310,6 +308,10 @@ export class SubProject implements OnInit {
 
   removeWorkActivity(index: number): void {
     if (this.workActivities.length > 1) {
+      const activityControl = this.workActivities.at(index);
+      if (activityControl.value.id) {
+        this.removedWorkActivities.push(activityControl.value);
+      }
       this.workActivities.removeAt(index);
     }
   }
@@ -332,11 +334,12 @@ export class SubProject implements OnInit {
     }
   }
 
-  onMaterialsPhotoSelect(event: Event): void {
+  onMaterialsPhotoSelect(event: Event, index: number): void {
     const input = event.target as HTMLInputElement;
     const file = input?.files?.[0];
     if (file) {
-      this.proposalForm.patchValue({ materialPhoto: file, materialPhotoName: file.name });
+      const activity = this.workActivities.at(index);
+      activity.patchValue({ materialPhoto: file, materialPhotoName: file.name });
     }
   }
 
@@ -350,8 +353,9 @@ export class SubProject implements OnInit {
     return activity ? activity.get('equipmentPhotoName')?.value || '' : '';
   }
 
-  get materialPhotoName(): string {
-    return this.proposalForm.get('materialPhotoName')?.value || '';
+  getMaterialPhotoName(index: number): string {
+    const activity = this.workActivities.at(index);
+    return activity ? activity.get('materialPhotoName')?.value || '' : '';
   }
 
   async viewAttachment(path: string): Promise<void> {
@@ -362,13 +366,17 @@ export class SubProject implements OnInit {
 
     this.isLoading = true;
     try {
-      const baseUrl = 'https://devgwapp.southsudansafetynet.info/mis_server/';
-      const fullUrl = baseUrl + path;
-
       const token = this.cookieService.get(environment.cookie_name);
       if (!token) {
         throw new Error('Authentication token not found.');
       }
+
+      // Construct the full URL with the query parameter
+      // Decode the path first, then let the browser re-encode it.
+      const decodedPath = decodeURIComponent(path);
+      const fullUrl = `${environment.globalApi}api/subproject/work-details/attachment/get?filePath=${decodedPath}`;
+
+      console.log('Fetching attachment from URL:', fullUrl); // Log the URL
 
       const response = await axios.get(fullUrl, {
         headers: {
@@ -378,15 +386,16 @@ export class SubProject implements OnInit {
       });
 
       const objectUrl = URL.createObjectURL(response.data);
-      window.open(objectUrl, '_blank');
+      const newTab = window.open();
+      if (newTab) {
+        newTab.document.body.innerHTML = `<img src="${objectUrl}" style="width:100%">`;
+      }
       // Revoke the object URL after a delay to give the browser time to open it
       setTimeout(() => URL.revokeObjectURL(objectUrl), 100);
 
-    } catch (err) {
-      console.error('Failed to fetch attachment', err);
-      alert('Could not load attachment. Please check the console for details.');
     } finally {
       this.isLoading = false;
+      this.cdr.detectChanges();
     }
   }
 
@@ -484,7 +493,7 @@ export class SubProject implements OnInit {
             estEndAt: activityValue.workEndDate,
             estCost: activityValue.estimatedCost,
             equipmentCost: activityValue.estimatedCostOfEquipment,
-            materialCost: 0,
+            materialCost: activityValue.estimatedMaterialCost || 0,
             status: true,
           };
 
@@ -519,6 +528,34 @@ export class SubProject implements OnInit {
         }
       }
 
+      for (const activityValue of this.removedWorkActivities) {
+        try {
+          if (!activityValue.id) continue;
+
+          const workDetailPayload = {
+            subprojectId: newSubProjectId,
+            id: parseInt(activityValue.id, 10),
+            workName: activityValue.name,
+            workCode: activityValue.code,
+            areaOfWorkId: Number(activityValue.typeOfWork),
+            workActivityId: Number(activityValue.secondaryActivity),
+            estManPower: activityValue.estimatedManpower,
+            estDay: activityValue.estimatedManDays,
+            estSkilledLabourDay: activityValue.estimatedSkillLabour,
+            estStartAt: activityValue.workStartDate,
+            estEndAt: activityValue.workEndDate,
+            estCost: activityValue.estimatedCost,
+            equipmentCost: activityValue.estimatedCostOfEquipment,
+            materialCost: activityValue.estimatedMaterialCost || 0,
+            status: false, // Mark as inactive
+          };
+
+          await this.api.POST('api/subproject/work-details/save', workDetailPayload);
+        } catch (err: any) {
+          throw new Error(`Sub-project was saved, but deactivating work activity #${activityValue.id} failed. Error: ${err.message}`);
+        }
+      }
+
       alert('Work proposal saved successfully!');
       this.router.navigate(['/sub-project-list']);
       this.isLoading = false;
@@ -538,6 +575,7 @@ export class SubProject implements OnInit {
     this.workActivities.clear();
     this.addWorkActivity();
     this.isLoading = false;
+    this.removedWorkActivities = [];
   }
 
   onCancel(): void {
