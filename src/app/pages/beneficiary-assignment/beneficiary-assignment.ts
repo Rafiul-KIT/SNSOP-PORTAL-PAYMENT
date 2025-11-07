@@ -15,9 +15,24 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { DividerModule } from 'primeng/divider';
 import { SelectModule } from 'primeng/select';
 import { Breadcrumb } from 'primeng/breadcrumb';
+import { TableModule } from 'primeng/table';
+import { CheckboxModule } from 'primeng/checkbox';
 import { Loader } from '../../components/loader/loader';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../../services/api.service';
+import Swal from 'sweetalert2';
+
+interface Beneficiary {
+  id: number;
+  householdNumber: string;
+  beneficiaryName: string;
+  gender: 'MALE' | 'FEMALE';
+  age: number;
+  phoneNo: string;
+  householdMonthlyAvgIncome: number;
+  assigned?: boolean;
+  isSelected?: boolean;
+}
 
 @Component({
   selector: 'app-beneficiary-assignment',
@@ -37,6 +52,8 @@ import { ApiService } from '../../services/api.service';
     SelectModule,
     Breadcrumb,
     Loader,
+    TableModule,
+    CheckboxModule,
   ],
 })
 export class BeneficiaryAssignment implements OnInit {
@@ -46,15 +63,27 @@ export class BeneficiaryAssignment implements OnInit {
   breadcrumbHome: any;
   subprojectId: string | null = null;
   projectForm!: FormGroup;
-  targets: any[] = [];
   statusMsg = '';
   isLoading = false;
-
   isSubmitted = false;
   selectedFile: File | null = null;
+  apiError = '';
+  activeTabIndex: number = 0;
 
-  private readonly PROJECTS_ENDPOINT = '/api/subproject/get';
-
+  // Can be assigned beneficiaries
+  canBeAssignedBeneficiaries: Beneficiary[] = [];
+  canBeAssignedTotalRecords = 0;
+  canBeAssignedRows = 10;
+  canBeAssignedFirst = 0;
+  isLoadingCanBeAssigned = false;
+  beneficiaryError = '';
+  // Existing assigned beneficiaries
+  existingBeneficiaries: Beneficiary[] = [];
+  existingTotalRecords = 0;
+  existingRows = 10;
+  existingFirst = 0;
+  isLoadingExisting = false;
+selectAll = false;
   constructor(
     private route: ActivatedRoute,
     private fb: FormBuilder,
@@ -70,14 +99,39 @@ export class BeneficiaryAssignment implements OnInit {
 
     if (this.subprojectId) {
       this.loadProjectData(this.subprojectId);
+      this.loadCanBeAssignedBeneficiaries(0, this.canBeAssignedRows);
+      this.loadExistingBeneficiaries(0, this.existingRows);
     }
   }
+
   onFileSelect(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      this.selectedFile = file;
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.selectedFile = input.files[0];
+      console.log(
+        'File selected:',
+        this.selectedFile.name,
+        this.selectedFile.type,
+        this.selectedFile.size
+      );
+    } else {
+      this.selectedFile = null;
     }
+    this.cdr.detectChanges();
   }
+toggleSelectAll(event: any): void {
+  this.selectAll = event.checked;
+  this.canBeAssignedBeneficiaries.forEach(b => (b.isSelected = this.selectAll));
+  this.cdr.detectChanges();
+}
+
+onRowSelectionChange(): void {
+  // Keep header checkbox synced
+  const allSelected = this.canBeAssignedBeneficiaries.every(b => b.isSelected);
+  const noneSelected = this.canBeAssignedBeneficiaries.every(b => !b.isSelected);
+  this.selectAll = allSelected && !noneSelected;
+  this.cdr.detectChanges();
+}
   initializeForm(): void {
     this.projectForm = this.fb.group({
       workStartAt: ['', Validators.required],
@@ -85,6 +139,7 @@ export class BeneficiaryAssignment implements OnInit {
       comments: [''],
     });
   }
+
   initBreadcrumb() {
     this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
     this.breadcrumbItems = [{ label: 'Beneficiary Assignment' }];
@@ -111,100 +166,313 @@ export class BeneficiaryAssignment implements OnInit {
         data.content.length > 0
       ) {
         this.projectInfo = data.content[0];
-
-        this.targets = data.content.map((item: any) => ({
-          id: item.id,
-          workCode: item.workCode,
-          workName: item.projectName,
-          areaOfWork: '',
-          workActivity: '',
-          estManPower: 0,
-          estCost: 0,
-          state: item.stateName,
-          county: item.countyName,
-          stateId: item.stateId,
-          countyId: item.countyId,
-          status: item.status,
-          screeningStatus: item.screeningStatus,
-        }));
-
-        this.statusMsg = `Loaded ${data.totalElements} record(s) successfully.`;
+        this.statusMsg = `Loaded project successfully.`;
       } else {
         this.projectInfo = null;
-        this.targets = [];
         this.statusMsg = 'No data found.';
       }
     } catch (error) {
       console.error('Failed to load project data:', error);
       this.statusMsg = 'Error loading project data.';
-      this.targets = [];
     } finally {
       this.isLoading = false;
       this.cdr.detectChanges();
     }
   }
-  onSubmit(): void {
-    this.isSubmitted = true;
 
-    // Validate form
-    if (this.projectForm.invalid) {
-      this.projectForm.markAllAsTouched();
-      return;
+  async loadCanBeAssignedBeneficiaries(
+    page: number,
+    size: number
+  ): Promise<void> {
+    if (!this.subprojectId) return;
+
+    this.isLoadingCanBeAssigned = true;
+
+    try {
+      const response: any = await this.apiService.GET(
+        `api/subproject/assign/progress/beneficiary/can-be-assigned?subprojectId=${this.subprojectId}&page=${page}&size=${size}`
+      );
+
+      if (response?.data?.code === 200) {
+        const beneficiaries = response.data.content || [];
+
+        this.canBeAssignedBeneficiaries = beneficiaries.map((b: any) => ({
+          id: b.id,
+          householdNumber: b.householdNumber,
+          beneficiaryName: b.beneficiaryName,
+          gender: b.gender,
+          age: b.age,
+          phoneNo: b.phoneNo,
+          householdMonthlyAvgIncome: b.householdMonthlyAvgIncome,
+          assigned: b.assigned || false,
+          isSelected: false,
+        }));
+
+        this.canBeAssignedTotalRecords = response.data.totalElements || 0;
+      } else {
+        this.canBeAssignedBeneficiaries = [];
+        this.canBeAssignedTotalRecords = 0;
+      }
+    } catch (error) {
+      console.error('Failed to load can be assigned beneficiaries:', error);
+      this.canBeAssignedBeneficiaries = [];
+      this.canBeAssignedTotalRecords = 0;
+    } finally {
+      this.isLoadingCanBeAssigned = false;
+      this.cdr.detectChanges();
     }
+  }
 
-    // Validate file attachment
-    if (!this.selectedFile) {
-      return;
+  async loadExistingBeneficiaries(page: number, size: number): Promise<void> {
+    if (!this.subprojectId) return;
+
+    this.isLoadingExisting = true;
+
+    try {
+      const response: any = await this.apiService.GET(
+        `api/subproject/assign/progress/beneficiary/existing?subprojectId=${this.subprojectId}&page=${page}&size=${size}`
+      );
+
+      if (response?.data?.code === 200) {
+        const beneficiaries = response.data.content || [];
+
+        this.existingBeneficiaries = beneficiaries.map((b: any) => ({
+          id: b.id,
+          householdNumber: b.householdNumber,
+          beneficiaryName: b.beneficiaryName,
+          gender: b.gender,
+          age: b.age,
+          phoneNo: b.phoneNo,
+          householdMonthlyAvgIncome: b.householdMonthlyAvgIncome,
+          assigned: b.assigned !== undefined ? b.assigned : true,
+          isSelected: false,
+        }));
+
+        this.existingTotalRecords = response.data.totalElements || 0;
+      } else {
+        this.existingBeneficiaries = [];
+        this.existingTotalRecords = 0;
+      }
+    } catch (error) {
+      console.error('Failed to load existing beneficiaries:', error);
+      this.existingBeneficiaries = [];
+      this.existingTotalRecords = 0;
+    } finally {
+      this.isLoadingExisting = false;
+      this.cdr.detectChanges();
     }
+  }
 
-    this.loading = true;
+  onCanBeAssignedPageChange(event: any): void {
+    const page = event.first / event.rows;
+    this.canBeAssignedFirst = event.first;
+    this.canBeAssignedRows = event.rows;
+    this.loadCanBeAssignedBeneficiaries(page, this.canBeAssignedRows);
+  }
 
-    // Prepare form data for API
+  onExistingPageChange(event: any): void {
+    const page = event.first / event.rows;
+    this.existingFirst = event.first;
+    this.existingRows = event.rows;
+    this.loadExistingBeneficiaries(page, this.existingRows);
+  }
+
+  onBeneficiarySelect(beneficiary: Beneficiary): void {
+    this.cdr.detectChanges();
+  }
+
+  getSelectedCanBeAssignedIds(): number[] {
+    return this.canBeAssignedBeneficiaries
+      .filter((b) => b.isSelected === true)
+      .map((b) => b.id);
+  }
+
+  getSelectedExistingIds(): number[] {
+    return this.existingBeneficiaries
+      .filter((b) => b.isSelected === true)
+      .map((b) => b.id);
+  }
+
+
+async assignBeneficiaries(): Promise<void> {
+  this.isSubmitted = true;
+  this.beneficiaryError = '';
+  this.apiError = '';
+
+  if (this.projectForm.invalid) {
+    this.projectForm.markAllAsTouched();
+    this.apiError = 'Please fill in all required fields';
+    
+    return;
+  }
+
+  if (!this.selectedFile) {
+    this.apiError = 'Please select an attachment file';
+ 
+    return;
+  }
+
+  const selectedIds = this.getSelectedCanBeAssignedIds();
+  if (selectedIds.length === 0) {
+    this.beneficiaryError = 'Please select at least one beneficiary to assign';
+    await Swal.fire('No Beneficiary Selected', this.beneficiaryError, 'warning');
+    return;
+  }
+
+  this.loading = true;
+
+  try {
     const formData = new FormData();
-
-    // Add form fields
-    formData.append(
-      'workStartAt',
-      this.formatDate(this.projectForm.value.workStartAt)
-    );
+    formData.append('subprojectId', this.subprojectId || '');
+    formData.append('workStartAt', this.formatDate(this.projectForm.value.workStartAt));
     formData.append('inchargeName', this.projectForm.value.inchargeName || '');
     formData.append('comments', this.projectForm.value.comments || '');
+    formData.append('attachment', this.selectedFile, this.selectedFile.name);
+    selectedIds.forEach(id => formData.append('beneficiaryIds', id.toString()));
 
-    // Add file attachment
-    formData.append('attachment', this.selectedFile);
+    const response: any = await this.apiService.axiosInstance.post(
+      'api/subproject/assign/progress/beneficiary/save',
+      formData
+    );
 
-    // Add project info (these are for API, not shown in form)
-    formData.append('projectName', this.projectInfo.projectName);
-    formData.append('workCode', this.projectInfo.workCode);
-    formData.append('payamName', this.projectInfo.payamName);
-    formData.append('bomaName', this.projectInfo.bomaName);
-    formData.append('stateName', this.projectInfo.stateName);
-    formData.append('countyName', this.projectInfo.countyName);
+    if (response?.data?.code === 200) {
+      await Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: `Successfully assigned ${selectedIds.length} beneficiary(ies)!`,
+        timer: 2500,
+        showConfirmButton: false
+      });
 
-    // Call your API service here
-    // this.projectService.submitProject(formData).subscribe({
-    //   next: (response) => {
-    //     console.log('Success:', response);
-    //     this.loading = false;
-    //     // Show success message
-    //   },
-    //   error: (error) => {
-    //     console.error('Error:', error);
-    //     this.loading = false;
-    //     // Show error message
-    //   }
-    // });
+      await Promise.all([
+        this.loadCanBeAssignedBeneficiaries(this.canBeAssignedFirst / this.canBeAssignedRows, this.canBeAssignedRows),
+        this.loadExistingBeneficiaries(this.existingFirst / this.existingRows, this.existingRows),
+      ]);
 
-    // For demonstration
-    console.log('Form Data:', formData);
-    console.log('Form Values:', this.projectForm.value);
-    console.log('Selected File:', this.selectedFile);
+      this.projectForm.reset();
+      this.selectedFile = null;
+      this.isSubmitted = false;
 
-    setTimeout(() => {
-      this.loading = false;
-      alert('Form submitted successfully!');
-    }, 2000);
+      const fileInput = document.getElementById('attachment') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+    } else {
+      const message = response?.data?.message || 'Failed to assign beneficiaries';
+      await Swal.fire('Error', message, 'error');
+    }
+  } catch (error: any) {
+    console.error('=== Error Details ===', error);
+    const message =
+      error?.response?.data?.message ||
+      error?.message ||
+      'Error assigning beneficiaries. Please try again.';
+    await Swal.fire('Error', message, 'error');
+  } finally {
+    this.loading = false;
+    this.cdr.detectChanges();
   }
+}
+
+
+async removeBeneficiaries(): Promise<void> {
+  this.isSubmitted = true;
+  this.beneficiaryError = '';
+  this.apiError = '';
+
+  if (this.projectForm.invalid) {
+    this.projectForm.markAllAsTouched();
+    this.apiError = 'Please fill in all required fields';
+    return;
+  }
+
+  if (!this.selectedFile) {
+    this.apiError = 'Please select an attachment file';
+    return;
+  }
+
+  const selectedIds = this.getSelectedExistingIds();
+  if (selectedIds.length === 0) {
+    this.beneficiaryError = 'Please select at least one beneficiary to remove';
+    await Swal.fire('No Beneficiary Selected', this.beneficiaryError, 'warning');
+    return;
+  }
+
+  const confirmResult = await Swal.fire({
+    title: 'Are you sure?',
+    text: `You are about to remove ${selectedIds.length} beneficiary(ies).`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Yes, remove them'
+  });
+
+  if (!confirmResult.isConfirmed) return;
+
+  this.loading = true;
+
+  try {
+  
+    const formData = new FormData();
+    formData.append('subprojectId', this.subprojectId || '');
+    formData.append('workStartAt', this.formatDate(this.projectForm.value.workStartAt));
+    formData.append('inchargeName', this.projectForm.value.inchargeName || '');
+    formData.append('comments', this.projectForm.value.comments || '');
+    formData.append('attachment', this.selectedFile, this.selectedFile.name);
+
+    selectedIds.forEach(id => formData.append('beneficiaryIds', id.toString()));
+
+    const response: any = await this.apiService.axiosInstance.patch(
+      'api/subproject/assign/progress/beneficiary/remove',
+      formData,
+      {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      }
+    );
+
+    if (response?.data?.code === 200) {
+      await Swal.fire({
+        icon: 'success',
+        title: 'Removed Successfully',
+        text: `Successfully removed ${selectedIds.length} beneficiary(ies)!`,
+        timer: 2500,
+        showConfirmButton: false
+      });
+
+      await Promise.all([
+        this.loadCanBeAssignedBeneficiaries(
+          this.canBeAssignedFirst / this.canBeAssignedRows,
+          this.canBeAssignedRows
+        ),
+        this.loadExistingBeneficiaries(
+          this.existingFirst / this.existingRows,
+          this.existingRows
+        ),
+      ]);
+
+      this.projectForm.reset();
+      this.selectedFile = null;
+      this.isSubmitted = false;
+
+      const fileInput = document.getElementById('attachment') as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+    } else {
+      const message = response?.data?.message || 'Failed to remove beneficiaries';
+      await Swal.fire('Error', message, 'error');
+    }
+  } catch (error: any) {
+    console.error('=== Error Details ===', error);
+    const message =
+      error?.response?.data?.message ||
+      error?.message ||
+      'Error removing beneficiaries. Please try again.';
+    await Swal.fire('Error', message, 'error');
+  } finally {
+    this.loading = false;
+    this.cdr.detectChanges();
+  }
+}
+
+
 
   formatDate(date: Date): string {
     if (!date) return '';
@@ -213,5 +481,10 @@ export class BeneficiaryAssignment implements OnInit {
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  onTabChange(event: any): void {
+    this.activeTabIndex = event.index;
+    this.cdr.detectChanges();
   }
 }
