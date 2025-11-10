@@ -38,16 +38,14 @@
             </p-floatlabel>
         </div>
 
-
-        <!-- Type of Work -->
+        <!-- Work Code -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
-                <p-select [options]="workTypes" optionLabel="label" optionValue="value"
-                    formControlName="typeOfWork"></p-select>
-                <label>Type of Work</label>
+                <input pInputText class="form-control" formControlName="workCode" />
+                <label>Work Code</label>
             </p-floatlabel>
         </div>
-
+        
         <!-- Payam -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
@@ -66,13 +64,13 @@
         </div>
 
         <!-- Status -->
-        <div class="col-md-3">
+        <!-- <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
                 <p-select [options]="statuses" optionLabel="label" optionValue="value"
                     formControlName="status"></p-select>
                 <label>Status</label>
             </p-floatlabel>
-        </div>
+        </div> -->
 
         <!-- Screening Status -->
         <div class="col-md-3">
@@ -83,15 +81,14 @@
             </p-floatlabel>
         </div>
 
-        <!-- Work Code -->
+        <!-- Type of Work -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
-                <input pInputText class="form-control" formControlName="workCode" />
-                <label>Work Code</label>
+                <p-select [options]="workTypes" optionLabel="label" optionValue="value"
+                    formControlName="typeOfMeeting"></p-select>
+                <label>Type of Meeting</label>
             </p-floatlabel>
         </div>
-
-
         }
 
         <div class="col-12">
@@ -154,9 +151,9 @@
             <td>{{ item.countyName }}</td>
             <td>{{ item.payamName }}</td>
             <td>{{ item.bomaName }}</td>
-            <td>{{ item.typeOfMeeting }}</td>
+            <td>{{ getTypeOfMeetingLabel(item.typeOfMeeting) }}</td>
             <td>{{ item.meetingDate | date: 'dd/MM/yyyy' }}</td>
-            <td>{{ item.screeningStatus }}</td>
+            <td>{{ getScreeningStatusLabel(item.screeningStatus) }}</td>
             <td>
                 <span
                     [class]="'badge ' + (item.status === 'Approved' ? 'bg-success' : item.status === 'Rejected' ? 'bg-danger' : 'bg-warning')">
@@ -165,8 +162,7 @@
             </td>
             <td class="text-center">
                 <p-button type="button" icon="fa-solid fa-circle-arrow-right fa-lg" pTooltip="Edit" tooltipPosition="top"
-                    appendTo="body" (onClick)="editSubProject(item)" size="small" outlined="true" severity="secondary"
-                    class="me-2 big-icon-btn" />
+                appendTo="body" (onClick)="editSubProject(item.id)" size = "small" outlined="true" severity="secondary" class="me-2 big-icon-btn"/>
                
 
             </td>

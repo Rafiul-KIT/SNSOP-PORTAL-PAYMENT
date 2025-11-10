@@ -3,9 +3,9 @@ import { ApiService } from './api.service';
 
 // Define Enum for typeOfMeeting
 export const TypeOfMeetingEnum = [
-  { id: '0', value: 'CC', label: 'CC - Community Committee' },
-  { id: '1', value: 'AM', label: 'AM - Assessment Meeting' },
-  { id: '2', value: 'OT', label: 'OT - On-site Training' }
+  { id: '0', value: 'CC', label: 'Community Committee' },
+  { id: '1', value: 'AM', label: 'Assessment Meeting' },
+  { id: '2', value: 'OT', label: 'On-site Training' }
 ];
  // Define Enum for status
 export const StatusEnum = [
@@ -23,8 +23,8 @@ export const StatusEnum = [
 // Define Enum for Screening Status
 export const ScreeningStatusEnum = [
  
-  { id: '0', value: 'Rejected', label: 'Rejected' },
-   { id: '1', value: 'Accepted', label: 'Accepted' }
+  { id: '0', value: 0, label: 'Rejected' },
+   { id: '1', value: 1, label: 'Accepted' }
 ];
 
 export interface GetLookupRequest {
