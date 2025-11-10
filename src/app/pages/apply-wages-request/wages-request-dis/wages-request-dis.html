@@ -11,13 +11,7 @@
 
 
     @if (advanceSearchPanelVisible) {
-    <div class="col-md-3">
-      <p-floatlabel variant="on" class="w-100">
-        <p-select optionLabel="name" optionValue="id" formControlName="gender"></p-select>
-        <label>
-          Implementing Partner</label>
-      </p-floatlabel>
-    </div>
+
     <!-- State -->
     <div class="col-md-3">
       <p-floatlabel variant="on" class="w-100">
@@ -124,7 +118,7 @@
 
       <td class="text-center">
 
-        <p-button type="button" icon="fa-regular fa-circle-check fa-lg" pTooltip="Edit" tooltipPosition="top"
+        <p-button type="button" icon="fa-regular fa-circle-check fa-lg" pTooltip="select" tooltipPosition="top"
           appendTo="body" (onClick)="editBeneficiary(b)" size="small" outlined="true" severity="secondary"
           class="me-2 big-icon-btn" />
 
