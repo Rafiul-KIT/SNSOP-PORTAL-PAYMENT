@@ -1,4 +1,4 @@
-@if (false) {
+@if (isLoading) {
 <app-loader></app-loader>
 } @else {
 <div class="breadcrumb-wrapper">
@@ -17,7 +17,6 @@
                         Beneficiary Attendance
                     </h3>
                     <div class="d-flex gap-2">
-                   
                         <button pButton type="button" label="Upload Beneficiary Attendance" icon="pi pi-upload"
                             class="p-button-primary" [disabled]="loading"></button>
                     </div>
@@ -26,7 +25,7 @@
 
             <!-- Main -->
             <p-card class="shadow-sm border-0">
-                @if (false) {
+                @if (loading) {
                 <app-loader></app-loader>
                 } @else {
                 <div class="row g-4 mb-4">
@@ -43,22 +42,22 @@
                                     <div
                                         class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
                                         <span class="text-muted">Project Name:</span>
-                                        <span class="fw-semibold text-dark">—</span>
+                                        <span class="fw-semibold text-dark">{{ projectInfo?.projectName || '—' }}</span>
                                     </div>
                                     <div
                                         class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
                                         <span class="text-muted">Work Code:</span>
-                                        <span class="fw-semibold text-dark">—</span>
+                                        <span class="fw-semibold text-dark">{{ projectInfo?.workCode || '—' }}</span>
                                     </div>
                                     <div
                                         class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
                                         <span class="text-muted">State:</span>
-                                        <span class="fw-semibold text-dark">—</span>
+                                        <span class="fw-semibold text-dark">{{ projectInfo?.stateName || '—' }}</span>
                                     </div>
                                     <div
                                         class="list-group-item d-flex justify-content-between border-bottom align-items-center px-0 border-0 py-2">
                                         <span class="text-muted">County:</span>
-                                        <span class="fw-semibold text-dark">—</span>
+                                        <span class="fw-semibold text-dark">{{ projectInfo?.countyName || '—' }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -79,31 +78,38 @@
                                     <div
                                         class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-1">
                                         <span class="text-muted">Payam:</span>
-                                        <span class="fw-semibold text-dark">—</span>
+                                        <span class="fw-semibold text-dark">{{ projectInfo?.payamName || '—' }}</span>
                                     </div>
 
                                     <div
                                         class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom ">
                                         <span class="text-muted">Boma Name:</span>
-                                        <span class="fw-semibold text-dark">—</span>
+                                        <span class="fw-semibold text-dark">{{ projectInfo?.bomaName || '—' }}</span>
                                     </div>
 
                                     <div
                                         class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom ">
                                         <span class="text-muted">Approved Date:</span>
-                                        <span class="fw-semibold text-dark">—</span>
+                                        <span class="fw-semibold text-dark">{{ formatDate(projectInfo?.approvedDate) }}</span>
                                     </div>
 
-                                    <div class="list-group-item d-flex  gap-3 align-items-center  px-0 border-0  py-1">
+                                    <div class="list-group-item d-flex gap-3 align-items-center px-0 border-0 py-1">
                                         <span class="text-muted pb-4">Attendance Date:</span>
-                                        <div class="flex-grow-1 text-start " style="max-width: 60%;">
-                                            <p-datepicker [showIcon]="true" dateFormat="dd/mm/yy"
-                                                placeholder="Select date" class="w-100"></p-datepicker>
+                                        <div class="flex-grow-1 text-start" style="max-width: 60%;">
+                                            <p-datepicker 
+                                                [(ngModel)]="attendanceDate"
+                                                [showIcon]="true" 
+                                                dateFormat="dd/mm/yy"
+                                                placeholder="Select date" 
+                                                class="w-100">
+                                            </p-datepicker>
 
+                                            @if (isAttendanceDateInvalid() && attendanceDate === null) {
                                             <small class="text-danger d-block mt-1 text-start">
                                                 <i class="pi pi-exclamation-circle me-1"></i>
                                                 Attendance date is required
                                             </small>
+                                            }
                                         </div>
                                     </div>
 
@@ -116,13 +122,12 @@
 
                 <p-divider></p-divider>
 
-                <!-- If you still need the old 'Payment Details', keep it; otherwise ditch it -->
                 <form (ngSubmit)="onSearch()">
                     <fieldset [disabled]="loading">
                         <div class="row">
                             <div class="d-flex justify-content-center mt-3">
                                 <button pButton type="submit" label="Submit" class="p-button-primary px-5"
-                                    [disabled]="loading"></button>
+                                    [disabled]="loading || isAttendanceDateInvalid()"></button>
                             </div>
                         </div>
                     </fieldset>
