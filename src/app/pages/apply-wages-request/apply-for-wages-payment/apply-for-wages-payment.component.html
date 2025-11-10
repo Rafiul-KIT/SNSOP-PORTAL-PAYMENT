@@ -1,174 +1,215 @@
-
-@if (false) {
-<app-loader></app-loader>
+@if (isLoading) {
+  <app-loader></app-loader>
 } @else {
-<div class="breadcrumb-wrapper">
-  <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
-</div>
+  <div class="breadcrumb-wrapper">
+    <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
+  </div>
 
-<div class="container-fluid py-4">
-  <div class="row justify-content-center">
-    <div class="col-12 col-xl-11">
-      <!-- Header Card -->
-      <p-card class="shadow-sm border-0 mb-4">
-        <div class="d-flex justify-content-between align-items-center">
-          <h3 class="mb-0 fw-semibold text-success">
-            <i class="pi pi-wallet me-2"></i>
-            Apply for Wages Payment
-          </h3>
-         
-        </div>
-      </p-card>
-
-      <!-- Main Content Card -->
-      <p-card class="shadow-sm border-0">
-
-
-        <div>
-          <!-- Project Information Section -->
-          <div class="row mb-3 ">
-            <div class="col-12 ">
-              <h5 class="fw-bold text-secondary mb-2">
-                <i class="pi pi-info-circle me-2"></i>
-                Project Information
-              </h5>
-            </div>
-
-            <!-- Left Column -->
-            <div class="col-md-6 ">
-              <div class="d-flex flex-column gap-1 text-muted fs-6"> <!-- ⬅️ larger text -->
-                <div class="d-flex justify-content-between align-items-center border-bottom py-1">
-                  <span class="fw-semibold me-2">Project Name:</span>
-                  <span class="fw-bold text-dark text-end flex-grow-1" style="max-width: 55%;">Juba Market Rehab</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center border-bottom py-1">
-                  <span class="fw-semibold me-2">Work Code:</span>
-                  <span class="text-dark text-end flex-grow-1" style="max-width: 55%;">WK-2025-04</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center border-bottom py-1">
-                  <span class="fw-semibold me-2">Approved Date:</span>
-                  <span class="text-dark text-end flex-grow-1" style="max-width: 55%;">10 Jan 2025</span>
-                </div>
-              </div>
-            </div>
-            
-
-            <!-- Right Column -->
-            <div class="col-md-6">
-              <div class="d-flex flex-column gap-1 text-muted fs-6">
-                <div class="d-flex justify-content-between align-items-center border-bottom py-1">
-                  <span class="fw-semibold me-2">State:</span>
-                  <span class="text-dark text-end flex-grow-1" style="max-width: 55%;">Central Equatoria</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center border-bottom py-1">
-                  <span class="fw-semibold me-2">County:</span>
-                  <span class="text-dark text-end flex-grow-1" style="max-width: 55%;">Juba</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center border-bottom py-1">
-                  <span class="fw-semibold me-2">Payam:</span>
-                  <span class="text-dark text-end flex-grow-1" style="max-width: 55%;">Gudele</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center border-bottom py-1">
-                  <span class="fw-semibold me-2">Boma:</span>
-                  <span class="text-dark text-end flex-grow-1" style="max-width: 55%;">Hai Gabat</span>
-                </div>
-              </div>
-            </div>
+  <div class="container-fluid py-4">
+    <div class="row justify-content-center">
+      <div class="col-12 col-xl-11">
+        <!-- Header Card -->
+        <p-card class="shadow-sm border-0 mb-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <h3 class="mb-0 fw-semibold text-success">
+              <i class="pi pi-wallet me-2"></i>
+              Apply for Wages Payment
+            </h3>
           </div>
+        </p-card>
 
-
-
-          <p-divider></p-divider>
-
-          <!-- Form Section -->
-          <form [formGroup]="wagesForm" (ngSubmit)="onSearch()">
-            <fieldset [disabled]="loading">
-              <div class="row mb-4">
+        <!-- Main Content Card -->
+        <p-card class="shadow-sm border-0">
+          @if (projectData) {
+            <div>
+              <!-- Project Information Section -->
+              <div class="row mb-3">
                 <div class="col-12">
-                  <h5 class="fw-bold text-secondary mb-3">
-                    <i class="pi pi-calendar me-2"></i>
-                    Payment Details
+                  <h5 class="fw-bold text-secondary mb-2">
+                    <i class="pi pi-info-circle me-2"></i>
+                    Project Information
                   </h5>
                 </div>
 
-                <!-- Wage Rate -->
-                <div class="col-md-6 col-lg-3 mb-3">
-                  <label for="wageRate" class="form-label fw-semibold">
-                    Wage Rate (USD) <span class="text-danger">*</span>
-                  </label>
-                  <p-inputNumber id="wageRate" formControlName="wageRate" mode="currency" currency="USD" locale="en-US"
-                    [minFractionDigits]="2" [maxFractionDigits]="2" class="w-100"
-                    [ngClass]="{'ng-invalid ng-dirty': isFieldInvalid('wageRate')}">
-                  </p-inputNumber>
-                  @if (isFieldInvalid('wageRate')) {
-                  <small class="text-danger">Wage rate is required</small>
-                  }
+                <!-- Left Column -->
+                <div class="col-md-6">
+                  <div class="d-flex flex-column gap-1 text-muted fs-6">
+                    <div class="d-flex justify-content-between align-items-center border-bottom py-1">
+                      <span class="fw-semibold me-2">Project Name:</span>
+                      <span class="fw-bold text-dark text-end flex-grow-1" style="max-width: 55%;">
+                        {{ projectData.workName }}
+                      </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center border-bottom py-1">
+                      <span class="fw-semibold me-2">Work Code:</span>
+                      <span class="text-dark text-end flex-grow-1" style="max-width: 55%;">
+                        {{ projectData.workCode }}
+                      </span>
+                    </div>
+                    
+                  </div>
                 </div>
 
-                <!-- From Date -->
-                <div class="col-md-6 col-lg-3 mb-3">
-                  <label for="fromDate" class="form-label fw-semibold">
-                    From Date <span class="text-danger">*</span>
-                  </label>
-                  <p-datePicker id="fromDate" formControlName="fromDate" [showIcon]="true" dateFormat="dd/mm/yy"
-                    placeholder="Select date" class="w-100" (onSelect)="onFromDateSelected()"
-                    [ngClass]="{'ng-invalid ng-dirty': isFieldInvalid('fromDate')}">
-                  </p-datePicker>
-                  @if (isFieldInvalid('fromDate')) {
-                  <small class="text-danger">From date is required</small>
-                  }
+                <!-- Right Column -->
+                <div class="col-md-6">
+                  <div class="d-flex flex-column gap-1 text-muted fs-6">
+                    <div class="d-flex justify-content-between align-items-center border-bottom py-1">
+                      <span class="fw-semibold me-2">State:</span>
+                      <span class="text-dark text-end flex-grow-1" style="max-width: 55%;">
+                        {{ projectData.stateName || 'N/A' }}
+                      </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center border-bottom py-1">
+                      <span class="fw-semibold me-2">County:</span>
+                      <span class="text-dark text-end flex-grow-1" style="max-width: 55%;">
+                        {{ projectData.countyName || 'N/A' }}
+                      </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center border-bottom py-1">
+                      <span class="fw-semibold me-2">Payam:</span>
+                      <span class="text-dark text-end flex-grow-1" style="max-width: 55%;">
+                        {{ projectData.payamName || 'N/A' }}
+                      </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center border-bottom py-1">
+                      <span class="fw-semibold me-2">Boma:</span>
+                      <span class="text-dark text-end flex-grow-1" style="max-width: 55%;">
+                        {{ projectData.bomaName || 'N/A' }}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-
-                <!-- To Date -->
-                <div class="col-md-6 col-lg-3 mb-3">
-                  <label for="toDate" class="form-label fw-semibold">
-                    To Date <span class="text-danger">*</span>
-                  </label>
-                  <p-datePicker id="toDate" formControlName="toDate" [showIcon]="true" dateFormat="dd/mm/yy"
-                    placeholder="Select date" class="w-100" [minDate]="minDate"
-                    [ngClass]="{'ng-invalid ng-dirty': isFieldInvalid('toDate')}">
-                  </p-datePicker>
-                  @if (isFieldInvalid('toDate')) {
-                  <small class="text-danger">To date is required</small>
-                  }
-                  @if (wagesForm.errors?.['dateRange'] && (wagesForm.get('toDate')?.touched ||
-                  wagesForm.get('fromDate')?.touched)) {
-                  <small class="text-danger">To date must be after From date</small>
-                  }
-                </div>
-
-                <!-- Payment Cycle -->
-                <div class="col-md-6 col-lg-3 mb-3">
-                  <label for="paymentCycle" class="form-label fw-semibold">
-                    Payment Cycle <span class="text-danger">*</span>
-                  </label>
-
-                  <!-- ✅ Updated to p-select -->
-                  <p-select id="paymentCycle" formControlName="paymentCycle" [options]="paymentCycles"
-                    optionLabel="label" optionValue="value" placeholder="Select cycle" class="w-100"
-                    [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('paymentCycle') }"></p-select>
-
-                  @if (isFieldInvalid('paymentCycle')) {
-                  <small class="text-danger">Payment cycle is required</small>
-                  }
-                </div>
-
               </div>
-            </fieldset>
 
-            <!-- Action Buttons -->
-            <div class="d-flex justify-content-center gap-3 mt-4">
-              <button pButton type="submit" label="Search" icon="pi pi-search" class="p-button-primary px-5"
-                [disabled]="loading">
-              </button>
-              <button pButton type="button" label="Cancel" icon="pi pi-times" class="p-button-danger px-5"
-                (click)="onCancel()" [disabled]="loading">
-              </button>
+              <p-divider></p-divider>
+
+              <!-- Form Section -->
+              <form [formGroup]="wagesForm" (ngSubmit)="onSearch()">
+                <fieldset [disabled]="loading">
+                  <div class="row mb-4">
+                    <div class="col-12">
+                      <h5 class="fw-bold text-secondary mb-3">
+                        <i class="pi pi-calendar me-2"></i>
+                        Payment Details
+                      </h5>
+                    </div>
+
+                    <!-- Wage Rate -->
+                    <div class="col-md-6 col-lg-3 mb-3">
+                      <label for="wageRate" class="form-label fw-semibold">
+                        Wage Rate (USD) <span class="text-danger">*</span>
+                      </label>
+                      <p-inputNumber 
+                        id="wageRate" 
+                        formControlName="wageRate" 
+                        mode="currency" 
+                        currency="USD" 
+                        locale="en-US"
+                        [minFractionDigits]="2" 
+                        [maxFractionDigits]="2" 
+                        class="w-100"
+                        [ngClass]="{'ng-invalid ng-dirty': isFieldInvalid('wageRate')}">
+                      </p-inputNumber>
+                      @if (isFieldInvalid('wageRate')) {
+                        <small class="text-danger">Wage rate is required</small>
+                      }
+                    </div>
+
+                    <!-- From Date -->
+                    <div class="col-md-6 col-lg-3 mb-3">
+                      <label for="fromDate" class="form-label fw-semibold">
+                        From Date <span class="text-danger">*</span>
+                      </label>
+                      <p-datePicker 
+                        id="fromDate" 
+                        formControlName="fromDate" 
+                        [showIcon]="true" 
+                        dateFormat="dd/mm/yy"
+                        placeholder="Select date" 
+                        class="w-100" 
+                        (onSelect)="onFromDateSelected()"
+                        [ngClass]="{'ng-invalid ng-dirty': isFieldInvalid('fromDate')}">
+                      </p-datePicker>
+                      @if (isFieldInvalid('fromDate')) {
+                        <small class="text-danger">From date is required</small>
+                      }
+                    </div>
+
+                    <!-- To Date -->
+                    <div class="col-md-6 col-lg-3 mb-3">
+                      <label for="toDate" class="form-label fw-semibold">
+                        To Date <span class="text-danger">*</span>
+                      </label>
+                      <p-datePicker 
+                        id="toDate" 
+                        formControlName="toDate" 
+                        [showIcon]="true" 
+                        dateFormat="dd/mm/yy"
+                        placeholder="Select date" 
+                        class="w-100" 
+                        [minDate]="minDate"
+                        [ngClass]="{'ng-invalid ng-dirty': isFieldInvalid('toDate')}">
+                      </p-datePicker>
+                      @if (isFieldInvalid('toDate')) {
+                        <small class="text-danger">To date is required</small>
+                      }
+                      @if (wagesForm.errors?.['dateRange'] && (wagesForm.get('toDate')?.touched || wagesForm.get('fromDate')?.touched)) {
+                        <small class="text-danger">To date must be after From date</small>
+                      }
+                    </div>
+
+                    <!-- Payment Cycle -->
+                    <div class="col-md-6 col-lg-3 mb-3">
+                      <label for="paymentCycle" class="form-label fw-semibold">
+                        Payment Cycle <span class="text-danger">*</span>
+                      </label>
+                      <p-select 
+                        id="paymentCycle" 
+                        formControlName="paymentCycle" 
+                        [options]="paymentCycles"
+                        optionLabel="label" 
+                        optionValue="value" 
+                        placeholder="Select cycle" 
+                        class="w-100"
+                        [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('paymentCycle') }">
+                      </p-select>
+                      @if (isFieldInvalid('paymentCycle')) {
+                        <small class="text-danger">Payment cycle is required</small>
+                      }
+                    </div>
+                  </div>
+                </fieldset>
+
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-center gap-3 mt-4">
+                  <button 
+                    pButton 
+                    type="submit" 
+                    label="Search" 
+                    icon="pi pi-search" 
+                    class="p-button-primary px-5"
+                    [disabled]="loading">
+                  </button>
+                  <button 
+                    pButton 
+                    type="button" 
+                    label="Cancel" 
+                    icon="pi pi-times" 
+                    class="p-button-danger px-5"
+                    (click)="onCancel()" 
+                    [disabled]="loading">
+                  </button>
+                </div>
+              </form>
             </div>
-          </form>
-        </div>
-
-      </p-card>
+          } @else {
+            <div class="text-center py-5">
+              <i class="pi pi-exclamation-triangle text-warning" style="font-size: 3rem;"></i>
+              <p class="mt-3 text-muted">{{ statusMsg || 'No project data available.' }}</p>
+            </div>
+          }
+        </p-card>
+      </div>
     </div>
   </div>
-</div>}
+}
