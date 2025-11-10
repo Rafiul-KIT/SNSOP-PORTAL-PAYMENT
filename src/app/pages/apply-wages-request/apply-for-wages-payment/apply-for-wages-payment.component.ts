@@ -86,10 +86,18 @@ export class ApplyForWagesPaymentComponent implements OnInit {
 
   initializePaymentCycles(): void {
     this.paymentCycles = [
-      { label: 'Payment Cycle 1', value: 'cycle1' },
-      { label: 'Payment Cycle 2', value: 'cycle2' },
-      { label: 'Payment Cycle 3', value: 'cycle3' },
-      { label: 'Payment Cycle 4', value: 'cycle4' }
+      { label: 'Payment Cycle 1', value: '1' },
+      { label: 'Payment Cycle 2', value: '2' },
+      { label: 'Payment Cycle 3', value: '3' },
+      { label: 'Payment Cycle 4', value: '4' },
+      { label: 'Payment Cycle 5', value: '5' },
+      { label: 'Payment Cycle 6', value: '6' },
+      { label: 'Payment Cycle 7', value: '7' },
+      { label: 'Payment Cycle 8', value: '8' },
+      { label: 'Payment Cycle 9', value: '9' },
+      { label: 'Payment Cycle 10', value: '10' },
+      { label: 'Payment Cycle 11', value: '11' },
+     
     ];
   }
 

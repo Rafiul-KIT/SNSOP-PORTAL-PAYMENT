@@ -8,15 +8,8 @@
   <div class="container-fluid py-4">
     <div class="row justify-content-center">
       <div class="col-12 col-xl-11">
-        <!-- Header Card -->
-        <p-card class="shadow-sm border-0 mb-4">
-          <div class="d-flex justify-content-between align-items-center">
-            <h3 class="mb-0 fw-semibold text-success">
-              <i class="pi pi-wallet me-2"></i>
-              Apply for Wages Payment
-            </h3>
-          </div>
-        </p-card>
+      
+    
 
         <!-- Main Content Card -->
         <p-card class="shadow-sm border-0">
@@ -95,7 +88,7 @@
                     </div>
 
                     <!-- Wage Rate -->
-                    <div class="col-md-6 col-lg-3 mb-3">
+                    <!-- <div class="col-md-6 col-lg-3 mb-3">
                       <label for="wageRate" class="form-label fw-semibold">
                         Wage Rate (USD) <span class="text-danger">*</span>
                       </label>
@@ -113,7 +106,7 @@
                       @if (isFieldInvalid('wageRate')) {
                         <small class="text-danger">Wage rate is required</small>
                       }
-                    </div>
+                    </div> -->
 
                     <!-- From Date -->
                     <div class="col-md-6 col-lg-3 mb-3">
@@ -190,15 +183,7 @@
                     class="p-button-primary px-5"
                     [disabled]="loading">
                   </button>
-                  <button 
-                    pButton 
-                    type="button" 
-                    label="Cancel" 
-                    icon="pi pi-times" 
-                    class="p-button-danger px-5"
-                    (click)="onCancel()" 
-                    [disabled]="loading">
-                  </button>
+                  
                 </div>
               </form>
             </div>
