@@ -1,20 +1,55 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 
 // PrimeNG Imports
 import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 import { DatePickerModule } from 'primeng/datepicker';
-
 import { ButtonModule } from 'primeng/button';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DividerModule } from 'primeng/divider';
+import { TableModule } from 'primeng/table';
+import { PaginatorModule } from 'primeng/paginator';
+import { CheckboxModule } from 'primeng/checkbox';
 import { ApiService } from '../../../services/api.service';
 import { SelectModule } from 'primeng/select';
 import { Loader } from "../../../components/loader/loader";
-import { Breadcrumb } from "primeng/breadcrumb";
+import { BreadcrumbModule } from "primeng/breadcrumb";
 
+interface SubProject {
+  id: number;
+  workCode: string;
+  projectId: number;
+  projectName: string;
+  stateId: number;
+  stateName: string;
+  countyId: number;
+  countyName: string;
+  payamId: number;
+  payamName: string;
+  bomaId: number;
+  bomaName: string;
+  typeOfMeeting: string;
+  meetingDate: string;
+  screeningStatus: string;
+  status: string;
+}
+
+interface BeneficiaryAttendanceRecord {
+  beneficiaryId: number;
+  householdNumber: string;
+  beneficiaryName: string;
+  gender: string;
+  age: number;
+  phoneNo: string;
+  present: boolean;
+  finlitAttended: boolean;
+  ecdAttended: boolean;
+  washAttended: boolean;
+  gbvAttended: boolean;
+}
 
 @Component({
   selector: 'app-beneficiary-attendance-perform',
@@ -34,110 +69,115 @@ import { Breadcrumb } from "primeng/breadcrumb";
     DividerModule,
     SelectModule,
     Loader,
-    Breadcrumb
+    BreadcrumbModule,
+    TableModule,
+    PaginatorModule,
+    CheckboxModule
 ],
 })
 export class BeneficiaryAttendancePerform implements OnInit {
-  wagesForm!: FormGroup;
-  paymentCycles: any[] = [];
-  minDate: Date = new Date();
   loading = false;
-  projectInfo: any;
+  isLoading = true;
+  subproject: SubProject | null = null;
   breadcrumbItems: any[] = [];
   breadcrumbHome: any;
-  constructor(private fb: FormBuilder, private projectService: ApiService) {
-    this.initializePaymentCycles();
-  }
+
+  beneficiaries: BeneficiaryAttendanceRecord[] = [];
+  selectedBeneficiaries: BeneficiaryAttendanceRecord[] = [];
+  totalRecords = 0;
+  currentPage = 0;
+  pageSize = 10;
+  attendanceDate: Date | null = null;
+
+  statusOptions = [
+    { label: 'Present', value: true },
+    { label: 'Absent', value: false }
+  ];
+
+  constructor(
+    private fb: FormBuilder,
+    private api: ApiService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
-    this.initializeForm();
     this.initBreadcrumb();
-    // this.projectService.getProjectInfo().subscribe(data => {
-    //   this.projectInfo = data;
-    // });
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.fetchSubProject(Number(id));
+    } else {
+      console.error('No subproject ID found in route');
+      this.isLoading = false;
+    }
   }
+
+  fetchSubProject(id: number) {
+    this.isLoading = true;
+    const body = { id: id };
+    this.api.POST('api/subproject/get?page=0&size=1', body)
+      .then((res: any) => {
+        const data = res.data || res;
+        if (data && data.content && data.content.length > 0) {
+          this.subproject = data.content[0];
+        } else {
+          console.error('Subproject not found');
+        }
+      })
+      .catch(err => {
+        console.error('Error fetching subproject:', err);
+      })
+      .finally(() => {
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      });
+  }
+
   initBreadcrumb() {
     this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
-    this.breadcrumbItems = [{ label: 'Create Wages Request' }];
-    
-  }
-initializeForm(): void {
-  this.wagesForm = this.fb.group(
-    {
-      wageRate: [{ value: 2.7, disabled: true }, [Validators.required, Validators.min(0.01)]],
-      fromDate: [null, Validators.required],
-      toDate: [null, Validators.required],
-      paymentCycle: [null, Validators.required]
-    },
-    { validators: this.dateRangeValidator }
-  );
-}
-
-
-  initializePaymentCycles(): void {
-    this.paymentCycles = [
-      { label: 'Payment Cycle 1', value: 'cycle1' },
-      { label: 'Payment Cycle 2', value: 'cycle2' },
-      { label: 'Payment Cycle 3', value: 'cycle3' },
-      { label: 'Payment Cycle 4', value: 'cycle4' }
-    ];
+    this.breadcrumbItems = [{ label: 'Beneficiary Attendance' }];
   }
 
-  dateRangeValidator(group: AbstractControl): ValidationErrors | null {
-    const fromDate = group.get('fromDate')?.value;
-    const toDate = group.get('toDate')?.value;
-    if (fromDate && toDate && fromDate > toDate) {
-      return { dateRange: true };
+  onAttendanceDateChange(event: Date) {
+    this.attendanceDate = event;
+    this.currentPage = 0;
+    this.fetchBeneficiaries(this.currentPage, this.pageSize);
+  }
+
+  fetchBeneficiaries(page: number, size: number) {
+    if (!this.subproject || !this.attendanceDate) {
+      return;
     }
-    return null;
-  }
-
-  onFromDateSelected(): void {
-    const fromDate = this.wagesForm.get('fromDate')?.value;
-    if (fromDate) {
-      this.minDate = new Date(fromDate);
-    }
-  }
-
-  onSearch(): void {
-    if (this.wagesForm.valid) {
-      this.loading = true;
-      console.log('Form Data:', this.wagesForm.value);
-      // Simulate API call
-      setTimeout(() => {
-        this.loading = false;
-        // Add search results to a table or display a message
-      }, 2000);
-    } else {
-      this.markFormGroupTouched(this.wagesForm);
-    }
-  }
-
-  onCancel(): void {
-    this.wagesForm.reset({
-      wageRate: 2.70
-    });
-  }
-
-  onLookUp(): void {
     this.loading = true;
-    console.log('Look Up clicked');
-    // Simulate API call
-    setTimeout(() => {
-      this.loading = false;
-      // a lookup table or display a message
-    }, 2000);
+    const date = this.attendanceDate.toISOString().split('T')[0]; // format to yyyy-mm-dd
+    const subprojectId = this.subproject.id;
+
+    this.api.GET(`api/attendance/get?subprojectId=${subprojectId}&attendanceDate=${date}&page=${page}&size=${size}`)
+      .then((res: any) => {
+        const data = res.data || res;
+        if (data && data.content) {
+          this.beneficiaries = data.content.map((b: BeneficiaryAttendanceRecord) => ({...b, present: true})); // Default to present
+          this.totalRecords = data.totalElements || 0;
+        } else {
+          this.beneficiaries = [];
+          this.totalRecords = 0;
+        }
+      })
+      .catch(err => {
+        console.error('Error fetching beneficiaries:', err);
+        this.beneficiaries = [];
+        this.totalRecords = 0;
+      })
+      .finally(() => {
+        this.loading = false;
+        this.cdr.markForCheck();
+      });
   }
 
-  markFormGroupTouched(formGroup: FormGroup): void {
-    Object.keys(formGroup.controls).forEach(key => {
-      const control = formGroup.get(key);
-      control?.markAsTouched();
-    });
-  }
-
-  isFieldInvalid(fieldName: string): boolean {
-    const field = this.wagesForm.get(fieldName);
-    return !!(field && field.invalid && field.touched);
+  onPageChange(event: any) {
+    this.currentPage = event.page;
+    this.pageSize = event.rows;
+    this.fetchBeneficiaries(this.currentPage, this.pageSize);
   }
 }

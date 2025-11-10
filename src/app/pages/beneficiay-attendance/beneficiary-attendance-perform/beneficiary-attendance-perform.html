@@ -1,4 +1,4 @@
-@if (false) {
+@if (isLoading) {
 <app-loader></app-loader>
 } @else {
 <div class="breadcrumb-wrapper">
@@ -26,7 +26,7 @@
 
             <!-- Main -->
             <p-card class="shadow-sm border-0">
-                @if (false) {
+                @if (!subproject) {
                 <app-loader></app-loader>
                 } @else {
                 <div class="row g-4 mb-4">
@@ -43,22 +43,22 @@
                                     <div
                                         class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
                                         <span class="text-muted">Project Name:</span>
-                                        <span class="fw-semibold text-dark">—</span>
+                                        <span class="fw-semibold text-dark">{{ subproject.projectName || '—' }}</span>
                                     </div>
                                     <div
                                         class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
                                         <span class="text-muted">Work Code:</span>
-                                        <span class="fw-semibold text-dark">—</span>
+                                        <span class="fw-semibold text-dark">{{ subproject.workCode || '—' }}</span>
                                     </div>
                                     <div
                                         class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
                                         <span class="text-muted">State:</span>
-                                        <span class="fw-semibold text-dark">—</span>
+                                        <span class="fw-semibold text-dark">{{ subproject.stateName || '—' }}</span>
                                     </div>
                                     <div
                                         class="list-group-item d-flex justify-content-between border-bottom align-items-center px-0 border-0 py-2">
                                         <span class="text-muted">County:</span>
-                                        <span class="fw-semibold text-dark">—</span>
+                                        <span class="fw-semibold text-dark">{{ subproject.countyName || '—' }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -79,13 +79,13 @@
                                     <div
                                         class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-1">
                                         <span class="text-muted">Payam:</span>
-                                        <span class="fw-semibold text-dark">—</span>
+                                        <span class="fw-semibold text-dark">{{ subproject.payamName || '—' }}</span>
                                     </div>
 
                                     <div
                                         class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom ">
                                         <span class="text-muted">Boma Name:</span>
-                                        <span class="fw-semibold text-dark">—</span>
+                                        <span class="fw-semibold text-dark">{{ subproject.bomaName || '—' }}</span>
                                     </div>
 
                                     <div
@@ -97,13 +97,8 @@
                                     <div class="list-group-item d-flex  gap-3 align-items-center  px-0 border-0  py-1">
                                         <span class="text-muted pb-4">Attendance Date:</span>
                                         <div class="flex-grow-1 text-start " style="max-width: 60%;">
-                                            <p-datepicker [showIcon]="true" dateFormat="dd/mm/yy"
+                                            <p-datepicker [(ngModel)]="attendanceDate" (ngModelChange)="onAttendanceDateChange($event)" [showIcon]="true" dateFormat="dd/mm/yy"
                                                 placeholder="Select date" class="w-100"></p-datepicker>
-
-                                            <small class="text-danger d-block mt-1 text-start">
-                                                <i class="pi pi-exclamation-circle me-1"></i>
-                                                Attendance date is required
-                                            </small>
                                         </div>
                                     </div>
 
@@ -116,17 +111,50 @@
 
                 <p-divider></p-divider>
 
-                <!-- If you still need the old 'Payment Details', keep it; otherwise ditch it -->
-                <form (ngSubmit)="onSearch()">
-                    <fieldset [disabled]="loading">
-                        <div class="row">
-                            <div class="d-flex justify-content-center mt-3">
-                                <button pButton type="submit" label="Submit" class="p-button-primary px-5"
-                                    [disabled]="loading"></button>
-                            </div>
-                        </div>
-                    </fieldset>
-                </form>
+                @if (beneficiaries.length > 0) {
+                <p-table [value]="beneficiaries" [(selection)]="selectedBeneficiaries" dataKey="beneficiaryId" [tableStyle]="{'min-width': '50rem'}">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th style="width: 4rem"><p-tableHeaderCheckbox></p-tableHeaderCheckbox></th>
+                            <th>Household No.</th>
+                            <th>Beneficiary Name</th>
+                            <th>Gender</th>
+                            <th>Age</th>
+                            <th>Phone No.</th>
+                            <th>FINLIT</th>
+                            <th>ECD</th>
+                            <th>WASH</th>
+                            <th>GBV</th>
+                            <th>Status</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-beneficiary>
+                        <tr>
+                            <td><p-tableCheckbox [value]="beneficiary"></p-tableCheckbox></td>
+                            <td>{{beneficiary.householdNumber}}</td>
+                            <td>{{beneficiary.beneficiaryName}}</td>
+                            <td>{{beneficiary.gender}}</td>
+                            <td>{{beneficiary.age}}</td>
+                            <td>{{beneficiary.phoneNo}}</td>
+                            <td><p-checkbox [(ngModel)]="beneficiary.finlitAttended" [binary]="true"></p-checkbox></td>
+                            <td><p-checkbox [(ngModel)]="beneficiary.ecdAttended" [binary]="true"></p-checkbox></td>
+                            <td><p-checkbox [(ngModel)]="beneficiary.washAttended" [binary]="true"></p-checkbox></td>
+                            <td><p-checkbox [(ngModel)]="beneficiary.ecdAttended" [binary]="true"></p-checkbox></td>
+                            <td><p-checkbox [(ngModel)]="beneficiary.washAttended" [binary]="true"></p-checkbox></td>
+                            <td><p-checkbox [(ngModel)]="beneficiary.gbvAttended" [binary]="true"></p-checkbox></td>
+                            <td>
+                                <p-select [options]="statusOptions" [(ngModel)]="beneficiary.present" optionLabel="label" optionValue="value"></p-select>
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+
+                <p-paginator (onPageChange)="onPageChange($event)" [first]="currentPage * pageSize" [rows]="pageSize" [totalRecords]="totalRecords" [rowsPerPageOptions]="[10, 20, 30]"></p-paginator>
+                
+                <div class="d-flex justify-content-end mt-3">
+                    <button pButton type="button" label="Save Attendance" class="p-button-primary px-5" [disabled]="loading"></button>
+                </div>
+                }
                 }
             </p-card>
         </div>
