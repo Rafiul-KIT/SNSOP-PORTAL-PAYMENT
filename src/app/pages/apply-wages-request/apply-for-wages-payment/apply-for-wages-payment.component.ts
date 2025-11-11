@@ -272,6 +272,16 @@ onPageChange(event: any): void {
       return;
     }
 
+    if (this.wagesForm.invalid) {
+      this.markFormGroupTouched(this.wagesForm);
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Validation Error',
+        detail: 'Please fill in all required payment details.'
+      });
+      return;
+    }
+
     this.submitting = true;
 
     try {
