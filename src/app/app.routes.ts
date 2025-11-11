@@ -59,7 +59,7 @@ export const routes: Routes = [
         component: WagesRequestDis ,
       },
          {
-        path: 'create',
+        path: 'create/:id',
         component: ApplyForWagesPaymentComponent ,
       },
        

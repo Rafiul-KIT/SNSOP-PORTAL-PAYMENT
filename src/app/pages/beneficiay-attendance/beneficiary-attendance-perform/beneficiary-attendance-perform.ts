@@ -1,4 +1,5 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -53,7 +54,6 @@ interface BeneficiaryAttendanceRecord {
 
 @Component({
   selector: 'app-beneficiary-attendance-perform',
- 
   templateUrl: './beneficiary-attendance-perform.html',
   styleUrl: './beneficiary-attendance-perform.scss',
   standalone: true,
@@ -134,6 +134,7 @@ export class BeneficiaryAttendancePerform implements OnInit {
       });
   }
 
+
   initBreadcrumb() {
     this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
     this.breadcrumbItems = [{ label: 'Beneficiary Attendance' }];
@@ -179,5 +180,18 @@ export class BeneficiaryAttendancePerform implements OnInit {
     this.currentPage = event.page;
     this.pageSize = event.rows;
     this.fetchBeneficiaries(this.currentPage, this.pageSize);
+  }
+
+  isAttendanceDateInvalid(): boolean {
+    return !this.attendanceDate;
+  }
+
+  formatDate(date: string | null): string {
+    if (!date) return '—';
+    try {
+      return new Date(date).toLocaleDateString('en-GB');
+    } catch {
+      return '—';
+    }
   }
 }
