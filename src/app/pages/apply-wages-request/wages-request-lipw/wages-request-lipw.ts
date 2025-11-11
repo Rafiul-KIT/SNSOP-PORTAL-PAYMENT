@@ -200,6 +200,7 @@ export class WagesRequestLipw   implements OnInit {
       payamName: null,
       bomaId: f.boma?.id || null,
       bomaName: null,
+      status: f.status || "8",
     
     };
   }
