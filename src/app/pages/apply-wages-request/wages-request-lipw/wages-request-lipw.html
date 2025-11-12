@@ -103,7 +103,7 @@
       <th>Boma</th>
       <th>Type of Meeting</th>
       <th>Meeting Date</th>
-      <th>Screening Status</th>
+    
       <th>Status</th>
       <th class="text-center" [style]="{ width: '185px' }">Action</th>
     </tr>
@@ -111,7 +111,7 @@
 
   <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
     <tr>
-      <td>{{ rowIndex + 1 }}</td>
+        <td>{{ (currentPage * pageSize) + rowIndex + 1 }}</td>
       <td>{{ item.workCode }}</td>
       <td>{{ item.projectName }}</td>
       <td>{{ item.stateName }}</td>
@@ -120,7 +120,7 @@
       <td>{{ item.bomaName }}</td>
       <td>{{ item.typeOfMeeting }}</td>
       <td>{{ item.meetingDate | date: 'dd/MM/yyyy' }}</td>
-      <td>{{ item.screeningStatus }}</td>
+  
       <td>
         <span
           [class]="'badge ' + (item.status === 'Approved' ? 'bg-success' : item.status === 'Rejected' ? 'bg-danger' : 'bg-warning')">
