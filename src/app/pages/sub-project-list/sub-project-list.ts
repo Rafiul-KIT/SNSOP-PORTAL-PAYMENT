@@ -347,6 +347,11 @@ export class SubProjectList implements OnInit {
     this.currentProjectIdToDelete = null;
     this.deleteComment = '';
   }
+    getScreeningStatusLabel(value: string): string {
+    const numericValue = parseInt(value, 10);
+    const found = ScreeningStatusEnum.find(item => item.value === numericValue);
+    return found ? found.label : value;
+  }
 
   trackById = (_: number, row: SubProjectDto) => row.id;
 }

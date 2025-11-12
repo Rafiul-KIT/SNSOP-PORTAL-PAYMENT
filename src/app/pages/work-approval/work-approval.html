@@ -144,7 +144,7 @@
       <td>{{ item.typeOfMeeting }}</td>
 
       <td>{{ item.meetingDate | date: 'dd/MM/yyyy' }}</td>
-      <td>{{ item.screeningStatus === 0 ? 'Rejected' : 'Accepted' }}</td>
+       <td>{{ getScreeningStatusLabel(item.screeningStatus) }}</td>
       <td>
         <span
           [class]="'badge ' + (item.status === 'Approved' ? 'bg-success' : item.status === 'Rejected' ? 'bg-danger' : 'bg-warning')">
