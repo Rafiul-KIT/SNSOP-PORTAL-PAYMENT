@@ -30,10 +30,9 @@ export class Header {
       link: environment.portals.payment,
       icon: 'fas fa-credit-card',
     },
-    { label: 'GRM', link: environment.portals.grm, icon: 'fas fa-sitemap' },
+    { label: 'GRM', icon: 'fas fa-sitemap' },
     {
       label: 'Report',
-      link: environment.portals.report,
       icon: 'fas fa-chart-line',
     },
     {
