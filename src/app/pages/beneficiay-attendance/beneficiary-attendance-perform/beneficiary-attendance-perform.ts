@@ -13,6 +13,8 @@ import { DividerModule } from 'primeng/divider';
 import { TableModule } from 'primeng/table';
 import { PaginatorModule } from 'primeng/paginator';
 import { CheckboxModule } from 'primeng/checkbox';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 import { ApiService } from '../../../services/api.service';
 import { SelectModule } from 'primeng/select';
 import { Loader } from "../../../components/loader/loader";
@@ -71,8 +73,10 @@ interface BeneficiaryAttendanceRecord {
     BreadcrumbModule,
     TableModule,
     PaginatorModule,
-    CheckboxModule
-  ],
+    CheckboxModule,
+    ToastModule
+],
+  providers: [MessageService],
 })
 export class BeneficiaryAttendancePerform implements OnInit {
   loading = false;
@@ -98,8 +102,9 @@ export class BeneficiaryAttendancePerform implements OnInit {
     private api: ApiService,
     private route: ActivatedRoute,
     private router: Router,
-    private cdr: ChangeDetectorRef
-  ) { }
+    private cdr: ChangeDetectorRef,
+    private messageService: MessageService
+  ) {}
 
   ngOnInit(): void {
     this.initBreadcrumb();
@@ -150,7 +155,12 @@ export class BeneficiaryAttendancePerform implements OnInit {
       return;
     }
     this.loading = true;
-    const date = this.attendanceDate.toISOString().split('T')[0]; // format to yyyy-mm-dd
+    // Format date to YYYY-MM-DD, avoiding timezone conversion issues from toISOString()
+    const dt = this.attendanceDate;
+    const year = dt.getFullYear();
+    const month = (dt.getMonth() + 1).toString().padStart(2, '0');
+    const day = dt.getDate().toString().padStart(2, '0');
+    const date = `${year}-${month}-${day}`;
     const subprojectId = this.subproject.id;
 
     this.api.GET(`api/attendance/get?subprojectId=${subprojectId}&attendanceDate=${date}&page=${page}&size=${size}`)
@@ -192,5 +202,70 @@ export class BeneficiaryAttendancePerform implements OnInit {
     } catch {
       return '—';
     }
+  }
+
+  saveAttendance() {
+    if (!this.subproject || !this.attendanceDate || this.beneficiaries.length === 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Cannot Save',
+        detail: 'No attendance data to save. Please select a date and ensure beneficiaries are loaded.',
+      });
+      return;
+    }
+
+    this.loading = true;
+
+    // Format date to YYYY-MM-DD
+    const dt = this.attendanceDate;
+    const year = dt.getFullYear();
+    const month = (dt.getMonth() + 1).toString().padStart(2, '0');
+    const day = dt.getDate().toString().padStart(2, '0');
+    const attendanceDateStr = `${year}-${month}-${day}`;
+
+    const payload = {
+      subprojectId: this.subproject.id,
+      status: true, // Assuming true for a completed attendance session
+      list: this.beneficiaries.map(b => ({
+        beneficiaryId: b.beneficiaryId,
+        attendanceDate: attendanceDateStr,
+        present: b.present,
+        finlitAttended: b.finlitAttended,
+        ecdAttended: b.ecdAttended,
+        washAttended: b.washAttended,
+        gbvAttended: b.gbvAttended,
+      })),
+    };
+
+    this.api.POST('api/attendance/save', payload)
+      .then((res: any) => {
+        if (res && res.code === 0) {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Attendance saved successfully!',
+          });
+          // After success, navigate back to the list page
+          this.router.navigate(['/beneficiary-attendance']);
+        } else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Save Failed',
+            detail: res.message || 'An unknown error occurred while saving.',
+          });
+        }
+      })
+      .catch(err => {
+        console.error('Error saving attendance:', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'API Error',
+          detail: 'Failed to save attendance. Please check the console for details.',
+        });
+      })
+      .finally(() => {
+        this.loading = false;
+        this.cdr.markForCheck();
+      });
   }
 }
