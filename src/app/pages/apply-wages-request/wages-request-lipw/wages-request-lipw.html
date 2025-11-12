@@ -47,7 +47,12 @@
       </p-floatlabel>
     </div>
 
-
+  <div class="col-md-3">
+      <p-floatlabel variant="on" class="w-100">
+        <p-select [options]="statuses" optionLabel="label" optionValue="value" formControlName="status"></p-select>
+        <label>Status</label>
+      </p-floatlabel>
+    </div>
     <!-- Work Code -->
     <div class="col-md-4">
       <p-floatlabel variant="on" class="w-100">
