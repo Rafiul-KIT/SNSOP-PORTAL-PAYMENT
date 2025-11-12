@@ -146,10 +146,10 @@ export class BeneficiaryAttendance implements OnInit {
       state: [null],
       county: [{ value: null, disabled: true }],
       projectName: [null],
-      typeOfWork: [null],
+      typeOfMeeting: [null],
       payam: [{ value: null, disabled: true }],
       boma: [{ value: null, disabled: true }],
-      status: [null],
+      status: 5,
       workCode: [''],
       workActivity: [null],
       screeningStatus: [null],
@@ -203,10 +203,10 @@ export class BeneficiaryAttendance implements OnInit {
       payamName: null,
       bomaId: f.boma?.id || null,
       bomaName: null,
-      typeOfMeeting: f.typeOfWork || null,
+      typeOfMeeting: f.typeOfMeeting || null,
       meetingDate: null,
       screeningStatus: f.screeningStatus || null,
-      status: f.status || null,
+      status: f.status,
     };
   }
 
@@ -273,9 +273,19 @@ export class BeneficiaryAttendance implements OnInit {
 
   // ---------- Actions ----------
   editSubProject(id: number) {
-    this.router.navigate(['/beneficiary-attendance/view']);
+    this.router.navigate(['beneficiary-attendance/view', id]);
   }
 
 
   trackById = (_: number, row: SubProjectDto) => row.id;
+
+  getTypeOfMeetingLabel(value: string): string {
+    const found = TypeOfMeetingEnum.find(item => item.value === value);
+    return found ? found.label : value;
+  }
+
+  getScreeningStatusLabel(value: string): string {
+    const found = ScreeningStatusEnum.find(item => item.value);
+    return found ? found.label : value;
+  }
 }
