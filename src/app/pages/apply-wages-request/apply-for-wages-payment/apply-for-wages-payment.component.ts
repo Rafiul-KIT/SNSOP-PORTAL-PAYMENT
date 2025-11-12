@@ -12,9 +12,24 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { DividerModule } from 'primeng/divider';
 import { SelectModule } from 'primeng/select';
 import { Breadcrumb } from "primeng/breadcrumb";
+import { TableModule } from 'primeng/table';
+import { MessageModule } from 'primeng/message';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 import { ApiService } from '../../../services/api.service';
 import { Loader } from "../../../components/loader/loader";
+
+interface Beneficiary {
+  beneficiaryId: number;
+  householdNumber: string;
+  beneficiaryName: string;
+  gender: string;
+  age: number;
+  phoneNo: string;
+  legalStatus: string;
+  totalDays: number;
+}
 
 @Component({
   selector: 'app-apply-for-wages-payment',
@@ -31,8 +46,12 @@ import { Loader } from "../../../components/loader/loader";
     DividerModule,
     SelectModule,
     Loader,
-    Breadcrumb
+    Breadcrumb,
+    TableModule,
+    MessageModule,
+    ToastModule
   ],
+  providers: [MessageService],
   templateUrl: './apply-for-wages-payment.component.html'
 })
 export class ApplyForWagesPaymentComponent implements OnInit {
@@ -47,12 +66,25 @@ export class ApplyForWagesPaymentComponent implements OnInit {
   breadcrumbHome: any;
   subprojectId: string | null = null;
 
+  // Table related properties
+  beneficiaries: Beneficiary[] = [];
+  selectedBeneficiaries: Beneficiary[] = [];
+  showTable = false;
+  tableLoading = false;
+  submitting = false;
+
+  // Pagination
+  totalRecords = 0;
+  pageNumber = 0;
+  pageSize = 10;
+
   constructor(
     private fb: FormBuilder,
     private apiService: ApiService,
     private route: ActivatedRoute,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private messageService: MessageService
   ) {
     this.initializePaymentCycles();
   }
@@ -86,18 +118,17 @@ export class ApplyForWagesPaymentComponent implements OnInit {
 
   initializePaymentCycles(): void {
     this.paymentCycles = [
-      { label: 'Payment Cycle 1', value: '1' },
-      { label: 'Payment Cycle 2', value: '2' },
-      { label: 'Payment Cycle 3', value: '3' },
-      { label: 'Payment Cycle 4', value: '4' },
-      { label: 'Payment Cycle 5', value: '5' },
-      { label: 'Payment Cycle 6', value: '6' },
-      { label: 'Payment Cycle 7', value: '7' },
-      { label: 'Payment Cycle 8', value: '8' },
-      { label: 'Payment Cycle 9', value: '9' },
-      { label: 'Payment Cycle 10', value: '10' },
-      { label: 'Payment Cycle 11', value: '11' },
-     
+      { label: 'Payment Cycle 1', value: 1 },
+      { label: 'Payment Cycle 2', value: 2 },
+      { label: 'Payment Cycle 3', value: 3 },
+      { label: 'Payment Cycle 4', value: 4 },
+      { label: 'Payment Cycle 5', value: 5 },
+      { label: 'Payment Cycle 6', value: 6 },
+      { label: 'Payment Cycle 7', value: 7 },
+      { label: 'Payment Cycle 8', value: 8 },
+      { label: 'Payment Cycle 9', value: 9 },
+      { label: 'Payment Cycle 10', value: 10 },
+      { label: 'Payment Cycle 11', value: 11 },
     ];
   }
 
@@ -125,6 +156,11 @@ export class ApplyForWagesPaymentComponent implements OnInit {
       console.error('Failed to load project data:', error);
       this.projectData = null;
       this.statusMsg = 'Error loading project data.';
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to load project data'
+      });
     } finally {
       this.isLoading = false;
       this.cdr.detectChanges();
@@ -147,22 +183,175 @@ export class ApplyForWagesPaymentComponent implements OnInit {
     }
   }
 
-  onSearch(): void {
-    if (this.wagesForm.valid) {
-      this.loading = true;
-      console.log('Form Data:', this.wagesForm.getRawValue());
-      // Simulate API call
-      setTimeout(() => {
-        this.loading = false;
-        // Navigate to results or show success message
-      }, 2000);
-    } else {
-      this.markFormGroupTouched(this.wagesForm);
+  async onSearch(): Promise<void> {
+  // Remove payment cycle from validation check
+  const fromDate = this.wagesForm.get('fromDate');
+  const toDate = this.wagesForm.get('toDate');
+  
+  if (!fromDate?.value || !toDate?.value || this.wagesForm.errors?.['dateRange']) {
+    fromDate?.markAsTouched();
+    toDate?.markAsTouched();
+    this.messageService.add({
+      severity: 'warn',
+      summary: 'Validation Error',
+      detail: 'Please select valid From Date and To Date'
+    });
+    return;
+  }
+
+  await this.loadBeneficiaries(0);
+}
+
+  async loadBeneficiaries(page: number): Promise<void> {
+    this.tableLoading = true;
+    this.pageNumber = page;
+
+    try {
+      const formValue = this.wagesForm.getRawValue();
+      const requestBody = {
+        subprojectId: Number(this.subprojectId),
+        fromDate: this.formatDate(formValue.fromDate),
+        toDate: this.formatDate(formValue.toDate)
+      };
+
+      const response: any = await this.apiService.POST(
+        `api/wage-request-apply/lipw/beneficiary/can-be-included?page=${page}&size=${this.pageSize}`,
+        requestBody
+      );
+
+      if (response?.data?.code === 200) {
+        this.beneficiaries = response.data.content || [];
+        this.totalRecords = response.data.totalElements || 0;
+        this.showTable = true;
+        this.selectedBeneficiaries = [];
+
+        if (this.beneficiaries.length === 0) {
+          this.messageService.add({
+            severity: 'info',
+            summary: 'No Data',
+            detail: 'No beneficiaries found for the selected criteria'
+          });
+        }
+      } else {
+        this.beneficiaries = [];
+        this.showTable = false;
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'No Data',
+          detail: response?.data?.message || 'No beneficiaries found'
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load beneficiaries:', error);
+      this.beneficiaries = [];
+      this.showTable = false;
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to load beneficiaries. Please try again.'
+      });
+    } finally {
+      this.tableLoading = false;
+      this.cdr.detectChanges();
     }
   }
 
-  onCancel(): void {
-    this.router.navigate(['/wages-payment-list']);
+onPageChange(event: any): void {
+  if (event && event.page !== undefined) {
+    this.loadBeneficiaries(event.page);
+  }
+}
+
+  async onSubmitWageRequest(): Promise<void> {
+    if (this.selectedBeneficiaries.length === 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'No Selection',
+        detail: 'Please select at least one beneficiary'
+      });
+      return;
+    }
+
+    if (this.wagesForm.invalid) {
+      this.markFormGroupTouched(this.wagesForm);
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Validation Error',
+        detail: 'Please fill in all required payment details.'
+      });
+      return;
+    }
+
+    this.submitting = true;
+
+    try {
+      const formValue = this.wagesForm.getRawValue();
+      const beneficiaryIds = this.selectedBeneficiaries.map(b => b.beneficiaryId);
+
+      const requestBody = {
+        subprojectId: Number(this.subprojectId),
+        fromDate: this.formatDate(formValue.fromDate),
+        toDate: this.formatDate(formValue.toDate),
+        paymentCycle: Number(formValue.paymentCycle),
+        beneficiaryIds: beneficiaryIds
+      };
+
+      const response: any = await this.apiService.POST(
+        'api/wage-request-apply/lipw/beneficiary/include',
+        requestBody
+      );
+
+      if (response?.data?.code === 200) {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: `Wage request submitted successfully for ${beneficiaryIds.length} beneficiaries`
+        });
+
+        // Reset form and table after successful submission
+        setTimeout(() => {
+          this.resetForm();
+          this.router.navigate(['/wages-payment-list']);
+        }, 2000);
+      } else {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: response?.data?.message || 'Failed to submit wage request'
+        });
+      }
+    } catch (error: any) {
+      console.error('Failed to submit wage request:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: error?.error?.message || 'Failed to submit wage request. Please try again.'
+      });
+    } finally {
+      this.submitting = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  resetForm(): void {
+    this.wagesForm.reset({
+      wageRate: 2.7
+    });
+    this.beneficiaries = [];
+    this.selectedBeneficiaries = [];
+    this.showTable = false;
+    this.minDate = new Date();
+  }
+
+
+
+  formatDate(date: Date): string {
+    if (!date) return '';
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   markFormGroupTouched(formGroup: FormGroup): void {
@@ -175,5 +364,19 @@ export class ApplyForWagesPaymentComponent implements OnInit {
   isFieldInvalid(fieldName: string): boolean {
     const field = this.wagesForm.get(fieldName);
     return !!(field && field.invalid && field.touched);
+  }
+
+  getGenderLabel(gender: string): string {
+    return gender === 'MALE' ? 'Male' : gender === 'FEMALE' ? 'Female' : gender;
+  }
+
+  getLegalStatusLabel(status: string): string {
+    const statusMap: any = {
+      'HOST': 'Host',
+      'IDP': 'IDP',
+      'REFUGEE': 'Refugee',
+      'RETURNEE': 'Returnee'
+    };
+    return statusMap[status] || status;
   }
 }
