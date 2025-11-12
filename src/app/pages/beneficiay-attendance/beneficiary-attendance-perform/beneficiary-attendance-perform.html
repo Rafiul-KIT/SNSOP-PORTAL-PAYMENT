@@ -1,5 +1,4 @@
 @if (isLoading) {
-@if (isLoading) {
 <app-loader></app-loader>
 } @else {
 <div class="breadcrumb-wrapper">
@@ -91,7 +90,7 @@
                                     <div
                                         class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom ">
                                         <span class="text-muted">Approved Date:</span>
-                                        <span class="fw-semibold text-dark">{{ formatDate(projectInfo?.approvedDate) }}</span>
+                                        <span class="fw-semibold text-dark">—</span>
                                     </div>
 
                                     <div class="list-group-item d-flex gap-3 align-items-center px-0 border-0 py-1">
@@ -139,11 +138,9 @@
                             <td><p-checkbox [(ngModel)]="beneficiary.finlitAttended" [binary]="true"></p-checkbox></td>
                             <td><p-checkbox [(ngModel)]="beneficiary.ecdAttended" [binary]="true"></p-checkbox></td>
                             <td><p-checkbox [(ngModel)]="beneficiary.washAttended" [binary]="true"></p-checkbox></td>
-                            <td><p-checkbox [(ngModel)]="beneficiary.ecdAttended" [binary]="true"></p-checkbox></td>
-                            <td><p-checkbox [(ngModel)]="beneficiary.washAttended" [binary]="true"></p-checkbox></td>
                             <td><p-checkbox [(ngModel)]="beneficiary.gbvAttended" [binary]="true"></p-checkbox></td>
                             <td>
-                                <p-select [options]="statusOptions" [(ngModel)]="beneficiary.present" optionLabel="label" optionValue="value"></p-select>
+                                <p-select [options]="statusOptions" [(ngModel)]="beneficiary.present" optionLabel="label" optionValue="value" appendTo="body"></p-select>
                             </td>
                         </tr>
                     </ng-template>
@@ -152,12 +149,13 @@
                 <p-paginator (onPageChange)="onPageChange($event)" [first]="currentPage * pageSize" [rows]="pageSize" [totalRecords]="totalRecords" [rowsPerPageOptions]="[10, 20, 30]"></p-paginator>
                 
                 <div class="d-flex justify-content-end mt-3">
-                    <button pButton type="button" label="Save Attendance" class="p-button-primary px-5" [disabled]="loading"></button>
+                    <button pButton type="button" label="Save Attendance" class="p-button-primary px-5" [disabled]="loading" (click)="saveAttendance()"></button>
                 </div>
                 }
                 }
-            </p-card>
-        </div>
-    </div>
-</div>
-}
+                            </p-card>
+                        </div>
+                    </div>
+                </div>
+                <p-toast></p-toast>
+                }

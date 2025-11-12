@@ -23,7 +23,7 @@ export const StatusEnum = [
 // Define Enum for Screening Status
 export const ScreeningStatusEnum = [
  
-  { id: '0', value: 0, label: 'Rejected' },
+  { id: '0', value: 2, label: 'Rejected' },
    { id: '1', value: 1, label: 'Accepted' }
 ];
 
