@@ -1,5 +1,4 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -73,7 +72,7 @@ interface BeneficiaryAttendanceRecord {
     TableModule,
     PaginatorModule,
     CheckboxModule
-],
+  ],
 })
 export class BeneficiaryAttendancePerform implements OnInit {
   loading = false;
@@ -100,7 +99,7 @@ export class BeneficiaryAttendancePerform implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.initBreadcrumb();
@@ -158,7 +157,7 @@ export class BeneficiaryAttendancePerform implements OnInit {
       .then((res: any) => {
         const data = res.data || res;
         if (data && data.content) {
-          this.beneficiaries = data.content.map((b: BeneficiaryAttendanceRecord) => ({...b, present: true})); // Default to present
+          this.beneficiaries = data.content.map((b: BeneficiaryAttendanceRecord) => ({ ...b, present: true })); // Default to present
           this.totalRecords = data.totalElements || 0;
         } else {
           this.beneficiaries = [];
