@@ -281,6 +281,11 @@ export class BeneficiarySubprojectList implements OnInit {
     if (!item?.id) return;
     this.router.navigate(['/beneficiary-assignment', item.id]);
   }
+    getScreeningStatusLabel(value: string): string {
+    const numericValue = parseInt(value, 10);
+    const found = ScreeningStatusEnum.find(item => item.value === numericValue);
+    return found ? found.label : value;
+  }
   async deleteProject(item: SubProjectDto) {
  console.log(item)
   }

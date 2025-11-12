@@ -265,7 +265,11 @@ export class WagesRequestLipw   implements OnInit {
     this.fetchPage(this.currentPage, this.pageSize);
     this.cdr.markForCheck();
   }
-
+  getScreeningStatusLabel(value: string): string {
+    const numericValue = parseInt(value, 10);
+    const found = ScreeningStatusEnum.find(item => item.value === numericValue);
+    return found ? found.label : value;
+  }
   // ---------- Actions ----------
   viewSubProject(id: number) {
     this.router.navigate(['/apply-wage-request/create', id]);
