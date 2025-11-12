@@ -2,15 +2,15 @@ export const environment = {
   production: true,
   env: 'prod',
   useHash: true,
-  domain: 'snsopmis.com',
-  globalApi: 'http://api.snsopmis.com:8000/services',
+  domain: 'https://mis.southsudansafetynet.info',
+  globalApi: 'https://gwapp.southsudansafetynet.info/mis_server/',
   portals: {
-    master: 'http://master.snsopmis.com',
-    masterSettings: 'http://master.snsopmis.com',
-    beneficiary: 'http://beneficiary.snsopmis.com',
-    payment: 'http://payment.snsopmis.com',
-    grm: 'http://grm.snsopmis.com',
-    report: 'http://report.snsopmis.com',
+    master: 'https://mis.southsudansafetynet.info/v2/',
+    masterSettings: 'https://mis.southsudansafetynet.info/v2/#/home/portals',
+    beneficiary: 'https://mis.southsudansafetynet.info/v2/beneficiary/',
+    payment: 'https://mis.southsudansafetynet.info/v2/payment',
+    grm: 'https://mis.southsudansafetynet.info/v2/grm',
+    report: 'https://mis.southsudansafetynet.info/v2/report',
   },
   cookie_name:'mis_ta'
 };
