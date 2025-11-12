@@ -329,6 +329,9 @@ async assignBeneficiaries(): Promise<void> {
     formData.append('comments', this.projectForm.value.comments || '');
     formData.append('attachment', this.selectedFile, this.selectedFile.name);
     selectedIds.forEach(id => formData.append('beneficiaryIds', id.toString()));
+for (const pair of formData.entries()) {
+  console.log(pair[0] + ':', pair[1]);
+}
 
     const response: any = await this.apiService.axiosInstance.post(
       'api/subproject/assign/progress/beneficiary/save',

@@ -8,13 +8,13 @@ import { BeneficiaryAttendance } from './pages/beneficiay-attendance/beneficiary
 import { SubProjectList } from './pages/sub-project-list/sub-project-list';
 import { SubProjectDetails } from './pages/sub-project-details/sub-project-details';
 import { WagesRequestLipw } from './pages/apply-wages-request/wages-request-lipw/wages-request-lipw';
-import { WagesRequestDis } from './pages/apply-wages-request/wages-request-dis/wages-request-dis';
 import { ApplyForWagesPaymentComponent } from './pages/apply-wages-request/apply-for-wages-payment/apply-for-wages-payment.component';
 import { BeneficiaryAttendancePerform } from './pages/beneficiay-attendance/beneficiary-attendance-perform/beneficiary-attendance-perform';
 import { WorkApproval } from './pages/work-approval/work-approval';
 import { WorkReview } from './pages/work-review/work-review';
 import { BeneficiaryAssignment } from './pages/beneficiary-assignment/beneficiary-assignment';
 import { BeneficiarySubprojectList } from './pages/beneficiary-subproject-list/beneficiary-subproject-list';
+import { ApplyForDisPayment } from './pages/apply-wages-request/apply-for-dis-payment/apply-for-dis-payment';
 
 
 
@@ -56,13 +56,13 @@ export const routes: Routes = [
       },
         {
         path: 'dis',
-        component: WagesRequestDis ,
+       component: ApplyForDisPayment ,
       },
          {
         path: 'create/:id',
         component: ApplyForWagesPaymentComponent ,
       },
-       
+           
 
     ],
   },
