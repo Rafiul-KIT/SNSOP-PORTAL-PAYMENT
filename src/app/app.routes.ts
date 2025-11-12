@@ -96,7 +96,7 @@ export const routes: Routes = [
   },
      {
     component: BeneficiaryAttendancePerform,
-    path: 'beneficiary-attendance/view',  
+    path: 'beneficiary-attendance/view/:id',  
   
   },
   {
