@@ -149,7 +149,7 @@ export class BeneficiaryAttendance implements OnInit {
       typeOfMeeting: [null],
       payam: [{ value: null, disabled: true }],
       boma: [{ value: null, disabled: true }],
-      status: 5,
+      status: 7,
       workCode: [''],
       workActivity: [null],
       screeningStatus: [null],
@@ -285,7 +285,8 @@ export class BeneficiaryAttendance implements OnInit {
   }
 
   getScreeningStatusLabel(value: string): string {
-    const found = ScreeningStatusEnum.find(item => item.value);
+    const numericValue = parseInt(value, 10);
+    const found = ScreeningStatusEnum.find(item => item.value === numericValue);
     return found ? found.label : value;
   }
 }
