@@ -16,6 +16,7 @@ import { TableModule } from 'primeng/table';
 import { MessageModule } from 'primeng/message';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import Swal from 'sweetalert2';
 
 import { ApiService } from '../../../services/api.service';
 import { Loader } from "../../../components/loader/loader";
@@ -282,6 +283,7 @@ onPageChange(event: any): void {
       return;
     }
 
+
     this.submitting = true;
 
     try {
@@ -302,30 +304,27 @@ onPageChange(event: any): void {
       );
 
       if (response?.data?.code === 200) {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: `Wage request submitted successfully for ${beneficiaryIds.length} beneficiaries`
+        await Swal.fire({
+          title: 'Success!',
+          text: `Wage request submitted successfully for ${beneficiaryIds.length} beneficiaries.`,
+          icon: 'success'
         });
 
-        // Reset form and table after successful submission
-        setTimeout(() => {
-          this.resetForm();
-          this.router.navigate(['/wages-payment-list']);
-        }, 2000);
+       
+       
       } else {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: response?.data?.message || 'Failed to submit wage request'
+        await Swal.fire({
+          title: 'Error!',
+          text: response?.data?.message || 'Failed to submit wage request',
+          icon: 'error'
         });
       }
     } catch (error: any) {
       console.error('Failed to submit wage request:', error);
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: error?.error?.message || 'Failed to submit wage request. Please try again.'
+      await Swal.fire({
+        title: 'Error!',
+        text: error?.error?.message || 'Failed to submit wage request. Please try again.',
+        icon: 'error'
       });
     } finally {
       this.submitting = false;
