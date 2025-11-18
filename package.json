@@ -24,6 +24,7 @@
     "@sweetalert2/ngx-sweetalert2": "^14.0.1",
     "axios": "^1.12.2",
     "bootstrap": "^5.3.8",
+    "bootstrap-datepicker": "^1.10.1",
     "chart.js": "^4.5.1",
     "file-saver": "^2.0.5",
     "jspdf": "^3.0.3",
