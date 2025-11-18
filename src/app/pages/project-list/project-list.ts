@@ -99,7 +99,6 @@ export class ProjectList implements OnInit {
         page: this.currentPage,
         size: this.pageSize,
         id: this.selectedProjectId,
-        status: 'InProgress',
       });
 
       const url = `${this.PROJECTS_ENDPOINT}?${query}`;
