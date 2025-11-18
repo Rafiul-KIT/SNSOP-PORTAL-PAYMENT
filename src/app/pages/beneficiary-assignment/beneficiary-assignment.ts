@@ -83,6 +83,7 @@ export class BeneficiaryAssignment implements OnInit {
   existingRows = 10;
   existingFirst = 0;
   isLoadingExisting = false;
+  existingBeneficiariesLoaded = false;
 selectAll = false;
   constructor(
     private route: ActivatedRoute,
@@ -100,7 +101,6 @@ selectAll = false;
     if (this.subprojectId) {
       this.loadProjectData(this.subprojectId);
       this.loadCanBeAssignedBeneficiaries(0, this.canBeAssignedRows);
-      this.loadExistingBeneficiaries(0, this.existingRows);
     }
   }
 
@@ -224,7 +224,7 @@ onRowSelectionChange(): void {
   }
 
   async loadExistingBeneficiaries(page: number, size: number): Promise<void> {
-    if (!this.subprojectId) return;
+    if (!this.subprojectId || this.isLoadingExisting) return;
 
     this.isLoadingExisting = true;
 
@@ -349,7 +349,7 @@ for (const pair of formData.entries()) {
 
       await Promise.all([
         this.loadCanBeAssignedBeneficiaries(this.canBeAssignedFirst / this.canBeAssignedRows, this.canBeAssignedRows),
-        this.loadExistingBeneficiaries(this.existingFirst / this.existingRows, this.existingRows),
+        // this.loadExistingBeneficiaries(this.existingFirst / this.existingRows, this.existingRows),
       ]);
 
       this.projectForm.reset();
@@ -486,8 +486,12 @@ async removeBeneficiaries(): Promise<void> {
     return `${year}-${month}-${day}`;
   }
 
-  onTabChange(event: any): void {
-    this.activeTabIndex = event.index;
+  onTabChange(index: number): void {
+    this.activeTabIndex = index;
+    if (index === 1 && !this.existingBeneficiariesLoaded) {
+      this.loadExistingBeneficiaries(0, this.existingRows);
+      this.existingBeneficiariesLoaded = true;
+    }
     this.cdr.detectChanges();
   }
 }

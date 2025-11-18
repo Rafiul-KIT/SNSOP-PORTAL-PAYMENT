@@ -129,14 +129,18 @@
 
                                 <div class="d-flex mb-3">
                                     <button class="btn btn-outline-primary w-50"
-                                        [ngClass]="{ 'active': activeTabIndex === 0 }" (click)="activeTabIndex = 0">
+                                        [ngClass]="{ 'active': activeTabIndex === 0 }" (click)="onTabChange(0)">
                                         Available for Assignment
-                                        <span class="badge bg-primary ms-2">{{ canBeAssignedTotalRecords }}</span>
+                                        @if(canBeAssignedTotalRecords > 0  ){
+ <span class="badge bg-primary ms-2">{{ canBeAssignedTotalRecords }}</span>
+                                        }
+                                       
                                     </button>
                                     <button class="btn btn-outline-success w-50"
-                                        [ngClass]="{ 'active': activeTabIndex === 1 }" (click)="activeTabIndex = 1">
+                                        [ngClass]="{ 'active': activeTabIndex === 1 }" (click)="onTabChange(1)">
                                         Currently Assigned
-                                        <span class="badge bg-success ms-2">{{ existingTotalRecords }}</span>
+                                         @if(existingTotalRecords > 0  ){
+                                        <span class="badge bg-success ms-2">{{ existingTotalRecords }}</span>}
                                     </button>
                                 </div>
 

@@ -399,9 +399,7 @@ async onSave(): Promise<void> {
         text: `Project ${this.isEditMode ? 'updated' : 'saved'} successfully!`,
         icon: 'success',
       }).then(() => {
-        if (!this.isEditMode) {
-          this.router.navigate(['/project-list']);
-        }
+      
       });
     } else {
       // Failure modal
