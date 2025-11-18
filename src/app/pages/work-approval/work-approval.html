@@ -64,8 +64,8 @@
     <!-- Type of Work -->
     <div class="col-md-3">
       <p-floatlabel variant="on" class="w-100">
-        <p-select [options]="workTypes" optionLabel="label" optionValue="value" formControlName="typeOfWork"></p-select>
-        <label>Type of Work</label>
+        <p-select [options]="workTypes" optionLabel="label" optionValue="value" formControlName="typeOfMeeting"></p-select>
+        <label>Type of Meeting</label>
       </p-floatlabel>
     </div>
 
@@ -141,7 +141,7 @@
       <td>{{ item.countyName }}</td>
       <td>{{ item.payamName }}</td>
       <td>{{ item.bomaName }}</td>
-      <td>{{ item.typeOfMeeting }}</td>
+      <td>{{ getTypeOfMeetingLabel(item.typeOfMeeting) }}</td>
 
       <td>{{ item.meetingDate | date: 'dd/MM/yyyy' }}</td>
        <td>{{ getScreeningStatusLabel(item.screeningStatus) }}</td>
