@@ -152,7 +152,7 @@ export class WorkApproval implements OnInit {
       state: [null],
       county: [{ value: null, disabled: true }],
       projectName: [null],
-      typeOfWork: [null],
+      typeOfMeeting: [null],
       payam: [{ value: null, disabled: true }],
       boma: [{ value: null, disabled: true }],
       status: [null],
@@ -209,7 +209,7 @@ export class WorkApproval implements OnInit {
       payamName: null,
       bomaId: f.boma?.id || null,
       bomaName: null,
-      typeOfMeeting: f.typeOfWork || null,
+      typeOfMeeting: f.typeOfMeeting || null,
       meetingDate: null,
       screeningStatus: f.screeningStatus || null,
       status: f.status || null,
@@ -279,6 +279,10 @@ export class WorkApproval implements OnInit {
   getScreeningStatusLabel(value: string): string {
     const numericValue = parseInt(value, 10);
     const found = ScreeningStatusEnum.find(item => item.value === numericValue);
+    return found ? found.label : value;
+  }
+  getTypeOfMeetingLabel(value: string): string {
+    const found = TypeOfMeetingEnum.find(item => item.value === value);
     return found ? found.label : value;
   }
   // ---------- Actions ----------
