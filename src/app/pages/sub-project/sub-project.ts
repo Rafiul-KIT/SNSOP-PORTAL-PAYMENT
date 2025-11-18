@@ -5,14 +5,16 @@ import {
   FormBuilder,
   FormGroup,
   FormArray,
-  FormControl, FormsModule, Validators,
+  FormControl,
+  FormsModule,
+  Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Breadcrumb } from 'primeng/breadcrumb';
 import { Loader } from '../../components/loader/loader';
 import { ApiService } from '../../services/api.service';
 import { LookupItem, LookupService } from '../../services/lookup.service';
-import { ButtonModule } from "primeng/button";
+import { ButtonModule } from 'primeng/button';
 import { CookieService } from 'ngx-cookie-service';
 import { environment } from '../../../environments/environment';
 import axios from 'axios';
@@ -20,7 +22,14 @@ import axios from 'axios';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, Loader, Breadcrumb, FormsModule, ButtonModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    Loader,
+    Breadcrumb,
+    FormsModule,
+    ButtonModule,
+  ],
   templateUrl: './sub-project.html',
   styleUrl: './sub-project.scss',
 })
