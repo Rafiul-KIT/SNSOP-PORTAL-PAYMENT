@@ -231,12 +231,12 @@
                         @if (activity.get('equipmentPhotoUrl')?.value) {
                           <div class="mb-2">
                             <button type="button" (click)="viewAttachment(activity.get('equipmentPhotoUrl')?.value)" class="btn btn-sm btn-outline-primary">
-                              <i class="fas fa-eye me-2"></i>View Current Equipment Photo
+                              <i class="fas fa-eye me-2"></i>View Current Equipment Attachment
                             </button>
                           </div>
                         }
                         <input type="file" class="form-control" (change)="onEquipmentPhotoSelect($event, i)"
-                          accept="image/*" />
+                          accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
 
                         @if (getEquipmentPhotoName(i); as photoName) {
                         <small class="text-muted">
@@ -256,16 +256,16 @@
                       </div>
 
                       <div class="col-md-6">
-                        <label class="form-label text-secondary fw-semibold">Work Photo</label>
+                        <label class="form-label text-secondary fw-semibold">Work Attachment</label>
                         @if (activity.get('workPhotoUrl')?.value) {
                           <div class="mb-2">
                             <button type="button" (click)="viewAttachment(activity.get('workPhotoUrl')?.value)" class="btn btn-sm btn-outline-primary">
-                              <i class="fas fa-eye me-2"></i>View Current Photo
+                              <i class="fas fa-eye me-2"></i>View Current Work Attachment
                             </button>
                           </div>
                         }
                         <input type="file" class="form-control" (change)="onWorkPhotoSelect($event, i)"
-                          accept="image/*" />
+                          accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
 
                         @if (getWorkPhotoName(i); as photoName) {
                         <small class="text-muted">
@@ -275,16 +275,16 @@
                       </div>
 
                       <div class="col-md-6">
-                        <label class="form-label text-secondary fw-semibold">Materials Photo</label>
+                        <label class="form-label text-secondary fw-semibold">Materials Attachment</label>
                         @if (activity.get('materialPhotoUrl')?.value) {
                           <div class="mb-2">
                             <button type="button" (click)="viewAttachment(activity.get('materialPhotoUrl')?.value)" class="btn btn-sm btn-outline-primary">
-                              <i class="fas fa-eye me-2"></i>View Current Materials Photo
+                              <i class="fas fa-eye me-2"></i>View Current Materials Attachment
                             </button>
                           </div>
                         }
                         <input type="file" class="form-control" (change)="onMaterialsPhotoSelect($event, i)"
-                          accept="image/*" />
+                          accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
 
                         @if (getMaterialPhotoName(i); as photoName) {
                         <small class="text-muted">Selected: {{ photoName }}</small>
