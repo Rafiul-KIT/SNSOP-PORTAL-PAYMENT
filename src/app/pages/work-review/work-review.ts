@@ -175,10 +175,12 @@ async submitApproval(): Promise<void> {
   try {
     await this.api.axiosInstance.post(`/${endpoint}`, fd, {});
     
+    const statusMessage = approvedStr === 'true' ? 'Approved' : 'Rejected';
+
     Swal.fire({
       icon: 'success',
       title: 'Success',
-      text: 'Status submitted successfully!',
+      text: `Status ${statusMessage} Submitted successfully!`,
     });
   } catch (err) {
     console.error(err);
