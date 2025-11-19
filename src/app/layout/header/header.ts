@@ -69,11 +69,22 @@ export class Header {
         routerLink: 'work-approval',
         routerLinkActiveOptions: 'active',
       },
-         {
+       
+        {
         label: 'Beneficiary Assignment',
         icon: 'fa fa-check',
-        routerLink: 'beneficiary-subproject-list',
-        routerLinkActiveOptions: 'active',
+        items: [
+          {
+            label: 'Assign Beneficiary',
+            icon: 'fa fa-check',
+            routerLink: '/beneficiary-assignment/asign-list',
+          },
+          {
+            label: 'Remove Beneficiary ',
+            icon: 'fa fa-check',
+            routerLink: '/beneficiary-assignment/remove-list',
+          },
+        ],
       },
        {
         label: 'Beneficiary Attendance',

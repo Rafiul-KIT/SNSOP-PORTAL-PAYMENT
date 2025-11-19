@@ -87,7 +87,8 @@
                                     dateFormat="yy-mm-dd" placeholder="Select date" class="w-100"
                                     [class.ng-invalid]="projectForm.get('workStartAt')?.invalid && projectForm.get('workStartAt')?.touched">
                                 </p-datePicker>
-                                @if (isSubmitted && projectForm.get('workStartAt')?.invalid && projectForm.get('workStartAt')?.touched)
+                                @if (isSubmitted && projectForm.get('workStartAt')?.invalid &&
+                                projectForm.get('workStartAt')?.touched)
                                 {
                                 <small class="text-danger">Work start date is required</small>
                                 }
@@ -131,15 +132,15 @@
                                     <button class="btn btn-outline-primary w-50"
                                         [ngClass]="{ 'active': activeTabIndex === 0 }" (click)="onTabChange(0)">
                                         Available for Assignment
-                                        @if(canBeAssignedTotalRecords > 0  ){
- <span class="badge bg-primary ms-2">{{ canBeAssignedTotalRecords }}</span>
+                                        @if(canBeAssignedTotalRecords > 0 ){
+                                        <span class="badge bg-primary ms-2">{{ canBeAssignedTotalRecords }}</span>
                                         }
-                                       
+
                                     </button>
                                     <button class="btn btn-outline-success w-50"
                                         [ngClass]="{ 'active': activeTabIndex === 1 }" (click)="onTabChange(1)">
                                         Currently Assigned
-                                         @if(existingTotalRecords > 0  ){
+                                        @if(existingTotalRecords > 0 ){
                                         <span class="badge bg-success ms-2">{{ existingTotalRecords }}</span>}
                                     </button>
                                 </div>

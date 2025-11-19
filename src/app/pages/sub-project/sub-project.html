@@ -15,9 +15,6 @@
         <span class="navbar-brand text-secondary mb-0 h1">
           <i class="fas fa-briefcase   me-2"></i>Work Proposals
         </span>
-
-
-
       </div>
     </nav>
     <!-- Main Content -->
@@ -82,7 +79,7 @@
                       <div class="text-danger mt-1">Type of Meeting is required.</div>
                       }
                     </div>
- 
+
                     <div class="col-md-12">
                       <label class="form-label text-secondary fw-semibold">Paper Screening Status <span
                           class="text-danger">*</span></label>
@@ -98,22 +95,16 @@
                       }
                     </div>
 
-                                      <div class="col-md-4">
-  <label class="form-label text-secondary fw-semibold">
-    Meeting Date <span class="text-danger">*</span>
-  </label>
-  <p-datePicker 
-    formControlName="meetingDate" 
-    [showIcon]="true"
-     dateFormat="dd/mm/yy"
-    class="w-100"
-    placeholder="Select a date"
-     size="small"
-  />
-  @if (proposalForm.get('meetingDate')?.invalid && proposalForm.get('meetingDate')?.touched) {
-    <div class="text-danger mt-1">Meeting Date is required.</div>
-  }
-</div>
+                    <div class="col-md-4">
+                      <label class="form-label text-secondary fw-semibold">
+                        Meeting Date <span class="text-danger">*</span>
+                      </label>
+                      <p-datePicker formControlName="meetingDate" [showIcon]="true" dateFormat="dd/mm/yy" class="w-100"
+                        placeholder="Select a date" size="small" />
+                      @if (proposalForm.get('meetingDate')?.invalid && proposalForm.get('meetingDate')?.touched) {
+                      <div class="text-danger mt-1">Meeting Date is required.</div>
+                      }
+                    </div>
                   </div>
                 </div>
               </div>
@@ -351,27 +342,17 @@
 
                         <br>
                         <div class="row g-3">
-                         <div class="col-md-6 col-lg-3">
-  <label class="form-label text-secondary fw-semibold">Estimated Work Start Date</label>
-  <p-datePicker 
-    formControlName="workStartDate" 
-    [showIcon]="true"
-    dateFormat="dd/mm/yy"
-    class="w-100"
-    placeholder="dd/mm/yyyy"
-  />
-</div>
+                          <div class="col-md-6 col-lg-3">
+                            <label class="form-label text-secondary fw-semibold">Estimated Work Start Date</label>
+                            <p-datePicker formControlName="workStartDate" [showIcon]="true" dateFormat="dd/mm/yy"
+                              class="w-100" placeholder="dd/mm/yyyy" />
+                          </div>
 
-<div class="col-md-6 col-lg-3">
-  <label class="form-label text-secondary fw-semibold">Estimated Work End Date</label>
-  <p-datePicker 
-    formControlName="workEndDate" 
-    [showIcon]="true"
-    dateFormat="dd/mm/yy"
-    class="w-100"
-    placeholder="dd/mm/yyyy"
-  />
-</div>
+                          <div class="col-md-6 col-lg-3">
+                            <label class="form-label text-secondary fw-semibold">Estimated Work End Date</label>
+                            <p-datePicker formControlName="workEndDate" [showIcon]="true" dateFormat="dd/mm/yy"
+                              class="w-100" placeholder="dd/mm/yyyy" />
+                          </div>
                         </div>
                       </div>
                     </div>
