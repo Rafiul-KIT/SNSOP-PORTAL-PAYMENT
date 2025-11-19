@@ -78,6 +78,9 @@ export class BeneficiaryAssignment implements OnInit {
   beneficiaryError = '';
   selectAll = false;
 
+  // Store for selected IDs across all pages
+  selectedBeneficiaryIds = new Set<number>();
+
   constructor(
     private route: ActivatedRoute,
     private fb: FormBuilder,
@@ -101,36 +104,39 @@ export class BeneficiaryAssignment implements OnInit {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       this.selectedFile = input.files[0];
-      console.log(
-        'File selected:',
-        this.selectedFile.name,
-        this.selectedFile.type,
-        this.selectedFile.size
-      );
     } else {
       this.selectedFile = null;
     }
     this.cdr.detectChanges();
   }
+
   toggleSelectAll(event: any): void {
     this.selectAll = event.checked;
-    this.canBeAssignedBeneficiaries.forEach(
-      (b) => (b.isSelected = this.selectAll)
-    );
+    this.canBeAssignedBeneficiaries.forEach((b) => {
+      b.isSelected = this.selectAll;
+      if (this.selectAll) {
+        this.selectedBeneficiaryIds.add(b.id);
+      } else {
+        this.selectedBeneficiaryIds.delete(b.id);
+      }
+    });
     this.cdr.detectChanges();
   }
 
-  onRowSelectionChange(): void {
-    // Keep header checkbox synced
-    const allSelected = this.canBeAssignedBeneficiaries.every(
-      (b) => b.isSelected
-    );
-    const noneSelected = this.canBeAssignedBeneficiaries.every(
-      (b) => !b.isSelected
-    );
-    this.selectAll = allSelected && !noneSelected;
+  onRowSelectionChange(beneficiary: Beneficiary): void {
+    if (beneficiary.isSelected) {
+      this.selectedBeneficiaryIds.add(beneficiary.id);
+    } else {
+      this.selectedBeneficiaryIds.delete(beneficiary.id);
+    }
+
+    // Keep header checkbox synced for the current page
+    this.selectAll =
+      this.canBeAssignedBeneficiaries.length > 0 &&
+      this.canBeAssignedBeneficiaries.every((b) => b.isSelected);
     this.cdr.detectChanges();
   }
+
   initializeForm(): void {
     this.projectForm = this.fb.group({
       workStartAt: ['', Validators.required],
@@ -204,10 +210,15 @@ export class BeneficiaryAssignment implements OnInit {
           phoneNo: b.phoneNo,
           householdMonthlyAvgIncome: b.householdMonthlyAvgIncome,
           assigned: b.assigned || false,
-          isSelected: false,
+          isSelected: this.selectedBeneficiaryIds.has(b.id), // Restore selection state
         }));
 
         this.canBeAssignedTotalRecords = response.data.totalElements || 0;
+
+        // Update selectAll checkbox state for the current page
+        this.selectAll =
+          this.canBeAssignedBeneficiaries.length > 0 &&
+          this.canBeAssignedBeneficiaries.every((b) => b.isSelected);
       } else {
         this.canBeAssignedBeneficiaries = [];
         this.canBeAssignedTotalRecords = 0;
@@ -229,14 +240,8 @@ export class BeneficiaryAssignment implements OnInit {
     this.loadCanBeAssignedBeneficiaries(page, this.canBeAssignedRows);
   }
 
-  onBeneficiarySelect(beneficiary: Beneficiary): void {
-    this.cdr.detectChanges();
-  }
-
   getSelectedCanBeAssignedIds(): number[] {
-    return this.canBeAssignedBeneficiaries
-      .filter((b) => b.isSelected === true)
-      .map((b) => b.id);
+    return Array.from(this.selectedBeneficiaryIds);
   }
 
   async assignBeneficiaries(): Promise<void> {
@@ -247,13 +252,11 @@ export class BeneficiaryAssignment implements OnInit {
     if (this.projectForm.invalid) {
       this.projectForm.markAllAsTouched();
       this.apiError = 'Please fill in all required fields';
-
       return;
     }
 
     if (!this.selectedFile) {
       this.apiError = 'Please select an attachment file';
-
       return;
     }
 
@@ -284,9 +287,6 @@ export class BeneficiaryAssignment implements OnInit {
       selectedIds.forEach((id) =>
         formData.append('beneficiaryIds', id.toString())
       );
-      for (const pair of formData.entries()) {
-        console.log(pair[0] + ':', pair[1]);
-      }
 
       const response: any = await this.apiService.axiosInstance.post(
         'api/subproject/assign/progress/beneficiary/save',
@@ -301,6 +301,9 @@ export class BeneficiaryAssignment implements OnInit {
           timer: 2500,
           showConfirmButton: false,
         });
+
+        this.selectedBeneficiaryIds.clear(); // Clear selection
+        this.selectAll = false;
 
         await this.loadCanBeAssignedBeneficiaries(
           this.canBeAssignedFirst / this.canBeAssignedRows,

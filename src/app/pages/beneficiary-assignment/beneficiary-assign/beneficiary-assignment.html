@@ -127,7 +127,7 @@
 
 
                         <div class="p-4">
-                            <h5 class="mb-3">Available for Assignment </h5>
+                            <h5 class="mb-3">Available for Assignment <span class="badge bg-primary ms-2">{{ getSelectedCanBeAssignedIds().length }} selected</span></h5>
                             <p-table [value]="canBeAssignedBeneficiaries" [lazy]="true" [paginator]="true"
                                 [rows]="canBeAssignedRows" [totalRecords]="canBeAssignedTotalRecords"
                                 [first]="canBeAssignedFirst" [loading]="isLoadingCanBeAssigned"
@@ -161,7 +161,7 @@
                                         <td>
                                             <p-checkbox [(ngModel)]="beneficiary.isSelected"
                                                 [ngModelOptions]="{standalone: true}" [binary]="true"
-                                                (onChange)="onRowSelectionChange()"></p-checkbox>
+                                                (onChange)="onRowSelectionChange(beneficiary)"></p-checkbox>
 
                                         </td>
                                         <td>{{ beneficiary.householdNumber || '—' }}</td>
