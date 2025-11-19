@@ -17,6 +17,9 @@ import { ApplyForDisPayment } from './pages/apply-wages-request/apply-for-dis-pa
 import { BeneficiaryRemove } from './pages/beneficiary-assignment/beneficiary-remove/beneficiary-remove';
 import { BeneficiarySubprojectRemove } from './pages/beneficiary-assignment/beneficiary-subproject-remove/beneficiary-subproject-remove';
 import { BeneficiarySubprojectList } from './pages/beneficiary-assignment/beneficiary-subproject-list/beneficiary-subproject-list';
+import { WageRequestDrafts } from './pages/wages-request-approval/wage-request-drafts/wage-request-drafts';
+import { WageDashboard } from './pages/wages-request-approval/wage-dashboard/wage-dashboard';
+import { WageDashboardDis } from './pages/wages-request-approval/wage-dashboard-dis/wage-dashboard-dis';
 
 
 
@@ -49,42 +52,7 @@ export const routes: Routes = [
     component: SubProject,
     path: 'sub-project/:id',
   },
-  {
-    path: 'apply-wage-request',
-    children: [
-      {
-        path: 'lipw',
-        component:  WagesRequestLipw,
-      },
-        {
-        path: 'dis',
-       component: ApplyForDisPayment ,
-      },
-         {
-        path: 'create/:id',
-        component: ApplyForWagesPaymentComponent ,
-      },
-           
-
-    ],
-  },
     {
-    path: 'report',
-   children: [
-    {
-      path: 'details',
-      loadComponent: () => import('./pages/report/report').then(m => m.ReportComponent),
-      data: { reportType: 9, reportTitle: 'Reconciliation Detail Report' }
-    },
-    {
-      path: 'summary',
-      loadComponent: () => import('./pages/report/report').then(m => m.ReportComponent),
-      data: { reportType: 10, reportTitle: 'Reconciliation Summary Report' }
-    }
-  ]
-  },
-  
-   {
     component: BeneficiaryAttendance,
     path: 'beneficiary-attendance',  
   },
@@ -127,6 +95,61 @@ export const routes: Routes = [
     path: 'project/:id',
     component: Project, 
   },
+  {
+    path: 'apply-wage-request',
+    children: [
+      {
+        path: 'lipw',
+        component:  WagesRequestLipw,
+      },
+        {
+        path: 'dis',
+       component: ApplyForDisPayment ,
+      },
+         {
+        path: 'create/:id',
+        component: ApplyForWagesPaymentComponent ,
+      },
+           
+
+    ],
+  },
+   {
+    path: 'wage-request-approval',
+    children: [
+      {
+        path: 'drafts',
+        component:  WageRequestDrafts,
+      },
+        {
+        path: 'lipw',
+       component: WageDashboard ,
+      },
+         {
+        path: 'dis',
+        component: WageDashboardDis ,
+      },
+           
+
+    ],
+  },
+    {
+    path: 'report',
+   children: [
+    {
+      path: 'details',
+      loadComponent: () => import('./pages/report/report').then(m => m.ReportComponent),
+      data: { reportType: 9, reportTitle: 'Reconciliation Detail Report' }
+    },
+    {
+      path: 'summary',
+      loadComponent: () => import('./pages/report/report').then(m => m.ReportComponent),
+      data: { reportType: 10, reportTitle: 'Reconciliation Summary Report' }
+    }
+  ]
+  },
+  
+ 
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
   {
     component: NotFound,
