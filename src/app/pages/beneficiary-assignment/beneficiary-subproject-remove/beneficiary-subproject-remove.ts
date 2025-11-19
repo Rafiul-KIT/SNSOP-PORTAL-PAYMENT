@@ -31,9 +31,9 @@ import {
   StatusEnum,
   ScreeningStatusEnum,
   ProjectNameDescription,
-} from '../../services/lookup.service';
-import { ApiService } from '../../services/api.service';
-import { Loader } from '../../components/loader/loader';
+} from '../../../services/lookup.service';
+import { ApiService } from '../../../services/api.service';
+import { Loader } from '../../../components/loader/loader';
 
 interface SubProjectDto {
   id: number;
@@ -54,9 +54,10 @@ interface SubProjectDto {
   status: string;
 }
 @Component({
-  selector: 'app-beneficiary-subproject-list',
-  templateUrl: './beneficiary-subproject-list.html',
-  styleUrl: './beneficiary-subproject-list.scss',
+  selector: 'app-beneficiary-subproject-remove',
+
+  templateUrl: './beneficiary-subproject-remove.html',
+  styleUrl: './beneficiary-subproject-remove.scss',
     standalone: true,
   imports: [
     CommonModule,
@@ -78,7 +79,7 @@ interface SubProjectDto {
   providers: [MessageService, ConfirmationService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BeneficiarySubprojectList implements OnInit {
+export class BeneficiarySubprojectRemove implements OnInit {
   isLoading = true;
   lookupsLoaded = false;
   searchForm!: FormGroup;
@@ -157,7 +158,7 @@ export class BeneficiarySubprojectList implements OnInit {
 
   initBreadcrumb() {
     this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
-    this.breadcrumbItems = [{ label: 'Work Approval' }];
+    this.breadcrumbItems = [{ label: 'Beneficiary Remove ' }];
   }
 
   async toggleAdvanceSearch() {
@@ -313,7 +314,7 @@ export class BeneficiarySubprojectList implements OnInit {
   // ---------- Actions ----------
   beneficiaryAssignment(item: SubProjectDto) {
     if (!item?.id) return;
-    this.router.navigate(['/beneficiary-assignment', item.id]);
+    this.router.navigate(['beneficiary-assignment/remove', item.id]);
   }
     getScreeningStatusLabel(value: string): string {
     const numericValue = parseInt(value, 10);

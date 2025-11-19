@@ -17,9 +17,9 @@ import { SelectModule } from 'primeng/select';
 import { Breadcrumb } from 'primeng/breadcrumb';
 import { TableModule } from 'primeng/table';
 import { CheckboxModule } from 'primeng/checkbox';
-import { Loader } from '../../components/loader/loader';
+import { Loader } from '../../../components/loader/loader';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ApiService } from '../../services/api.service';
+import { ApiService } from '../../../services/api.service';
 import Swal from 'sweetalert2';
 
 interface Beneficiary {

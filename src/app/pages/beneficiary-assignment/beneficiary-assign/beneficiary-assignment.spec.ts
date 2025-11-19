@@ -2,8 +2,8 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { ActivatedRoute } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { BeneficiaryAssignment } from './beneficiary-assignment';
-import { ApiService } from '../../services/api.service';
-import { Subproject } from '../../interfaces/subproject.interface';
+import { ApiService } from '../../../services/api.service';
+import { Subproject } from '../../../interfaces/subproject.interface';
 import { ChangeDetectorRef } from '@angular/core';
 
 describe('BeneficiaryAssignment', () => {
