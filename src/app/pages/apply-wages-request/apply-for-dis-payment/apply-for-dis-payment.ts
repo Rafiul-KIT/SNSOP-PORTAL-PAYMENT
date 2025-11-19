@@ -235,7 +235,7 @@ export class ApplyForDisPayment implements OnInit {
 
     const page = 0;
     const size = 10;
-    const url = `api/wage-request-apply/dis/beneficiary/can-be-included?page=${page}&size=${size}`;
+    const url = `api/wage-request/dis/beneficiary/can-be-included?page=${page}&size=${size}`;
 
     try {
       const response: any = await this.apiService.POST(url, requestBody);
@@ -287,7 +287,7 @@ export class ApplyForDisPayment implements OnInit {
       beneficiaryIds: this.selectedBeneficiaries.map(b => b.beneficiaryId)
     };
 
-    const url = 'api/wage-request-apply/dis/beneficiary/include';
+    const url = 'api/wage-request/dis/beneficiary/include';
 
     try {
       const response: any = await this.apiService.POST(url, payload);
