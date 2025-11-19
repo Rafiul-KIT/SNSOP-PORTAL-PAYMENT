@@ -25,9 +25,8 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageService } from 'primeng/api';
 import { ApiService } from '../../../services/api.service';
-import { LookupService, StatusEnum } from '../../../services/lookup.service';
-import { Loader } from "../../../components/loader/loader";
-
+import { LookupService, StatusEnum, StatusWageEnum } from '../../../services/lookup.service';
+import { Loader } from '../../../components/loader/loader';
 
 interface WageRequestDto {
   id: number;
@@ -69,8 +68,8 @@ interface SubProjectLookup {
     TooltipModule,
     DatePickerModule,
     InputTextModule,
-    Loader
-],
+    Loader,
+  ],
   providers: [MessageService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -102,8 +101,7 @@ export class WageRequestDrafts implements OnInit {
     { label: 'Cycle 3', value: 3 },
     { label: 'Cycle 4', value: 4 },
   ];
-  statuses: any[] = [
-  ];
+  statuses: any[] = [];
 
   wageRequests: WageRequestDto[] = [];
   totalRecords = 0;
@@ -136,7 +134,7 @@ export class WageRequestDrafts implements OnInit {
         'api/subproject/get?page=0&size=1000',
         {}
       );
-      
+
       if (subProjectRes.data && subProjectRes.data.content) {
         this.subProjects = subProjectRes.data.content.map((sp: any) => ({
           id: sp.id,
@@ -160,7 +158,7 @@ export class WageRequestDrafts implements OnInit {
   }
 
   async ngOnInit() {
-    this.statuses= StatusEnum;
+    this.statuses = StatusWageEnum;
     this.initBreadcrumb();
     this.initForm();
     this.fetchPage(this.currentPage, this.pageSize);
@@ -262,7 +260,7 @@ export class WageRequestDrafts implements OnInit {
       })
       .finally(() => {
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       });
   }
 
@@ -287,8 +285,6 @@ export class WageRequestDrafts implements OnInit {
   editWageRequest(id: number) {
     this.router.navigate(['/wage-request', id]);
   }
-
-
 
   deleteWageRequest(id: number) {
     this.currentRequestIdToDelete = id;
@@ -324,7 +320,10 @@ export class WageRequestDrafts implements OnInit {
         remarks: this.deleteComment,
       };
 
-      const res: any = await this.api.POST(`api/wage-request/save`, finalPayload);
+      const res: any = await this.api.POST(
+        `api/wage-request/save`,
+        finalPayload
+      );
 
       if (res.data) {
         this.messageService.add({
@@ -341,7 +340,9 @@ export class WageRequestDrafts implements OnInit {
       this.messageService.add({
         severity: 'error',
         summary: 'Error',
-        detail: `Failed to reject wage request: ${err.message || 'Unknown error'}.`,
+        detail: `Failed to reject wage request: ${
+          err.message || 'Unknown error'
+        }.`,
       });
     } finally {
       this.cancelDelete();
@@ -362,12 +363,18 @@ export class WageRequestDrafts implements OnInit {
 
   getStatusClass(status: number): string {
     switch (status) {
-      case 0: return 'bg-secondary'; // Draft
-      case 1: return 'bg-info'; // Submitted
-      case 2: return 'bg-success'; // Approved
-      case 3: return 'bg-danger'; // Rejected
-      case 4: return 'bg-primary'; // Paid
-      default: return 'bg-secondary';
+      case 0:
+        return 'bg-secondary'; // Draft
+      case 1:
+        return 'bg-info'; // Submitted
+      case 2:
+        return 'bg-success'; // Approved
+      case 3:
+        return 'bg-danger'; // Rejected
+      case 4:
+        return 'bg-primary'; // Paid
+      default:
+        return 'bg-secondary';
     }
   }
 
