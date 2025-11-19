@@ -394,15 +394,44 @@ export class SubProject implements OnInit {
         responseType: 'blob'
       });
 
-      const objectUrl = URL.createObjectURL(response.data);
-      const newTab = window.open();
-      if (newTab) {
-        newTab.document.body.innerHTML = `<img src="${objectUrl}" style="width:100%">`;
-      }
-      // Revoke the object URL after a delay to give the browser time to open it
-      setTimeout(() => URL.revokeObjectURL(objectUrl), 100);
+      const blob = response.data;
+      const objectUrl = URL.createObjectURL(blob);
 
-    } finally {
+      // Check if the file is an image by its MIME type
+      if (blob.type.startsWith('image/')) {
+        const newTab = window.open();
+        if (newTab) {
+          newTab.document.body.innerHTML = `<img src="${objectUrl}" style="width:100%">`;
+          // Revoke the object URL after the image has loaded in the new tab
+          newTab.onload = () => {
+            URL.revokeObjectURL(objectUrl);
+          };
+        } else {
+          // Fallback if pop-up is blocked
+          URL.revokeObjectURL(objectUrl);
+        }
+      } else {
+        // For other file types, trigger a download
+        const link = document.createElement('a');
+        link.href = objectUrl;
+
+        // Extract filename from path for the download attribute
+        const filename = path.split('/').pop()?.split('?')[0] || 'download';
+        link.setAttribute('download', decodeURIComponent(filename));
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Revoke the object URL after the download is initiated
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 100);
+      }
+
+    } catch (err) {
+      console.error('Failed to fetch attachment', err);
+      alert('Failed to fetch attachment. See console for details.');
+    }
+    finally {
       this.isLoading = false;
       this.cdr.detectChanges();
     }
@@ -521,8 +550,8 @@ export class SubProject implements OnInit {
             formData.append('equipmentPhoto', activityValue.equipmentPhoto, activityValue.equipmentPhotoName);
             hasFiles = true;
           }
-          if (formValue.materialsPhoto) {
-            formData.append('materialPhoto', formValue.materialPhoto, formValue.materialPhotoName);
+          if (activityValue.materialPhoto) {
+            formData.append('materialPhoto', activityValue.materialPhoto, activityValue.materialPhotoName);
             hasFiles = true;
           }
 
