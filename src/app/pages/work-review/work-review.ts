@@ -178,7 +178,7 @@ async submitApproval(): Promise<void> {
     Swal.fire({
       icon: 'success',
       title: 'Success',
-      text: 'Approval submitted successfully!',
+      text: 'Status submitted successfully!',
     });
   } catch (err) {
     console.error(err);
