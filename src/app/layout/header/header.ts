@@ -108,6 +108,27 @@ export class Header {
           },
         ],
       },
+        {
+        label: 'Wage Request Approval',
+        icon: 'fa fa-check',
+        items: [
+          {
+            label: 'Wage Request Drafts',
+            icon: 'fa fa-check',
+            routerLink: '/wage-request-approval/drafts',
+          },
+          {
+            label: 'Wage Request For Lipw ',
+            icon: 'fa fa-check',
+            routerLink: '/wage-request-approval/lipw',
+          },
+            {
+            label: 'Benefits For Dis ',
+            icon: 'fa fa-check',
+            routerLink: '/wage-request-approval/dis',
+          },
+        ],
+      },
           {
         label: 'Report',
         icon: 'fas fa-chart-line',
@@ -125,19 +146,19 @@ export class Header {
         ],
       },
      
-      {
-        label: 'Creating Payroll',
-        icon: 'fas fa-file-invoice-dollar',
-        routerLink: 'dashboard',
-        routerLinkActiveOptions: 'active',
-      },
+      // {
+      //   label: 'Creating Payroll',
+      //   icon: 'fas fa-file-invoice-dollar',
+      //   routerLink: 'dashboard',
+      //   routerLinkActiveOptions: 'active',
+      // },
         
-      {
-        label: 'Payroll Download',
-        icon: 'fas fa-download',
-        routerLink: 'dashboard',
-        routerLinkActiveOptions: 'active',
-      },
+      // {
+      //   label: 'Payroll Download',
+      //   icon: 'fas fa-download',
+      //   routerLink: 'dashboard',
+      //   routerLinkActiveOptions: 'active',
+      // },
       // {
       //   label: 'Sub Payroll',
       //   icon: 'fas fa-list-alt',
