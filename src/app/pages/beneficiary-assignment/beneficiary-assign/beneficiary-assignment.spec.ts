@@ -4,13 +4,22 @@ import {
   fakeAsync,
   tick,
 } from '@angular/core/testing';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { BeneficiaryAssignment } from './beneficiary-assignment';
 import { ApiService } from '../../../services/api.service';
 import { ChangeDetectorRef } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+
+// Helper to create a valid mock AxiosResponse
+const createMockAxiosResponse = (data: any): any => ({
+  data,
+  status: 200,
+  statusText: 'OK',
+  headers: {},
+  config: {},
+});
 
 describe('BeneficiaryAssignment', () => {
   let component: BeneficiaryAssignment;
@@ -34,12 +43,11 @@ describe('BeneficiaryAssignment', () => {
 
   beforeEach(async () => {
     const apiServiceSpy = jasmine.createSpyObj('ApiService', ['POST', 'GET']);
-    // Mock the axiosInstance property which is used for form submission
     apiServiceSpy.axiosInstance = jasmine.createSpyObj('axiosInstance', [
       'post',
       'patch',
     ]);
-
+    const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     const cdrSpy = jasmine.createSpyObj('ChangeDetectorRef', ['detectChanges']);
 
     await TestBed.configureTestingModule({
@@ -52,6 +60,7 @@ describe('BeneficiaryAssignment', () => {
       providers: [
         { provide: ApiService, useValue: apiServiceSpy },
         { provide: ChangeDetectorRef, useValue: cdrSpy },
+        { provide: Router, useValue: routerSpy },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -72,14 +81,10 @@ describe('BeneficiaryAssignment', () => {
 
     // Mock the API calls that happen on initialization
     apiService.POST.and.returnValue(
-      Promise.resolve({
-        data: { code: 200, content: [mockSubproject], totalElements: 1 },
-      })
+      Promise.resolve(createMockAxiosResponse({ code: 200, content: [mockSubproject], totalElements: 1 }))
     );
     apiService.GET.and.returnValue(
-      Promise.resolve({
-        data: { code: 200, content: [], totalElements: 0 },
-      })
+      Promise.resolve(createMockAxiosResponse({ code: 200, content: [], totalElements: 0 }))
     );
   });
 
@@ -113,7 +118,7 @@ describe('BeneficiaryAssignment', () => {
 
   it('should handle no project data found', fakeAsync(() => {
     apiService.POST.and.returnValue(
-      Promise.resolve({ data: { code: 200, content: [], totalElements: 0 } })
+      Promise.resolve(createMockAxiosResponse({ code: 200, content: [], totalElements: 0 }))
     );
 
     component.loadProjectData('1');
@@ -137,11 +142,7 @@ describe('BeneficiaryAssignment', () => {
   }));
 
   it('should get selected beneficiary IDs', () => {
-    component.canBeAssignedBeneficiaries = [
-      { id: 101, isSelected: true, beneficiaryName: 'A', gender: 'MALE', age: 30, householdMonthlyAvgIncome: 100, householdNumber: 'HH1', phoneNo: '111' },
-      { id: 102, isSelected: false, beneficiaryName: 'B', gender: 'FEMALE', age: 40, householdMonthlyAvgIncome: 200, householdNumber: 'HH2', phoneNo: '222' },
-      { id: 103, isSelected: true, beneficiaryName: 'C', gender: 'MALE', age: 50, householdMonthlyAvgIncome: 300, householdNumber: 'HH3', phoneNo: '333' },
-    ];
+    component.selectedBeneficiaryIds = new Set([101, 103]);
     const selectedIds = component.getSelectedCanBeAssignedIds();
     expect(selectedIds).toEqual([101, 103]);
   });

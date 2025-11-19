@@ -1,10 +1,19 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BeneficiaryRemove } from './beneficiary-remove';
 import { ApiService } from '../../../services/api.service';
 import { ChangeDetectorRef } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+
+// Helper to create a valid mock AxiosResponse
+const createMockAxiosResponse = (data: any): any => ({
+  data,
+  status: 200,
+  statusText: 'OK',
+  headers: {},
+  config: {},
+});
 
 describe('BeneficiaryRemove', () => {
   let component: BeneficiaryRemove;
@@ -14,6 +23,7 @@ describe('BeneficiaryRemove', () => {
   beforeEach(async () => {
     const apiServiceSpy = jasmine.createSpyObj('ApiService', ['POST', 'GET']);
     apiServiceSpy.axiosInstance = jasmine.createSpyObj('axiosInstance', ['patch']);
+    const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
     await TestBed.configureTestingModule({
       imports: [
@@ -35,6 +45,7 @@ describe('BeneficiaryRemove', () => {
             },
           },
         },
+        { provide: Router, useValue: routerSpy },
       ],
     }).compileComponents();
 
@@ -43,8 +54,8 @@ describe('BeneficiaryRemove', () => {
     apiService = TestBed.inject(ApiService) as jasmine.SpyObj<ApiService>;
 
     // Provide default mock responses for calls in ngOnInit
-    apiService.POST.and.returnValue(Promise.resolve({ data: { code: 200, content: [{ id: 1 }], totalElements: 1 } }));
-    apiService.GET.and.returnValue(Promise.resolve({ data: { code: 200, content: [], totalElements: 0 } }));
+    apiService.POST.and.returnValue(Promise.resolve(createMockAxiosResponse({ code: 200, content: [{ id: 1 }], totalElements: 1 })));
+    apiService.GET.and.returnValue(Promise.resolve(createMockAxiosResponse({ code: 200, content: [], totalElements: 0 })));
 
     fixture.detectChanges();
   });

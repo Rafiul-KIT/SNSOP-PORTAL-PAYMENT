@@ -126,7 +126,7 @@
                         <p-divider></p-divider>
 
                         <div class="p-4">
-                            <h5 class="mb-3">Currently Assigned Beneficiaries</h5>
+                            <h5 class="mb-3">Currently Assigned Beneficiaries <span class="badge bg-danger ms-2">{{ getSelectedExistingIds().length }} selected</span></h5>
                             <p-table [value]="existingBeneficiaries" [lazy]="true" [paginator]="true"
                                 [rows]="existingRows" [totalRecords]="existingTotalRecords" [first]="existingFirst"
                                 [loading]="isLoadingExisting" (onLazyLoad)="onExistingPageChange($event)"
@@ -156,7 +156,7 @@
                                         <td>
                                             <p-checkbox [(ngModel)]="beneficiary.isSelected"
                                                 [ngModelOptions]="{standalone: true}" [binary]="true"
-                                                (onChange)="onRowSelectionChange()"></p-checkbox>
+                                                (onChange)="onRowSelectionChange(beneficiary)"></p-checkbox>
                                         </td>
                                         <td>{{ beneficiary.householdNumber || '—' }}</td>
                                         <td>{{ beneficiary.beneficiaryName || '—' }}</td>

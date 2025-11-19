@@ -77,6 +77,9 @@ export class BeneficiaryRemove implements OnInit {
   isLoadingExisting = false;
   selectAll = false;
 
+  // Store for selected IDs across all pages
+  selectedBeneficiaryIds = new Set<number>();
+
   constructor(
     private route: ActivatedRoute,
     private fb: FormBuilder,
@@ -108,16 +111,26 @@ export class BeneficiaryRemove implements OnInit {
 
   toggleSelectAll(event: any): void {
     this.selectAll = event.checked;
-    this.existingBeneficiaries.forEach(
-      (b) => (b.isSelected = this.selectAll)
-    );
+    this.existingBeneficiaries.forEach((b) => {
+      b.isSelected = this.selectAll;
+      if (this.selectAll) {
+        this.selectedBeneficiaryIds.add(b.id);
+      } else {
+        this.selectedBeneficiaryIds.delete(b.id);
+      }
+    });
     this.cdr.detectChanges();
   }
 
-  onRowSelectionChange(): void {
-    const allSelected = this.existingBeneficiaries.every((b) => b.isSelected);
-    const noneSelected = this.existingBeneficiaries.every((b) => !b.isSelected);
-    this.selectAll = allSelected && !noneSelected;
+  onRowSelectionChange(beneficiary: Beneficiary): void {
+    if (beneficiary.isSelected) {
+      this.selectedBeneficiaryIds.add(beneficiary.id);
+    } else {
+      this.selectedBeneficiaryIds.delete(beneficiary.id);
+    }
+    this.selectAll =
+      this.existingBeneficiaries.length > 0 &&
+      this.existingBeneficiaries.every((b) => b.isSelected);
     this.cdr.detectChanges();
   }
 
@@ -191,10 +204,15 @@ export class BeneficiaryRemove implements OnInit {
           phoneNo: b.phoneNo,
           householdMonthlyAvgIncome: b.householdMonthlyAvgIncome,
           assigned: b.assigned !== undefined ? b.assigned : true,
-          isSelected: false,
+          isSelected: this.selectedBeneficiaryIds.has(b.id), // Restore selection
         }));
 
         this.existingTotalRecords = response.data.totalElements || 0;
+
+        // Update selectAll checkbox state for the current page
+        this.selectAll =
+          this.existingBeneficiaries.length > 0 &&
+          this.existingBeneficiaries.every((b) => b.isSelected);
       } else {
         this.existingBeneficiaries = [];
         this.existingTotalRecords = 0;
@@ -217,9 +235,7 @@ export class BeneficiaryRemove implements OnInit {
   }
 
   getSelectedExistingIds(): number[] {
-    return this.existingBeneficiaries
-      .filter((b) => b.isSelected === true)
-      .map((b) => b.id);
+    return Array.from(this.selectedBeneficiaryIds);
   }
 
   async removeBeneficiaries(): Promise<void> {
@@ -295,6 +311,9 @@ export class BeneficiaryRemove implements OnInit {
           timer: 2500,
           showConfirmButton: false,
         });
+
+        this.selectedBeneficiaryIds.clear(); // Clear selection
+        this.selectAll = false;
 
         // Reload the list of existing beneficiaries
         this.loadExistingBeneficiaries(
