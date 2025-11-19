@@ -243,7 +243,7 @@ export class BeneficiarySubprojectRemove implements OnInit {
       typeOfMeeting: f.typeOfWork || null,
       meetingDate: null,
       screeningStatus: f.screeningStatus || null,
-      status: f.status || "5",
+      status: f.status || "7",
     };
   }
 

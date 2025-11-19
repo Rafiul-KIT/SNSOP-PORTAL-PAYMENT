@@ -68,7 +68,6 @@ export class BeneficiaryAssignment implements OnInit {
   isSubmitted = false;
   selectedFile: File | null = null;
   apiError = '';
-  activeTabIndex: number = 0;
 
   // Can be assigned beneficiaries
   canBeAssignedBeneficiaries: Beneficiary[] = [];
@@ -77,14 +76,8 @@ export class BeneficiaryAssignment implements OnInit {
   canBeAssignedFirst = 0;
   isLoadingCanBeAssigned = false;
   beneficiaryError = '';
-  // Existing assigned beneficiaries
-  existingBeneficiaries: Beneficiary[] = [];
-  existingTotalRecords = 0;
-  existingRows = 10;
-  existingFirst = 0;
-  isLoadingExisting = false;
-  existingBeneficiariesLoaded = false;
-selectAll = false;
+  selectAll = false;
+
   constructor(
     private route: ActivatedRoute,
     private fb: FormBuilder,
@@ -119,19 +112,25 @@ selectAll = false;
     }
     this.cdr.detectChanges();
   }
-toggleSelectAll(event: any): void {
-  this.selectAll = event.checked;
-  this.canBeAssignedBeneficiaries.forEach(b => (b.isSelected = this.selectAll));
-  this.cdr.detectChanges();
-}
+  toggleSelectAll(event: any): void {
+    this.selectAll = event.checked;
+    this.canBeAssignedBeneficiaries.forEach(
+      (b) => (b.isSelected = this.selectAll)
+    );
+    this.cdr.detectChanges();
+  }
 
-onRowSelectionChange(): void {
-  // Keep header checkbox synced
-  const allSelected = this.canBeAssignedBeneficiaries.every(b => b.isSelected);
-  const noneSelected = this.canBeAssignedBeneficiaries.every(b => !b.isSelected);
-  this.selectAll = allSelected && !noneSelected;
-  this.cdr.detectChanges();
-}
+  onRowSelectionChange(): void {
+    // Keep header checkbox synced
+    const allSelected = this.canBeAssignedBeneficiaries.every(
+      (b) => b.isSelected
+    );
+    const noneSelected = this.canBeAssignedBeneficiaries.every(
+      (b) => !b.isSelected
+    );
+    this.selectAll = allSelected && !noneSelected;
+    this.cdr.detectChanges();
+  }
   initializeForm(): void {
     this.projectForm = this.fb.group({
       workStartAt: ['', Validators.required],
@@ -223,58 +222,11 @@ onRowSelectionChange(): void {
     }
   }
 
-  async loadExistingBeneficiaries(page: number, size: number): Promise<void> {
-    if (!this.subprojectId || this.isLoadingExisting) return;
-
-    this.isLoadingExisting = true;
-
-    try {
-      const response: any = await this.apiService.GET(
-        `api/subproject/assign/progress/beneficiary/existing?subprojectId=${this.subprojectId}&page=${page}&size=${size}`
-      );
-
-      if (response?.data?.code === 200) {
-        const beneficiaries = response.data.content || [];
-
-        this.existingBeneficiaries = beneficiaries.map((b: any) => ({
-          id: b.id,
-          householdNumber: b.householdNumber,
-          beneficiaryName: b.beneficiaryName,
-          gender: b.gender,
-          age: b.age,
-          phoneNo: b.phoneNo,
-          householdMonthlyAvgIncome: b.householdMonthlyAvgIncome,
-          assigned: b.assigned !== undefined ? b.assigned : true,
-          isSelected: false,
-        }));
-
-        this.existingTotalRecords = response.data.totalElements || 0;
-      } else {
-        this.existingBeneficiaries = [];
-        this.existingTotalRecords = 0;
-      }
-    } catch (error) {
-      console.error('Failed to load existing beneficiaries:', error);
-      this.existingBeneficiaries = [];
-      this.existingTotalRecords = 0;
-    } finally {
-      this.isLoadingExisting = false;
-      this.cdr.detectChanges();
-    }
-  }
-
   onCanBeAssignedPageChange(event: any): void {
     const page = event.first / event.rows;
     this.canBeAssignedFirst = event.first;
     this.canBeAssignedRows = event.rows;
     this.loadCanBeAssignedBeneficiaries(page, this.canBeAssignedRows);
-  }
-
-  onExistingPageChange(event: any): void {
-    const page = event.first / event.rows;
-    this.existingFirst = event.first;
-    this.existingRows = event.rows;
-    this.loadExistingBeneficiaries(page, this.existingRows);
   }
 
   onBeneficiarySelect(beneficiary: Beneficiary): void {
@@ -287,195 +239,99 @@ onRowSelectionChange(): void {
       .map((b) => b.id);
   }
 
-  getSelectedExistingIds(): number[] {
-    return this.existingBeneficiaries
-      .filter((b) => b.isSelected === true)
-      .map((b) => b.id);
-  }
+  async assignBeneficiaries(): Promise<void> {
+    this.isSubmitted = true;
+    this.beneficiaryError = '';
+    this.apiError = '';
 
+    if (this.projectForm.invalid) {
+      this.projectForm.markAllAsTouched();
+      this.apiError = 'Please fill in all required fields';
 
-async assignBeneficiaries(): Promise<void> {
-  this.isSubmitted = true;
-  this.beneficiaryError = '';
-  this.apiError = '';
-
-  if (this.projectForm.invalid) {
-    this.projectForm.markAllAsTouched();
-    this.apiError = 'Please fill in all required fields';
-    
-    return;
-  }
-
-  if (!this.selectedFile) {
-    this.apiError = 'Please select an attachment file';
- 
-    return;
-  }
-
-  const selectedIds = this.getSelectedCanBeAssignedIds();
-  if (selectedIds.length === 0) {
-    this.beneficiaryError = 'Please select at least one beneficiary to assign';
-    await Swal.fire('No Beneficiary Selected', this.beneficiaryError, 'warning');
-    return;
-  }
-
-  this.loading = true;
-
-  try {
-    const formData = new FormData();
-    formData.append('subprojectId', this.subprojectId || '');
-    formData.append('workStartAt', this.formatDate(this.projectForm.value.workStartAt));
-    formData.append('inchargeName', this.projectForm.value.inchargeName || '');
-    formData.append('comments', this.projectForm.value.comments || '');
-    formData.append('attachment', this.selectedFile, this.selectedFile.name);
-    selectedIds.forEach(id => formData.append('beneficiaryIds', id.toString()));
-for (const pair of formData.entries()) {
-  console.log(pair[0] + ':', pair[1]);
-}
-
-    const response: any = await this.apiService.axiosInstance.post(
-      'api/subproject/assign/progress/beneficiary/save',
-      formData
-    );
-
-    if (response?.data?.code === 200) {
-      await Swal.fire({
-        icon: 'success',
-        title: 'Success',
-        text: `Successfully assigned ${selectedIds.length} beneficiary(ies)!`,
-        timer: 2500,
-        showConfirmButton: false
-      });
-
-      await Promise.all([
-        this.loadCanBeAssignedBeneficiaries(this.canBeAssignedFirst / this.canBeAssignedRows, this.canBeAssignedRows),
-        // this.loadExistingBeneficiaries(this.existingFirst / this.existingRows, this.existingRows),
-      ]);
-
-      this.projectForm.reset();
-      this.selectedFile = null;
-      this.isSubmitted = false;
-
-      const fileInput = document.getElementById('attachment') as HTMLInputElement;
-      if (fileInput) fileInput.value = '';
-    } else {
-      const message = response?.data?.message || 'Failed to assign beneficiaries';
-      await Swal.fire('Error', message, 'error');
+      return;
     }
-  } catch (error: any) {
-    console.error('=== Error Details ===', error);
-    const message =
-      error?.response?.data?.message ||
-      error?.message ||
-      'Error assigning beneficiaries. Please try again.';
-    await Swal.fire('Error', message, 'error');
-  } finally {
-    this.loading = false;
-    this.cdr.detectChanges();
-  }
-}
 
+    if (!this.selectedFile) {
+      this.apiError = 'Please select an attachment file';
 
-async removeBeneficiaries(): Promise<void> {
-  this.isSubmitted = true;
-  this.beneficiaryError = '';
-  this.apiError = '';
+      return;
+    }
 
-  if (this.projectForm.invalid) {
-    this.projectForm.markAllAsTouched();
-    this.apiError = 'Please fill in all required fields';
-    return;
-  }
+    const selectedIds = this.getSelectedCanBeAssignedIds();
+    if (selectedIds.length === 0) {
+      this.beneficiaryError =
+        'Please select at least one beneficiary to assign';
+      await Swal.fire(
+        'No Beneficiary Selected',
+        this.beneficiaryError,
+        'warning'
+      );
+      return;
+    }
 
-  if (!this.selectedFile) {
-    this.apiError = 'Please select an attachment file';
-    return;
-  }
+    this.loading = true;
 
-  const selectedIds = this.getSelectedExistingIds();
-  if (selectedIds.length === 0) {
-    this.beneficiaryError = 'Please select at least one beneficiary to remove';
-    await Swal.fire('No Beneficiary Selected', this.beneficiaryError, 'warning');
-    return;
-  }
-
-  const confirmResult = await Swal.fire({
-    title: 'Are you sure?',
-    text: `You are about to remove ${selectedIds.length} beneficiary(ies).`,
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#d33',
-    confirmButtonText: 'Yes, remove them'
-  });
-
-  if (!confirmResult.isConfirmed) return;
-
-  this.loading = true;
-
-  try {
-  
-    const formData = new FormData();
-    formData.append('subprojectId', this.subprojectId || '');
-    formData.append('workStartAt', this.formatDate(this.projectForm.value.workStartAt));
-    formData.append('inchargeName', this.projectForm.value.inchargeName || '');
-    formData.append('comments', this.projectForm.value.comments || '');
-    formData.append('attachment', this.selectedFile, this.selectedFile.name);
-
-    selectedIds.forEach(id => formData.append('beneficiaryIds', id.toString()));
-
-    const response: any = await this.apiService.axiosInstance.patch(
-      'api/subproject/assign/progress/beneficiary/remove',
-      formData,
-      {
-        headers: { 'Content-Type': 'multipart/form-data' }
+    try {
+      const formData = new FormData();
+      formData.append('subprojectId', this.subprojectId || '');
+      formData.append(
+        'workStartAt',
+        this.formatDate(this.projectForm.value.workStartAt)
+      );
+      formData.append('inchargeName', this.projectForm.value.inchargeName || '');
+      formData.append('comments', this.projectForm.value.comments || '');
+      formData.append('attachment', this.selectedFile, this.selectedFile.name);
+      selectedIds.forEach((id) =>
+        formData.append('beneficiaryIds', id.toString())
+      );
+      for (const pair of formData.entries()) {
+        console.log(pair[0] + ':', pair[1]);
       }
-    );
 
-    if (response?.data?.code === 200) {
-      await Swal.fire({
-        icon: 'success',
-        title: 'Removed Successfully',
-        text: `Successfully removed ${selectedIds.length} beneficiary(ies)!`,
-        timer: 2500,
-        showConfirmButton: false
-      });
+      const response: any = await this.apiService.axiosInstance.post(
+        'api/subproject/assign/progress/beneficiary/save',
+        formData
+      );
 
-      await Promise.all([
-        this.loadCanBeAssignedBeneficiaries(
+      if (response?.data?.code === 200) {
+        await Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: `Successfully assigned ${selectedIds.length} beneficiary(ies)!`,
+          timer: 2500,
+          showConfirmButton: false,
+        });
+
+        await this.loadCanBeAssignedBeneficiaries(
           this.canBeAssignedFirst / this.canBeAssignedRows,
           this.canBeAssignedRows
-        ),
-        this.loadExistingBeneficiaries(
-          this.existingFirst / this.existingRows,
-          this.existingRows
-        ),
-      ]);
+        );
 
-      this.projectForm.reset();
-      this.selectedFile = null;
-      this.isSubmitted = false;
+        this.projectForm.reset();
+        this.selectedFile = null;
+        this.isSubmitted = false;
 
-      const fileInput = document.getElementById('attachment') as HTMLInputElement;
-      if (fileInput) fileInput.value = '';
-    } else {
-      const message = response?.data?.message || 'Failed to remove beneficiaries';
+        const fileInput = document.getElementById(
+          'attachment'
+        ) as HTMLInputElement;
+        if (fileInput) fileInput.value = '';
+      } else {
+        const message =
+          response?.data?.message || 'Failed to assign beneficiaries';
+        await Swal.fire('Error', message, 'error');
+      }
+    } catch (error: any) {
+      console.error('=== Error Details ===', error);
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        'Error assigning beneficiaries. Please try again.';
       await Swal.fire('Error', message, 'error');
+    } finally {
+      this.loading = false;
+      this.cdr.detectChanges();
     }
-  } catch (error: any) {
-    console.error('=== Error Details ===', error);
-    const message =
-      error?.response?.data?.message ||
-      error?.message ||
-      'Error removing beneficiaries. Please try again.';
-    await Swal.fire('Error', message, 'error');
-  } finally {
-    this.loading = false;
-    this.cdr.detectChanges();
   }
-}
-
-
 
   formatDate(date: Date): string {
     if (!date) return '';
@@ -484,14 +340,5 @@ async removeBeneficiaries(): Promise<void> {
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
-  }
-
-  onTabChange(index: number): void {
-    this.activeTabIndex = index;
-    if (index === 1 && !this.existingBeneficiariesLoaded) {
-      this.loadExistingBeneficiaries(0, this.existingRows);
-      this.existingBeneficiariesLoaded = true;
-    }
-    this.cdr.detectChanges();
   }
 }
