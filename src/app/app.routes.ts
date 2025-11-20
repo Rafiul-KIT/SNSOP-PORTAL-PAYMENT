@@ -11,9 +11,15 @@ import { ApplyForWagesPaymentComponent } from './pages/apply-wages-request/apply
 import { BeneficiaryAttendancePerform } from './pages/beneficiay-attendance/beneficiary-attendance-perform/beneficiary-attendance-perform';
 import { WorkApproval } from './pages/work-approval/work-approval';
 import { WorkReview } from './pages/work-review/work-review';
-import { BeneficiaryAssignment } from './pages/beneficiary-assignment/beneficiary-assignment';
-import { BeneficiarySubprojectList } from './pages/beneficiary-subproject-list/beneficiary-subproject-list';
+import { BeneficiaryAssignment } from './pages/beneficiary-assignment/beneficiary-assign/beneficiary-assignment';
+
 import { ApplyForDisPayment } from './pages/apply-wages-request/apply-for-dis-payment/apply-for-dis-payment';
+import { BeneficiaryRemove } from './pages/beneficiary-assignment/beneficiary-remove/beneficiary-remove';
+import { BeneficiarySubprojectRemove } from './pages/beneficiary-assignment/beneficiary-subproject-remove/beneficiary-subproject-remove';
+import { BeneficiarySubprojectList } from './pages/beneficiary-assignment/beneficiary-subproject-list/beneficiary-subproject-list';
+import { WageRequestDrafts } from './pages/wages-request-approval/wage-request-drafts/wage-request-drafts';
+import { WageDashboard } from './pages/wages-request-approval/wage-dashboard/wage-dashboard';
+import { WageDashboardDis } from './pages/wages-request-approval/wage-dashboard-dis/wage-dashboard-dis';
 
 
 
@@ -46,6 +52,49 @@ export const routes: Routes = [
     component: SubProject,
     path: 'sub-project/:id',
   },
+    {
+    component: BeneficiaryAttendance,
+    path: 'beneficiary-attendance',  
+  },
+
+    {
+    path: 'beneficiary-assignment',
+    children: [
+      {
+        path: 'asign-list',
+        component:  BeneficiarySubprojectList,
+      },
+        {
+        path: 'remove-list',
+       component: BeneficiarySubprojectRemove  ,
+      },
+         {
+        path: 'assign/:id',
+        component: BeneficiaryAssignment ,
+      },
+         {
+        path: 'remove/:id',
+        component: BeneficiaryRemove ,
+      },
+           
+
+    ],
+  },
+  
+     {
+    component: BeneficiaryAttendancePerform,
+    path: 'beneficiary-attendance/view/:id',  
+  
+  },
+  {
+    component: Project,
+    path: 'project', 
+  },
+
+  {
+    path: 'project/:id',
+    component: Project, 
+  },
   {
     path: 'apply-wage-request',
     children: [
@@ -60,6 +109,25 @@ export const routes: Routes = [
          {
         path: 'create/:id',
         component: ApplyForWagesPaymentComponent ,
+      },
+           
+
+    ],
+  },
+   {
+    path: 'wage-request-approval',
+    children: [
+      {
+        path: 'drafts',
+        component:  WageRequestDrafts,
+      },
+        {
+        path: 'lipw',
+       component: WageDashboard ,
+      },
+         {
+        path: 'dis',
+        component: WageDashboardDis ,
       },
            
 
@@ -81,32 +149,7 @@ export const routes: Routes = [
   ]
   },
   
-   {
-    component: BeneficiaryAttendance,
-    path: 'beneficiary-attendance',  
-  },
-  {
-    component: BeneficiarySubprojectList,
-    path: 'beneficiary-subproject-list',  
-  },
-   {
-    component: BeneficiaryAssignment,
-    path: 'beneficiary-assignment/:id',  
-  },
-     {
-    component: BeneficiaryAttendancePerform,
-    path: 'beneficiary-attendance/view/:id',  
-  
-  },
-  {
-    component: Project,
-    path: 'project', 
-  },
-
-  {
-    path: 'project/:id',
-    component: Project, 
-  },
+ 
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
   {
     component: NotFound,

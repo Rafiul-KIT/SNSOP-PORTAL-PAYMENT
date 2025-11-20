@@ -31,9 +31,9 @@ import {
   StatusEnum,
   ScreeningStatusEnum,
   ProjectNameDescription,
-} from '../../services/lookup.service';
-import { ApiService } from '../../services/api.service';
-import { Loader } from '../../components/loader/loader';
+} from '../../../services/lookup.service';
+import { ApiService } from '../../../services/api.service';
+import { Loader } from '../../../components/loader/loader';
 
 interface SubProjectDto {
   id: number;
@@ -54,9 +54,10 @@ interface SubProjectDto {
   status: string;
 }
 @Component({
-  selector: 'app-beneficiary-subproject-list',
-  templateUrl: './beneficiary-subproject-list.html',
-  styleUrl: './beneficiary-subproject-list.scss',
+  selector: 'app-beneficiary-subproject-remove',
+
+  templateUrl: './beneficiary-subproject-remove.html',
+  styleUrl: './beneficiary-subproject-remove.scss',
     standalone: true,
   imports: [
     CommonModule,
@@ -78,8 +79,9 @@ interface SubProjectDto {
   providers: [MessageService, ConfirmationService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BeneficiarySubprojectList implements OnInit {
+export class BeneficiarySubprojectRemove implements OnInit {
   isLoading = true;
+  lookupsLoaded = false;
   searchForm!: FormGroup;
 
   // geo lookup lists
@@ -116,19 +118,13 @@ export class BeneficiarySubprojectList implements OnInit {
     private cdr: ChangeDetectorRef
   ) {}
 
-  private async loadLookups() {
+  private async loadInitialLookups() {
     await Promise.all([
       this.lookup.getOrFetchStateList(),
-      this.lookup.fetchAllCountyList(),
-      this.lookup.fetchAllPayamList(),
-      this.lookup.fetchAllBomaList(),
       this.lookup.getProjectNameDescription(),
     ]);
 
     this.states = this.lookup.getStateList();
-    this.counties = this.lookup.getAllCountyList();
-    this.payams = this.lookup.getAllPayamList();
-    this.bomas = this.lookup.getAllBomaList();
     this.projects = this.lookup.projectNameDescriptionList;
 
     this.cdr.markForCheck();
@@ -139,7 +135,6 @@ export class BeneficiarySubprojectList implements OnInit {
     this.statuses = StatusEnum;
     this.screeningStatuses = ScreeningStatusEnum;
     this.initBreadcrumb();
-    await this.loadLookups();
     this.initForm();
     this.fetchPage(this.currentPage, this.pageSize);
   }
@@ -163,32 +158,69 @@ export class BeneficiarySubprojectList implements OnInit {
 
   initBreadcrumb() {
     this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
-    this.breadcrumbItems = [{ label: 'Work Approval' }];
+    this.breadcrumbItems = [{ label: 'Beneficiary Remove ' }];
+  }
+
+  async toggleAdvanceSearch() {
+    this.advanceSearchPanelVisible = !this.advanceSearchPanelVisible;
+    if (this.advanceSearchPanelVisible && !this.lookupsLoaded) {
+      this.isLoading = true;
+      this.cdr.markForCheck();
+      try {
+        await this.loadInitialLookups();
+        this.lookupsLoaded = true;
+      } catch (err) {
+        console.error('Lookups loading error:', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to load lookup data.',
+        });
+      } finally {
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      }
+    }
   }
 
   // ---------- dependent dropdowns ----------
-  onStateChange(state: LookupItem | null) {
+  async onStateChange(state: LookupItem | null) {
+    this.searchForm.get('county')?.reset({ value: null, disabled: true });
+    this.searchForm.get('payam')?.reset({ value: null, disabled: true });
+    this.searchForm.get('boma')?.reset({ value: null, disabled: true });
+    this.counties = [];
+    this.payams = [];
+    this.bomas = [];
+
     if (state?.id) {
+      this.counties = await this.lookup.getCountyListByStateId(state.id);
       this.searchForm.get('county')?.enable();
-    } else {
-      this.searchForm.get('county')?.disable();
     }
+    this.cdr.markForCheck();
   }
 
-  onCountyChange(county: LookupItem | null) {
+  async onCountyChange(county: LookupItem | null) {
+    this.searchForm.get('payam')?.reset({ value: null, disabled: true });
+    this.searchForm.get('boma')?.reset({ value: null, disabled: true });
+    this.payams = [];
+    this.bomas = [];
+
     if (county?.id) {
+      this.payams = await this.lookup.getPayamListByCountyId(county.id);
       this.searchForm.get('payam')?.enable();
-    } else {
-      this.searchForm.get('payam')?.disable();
     }
+    this.cdr.markForCheck();
   }
 
-  onPayamChange(payam: LookupItem | null) {
+  async onPayamChange(payam: LookupItem | null) {
+    this.searchForm.get('boma')?.reset({ value: null, disabled: true });
+    this.bomas = [];
+
     if (payam?.id) {
+      this.bomas = await this.lookup.getBomaListByPayamId(payam.id);
       this.searchForm.get('boma')?.enable();
-    } else {
-      this.searchForm.get('boma')?.disable();
     }
+    this.cdr.markForCheck();
   }
 
   // ---------- Request building ----------
@@ -211,7 +243,7 @@ export class BeneficiarySubprojectList implements OnInit {
       typeOfMeeting: f.typeOfWork || null,
       meetingDate: null,
       screeningStatus: f.screeningStatus || null,
-      status: f.status || "5",
+      status: f.status || "7",
     };
   }
 
@@ -268,7 +300,10 @@ export class BeneficiarySubprojectList implements OnInit {
 
   resetForm() {
     this.searchForm.reset();
-    this.counties = this.lookup.getAllCountyList(); // Reset to full list
+    this.searchForm.get('county')?.disable();
+    this.searchForm.get('payam')?.disable();
+    this.searchForm.get('boma')?.disable();
+    this.counties = [];
     this.payams = [];
     this.bomas = [];
     this.currentPage = 0;
@@ -279,7 +314,7 @@ export class BeneficiarySubprojectList implements OnInit {
   // ---------- Actions ----------
   beneficiaryAssignment(item: SubProjectDto) {
     if (!item?.id) return;
-    this.router.navigate(['/beneficiary-assignment', item.id]);
+    this.router.navigate(['beneficiary-assignment/remove', item.id]);
   }
     getScreeningStatusLabel(value: string): string {
     const numericValue = parseInt(value, 10);

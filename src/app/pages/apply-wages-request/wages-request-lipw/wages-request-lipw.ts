@@ -74,6 +74,7 @@ interface SubProjectDto {
 })
 export class WagesRequestLipw   implements OnInit {
   isLoading = true;
+  lookupsLoaded = false;
   searchForm!: FormGroup;
 
   // geo lookup lists
@@ -110,19 +111,13 @@ export class WagesRequestLipw   implements OnInit {
     private cdr: ChangeDetectorRef
   ) {}
 
-  private async loadLookups() {
+  private async loadInitialLookups() {
     await Promise.all([
       this.lookup.getOrFetchStateList(),
-      this.lookup.fetchAllCountyList(),
-      this.lookup.fetchAllPayamList(),
-      this.lookup.fetchAllBomaList(),
       this.lookup.getProjectNameDescription(),
     ]);
 
     this.states = this.lookup.getStateList();
-    this.counties = this.lookup.getAllCountyList();
-    this.payams = this.lookup.getAllPayamList();
-    this.bomas = this.lookup.getAllBomaList();
     this.projects = this.lookup.projectNameDescriptionList;
 
     this.cdr.markForCheck();
@@ -134,7 +129,6 @@ export class WagesRequestLipw   implements OnInit {
     this.statuses = StatusEnum;
     this.screeningStatuses = ScreeningStatusEnum;
     this.initBreadcrumb();
-    await this.loadLookups();
     this.initForm();
     this.fetchPage(this.currentPage, this.pageSize);
   }
@@ -161,29 +155,66 @@ export class WagesRequestLipw   implements OnInit {
     this.breadcrumbItems = [{ label: 'Sub-Project List' }];
   }
 
+  async toggleAdvanceSearch() {
+    this.advanceSearchPanelVisible = !this.advanceSearchPanelVisible;
+    if (this.advanceSearchPanelVisible && !this.lookupsLoaded) {
+      this.isLoading = true;
+      this.cdr.markForCheck();
+      try {
+        await this.loadInitialLookups();
+        this.lookupsLoaded = true;
+      } catch (err) {
+        console.error('Lookups loading error:', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to load lookup data.',
+        });
+      } finally {
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      }
+    }
+  }
+
   // ---------- dependent dropdowns ----------
-  onStateChange(state: LookupItem | null) {
+  async onStateChange(state: LookupItem | null) {
+    this.searchForm.get('county')?.reset({ value: null, disabled: true });
+    this.searchForm.get('payam')?.reset({ value: null, disabled: true });
+    this.searchForm.get('boma')?.reset({ value: null, disabled: true });
+    this.counties = [];
+    this.payams = [];
+    this.bomas = [];
+
     if (state?.id) {
+      this.counties = await this.lookup.getCountyListByStateId(state.id);
       this.searchForm.get('county')?.enable();
-    } else {
-      this.searchForm.get('county')?.disable();
     }
+    this.cdr.markForCheck();
   }
 
-  onCountyChange(county: LookupItem | null) {
+  async onCountyChange(county: LookupItem | null) {
+    this.searchForm.get('payam')?.reset({ value: null, disabled: true });
+    this.searchForm.get('boma')?.reset({ value: null, disabled: true });
+    this.payams = [];
+    this.bomas = [];
+
     if (county?.id) {
+      this.payams = await this.lookup.getPayamListByCountyId(county.id);
       this.searchForm.get('payam')?.enable();
-    } else {
-      this.searchForm.get('payam')?.disable();
     }
+    this.cdr.markForCheck();
   }
 
-  onPayamChange(payam: LookupItem | null) {
+  async onPayamChange(payam: LookupItem | null) {
+    this.searchForm.get('boma')?.reset({ value: null, disabled: true });
+    this.bomas = [];
+
     if (payam?.id) {
+      this.bomas = await this.lookup.getBomaListByPayamId(payam.id);
       this.searchForm.get('boma')?.enable();
-    } else {
-      this.searchForm.get('boma')?.disable();
     }
+    this.cdr.markForCheck();
   }
 
   // ---------- Request building ----------
@@ -258,7 +289,10 @@ export class WagesRequestLipw   implements OnInit {
 
   resetForm() {
     this.searchForm.reset();
-    this.counties = this.lookup.getAllCountyList(); // Reset to full list
+    this.searchForm.get('county')?.disable();
+    this.searchForm.get('payam')?.disable();
+    this.searchForm.get('boma')?.disable();
+    this.counties = [];
     this.payams = [];
     this.bomas = [];
     this.currentPage = 0;

@@ -216,7 +216,7 @@ export class ApplyForWagesPaymentComponent implements OnInit {
       };
 
       const response: any = await this.apiService.POST(
-        `api/wage-request-apply/lipw/beneficiary/can-be-included?page=${page}&size=${this.pageSize}`,
+        `api/wage-request/lipw/beneficiary/can-be-included?page=${page}&size=${this.pageSize}`,
         requestBody
       );
 
@@ -299,7 +299,7 @@ onPageChange(event: any): void {
       };
 
       const response: any = await this.apiService.POST(
-        'api/wage-request-apply/lipw/beneficiary/include',
+        'api/wage-request/lipw/beneficiary/include',
         requestBody
       );
 
