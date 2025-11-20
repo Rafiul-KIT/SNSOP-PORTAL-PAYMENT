@@ -166,203 +166,208 @@
               </div>
 
               <div formArrayName="workActivities">
-                @for (activity of workActivities.controls; track trackByIndex(i); let i = $index) {
-                <div [formGroupName]="i" class="card mb-4 border-secondary">
-                  <div class="card-header bg-opacity-10 d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0 text-secondary">
-                      <i class="fas fa-wrench me-2"></i>Activity {{ i + 1 }}
-                    </h5>
+                      @for (activity of workActivities.controls; track trackByIndex(i); let i = $index) {
+                      <div [formGroupName]="i" class="card mb-4 border-secondary">
+                        <div class="card-header bg-opacity-10 d-flex justify-content-between align-items-center">
+                          <h5 class="mb-0 text-secondary">
+                            <i class="fas fa-wrench me-2"></i>Activity {{ i + 1 }}
+                          </h5>
 
-                    @if (workActivities.length > 0) {
-                    <p-button [style]="{ width: '35px', minWidth: '35px', height: '32px', padding: '0' }" type="button"
-                      icon="fas fa-times" pTooltip="Remove activity" tooltipPosition="top" appendTo="body"
-                      (onClick)="removeWorkActivity(i)" size="small" outlined="true" severity="danger"
-                      [attr.aria-label]="'Remove activity ' + (i + 1)">
-                    </p-button>
+                          @if (workActivities.length > 0) {
+                          <p-button [style]="{ width: '35px', minWidth: '35px', height: '32px', padding: '0' }" type="button"
+                            icon="fas fa-times" pTooltip="Remove activity" tooltipPosition="top" appendTo="body"
+                            (onClick)="removeWorkActivity(i)" size="small" outlined="true" severity="danger"
+                            [attr.aria-label]="'Remove activity ' + (i + 1)">
+                          </p-button>
 
-                    }
-                  </div>
+                          }
+                        </div>
 
-                  <div class="card-body">
-                    <h4 class="text-secondary border-bottom border-secondary border-1 pb-2 mb-4">
-                      <i class="fas fa-calendar-alt me-2"></i>Work Timeline & Details
-                    </h4>
+                        <div class="card-body">
+                          <h4 class="text-secondary border-bottom border-secondary border-1 pb-2 mb-4">
+                            <i class="fas fa-calendar-alt me-2"></i>Work Timeline & Details
+                          </h4>
 
-                    <div class="row g-3">
-                      <!-- Left Column -->
-                      <div class="col-lg-6">
-                        <div class="row g-3">
-                          <div class="col-12">
-                            <label class="form-label text-secondary fw-semibold">Work Name</label>
-                            <input type="text" class="form-control" formControlName="name" />
-                          </div>
+                          <div class="row g-3">
+                            <div class="col-lg-6">
+                              <div class="row g-3">
+                                <div class="col-12">
+                                  <label class="form-label text-secondary fw-semibold">Work Name</label>
+                                  <input type="text" class="form-control" placeholder="Enter Work Name" formControlName="name" />
+                                </div>
 
-                          <div class="col-12">
-                            <label class="form-label text-secondary fw-semibold">Work Activity Code</label>
-                            <input type="text" class="form-control" formControlName="code" />
-                          </div>
+                                <div class="col-12">
+                                  <label class="form-label text-secondary fw-semibold">Work Activity Code</label>
+                                  <input type="text" class="form-control" placeholder="Enter Work Activity Code" formControlName="code" />
+                                </div>
 
-                          <div class="col-md-6">
-                            <label class="form-label text-secondary fw-semibold">Type of Work</label>
-                            <select class="form-select" formControlName="typeOfWork"
-                              (change)="onTypeOfWorkChange($event, i)">
-                              <option value="">--Select--</option>
+                                <div class="col-md-6">
+                                  <label class="form-label text-secondary fw-semibold">Type of Work</label>
+                                  <select class="form-select" formControlName="typeOfWork"
+                                    (change)="onTypeOfWorkChange($event, i)">
+                                    <option value="">--Select--</option>
 
-                              @for (type of availableTypesOfWork; track type.id) {
-                              <option [value]="type.id">{{ type.description }}</option>
-                              }
-                            </select>
-                          </div>
+                                    @for (type of availableTypesOfWork; track type.id) {
+                                    <option [value]="type.id">{{ type.description }}</option>
+                                    }
+                                  </select>
+                                </div>
 
-                          <div class="col-md-6">
-                            <label class="form-label text-secondary fw-semibold">Work Activity</label>
-                            <select class="form-select" formControlName="secondaryActivity">
-                              <option value="">--Select--</option>
+                                <div class="col-md-6">
+                                  <label class="form-label text-secondary fw-semibold">Work Activity</label>
+                                  <select class="form-select" formControlName="secondaryActivity">
+                                    <option value="">--Select--</option>
 
-                              @if (availableActivities.get(activity.get('typeOfWork')?.value); as activityOptions) {
+                                    @if (availableActivities.get(activity.get('typeOfWork')?.value); as activityOptions) {
 
-                              @for (option of activityOptions; track option.id) {
-                              <option [value]="option.id">{{ option.description }}</option>
-                              }
-                              }
-                            </select>
-                          </div>
+                                    @for (option of activityOptions; track option.id) {
+                                    <option [value]="option.id">{{ option.description }}</option>
+                                    }
+                                    }
+                                  </select>
+                                </div>
 
-                          <div class="col-md-6">
-                            <label class="form-label text-secondary fw-semibold">Estimated Skill Labour Required</label>
-                            <div class="input-group">
-                              <span class="input-group-text"><i class="fas text-secondary fa-users"></i></span>
-                              <input type="number" class="form-control" formControlName="estimatedSkillLabour" />
+                                <div class="col-md-6">
+                                  <label class="form-label text-secondary fw-semibold">Estimated Skill Labour Required</label>
+                                  <div class="input-group">
+                                    <span class="input-group-text"><i class="fas text-secondary fa-users"></i></span>
+                                    <input type="number" class="form-control" formControlName="estimatedSkillLabour" placeholder="0" />
+                                  </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                  <label class="form-label text-secondary fw-semibold">Estimated Cost (In USD)</label>
+                                  <div class="input-group">
+                                    <span class="input-group-text"><i class="fas text-secondary fa-dollar-sign"></i></span>
+                                    <input type="number" class="form-control" formControlName="estimatedCost"
+                                      placeholder="0.00" />
+                                  </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                  <label class="form-label text-secondary fw-semibold">Estimated cost of hand tools and
+                                    equipment(In USD)</label>
+                                  <div class="input-group">
+                                    <span class="input-group-text"><i class="fas text-secondary fa-dollar-sign"></i></span>
+                                    <input type="number" class="form-control" formControlName="estimatedCostOfEquipment"
+                                      placeholder="0.00" />
+                                  </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                  <label class="form-label text-secondary fw-semibold">Estimated cost of materials required
+                                    (In USD)</label>
+                                  <div class="input-group">
+                                    <span class="input-group-text"><i class="fas text-secondary fa-dollar-sign"></i></span>
+                                    <input type="number" class="form-control" formControlName="estimatedMaterialCost"
+                                      placeholder="0.00" />
+                                  </div>
+                                </div>
+                              </div>
                             </div>
-                          </div>
 
-                          <div class="col-md-6">
-                            <label class="form-label text-secondary fw-semibold">Estimated Cost (In USD)</label>
-                            <div class="input-group">
-                              <span class="input-group-text"><i class="fas text-secondary fa-dollar-sign"></i></span>
-                              <input type="number" class="form-control" formControlName="estimatedCost"
-                                placeholder="0.00" />
-                            </div>
-                          </div>
+                            <div class="col-lg-6">
+                              <div class="row g-3">
+                                <div class="col-12">
+                                  <label class="form-label text-secondary fw-semibold">Type of Equipment Required</label>
+                                  @if (activity.get('equipmentPhotoUrl')?.value) {
+                                  <div class="mb-2">
+                                    <button type="button" (click)="viewAttachment(activity.get('equipmentPhotoUrl')?.value)"
+                                      class="btn btn-sm btn-outline-primary">
+                                      <i class="fas fa-eye me-2"></i>Current Equipment Attachment
+                                    </button>
+                                  </div>
+                                  }
+                                  <input type="file" #equipmentPhotoInput class="form-control" (change)="onEquipmentPhotoSelect($event, i)"
+                                    accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
 
-                          <div class="col-md-6">
-                            <label class="form-label text-secondary fw-semibold">Estimated cost of hand tools and
-                              equipment(In USD)</label>
-                            <div class="input-group">
-                              <span class="input-group-text"><i class="fas text-secondary fa-dollar-sign"></i></span>
-                              <input type="number" class="form-control" formControlName="estimatedCostOfEquipment"
-                                placeholder="0.00" />
-                            </div>
-                          </div>
+                                  @if (getEquipmentPhotoName(i); as photoName) {
+                                  <div class="d-flex justify-content-between align-items-center mt-1">
+                                    <small class="text-muted">
+                                      Selected: {{ photoName }}
+                                    </small>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" (click)="clearAttachment(i, 'equipmentPhoto', equipmentPhotoInput)">
+                                      <i class="fas fa-times"></i>
+                                    </button>
+                                  </div>
+                                  }
+                                </div>
 
-                          <div class="col-md-6">
-                            <label class="form-label text-secondary fw-semibold">Estimated cost of materials required
-                              (In USD)</label>
-                            <div class="input-group">
-                              <span class="input-group-text"><i class="fas text-secondary fa-dollar-sign"></i></span>
-                              <input type="number" class="form-control" formControlName="estimatedMaterialCost"
-                                placeholder="0.00" />
+                                <div class="col-12">
+                                  <label class="form-label text-secondary fw-semibold">Work Attachment</label>
+                                  @if (activity.get('workPhotoUrl')?.value) {
+                                  <div class="mb-2">
+                                    <button type="button" (click)="viewAttachment(activity.get('workPhotoUrl')?.value)"
+                                      class="btn btn-sm btn-outline-primary">
+                                      <i class="fas fa-eye me-2"></i>Current Work Attachment
+                                    </button>
+                                  </div>
+                                  }
+                                  <input type="file" #workPhotoInput class="form-control" (change)="onWorkPhotoSelect($event, i)"
+                                    accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+
+                                  @if (getWorkPhotoName(i); as photoName) {
+                                  <div class="d-flex justify-content-between align-items-center mt-1">
+                                    <small class="text-muted">
+                                      Selected: {{ photoName }}
+                                    </small>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" (click)="clearAttachment(i, 'workPhoto', workPhotoInput)">
+                                      <i class="fas fa-times"></i>
+                                    </button>
+                                  </div>
+                                  }
+                                </div>
+
+                                <div class="col-12">
+                                  <label class="form-label text-secondary fw-semibold">Materials Photo</label>
+                                  @if (activity.get('materialPhotoUrl')?.value) {
+                                  <div class="mb-2">
+                                    <button type="button" (click)="viewAttachment(activity.get('materialPhotoUrl')?.value)"
+                                      class="btn btn-sm btn-outline-primary">
+                                      <i class="fas fa-eye me-2"></i>Current Materials Attachment
+                                    </button>
+                                  </div>
+                                  }
+                                  <input type="file" #materialPhotoInput class="form-control" (change)="onMaterialsPhotoSelect($event, i)"
+                                    accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+
+                                  @if (getMaterialPhotoName(i); as photoName) {
+                                  <div class="d-flex justify-content-between align-items-center mt-1">
+                                    <small class="text-muted">Selected: {{ photoName }}</small>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" (click)="clearAttachment(i, 'materialPhoto', materialPhotoInput)">
+                                      <i class="fas fa-times"></i>
+                                    </button>
+                                  </div>
+                                  }
+                                </div>
+
+                                <div class="col-md-6">
+                                  <label class="form-label text-secondary fw-semibold">Estimated Manpower</label>
+                                  <input type="number" class="form-control" formControlName="estimatedManpower" placeholder="0" />
+                                </div>
+
+                                <div class="col-md-6">
+                                  <label class="form-label text-secondary fw-semibold">Estimated Man Days</label>
+                                  <input type="number" class="form-control" formControlName="estimatedManDays" placeholder="0" />
+                                </div>
+
+                                <div class="col-md-6 col-lg-3">
+                                  <label class="form-label text-secondary fw-semibold">Estimated Work Start Date</label>
+                                  <p-datePicker formControlName="workStartDate" [showIcon]="true" dateFormat="dd/mm/yy"
+                                    class="w-100" placeholder="dd/mm/yyyy" />
+                                </div>
+
+                                <div class="col-md-6 col-lg-3">
+                                  <label class="form-label text-secondary fw-semibold">Estimated Work End Date</label>
+                                  <p-datePicker formControlName="workEndDate" [showIcon]="true" dateFormat="dd/mm/yy"
+                                    class="w-100" placeholder="dd/mm/yyyy" />
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
-
-                      <div class="col-md-6">
-                        <label class="form-label text-secondary fw-semibold">Type of Equipment Required</label>
-                        @if (activity.get('equipmentPhotoUrl')?.value) {
-                          <div class="mb-2">
-                            <button type="button" (click)="viewAttachment(activity.get('equipmentPhotoUrl')?.value)" class="btn btn-sm btn-outline-primary">
-                              <i class="fas fa-eye me-2"></i>View Current Equipment Attachment
-                            </button>
-                          </div>
-                        }
-                        <input type="file" class="form-control" (change)="onEquipmentPhotoSelect($event, i)"
-                          accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
-
-                            @if (getEquipmentPhotoName(i); as photoName) {
-                            <small class="text-muted">
-                              Selected: {{ photoName }}
-                            </small>
-                            }
-                          </div>
-
-                      <div class="col-md-6">
-                        <label class="form-label text-secondary fw-semibold">Estimated cost of hand tools and
-                          equipment(In USD)</label>
-                        <div class="input-group">
-                          <span class="input-group-text"><i class="fas text-secondary fa-dollar-sign"></i></span>
-                          <input type="number" class="form-control" formControlName="estimatedCostOfEquipment"
-                            placeholder="0.00" />
-                        </div>
-                      </div>
-
-                      <div class="col-md-6">
-                        <label class="form-label text-secondary fw-semibold">Work Attachment</label>
-                        @if (activity.get('workPhotoUrl')?.value) {
-                          <div class="mb-2">
-                            <button type="button" (click)="viewAttachment(activity.get('workPhotoUrl')?.value)" class="btn btn-sm btn-outline-primary">
-                              <i class="fas fa-eye me-2"></i>View Current Work Attachment
-                            </button>
-                          </div>
-                        }
-                        <input type="file" class="form-control" (change)="onWorkPhotoSelect($event, i)"
-                          accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
-
-                            @if (getWorkPhotoName(i); as photoName) {
-                            <small class="text-muted">
-                              Selected: {{ photoName }}
-                            </small>
-                            }
-                          </div>
-
-                      <div class="col-md-6">
-                        <label class="form-label text-secondary fw-semibold">Materials Attachment</label>
-                        @if (activity.get('materialPhotoUrl')?.value) {
-                          <div class="mb-2">
-                            <button type="button" (click)="viewAttachment(activity.get('materialPhotoUrl')?.value)" class="btn btn-sm btn-outline-primary">
-                              <i class="fas fa-eye me-2"></i>View Current Materials Attachment
-                            </button>
-                          </div>
-                        }
-                        <input type="file" class="form-control" (change)="onMaterialsPhotoSelect($event, i)"
-                          accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
-
-                            @if (getMaterialPhotoName(i); as photoName) {
-                            <small class="text-muted">Selected: {{ photoName }}</small>
-                            }
-                          </div>
-
-                          <div class="col-md-6">
-                            <label class="form-label text-secondary fw-semibold">Estimated Manpower</label>
-                            <input type="number" class="form-control" formControlName="estimatedManpower" />
-                          </div>
-
-                          <div class="col-md-6">
-                            <label class="form-label text-secondary fw-semibold">Estimated Man Days</label>
-                            <input type="number" class="form-control" formControlName="estimatedManDays" />
-                          </div>
-
-                        </div>
-
-                        <br>
-                        <div class="row g-3">
-                          <div class="col-md-6 col-lg-3">
-                            <label class="form-label text-secondary fw-semibold">Estimated Work Start Date</label>
-                            <p-datePicker formControlName="workStartDate" [showIcon]="true" dateFormat="dd/mm/yy"
-                              class="w-100" placeholder="dd/mm/yyyy" />
-                          </div>
-
-                          <div class="col-md-6 col-lg-3">
-                            <label class="form-label text-secondary fw-semibold">Estimated Work End Date</label>
-                            <p-datePicker formControlName="workEndDate" [showIcon]="true" dateFormat="dd/mm/yy"
-                              class="w-100" placeholder="dd/mm/yyyy" />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                }
+                      }
 
               </div>
             </div>
