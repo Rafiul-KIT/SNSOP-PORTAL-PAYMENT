@@ -92,10 +92,18 @@ export class BeneficiaryAttendancePerform implements OnInit {
   totalRecords = 0;
   currentPage = 0;
   pageSize = 10;
+  today: Date = new Date();
+
   attendanceDate: Date | null = null;
   attendanceDateTouched: boolean = false;
 
+  allFinlit: boolean = false;
+  allEcd: boolean = false;
+  allWash: boolean = false;
+  allGbv: boolean = false;
+
   statusOptions = [
+    { label: '--select--', value: null },
     { label: 'Present', value: true },
     { label: 'Absent', value: false }
   ];
@@ -110,6 +118,7 @@ export class BeneficiaryAttendancePerform implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.today.setHours(23, 59, 59, 999); // Set to end of today to include all of today
     this.initBreadcrumb();
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
@@ -149,11 +158,11 @@ export class BeneficiaryAttendancePerform implements OnInit {
 
   onAttendanceDateChange(event: Date) {
     this.attendanceDate = event;
-    this.attendanceDateTouched = true;
     // When date changes, clear the current list and reset pagination, a new search is required.
     this.beneficiaries = [];
     this.totalRecords = 0;
     this.currentPage = 0;
+
   }
 
   onSearch() {
@@ -161,6 +170,7 @@ export class BeneficiaryAttendancePerform implements OnInit {
     if (this.isAttendanceDateInvalid()) {
       return; // Don't search if date is invalid
     }
+
     this.currentPage = 0;
     this.fetchBeneficiaries(this.currentPage, this.pageSize);
   }
@@ -178,11 +188,12 @@ export class BeneficiaryAttendancePerform implements OnInit {
     const date = `${year}-${month}-${day}`;
     const subprojectId = this.subproject.id;
 
-    this.api.GET(`api/attendance/get?subprojectId=${subprojectId}&attendanceDate=${date}&page=${page}&size=${size}`)
+    this.api.GET(`api/attendance/get?subprojectId=${subprojectId}&attendanceDate=${date}&page=${page}&size=10000`)
       .then((res: any) => {
         const data = res.data || res;
         if (data && data.content && data.content.length > 0) {
           this.beneficiaries = data.content;
+          this.selectedBeneficiaries = this.beneficiaries.filter(b => b.present);
           this.totalRecords = data.totalElements || 0;
           this.loading = false;
           this.cdr.markForCheck();
@@ -207,7 +218,7 @@ export class BeneficiaryAttendancePerform implements OnInit {
     }
     const subprojectId = this.subproject.id;
 
-    this.api.GET(`api/subproject/assign/progress/beneficiary/existing?subprojectId=${subprojectId}&page=${page}&size=${size}`)
+    this.api.GET(`api/subproject/assign/progress/beneficiary/existing?subprojectId=${subprojectId}&page=${page}&size=10000`)
       .then((res: any) => {
         const data = res.data || res;
         if (data && data.content) {
@@ -241,15 +252,26 @@ export class BeneficiaryAttendancePerform implements OnInit {
       });
   }
 
-  onPageChange(event: any) {
-    this.currentPage = event.page;
-    this.pageSize = event.rows;
-    this.fetchBeneficiaries(this.currentPage, this.pageSize);
+  onSelectAll(field: keyof BeneficiaryAttendanceRecord, event: any) {
+    const isChecked = event.checked;
+    this.selectedBeneficiaries.forEach(b => {
+      (b as any)[field] = isChecked;
+    });
   }
+
+  onSelectAllStatus(event: any) {
+    const status = event.value;
+    this.selectedBeneficiaries.forEach(b => {
+      b.present = status;
+    });
+  }
+
+
 
   isAttendanceDateInvalid(): boolean {
     return !this.attendanceDate;
   }
+
 
   formatDate(date: string | null): string {
     if (!date) return '—';
@@ -315,7 +337,7 @@ export class BeneficiaryAttendancePerform implements OnInit {
     const payload = {
       subprojectId: this.subproject.id,
       status: true,
-      list: this.beneficiaries.map(b => ({
+      list: this.selectedBeneficiaries.map(b => ({
         beneficiaryId: b.beneficiaryId,
         attendanceDate: attendanceDateStr,
         present: b.present ?? false, // Default null/undefined status to absent
@@ -328,14 +350,19 @@ export class BeneficiaryAttendancePerform implements OnInit {
 
     this.api.POST('api/attendance/save', payload)
       .then((res: any) => {
-        if (res && res.code === 0) {
+        if (res && res.data.code === 200) {
           this.messageService.add({
             severity: 'success',
             summary: 'Success',
             detail: 'Attendance saved successfully!',
           });
-          // After success, navigate back to the list page
-          this.router.navigate(['/beneficiary-attendance']);
+          // After success, clear the fields and table
+          this.attendanceDate = null;
+          this.beneficiaries = [];
+          this.selectedBeneficiaries = [];
+          this.totalRecords = 0;
+          this.attendanceDateTouched = false;
+          this.cdr.markForCheck(); // Trigger change detection
         } else {
           this.messageService.add({
             severity: 'error',

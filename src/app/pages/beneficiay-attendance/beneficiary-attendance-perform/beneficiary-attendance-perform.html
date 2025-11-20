@@ -60,7 +60,7 @@
                                             <div class="p-inputgroup">
                                                 <p-datepicker [(ngModel)]="attendanceDate"
                                                     (ngModelChange)="onAttendanceDateChange($event)" [showIcon]="true"
-                                                    dateFormat="dd/mm/yy" placeholder="Select date"
+                                                    dateFormat="dd/mm/yy" placeholder="Select date" [maxDate]="today"
                                                     [ngClass]="{'ng-invalid ng-dirty': isAttendanceDateInvalid() && attendanceDateTouched}"></p-datepicker> &nbsp; &nbsp; &nbsp;
                                                     <button pButton type="button" icon="fas fa-search" class="p-button-primary" label="Search" (click)="onSearch()" [disabled]="isAttendanceDateInvalid()"></button>
                                             </div>
@@ -123,11 +123,11 @@
                             <th>Gender</th>
                             <th>Age</th>
                             <th>Phone No.</th>
-                            <th>FINLIT</th>
-                            <th>ECD</th>
-                            <th>WASH</th>
-                            <th>GBV</th>
-                            <th>Status</th>
+                            <th>FINLIT <p-checkbox [(ngModel)]="allFinlit" (onChange)="onSelectAll('finlitAttended', $event)" [binary]="true"></p-checkbox></th>
+                            <th>ECD <p-checkbox [(ngModel)]="allEcd" (onChange)="onSelectAll('ecdAttended', $event)" [binary]="true"></p-checkbox></th>
+                            <th>WASH <p-checkbox [(ngModel)]="allWash" (onChange)="onSelectAll('washAttended', $event)" [binary]="true"></p-checkbox></th>
+                            <th>GBV <p-checkbox [(ngModel)]="allGbv" (onChange)="onSelectAll('gbvAttended', $event)" [binary]="true"></p-checkbox></th>
+                            <th>Status <p-select [options]="statusOptions" (onChange)="onSelectAllStatus($event)" placeholder="--select--" appendTo="body"></p-select></th>
                         </tr>
                     </ng-template>
                     <ng-template pTemplate="body" let-beneficiary>
@@ -149,8 +149,7 @@
                     </ng-template>
                 </p-table>
 
-                <p-paginator (onPageChange)="onPageChange($event)" [first]="currentPage * pageSize" [rows]="pageSize"
-                    [totalRecords]="totalRecords" [rowsPerPageOptions]="[10, 20, 30]"></p-paginator>
+
 
                 <div class="d-flex justify-content-end mt-3">
                     <button pButton type="button" label="Save Attendance" class="p-button-primary px-5" [disabled]="loading" (click)="saveAttendance()"></button>
