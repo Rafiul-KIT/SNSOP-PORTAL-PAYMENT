@@ -209,7 +209,7 @@ export class SubProject implements OnInit {
       this.proposalForm.patchValue({
         projectName: subProjectData.projectId,
         typeOfMeeting: subProjectData.typeOfMeeting,
-        meetingDate: subProjectData.meetingDate,
+        meetingDate: subProjectData.meetingDate ? new Date(subProjectData.meetingDate) : null,
         stateName: subProjectData.stateName,
         countyName: subProjectData.countyName,
         payamName: subProjectData.payamName,
@@ -253,14 +253,14 @@ export class SubProject implements OnInit {
               code: activity.workCode || '',
               typeOfWork: typeOfWorkId ? String(typeOfWorkId) : null,
               secondaryActivity: workActivityId ? String(workActivityId) : null,
-              estimatedManpower: activity.estManPower || 0,
-              estimatedManDays: activity.estDay || 0,
-              estimatedCostOfEquipment: activity.equipmentCost || 0,
-              workStartDate: activity.estStartAt || '',
-              workEndDate: activity.estEndAt || '',
-              estimatedMaterialCost: activity.materialCost || 0,
-              estimatedSkillLabour: activity.estSkilledLabourDay || 0,
-              estimatedCost: activity.estCost || 0,
+              estimatedManpower: activity.estManPower,
+              estimatedManDays: activity.estDay,
+              estimatedCostOfEquipment: activity.equipmentCost,
+              workStartDate: activity.estStartAt ? new Date(activity.estStartAt) : null,
+              workEndDate: activity.estEndAt ? new Date(activity.estEndAt) : null,
+              estimatedMaterialCost: activity.materialCost,
+              estimatedSkillLabour: activity.estSkilledLabourDay,
+              estimatedCost: activity.estCost,
               workPhotoUrl: activity.workPhotoUrl || '',
               equipmentPhotoUrl: activity.equipmentPhotoUrl || '',
               materialPhotoUrl: activity.materialPhotoUrl || '',
@@ -288,11 +288,11 @@ export class SubProject implements OnInit {
       id: [null],
       name: [''],
       code: [''],
-      typeOfWork: [null],
-      secondaryActivity: [null],
-      estimatedManpower: [0],
-      estimatedManDays: [0],
-      estimatedCostOfEquipment: [0],
+      typeOfWork: [''],
+      secondaryActivity: [''],
+      estimatedManpower: [null],
+      estimatedManDays: [null],
+      estimatedCostOfEquipment: [null],
       workPhoto: [null],
       workPhotoName: [''],
       equipmentPhoto: [null],
@@ -307,9 +307,9 @@ export class SubProject implements OnInit {
 
       workStartDate: [''],
       workEndDate: [''],
-      estimatedCost: [0],
-      estimatedSkillLabour: [0],
-      estimatedMaterialCost: [0],
+      estimatedCost: [null],
+      estimatedSkillLabour: [null],
+      estimatedMaterialCost: [null],
     });
   }
 
@@ -367,6 +367,17 @@ export class SubProject implements OnInit {
   getMaterialPhotoName(index: number): string {
     const activity = this.workActivities.at(index);
     return activity ? activity.get('materialPhotoName')?.value || '' : '';
+  }
+
+  clearAttachment(index: number, fieldName: string, fileInput: HTMLInputElement): void {
+    const activity = this.workActivities.at(index);
+    if (activity) {
+      activity.get(fieldName)?.reset();
+      activity.get(`${fieldName}Name`)?.reset();
+      if (fileInput) {
+        fileInput.value = ''; // Clear the input element's value
+      }
+    }
   }
 
   async viewAttachment(path: string): Promise<void> {
@@ -496,8 +507,6 @@ export class SubProject implements OnInit {
 
       const subProjectResponse = await this.api.POST('api/subproject/save', subProjectPayload);
 
-      console.log('Response from /api/subproject/save:', JSON.stringify(subProjectResponse, null, 2));
-
       const newSubProjectId = subProjectResponse.data.entityId;
       if (!newSubProjectId) throw new Error('Failed to get sub-project ID after saving.');
 
@@ -526,13 +535,13 @@ export class SubProject implements OnInit {
             workCode: activityValue.code,
             areaOfWorkId: Number(activityValue.typeOfWork),
             workActivityId: Number(activityValue.secondaryActivity),
-            estManPower: activityValue.estimatedManpower,
-            estDay: activityValue.estimatedManDays,
-            estSkilledLabourDay: activityValue.estimatedSkillLabour,
+            estManPower: activityValue.estimatedManpower || 0,
+            estDay: activityValue.estimatedManDays || 0,
+            estSkilledLabourDay: activityValue.estimatedSkillLabour || 0,
             estStartAt: activityValue.workStartDate,
             estEndAt: activityValue.workEndDate,
-            estCost: activityValue.estimatedCost,
-            equipmentCost: activityValue.estimatedCostOfEquipment,
+            estCost: activityValue.estimatedCost || 0,
+            equipmentCost: activityValue.estimatedCostOfEquipment || 0,
             materialCost: activityValue.estimatedMaterialCost || 0,
             status: true,
           };
