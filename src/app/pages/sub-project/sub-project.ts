@@ -18,6 +18,7 @@ import { ButtonModule } from 'primeng/button';
 import { CookieService } from 'ngx-cookie-service';
 import { environment } from '../../../environments/environment';
 import axios from 'axios';
+import { DatePickerModule } from 'primeng/datepicker';
 
 @Component({
   selector: 'app-root',
@@ -29,6 +30,7 @@ import axios from 'axios';
     Breadcrumb,
     FormsModule,
     ButtonModule,
+    DatePickerModule
   ],
   templateUrl: './sub-project.html',
   styleUrl: './sub-project.scss',

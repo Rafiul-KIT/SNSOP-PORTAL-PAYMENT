@@ -3,7 +3,11 @@
 } @else {
 <!-- Breadcrumb -->
 <div class="breadcrumb-wrapper mb-3">
-  <p-breadcrumb [model]="breadCrumbItems" [home]="breadcrumbHome" class="max-w-full"></p-breadcrumb>
+  <p-breadcrumb
+    [model]="breadCrumbItems"
+    [home]="breadcrumbHome"
+    class="max-w-full"
+  ></p-breadcrumb>
 </div>
 <p-toast position="bottom-right"></p-toast>
 <!-- Outer panel -->
@@ -15,25 +19,35 @@
         <!-- Left column -->
         <div class="col-12 col-md-6">
           <div class="row mb-2">
-            <label class="col-md-4 col-form-label text-md-end">Project Name :</label>
+            <label class="col-md-4 col-form-label text-md-end"
+              >Project Name :</label
+            >
             <div class="col-md-8">
-              <input type="text" class="form-control" formControlName="projectName" />
-              @if (projectForm.get('projectName')?.invalid && projectForm.get('projectName')?.touched) {
-                <small class="text-danger">
-                  Project name is required
-                </small>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="projectName"
+              />
+              @if (projectForm.get('projectName')?.invalid &&
+              projectForm.get('projectName')?.touched) {
+              <small class="text-danger"> Project name is required </small>
               }
             </div>
           </div>
 
           <div class="row mb-2">
-            <label class="col-md-4 col-form-label text-md-end">Start Date :</label>
+            <label class="col-md-4 col-form-label text-md-end"
+              >Start Date :</label
+            >
             <div class="col-md-8">
-              <p-datePicker formControlName="startDate" dateFormat="dd/mm/yy" [showIcon]="true"></p-datePicker>
-              @if (projectForm.get('startDate')?.invalid && projectForm.get('startDate')?.touched) {
-                <small class="text-danger">
-                  Start date is required
-                </small>
+              <p-datePicker
+                formControlName="startDate"
+                dateFormat="dd/mm/yy"
+                [showIcon]="true"
+              ></p-datePicker>
+              @if (projectForm.get('startDate')?.invalid &&
+              projectForm.get('startDate')?.touched) {
+              <small class="text-danger"> Start date is required </small>
               }
             </div>
           </div>
@@ -41,19 +55,34 @@
           <div class="row mb-2">
             <label class="col-md-4 col-form-label text-md-end">End Date :</label>
             <div class="col-md-8">
-              <p-datePicker formControlName="endDate" dateFormat="dd/mm/yy" [showIcon]="true"></p-datePicker>
-              @if (projectForm.get('endDate')?.invalid && projectForm.get('endDate')?.touched) {
-                <small class="text-danger">
-                  End date is required
-                </small>
+              <p-datePicker
+                formControlName="endDate"
+                dateFormat="dd/mm/yy"
+                [showIcon]="true"
+              ></p-datePicker>
+              @if (projectForm.get('endDate')?.invalid &&
+              projectForm.get('endDate')?.touched) {
+              <small class="text-danger"> End date is required </small>
+              } @if (projectForm.hasError('dateRange') &&
+              (projectForm.get('startDate')?.touched ||
+              projectForm.get('endDate')?.touched)) {
+              <small class="text-danger">
+                End date must be after start date
+              </small>
               }
             </div>
           </div>
 
           <div class="row mb-2">
-            <label class="col-md-4 col-form-label text-md-end">Project Sanction Date :</label>
+            <label class="col-md-4 col-form-label text-md-end"
+              >Project Sanction Date :</label
+            >
             <div class="col-md-8">
-              <p-datePicker formControlName="sanctionDate" dateFormat="dd/mm/yy" [showIcon]="true"></p-datePicker>
+              <p-datePicker
+                formControlName="sanctionDate"
+                dateFormat="dd/mm/yy"
+                [showIcon]="true"
+              ></p-datePicker>
             </div>
           </div>
         </div>
@@ -61,37 +90,77 @@
         <!-- Right column -->
         <div class="col-12 col-md-6">
           <div class="row mb-2">
-            <label class="col-md-4 col-form-label text-md-end">Target Beneficiaries :</label>
+            <label class="col-md-4 col-form-label text-md-end"
+              >Target Beneficiaries :</label
+            >
             <div class="col-md-8">
-              <input type="number" class="form-control" formControlName="targetBeneficiaries" min="1" />
-              @if (projectForm.get('targetBeneficiaries')?.invalid && projectForm.get('targetBeneficiaries')?.touched) {
-                <small class="text-danger">
-                  Target beneficiaries is required (min: 1)
-                </small>
+              <input
+                type="number"
+                class="form-control"
+                formControlName="targetBeneficiaries"
+                min="1"
+              />
+              @if (projectForm.get('targetBeneficiaries')?.invalid &&
+              projectForm.get('targetBeneficiaries')?.touched) {
+              <small class="text-danger">
+                @if
+                (projectForm.get('targetBeneficiaries')?.hasError('required')) {
+                Target beneficiaries is required. } @if
+                (projectForm.get('targetBeneficiaries')?.hasError('min')) {
+                Minimum 1 beneficiary is required. } @if
+                (projectForm.get('targetBeneficiaries')?.hasError('pattern')) {
+                Target beneficiaries must be a whole number. }
+              </small>
               }
             </div>
           </div>
 
           <div class="row mb-2">
-            <label class="col-md-4 col-form-label text-md-end">Project Cost (USD) :</label>
+            <label class="col-md-4 col-form-label text-md-end"
+              >Project Cost (USD) :</label
+            >
             <div class="col-md-8">
-              <input type="number" class="form-control" formControlName="cost" min="0" step="0.01" />
-              @if (projectForm.get('cost')?.invalid && projectForm.get('cost')?.touched) {
-                <small class="text-danger">
-                  Project cost is required
-                </small>
+              <input
+                type="number"
+                class="form-control"
+                formControlName="cost"
+                min="0"
+                step="0.01"
+              />
+              @if (projectForm.get('cost')?.invalid &&
+              projectForm.get('cost')?.touched) {
+              <small class="text-danger">
+                @if (projectForm.get('cost')?.hasError('required')) { Project
+                cost is required. } @if
+                (projectForm.get('cost')?.hasError('min')) { Project cost must
+                be non-negative. } @if
+                (projectForm.get('cost')?.hasError('pattern')) { Project cost
+                must be a valid amount (e.g., 123.45). }
+              </small>
               }
             </div>
           </div>
 
           <div class="row mb-2">
-            <label class="col-md-4 col-form-label text-md-end">Person Incharge :</label>
+            <label class="col-md-4 col-form-label text-md-end"
+              >Person Incharge :</label
+            >
             <div class="col-md-8">
-              <input type="text" class="form-control" formControlName="inchargeName" />
-              @if (projectForm.get('inchargeName')?.invalid && projectForm.get('inchargeName')?.touched) {
-                <small class="text-danger">
-                  Person incharge name is required
-                </small>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="inchargeName"
+              />
+              @if (projectForm.get('inchargeName')?.invalid &&
+              projectForm.get('inchargeName')?.touched) {
+              <small class="text-danger">
+                @if (projectForm.get('inchargeName')?.hasError('required')) {
+                Person incharge name is required. } @if
+                (projectForm.get('inchargeName')?.hasError('minlength')) { Name
+                must be at least 2 characters. } @if
+                (projectForm.get('inchargeName')?.hasError('pattern')) { Name
+                must contain only letters and spaces. }
+              </small>
               }
             </div>
           </div>
@@ -99,11 +168,19 @@
           <div class="row mb-2">
             <label class="col-md-4 col-form-label text-md-end">Mobile :</label>
             <div class="col-md-8">
-              <input type="text" class="form-control" formControlName="inchargeMobile" />
-              @if (projectForm.get('inchargeMobile')?.invalid && projectForm.get('inchargeMobile')?.touched) {
-                <small class="text-danger">
-                  Valid mobile number required 9 digits
-                </small>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="inchargeMobile"
+              />
+              @if (projectForm.get('inchargeMobile')?.invalid &&
+              projectForm.get('inchargeMobile')?.touched) {
+              <small class="text-danger">
+                @if (projectForm.get('inchargeMobile')?.hasError('required')) {
+                Mobile number is required. } @if
+                (projectForm.get('inchargeMobile')?.hasError('pattern')) { Valid
+                mobile number required (9 to 13 digits). }
+              </small>
               }
             </div>
           </div>
@@ -111,11 +188,20 @@
           <div class="row mb-2">
             <label class="col-md-4 col-form-label text-md-end">Email :</label>
             <div class="col-md-8">
-              <input type="email" class="form-control" formControlName="inchargeEmail" placeholder="example@email.com" />
-              @if (projectForm.get('inchargeEmail')?.invalid && projectForm.get('inchargeEmail')?.touched) {
-                <small class="text-danger">
-                  Valid email address is required
-                </small>
+              <input
+                type="email"
+                class="form-control"
+                formControlName="inchargeEmail"
+                placeholder="example@email.com"
+              />
+              @if (projectForm.get('inchargeEmail')?.invalid &&
+              projectForm.get('inchargeEmail')?.touched) {
+              <small class="text-danger">
+                @if (projectForm.get('inchargeEmail')?.hasError('required')) {
+                Email is required. } @if
+                (projectForm.get('inchargeEmail')?.hasError('email')) { A valid
+                email address is required. }
+              </small>
               }
             </div>
           </div>
@@ -126,13 +212,12 @@
               <select class="form-select" formControlName="status">
                 <option value="">--Select--</option>
                 @for (s of statusList; track s) {
-                  <option [value]="s">{{ s }}</option>
+                <option [value]="s">{{ s }}</option>
                 }
               </select>
-              @if (projectForm.get('status')?.invalid && projectForm.get('status')?.touched) {
-                <small class="text-danger">
-                  Status is required
-                </small>
+              @if (projectForm.get('status')?.invalid &&
+              projectForm.get('status')?.touched) {
+              <small class="text-danger"> Status is required </small>
               }
             </div>
           </div>
@@ -141,16 +226,22 @@
     </form>
 
     <!-- Section: State / County -->
-    <h5 class="fw-semibold mt-5 mb-3 text-center">State / County wise Project Details</h5>
+    <h5 class="fw-semibold mt-5 mb-3 text-center">
+      State / County wise Project Details
+    </h5>
 
     <!-- Add new target form -->
     <form [formGroup]="targetForm" class="row g-3 align-items-end mb-3">
       <div class="col-12 col-md-5">
         <label class="form-label">State</label>
-        <select class="form-select" formControlName="state" (change)="onStateChange($event)">
+        <select
+          class="form-select"
+          formControlName="state"
+          (change)="onStateChange($event)"
+        >
           <option value="">--Select--</option>
           @for (st of states; track st.id) {
-            <option [value]="st.id">{{ st.name }}</option>
+          <option [value]="st.id">{{ st.name }}</option>
           }
         </select>
       </div>
@@ -160,54 +251,79 @@
         <select class="form-select" formControlName="county">
           <option value="">--Select--</option>
           @for (c of counties; track c.id) {
-            <option [value]="c.id">{{ c.name }}</option>
+          <option [value]="c.id">{{ c.name }}</option>
           }
         </select>
       </div>
 
       <div class="col-12 col-md-2">
-          
-        <p-button label="Add New" icon="fas fa-plus"  pTooltip="Add Target" 
-      tooltipPosition="top"   size="small" 
-      class="w-auto" (click)="addTarget()"></p-button>
+        <p-button
+          label="Add New"
+          icon="fas fa-plus"
+          pTooltip="Add Target"
+          tooltipPosition="top"
+          size="small"
+          class="w-auto"
+          (click)="addTarget()"
+        ></p-button>
       </div>
     </form>
 
     <!-- Table of added locations -->
     <div class="table-responsive">
       @if (targets.length > 0) {
-        <table class="table table-bordered table-striped mt-3">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th class="text-center">State</th>
-              <th class="text-center">County</th>
-              <th class="text-center">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (t of targets; track $index) {
-              <tr>
-                <td class="text-center">{{ $index + 1 }}</td>
-                <td class="text-center">{{ t.state }}</td>
-                <td class="text-center">{{ t.county }}</td>
-                <td class="d-flex justify-content-center">
-                  <p-button icon="pi pi-trash" class="margin-auto" severity="danger" (click)="removeTarget($index)" label="Remove"></p-button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
+      <table class="table table-bordered table-striped mt-3">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th class="text-center">State</th>
+            <th class="text-center">County</th>
+            <th class="text-center">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (t of targets; track $index) {
+          <tr>
+            <td class="text-center">{{ $index + 1 }}</td>
+            <td class="text-center">{{ t.state }}</td>
+            <td class="text-center">{{ t.county }}</td>
+            <td class="d-flex justify-content-center">
+              <p-button
+                icon="pi pi-trash"
+                class="margin-auto"
+                severity="danger"
+                (click)="removeTarget($index)"
+                label="Remove"
+              ></p-button>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
       }
     </div>
 
     <!-- Buttons -->
     <div class="d-flex justify-content-center gap-2 mt-4 mb-4 flex-wrap">
-      <p-button label="Save" icon="fas fa-save" severity="primary" (click)="onSave()"></p-button>
-      <p-button label="Clear All" icon="fas fa-eraser" severity="warn" (click)="onClear()"></p-button>
-      <p-button label="Cancel" icon="fas fa-times" severity="secondary" (click)="onCancel()"></p-button>
+      <p-button
+        label="Save"
+        icon="fas fa-save"
+        severity="primary"
+        (click)="onSave()"
+      ></p-button>
+      <p-button
+        label="Clear All"
+        icon="fas fa-eraser"
+        severity="warn"
+        (click)="onClear()"
+      ></p-button>
+      <p-button
+        label="Cancel"
+        icon="fas fa-times"
+        severity="secondary"
+        (click)="onCancel()"
+      ></p-button>
     </div>
-
-
   </div>
-</div>}
+</div>
+}

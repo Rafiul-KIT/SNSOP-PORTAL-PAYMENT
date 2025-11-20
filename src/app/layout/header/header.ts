@@ -30,10 +30,9 @@ export class Header {
       link: environment.portals.payment,
       icon: 'fas fa-credit-card',
     },
-    { label: 'GRM', link: environment.portals.grm, icon: 'fas fa-sitemap' },
+    { label: 'GRM', icon: 'fas fa-sitemap' },
     {
       label: 'Report',
-      link: environment.portals.report,
       icon: 'fas fa-chart-line',
     },
     {
@@ -70,11 +69,22 @@ export class Header {
         routerLink: 'work-approval',
         routerLinkActiveOptions: 'active',
       },
-         {
+       
+        {
         label: 'Beneficiary Assignment',
         icon: 'fa fa-check',
-        routerLink: 'beneficiary-subproject-list',
-        routerLinkActiveOptions: 'active',
+        items: [
+          {
+            label: 'Assign Beneficiary',
+            icon: 'fa fa-check',
+            routerLink: '/beneficiary-assignment/asign-list',
+          },
+          {
+            label: 'Remove Beneficiary ',
+            icon: 'fa fa-check',
+            routerLink: '/beneficiary-assignment/remove-list',
+          },
+        ],
       },
        {
         label: 'Beneficiary Attendance',
@@ -98,6 +108,27 @@ export class Header {
           },
         ],
       },
+        {
+        label: 'Wage Request Approval',
+        icon: 'fa fa-check',
+        items: [
+          {
+            label: 'Wage Request Drafts',
+            icon: 'fa fa-check',
+            routerLink: '/wage-request-approval/drafts',
+          },
+          {
+            label: 'Wage Request For Lipw ',
+            icon: 'fa fa-check',
+            routerLink: '/wage-request-approval/lipw',
+          },
+            {
+            label: 'Benefits For Dis ',
+            icon: 'fa fa-check',
+            routerLink: '/wage-request-approval/dis',
+          },
+        ],
+      },
           {
         label: 'Report',
         icon: 'fas fa-chart-line',
@@ -115,19 +146,19 @@ export class Header {
         ],
       },
      
-      {
-        label: 'Creating Payroll',
-        icon: 'fas fa-file-invoice-dollar',
-        routerLink: 'dashboard',
-        routerLinkActiveOptions: 'active',
-      },
+      // {
+      //   label: 'Creating Payroll',
+      //   icon: 'fas fa-file-invoice-dollar',
+      //   routerLink: 'dashboard',
+      //   routerLinkActiveOptions: 'active',
+      // },
         
-      {
-        label: 'Payroll Download',
-        icon: 'fas fa-download',
-        routerLink: 'dashboard',
-        routerLinkActiveOptions: 'active',
-      },
+      // {
+      //   label: 'Payroll Download',
+      //   icon: 'fas fa-download',
+      //   routerLink: 'dashboard',
+      //   routerLinkActiveOptions: 'active',
+      // },
       // {
       //   label: 'Sub Payroll',
       //   icon: 'fas fa-list-alt',

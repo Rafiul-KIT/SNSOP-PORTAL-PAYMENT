@@ -17,6 +17,12 @@ import { Validators } from '@angular/forms';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import Swal from 'sweetalert2';
+
+export const TypeOfMeetingEnum = [
+  { id: '0', value: 'CC', label: 'Community Committee' },
+  { id: '1', value: 'AM', label: 'Assessment Meeting' },
+  { id: '2', value: 'OT', label: 'On-site Training' },
+];
 interface WorkActivity {
   id?: number;
   workName: string;
@@ -169,10 +175,12 @@ async submitApproval(): Promise<void> {
   try {
     await this.api.axiosInstance.post(`/${endpoint}`, fd, {});
     
+    const statusMessage = approvedStr === 'true' ? 'Approved' : 'Rejected';
+
     Swal.fire({
       icon: 'success',
       title: 'Success',
-      text: 'Approval submitted successfully!',
+      text: `Status ${statusMessage} Submitted successfully!`,
     });
   } catch (err) {
     console.error(err);
@@ -300,7 +308,7 @@ async submitApproval(): Promise<void> {
         subprojectData.targetBeneficiary ||
         0,
       projectCost: subprojectData.projectCost || 0,
-      typeOfMeeting: subprojectData.typeOfMeeting || '',
+      typeOfMeeting: this.getTypeOfMeetingLabel(subprojectData.typeOfMeeting) || '',
       meetingDate: subprojectData.meetingDate || '',
       screeningStatus: this.formatScreeningStatus(
         subprojectData.screeningStatus
@@ -361,6 +369,11 @@ async submitApproval(): Promise<void> {
     if (status === undefined || status === null) return '';
     if (typeof status === 'boolean') return status ? 'Active' : 'Inactive';
     return String(status);
+  }
+
+  getTypeOfMeetingLabel(value: string): string {
+    const found = TypeOfMeetingEnum.find(item => item.value === value);
+    return found ? found.label : value;
   }
 
   get workActivities(): FormArray {

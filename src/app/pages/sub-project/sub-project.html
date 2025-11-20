@@ -15,9 +15,6 @@
         <span class="navbar-brand text-secondary mb-0 h1">
           <i class="fas fa-briefcase   me-2"></i>Work Proposals
         </span>
-
-
-
       </div>
     </nav>
     <!-- Main Content -->
@@ -36,7 +33,8 @@
                   <div class="row g-3">
 
                     <div class="col-md-12">
-                      <label class="form-label text-secondary fw-semibold">Project Name <span class="text-danger">*</span></label>
+                      <label class="form-label text-secondary fw-semibold">Project Name <span
+                          class="text-danger">*</span></label>
                       <select class="form-select" formControlName="projectName" (change)="onProjectSelect($event)">
                         <option value="">--Select--</option>
                         @for (project of availableProjects; track project.id) {
@@ -69,7 +67,8 @@
                 <div class="col-md-6">
                   <div class="row g-3">
                     <div class="col-md-12">
-                      <label class="form-label text-secondary fw-semibold">Type of Meeting <span class="text-danger">*</span></label>
+                      <label class="form-label text-secondary fw-semibold">Type of Meeting <span
+                          class="text-danger">*</span></label>
                       <select class="form-select" formControlName="typeOfMeeting">
                         <option value="">--Select--</option>
                         <option value="CC">Community Consultancy</option>
@@ -80,23 +79,30 @@
                       <div class="text-danger mt-1">Type of Meeting is required.</div>
                       }
                     </div>
+
                     <div class="col-md-12">
-                      <label class="form-label text-secondary fw-semibold">Meeting Date <span class="text-danger">*</span></label>
-                      <input type="date" class="form-control" formControlName="meetingDate" />
-                      @if (proposalForm.get('meetingDate')?.invalid && proposalForm.get('meetingDate')?.touched) {
-                      <div class="text-danger mt-1">Meeting Date is required.</div>
-                      }
-                    </div>
-                    <div class="col-md-12">
-                      <label class="form-label text-secondary fw-semibold">Paper Screening Status <span class="text-danger">*</span></label>
+                      <label class="form-label text-secondary fw-semibold">Paper Screening Status <span
+                          class="text-danger">*</span></label>
                       <select class="form-select" formControlName="paperScreeningStatus">
                         <option value="">--Select--</option>
 
                         <option value="1">Approved</option>
                         <option value="0">Rejected</option>
                       </select>
-                      @if (proposalForm.get('paperScreeningStatus')?.invalid && proposalForm.get('paperScreeningStatus')?.touched) {
+                      @if (proposalForm.get('paperScreeningStatus')?.invalid &&
+                      proposalForm.get('paperScreeningStatus')?.touched) {
                       <div class="text-danger mt-1">Paper Screening Status is required.</div>
+                      }
+                    </div>
+
+                    <div class="col-md-4">
+                      <label class="form-label text-secondary fw-semibold">
+                        Meeting Date <span class="text-danger">*</span>
+                      </label>
+                      <p-datePicker formControlName="meetingDate" [showIcon]="true" dateFormat="dd/mm/yy" class="w-100"
+                        placeholder="Select a date" size="small" />
+                      @if (proposalForm.get('meetingDate')?.invalid && proposalForm.get('meetingDate')?.touched) {
+                      <div class="text-danger mt-1">Meeting Date is required.</div>
                       }
                     </div>
                   </div>
@@ -109,19 +115,20 @@
                 <i class="fas fa-map-marker-alt me-2"></i>Work Proposal Location
               </h4>
               <div class="row g-3">
-                                <div class="col-md-6 col-lg-3">
-                                  <label class="form-label text-secondary fw-semibold">State Name</label>
-                                  <input type="text" class="form-control" formControlName="stateName" readonly>
-                                </div>
-                
-                                <div class="col-md-6 col-lg-3">
-                                  <label class="form-label text-secondary fw-semibold">County / Municipality
-                                    Name</label>
-                                  <input type="text" class="form-control" formControlName="countyName" readonly>
-                                </div>
+                <div class="col-md-6 col-lg-3">
+                  <label class="form-label text-secondary fw-semibold">State Name</label>
+                  <input type="text" class="form-control" formControlName="stateName" readonly>
+                </div>
 
                 <div class="col-md-6 col-lg-3">
-                  <label class="form-label text-secondary fw-semibold">Payam / Block Name <span class="text-danger">*</span></label>
+                  <label class="form-label text-secondary fw-semibold">County / Municipality
+                    Name</label>
+                  <input type="text" class="form-control" formControlName="countyName" readonly>
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                  <label class="form-label text-secondary fw-semibold">Payam / Block Name <span
+                      class="text-danger">*</span></label>
                   <select class="form-select" formControlName="payamName" (change)="onPayamChange($event)">
                     <option value="">--Select--</option>
                     <option *ngFor="let payam of availablePayams" [value]="payam.name">{{ payam.name }}</option>
@@ -167,8 +174,9 @@
                     </h5>
 
                     @if (workActivities.length > 0) {
-                    <p-button  [style]="{ width: '35px', minWidth: '35px', height: '32px', padding: '0' }" type="button" icon="fas fa-times" pTooltip="Remove activity" tooltipPosition="top"
-                      appendTo="body" (onClick)="removeWorkActivity(i)" size="small" outlined="true" severity="danger"
+                    <p-button [style]="{ width: '35px', minWidth: '35px', height: '32px', padding: '0' }" type="button"
+                      icon="fas fa-times" pTooltip="Remove activity" tooltipPosition="top" appendTo="body"
+                      (onClick)="removeWorkActivity(i)" size="small" outlined="true" severity="danger"
                       [attr.aria-label]="'Remove activity ' + (i + 1)">
                     </p-button>
 
@@ -179,51 +187,84 @@
                     <h4 class="text-secondary border-bottom border-secondary border-1 pb-2 mb-4">
                       <i class="fas fa-calendar-alt me-2"></i>Work Timeline & Details
                     </h4>
+
                     <div class="row g-3">
-                      <div class="col-md-6">
-                        <label class="form-label text-secondary fw-semibold">Work Name</label>
-                        <input type="text" class="form-control" formControlName="name" />
-                      </div>
+                      <!-- Left Column -->
+                      <div class="col-lg-6">
+                        <div class="row g-3">
+                          <div class="col-12">
+                            <label class="form-label text-secondary fw-semibold">Work Name</label>
+                            <input type="text" class="form-control" formControlName="name" />
+                          </div>
 
-                      <div class="col-md-6">
-                        <label class="form-label text-secondary fw-semibold">Work Activity Code</label>
-                        <input type="text" class="form-control" formControlName="code" />
-                      </div>
+                          <div class="col-12">
+                            <label class="form-label text-secondary fw-semibold">Work Activity Code</label>
+                            <input type="text" class="form-control" formControlName="code" />
+                          </div>
 
-                      <div class="col-md-6 col-lg-3">
-                        <label class="form-label text-secondary fw-semibold">Type of Work</label>
-                        <select class="form-select" formControlName="typeOfWork"
-                          (change)="onTypeOfWorkChange($event, i)">
-                          <option value="">--Select--</option>
+                          <div class="col-md-6">
+                            <label class="form-label text-secondary fw-semibold">Type of Work</label>
+                            <select class="form-select" formControlName="typeOfWork"
+                              (change)="onTypeOfWorkChange($event, i)">
+                              <option value="">--Select--</option>
 
-                          @for (type of availableTypesOfWork; track type.id) {
-                          <option [value]="type.id">{{ type.description }}</option>
-                          }
-                        </select>
-                      </div>
+                              @for (type of availableTypesOfWork; track type.id) {
+                              <option [value]="type.id">{{ type.description }}</option>
+                              }
+                            </select>
+                          </div>
 
-                      <div class="col-md-6 col-lg-3">
-                        <label class="form-label text-secondary fw-semibold">Work Activity</label>
-                        <select class="form-select" formControlName="secondaryActivity">
-                          <option value="">--Select--</option>
+                          <div class="col-md-6">
+                            <label class="form-label text-secondary fw-semibold">Work Activity</label>
+                            <select class="form-select" formControlName="secondaryActivity">
+                              <option value="">--Select--</option>
 
-                          @if (availableActivities.get(activity.get('typeOfWork')?.value); as activityOptions) {
+                              @if (availableActivities.get(activity.get('typeOfWork')?.value); as activityOptions) {
 
-                          @for (option of activityOptions; track option.id) {
-                          <option [value]="option.id">{{ option.description }}</option>
-                          }
-                          }
-                        </select>
-                      </div>
+                              @for (option of activityOptions; track option.id) {
+                              <option [value]="option.id">{{ option.description }}</option>
+                              }
+                              }
+                            </select>
+                          </div>
 
-                      <div class="col-md-6 col-lg-3">
-                        <label class="form-label text-secondary fw-semibold">Estimated Manpower</label>
-                        <input type="number" class="form-control" formControlName="estimatedManpower" />
-                      </div>
+                          <div class="col-md-6">
+                            <label class="form-label text-secondary fw-semibold">Estimated Skill Labour Required</label>
+                            <div class="input-group">
+                              <span class="input-group-text"><i class="fas text-secondary fa-users"></i></span>
+                              <input type="number" class="form-control" formControlName="estimatedSkillLabour" />
+                            </div>
+                          </div>
 
-                      <div class="col-md-6 col-lg-3">
-                        <label class="form-label text-secondary fw-semibold">Estimated Man Days</label>
-                        <input type="number" class="form-control" formControlName="estimatedManDays" />
+                          <div class="col-md-6">
+                            <label class="form-label text-secondary fw-semibold">Estimated Cost (In USD)</label>
+                            <div class="input-group">
+                              <span class="input-group-text"><i class="fas text-secondary fa-dollar-sign"></i></span>
+                              <input type="number" class="form-control" formControlName="estimatedCost"
+                                placeholder="0.00" />
+                            </div>
+                          </div>
+
+                          <div class="col-md-6">
+                            <label class="form-label text-secondary fw-semibold">Estimated cost of hand tools and
+                              equipment(In USD)</label>
+                            <div class="input-group">
+                              <span class="input-group-text"><i class="fas text-secondary fa-dollar-sign"></i></span>
+                              <input type="number" class="form-control" formControlName="estimatedCostOfEquipment"
+                                placeholder="0.00" />
+                            </div>
+                          </div>
+
+                          <div class="col-md-6">
+                            <label class="form-label text-secondary fw-semibold">Estimated cost of materials required
+                              (In USD)</label>
+                            <div class="input-group">
+                              <span class="input-group-text"><i class="fas text-secondary fa-dollar-sign"></i></span>
+                              <input type="number" class="form-control" formControlName="estimatedMaterialCost"
+                                placeholder="0.00" />
+                            </div>
+                          </div>
+                        </div>
                       </div>
 
                       <div class="col-md-6">
@@ -238,12 +279,12 @@
                         <input type="file" class="form-control" (change)="onEquipmentPhotoSelect($event, i)"
                           accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
 
-                        @if (getEquipmentPhotoName(i); as photoName) {
-                        <small class="text-muted">
-                          Selected: {{ photoName }}
-                        </small>
-                        }
-                      </div>
+                            @if (getEquipmentPhotoName(i); as photoName) {
+                            <small class="text-muted">
+                              Selected: {{ photoName }}
+                            </small>
+                            }
+                          </div>
 
                       <div class="col-md-6">
                         <label class="form-label text-secondary fw-semibold">Estimated cost of hand tools and
@@ -267,12 +308,12 @@
                         <input type="file" class="form-control" (change)="onWorkPhotoSelect($event, i)"
                           accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
 
-                        @if (getWorkPhotoName(i); as photoName) {
-                        <small class="text-muted">
-                          Selected: {{ photoName }}
-                        </small>
-                        }
-                      </div>
+                            @if (getWorkPhotoName(i); as photoName) {
+                            <small class="text-muted">
+                              Selected: {{ photoName }}
+                            </small>
+                            }
+                          </div>
 
                       <div class="col-md-6">
                         <label class="form-label text-secondary fw-semibold">Materials Attachment</label>
@@ -286,54 +327,43 @@
                         <input type="file" class="form-control" (change)="onMaterialsPhotoSelect($event, i)"
                           accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
 
-                        @if (getMaterialPhotoName(i); as photoName) {
-                        <small class="text-muted">Selected: {{ photoName }}</small>
-                        }
-                      </div>
+                            @if (getMaterialPhotoName(i); as photoName) {
+                            <small class="text-muted">Selected: {{ photoName }}</small>
+                            }
+                          </div>
 
-                      <div class="col-md-4">
-                        <label class="form-label text-secondary fw-semibold">Estimated cost of materials required (In
-                          USD)</label>
-                        <div class="input-group">
-                          <span class="input-group-text"><i class="fas text-secondary fa-dollar-sign"></i></span>
-                          <input type="number" class="form-control" formControlName="estimatedMaterialCost"
-                            placeholder="0.00" />
+                          <div class="col-md-6">
+                            <label class="form-label text-secondary fw-semibold">Estimated Manpower</label>
+                            <input type="number" class="form-control" formControlName="estimatedManpower" />
+                          </div>
+
+                          <div class="col-md-6">
+                            <label class="form-label text-secondary fw-semibold">Estimated Man Days</label>
+                            <input type="number" class="form-control" formControlName="estimatedManDays" />
+                          </div>
+
                         </div>
-                      </div>
 
-                      <div class="col-md-4">
-                        <label class="form-label text-secondary fw-semibold">Estimated Skill Labour Required</label>
-                        <div class="input-group">
-                          <span class="input-group-text"><i class="fas text-secondary fa-users"></i></span>
-                          <input type="number" class="form-control" formControlName="estimatedSkillLabour" />
+                        <br>
+                        <div class="row g-3">
+                          <div class="col-md-6 col-lg-3">
+                            <label class="form-label text-secondary fw-semibold">Estimated Work Start Date</label>
+                            <p-datePicker formControlName="workStartDate" [showIcon]="true" dateFormat="dd/mm/yy"
+                              class="w-100" placeholder="dd/mm/yyyy" />
+                          </div>
+
+                          <div class="col-md-6 col-lg-3">
+                            <label class="form-label text-secondary fw-semibold">Estimated Work End Date</label>
+                            <p-datePicker formControlName="workEndDate" [showIcon]="true" dateFormat="dd/mm/yy"
+                              class="w-100" placeholder="dd/mm/yyyy" />
+                          </div>
                         </div>
-                      </div>
-                      <div class="col-md-4">
-                        <label class="form-label text-secondary fw-semibold">Estimated Cost (In USD)</label>
-                        <div class="input-group">
-                          <span class="input-group-text"><i class="fas text-secondary fa-users"></i></span>
-                          <input type="number" class="form-control" formControlName="estimatedCost"
-                            placeholder="0.00" />
-                        </div>
-                      </div>
-
-                    </div>
-
-                    <br>
-                    <div class="row g-3">
-                      <div class="col-md-6 col-lg-3">
-                        <label class="form-label text-secondary fw-semibold">Estimated Work Start Date</label>
-                        <input type="date" class="form-control" formControlName="workStartDate" placeholder="dd/mm/yyyy" />
-                      </div>
-
-                      <div class="col-md-6 col-lg-3">
-                        <label class="form-label text-secondary fw-semibold">Estimated Work End Date</label>
-                        <input type="date" class="form-control" formControlName="workEndDate" placeholder="dd/mm/yyyy" />
                       </div>
                     </div>
                   </div>
                 </div>
                 }
+
               </div>
             </div>
 

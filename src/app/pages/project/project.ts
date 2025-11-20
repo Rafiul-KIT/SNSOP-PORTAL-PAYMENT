@@ -1,9 +1,11 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
+  AbstractControl,
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
+  ValidationErrors,
   Validators,
 } from '@angular/forms';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
@@ -17,6 +19,17 @@ import { Loader } from "../../components/loader/loader";
 import { Toast } from "primeng/toast";
 import { MessageService } from 'primeng/api';
 import Swal from 'sweetalert2';
+
+export function dateRangeValidator(
+  group: AbstractControl
+): ValidationErrors | null {
+  const startDate = group.get('startDate')?.value;
+  const endDate = group.get('endDate')?.value;
+  if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+    return { dateRange: true };
+  }
+  return null;
+}
 
 @Component({
   selector: 'app-project',
@@ -99,21 +112,45 @@ private showToast(severity: 'success' | 'info' | 'warn' | 'error', summary: stri
     }
 
     // Initialize the project form
-    this.projectForm = this.fb.group({
-      projectName: ['', [Validators.required, Validators.minLength(2)]],
-      startDate: [null, Validators.required],
-      endDate: [null, Validators.required],
-      sanctionDate: [null],
-      targetBeneficiaries: [null, [Validators.required, Validators.min(1)]],
-      cost: [null, [Validators.required, Validators.min(0)]],
-      inchargeName: ['', [Validators.required, Validators.minLength(2)]],
-      inchargeMobile: [
-        '',
-        [Validators.required, Validators.pattern(/^[0-9]{9,15}$/)],
-      ],
-      inchargeEmail: ['', [Validators.required, Validators.email]],
-      status: ['', Validators.required],
-    });
+    this.projectForm = this.fb.group(
+      {
+        projectName: ['', [Validators.required, Validators.minLength(2)]],
+        startDate: [null, Validators.required],
+        endDate: [null, Validators.required],
+        sanctionDate: [null],
+        targetBeneficiaries: [
+          null,
+          [
+            Validators.required,
+            Validators.min(1),
+            Validators.pattern(/^[0-9]+$/),
+          ],
+        ],
+        cost: [
+          null,
+          [
+            Validators.required,
+            Validators.min(0),
+            Validators.pattern(/^[0-9]+(\.[0-9]{1,2})?$/),
+          ],
+        ],
+        inchargeName: [
+          '',
+          [
+            Validators.required,
+            Validators.minLength(2),
+            Validators.pattern(/^[a-zA-Z\s]*$/),
+          ],
+        ],
+        inchargeMobile: [
+          '',
+          [Validators.required, Validators.pattern(/^[0-9]{9,13}$/)],
+        ],
+        inchargeEmail: ['', [Validators.required, Validators.email]],
+        status: ['', Validators.required],
+      },
+      { validators: dateRangeValidator }
+    );
 
     // Initialize the target form for adding state/county details
     this.targetForm = this.fb.group({
@@ -362,9 +399,7 @@ async onSave(): Promise<void> {
         text: `Project ${this.isEditMode ? 'updated' : 'saved'} successfully!`,
         icon: 'success',
       }).then(() => {
-        if (!this.isEditMode) {
-          this.router.navigate(['/project-list']);
-        }
+      
       });
     } else {
       // Failure modal
