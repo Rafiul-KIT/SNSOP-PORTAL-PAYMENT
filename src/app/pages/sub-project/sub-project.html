@@ -284,7 +284,7 @@
                                   @if (getEquipmentPhotoName(i); as photoName) {
                                   <div class="d-flex justify-content-between align-items-center mt-1">
                                     <small class="text-muted">
-                                      Selected: {{ photoName }}
+                                      Selected: {{ getEquipmentPhotoName(i) }}
                                     </small>
                                     <button type="button" class="btn btn-sm btn-outline-danger" (click)="clearAttachment(i, 'equipmentPhoto', equipmentPhotoInput)">
                                       <i class="fas fa-times"></i>
@@ -309,7 +309,7 @@
                                   @if (getWorkPhotoName(i); as photoName) {
                                   <div class="d-flex justify-content-between align-items-center mt-1">
                                     <small class="text-muted">
-                                      Selected: {{ photoName }}
+                                      Selected: {{ getWorkPhotoName(i) }}
                                     </small>
                                     <button type="button" class="btn btn-sm btn-outline-danger" (click)="clearAttachment(i, 'workPhoto', workPhotoInput)">
                                       <i class="fas fa-times"></i>
@@ -333,7 +333,7 @@
 
                                   @if (getMaterialPhotoName(i); as photoName) {
                                   <div class="d-flex justify-content-between align-items-center mt-1">
-                                    <small class="text-muted">Selected: {{ photoName }}</small>
+                                    <small class="text-muted">Selected: {{ getMaterialPhotoName(i) }}</small>
                                     <button type="button" class="btn btn-sm btn-outline-danger" (click)="clearAttachment(i, 'materialPhoto', materialPhotoInput)">
                                       <i class="fas fa-times"></i>
                                     </button>
