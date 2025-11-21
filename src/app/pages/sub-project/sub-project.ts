@@ -295,12 +295,15 @@ export class SubProject implements OnInit {
       estimatedCostOfEquipment: [null],
       workPhoto: [null],
       workPhotoName: [''],
+      workPhotoSize: [null],
       equipmentPhoto: [null],
       equipmentPhotoName: [''],
+      equipmentPhotoSize: [null],
       workPhotoUrl: [''],
       equipmentPhotoUrl: [''],
       materialPhoto: [''],
       materialPhotoName: [''],
+      materialPhotoSize: [null],
       materialPhotoUrl: [''],
       startCoordinate: [''],
       endCoordinate: [''],
@@ -327,46 +330,95 @@ export class SubProject implements OnInit {
     }
   }
 
-  onWorkPhotoSelect(event: Event, index: number): void {
+  private handleFileInput(event: Event, index: number, fileControlName: string, fileNameControlName: string, fileSizeControlName: string): void {
     const input = event.target as HTMLInputElement;
     const file = input?.files?.[0];
+    const MAX_FILE_SIZE_MB = 3;
+    const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024; // 3 MB
+
     if (file) {
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        alert(`File size exceeds the limit of ${MAX_FILE_SIZE_MB} MB. Please select a smaller file.`);
+        // Clear the input field
+        if (input) {
+          input.value = '';
+        }
+        const activity = this.workActivities.at(index);
+        activity.patchValue({
+          [fileControlName]: null,
+          [fileNameControlName]: '',
+          [fileSizeControlName]: null
+        });
+        return;
+      }
+
       const activity = this.workActivities.at(index);
-      activity.patchValue({ workPhoto: file, workPhotoName: file.name });
+      activity.patchValue({
+        [fileControlName]: file,
+        [fileNameControlName]: file.name,
+        [fileSizeControlName]: file.size
+      });
     }
+  }
+
+  onWorkPhotoSelect(event: Event, index: number): void {
+    this.handleFileInput(event, index, 'workPhoto', 'workPhotoName', 'workPhotoSize');
   }
 
   onEquipmentPhotoSelect(event: Event, index: number): void {
-    const input = event.target as HTMLInputElement;
-    const file = input?.files?.[0];
-    if (file) {
-      const activity = this.workActivities.at(index);
-      activity.patchValue({ equipmentPhoto: file, equipmentPhotoName: file.name });
-    }
+    this.handleFileInput(event, index, 'equipmentPhoto', 'equipmentPhotoName', 'equipmentPhotoSize');
   }
 
   onMaterialsPhotoSelect(event: Event, index: number): void {
-    const input = event.target as HTMLInputElement;
-    const file = input?.files?.[0];
-    if (file) {
-      const activity = this.workActivities.at(index);
-      activity.patchValue({ materialPhoto: file, materialPhotoName: file.name });
-    }
+    this.handleFileInput(event, index, 'materialPhoto', 'materialPhotoName', 'materialPhotoSize');
+  }
+
+  private formatBytes(bytes: number, decimals = 2): string {
+    if (bytes === 0) return '0 Bytes';
+
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
   }
 
   getWorkPhotoName(index: number): string {
     const activity = this.workActivities.at(index);
-    return activity ? activity.get('workPhotoName')?.value || '' : '';
+    if (!activity) return '';
+
+    const fileName = activity.get('workPhotoName')?.value || '';
+    const fileSize = activity.get('workPhotoSize')?.value;
+
+    return fileName && fileSize !== null
+      ? `${fileName} (${this.formatBytes(fileSize)})`
+      : fileName;
   }
 
   getEquipmentPhotoName(index: number): string {
     const activity = this.workActivities.at(index);
-    return activity ? activity.get('equipmentPhotoName')?.value || '' : '';
+    if (!activity) return '';
+
+    const fileName = activity.get('equipmentPhotoName')?.value || '';
+    const fileSize = activity.get('equipmentPhotoSize')?.value;
+
+    return fileName && fileSize !== null
+      ? `${fileName} (${this.formatBytes(fileSize)})`
+      : fileName;
   }
 
   getMaterialPhotoName(index: number): string {
     const activity = this.workActivities.at(index);
-    return activity ? activity.get('materialPhotoName')?.value || '' : '';
+    if (!activity) return '';
+
+    const fileName = activity.get('materialPhotoName')?.value || '';
+    const fileSize = activity.get('materialPhotoSize')?.value;
+
+    return fileName && fileSize !== null
+      ? `${fileName} (${this.formatBytes(fileSize)})`
+      : fileName;
   }
 
   clearAttachment(index: number, fieldName: string, fileInput: HTMLInputElement): void {
@@ -374,6 +426,12 @@ export class SubProject implements OnInit {
     if (activity) {
       activity.get(fieldName)?.reset();
       activity.get(`${fieldName}Name`)?.reset();
+      // Clear the corresponding size field
+      const sizeFieldName = `${fieldName}Size`;
+      if (activity.get(sizeFieldName)) {
+        activity.get(sizeFieldName)?.reset();
+      }
+
       if (fileInput) {
         fileInput.value = ''; // Clear the input element's value
       }
@@ -452,23 +510,29 @@ export class SubProject implements OnInit {
 
   async onSubmit(): Promise<void> {
     if (!this.proposalForm.valid) {
-      alert('Please fill in all required fields');
+      alert('Please fill in all required fields.');
       this.proposalForm.markAllAsTouched();
       return;
     }
 
     this.isLoading = true;
+    this.cdr.detectChanges();
+
+    let newSubProjectId: number | null = null;
+    let projectId: number;
+    let projectName: string;
 
     try {
+      // --- Step 1: Prepare and Save Sub-project Basic Info ---
       const formValue = this.proposalForm.value;
 
       const rawProjectId = formValue.projectName;
       if (!rawProjectId) throw new Error(`Project not selected.`);
-      const projectId = parseInt(rawProjectId, 10);
+      projectId = parseInt(rawProjectId, 10);
       if (isNaN(projectId)) throw new Error(`Invalid Project ID.`);
 
       const selectedProject = this.availableProjects.find(p => p.id === projectId);
-      const projectName = selectedProject ? selectedProject.name : '';
+      projectName = selectedProject ? selectedProject.name : '';
       if (!projectName) throw new Error(`Project name not found for ID: ${projectId}.`);
 
       const stateId = await this.lookupService.getStateIdByName(formValue.stateName);
@@ -485,7 +549,6 @@ export class SubProject implements OnInit {
 
       const year = new Date().getFullYear();
 
-      // --- API Call 1: Save Sub-project ---
       const subProjectPayload: any = {
         id: this.subprojectId ? parseInt(this.subprojectId, 10) : null,
         workCode: this.subprojectId ? `${year}-SNSOP-${projectName}-${this.subprojectId}` : null,
@@ -506,116 +569,132 @@ export class SubProject implements OnInit {
       };
 
       const subProjectResponse = await this.api.POST('api/subproject/save', subProjectPayload);
-
-      const newSubProjectId = subProjectResponse.data.entityId;
+      newSubProjectId = subProjectResponse.data.entityId;
       if (!newSubProjectId) throw new Error('Failed to get sub-project ID after saving.');
 
       if (!this.subprojectId) {
-        // This was a new sub-project, now we update it with the correct workCode
         const workCode = `${year}-SNSOP-${projectName}-${newSubProjectId}`;
         const updatePayload = { ...subProjectPayload, id: newSubProjectId, workCode: workCode };
         await this.api.POST('api/subproject/save', updatePayload);
       }
-
-      // --- API Calls 2 & 3: Save Work Details and Attachments ---
-      for (const [index, activityControl] of this.workActivities.controls.entries()) {
-        const activityValue = activityControl.value;
-
-        try {
-          const areaOfWorkId = activityValue.typeOfWork;
-          if (!areaOfWorkId) throw new Error(`"Area of Work" was not selected`);
-
-          const workActivityId = activityValue.secondaryActivity;
-          if (!workActivityId) throw new Error(`"Work Activity" was not selected`);
-
-          const workDetailPayload = {
-            subprojectId: newSubProjectId,
-            id: activityValue.id ? parseInt(activityValue.id, 10) : null,
-            workName: activityValue.name,
-            workCode: activityValue.code,
-            areaOfWorkId: Number(activityValue.typeOfWork),
-            workActivityId: Number(activityValue.secondaryActivity),
-            estManPower: activityValue.estimatedManpower || 0,
-            estDay: activityValue.estimatedManDays || 0,
-            estSkilledLabourDay: activityValue.estimatedSkillLabour || 0,
-            estStartAt: activityValue.workStartDate,
-            estEndAt: activityValue.workEndDate,
-            estCost: activityValue.estimatedCost || 0,
-            equipmentCost: activityValue.estimatedCostOfEquipment || 0,
-            materialCost: activityValue.estimatedMaterialCost || 0,
-            status: true,
-          };
-
-          const workDetailResponse = await this.api.POST('api/subproject/work-details/save', workDetailPayload);
-          const newWorkDetailId = workDetailResponse.data.entityId;
-          if (!newWorkDetailId) throw new Error('Failed to get work detail ID after saving.');
-
-          const formData = new FormData();
-          let hasFiles = false;
-
-          if (activityValue.workPhoto) {
-            formData.append('workPhoto', activityValue.workPhoto, activityValue.workPhotoName);
-            hasFiles = true;
-          }
-          if (activityValue.equipmentPhoto) {
-            formData.append('equipmentPhoto', activityValue.equipmentPhoto, activityValue.equipmentPhotoName);
-            hasFiles = true;
-          }
-          if (activityValue.materialPhoto) {
-            formData.append('materialPhoto', activityValue.materialPhoto, activityValue.materialPhotoName);
-            hasFiles = true;
-          }
-
-          if (hasFiles) {
-            formData.append('projectId', projectId.toString());
-            formData.append('subprojectId', newSubProjectId.toString());
-            formData.append('subprojectWorkDetailId', newWorkDetailId.toString());
-            await this.api.POST_FORM_DATA('api/subproject/work-details/attachment/save', formData);
-          }
-        } catch (err: any) {
-          throw new Error(`Sub-project was saved, but saving work activity #${index + 1} (${activityValue.name || 'Untitled'}) failed. Please review the sub-project. Error: ${err.message}`);
-        }
-      }
-
-      for (const activityValue of this.removedWorkActivities) {
-        try {
-          if (!activityValue.id) continue;
-
-          const workDetailPayload = {
-            subprojectId: newSubProjectId,
-            id: parseInt(activityValue.id, 10),
-            workName: activityValue.name,
-            workCode: activityValue.code,
-            areaOfWorkId: Number(activityValue.typeOfWork),
-            workActivityId: Number(activityValue.secondaryActivity),
-            estManPower: activityValue.estimatedManpower,
-            estDay: activityValue.estimatedManDays,
-            estSkilledLabourDay: activityValue.estimatedSkillLabour,
-            estStartAt: activityValue.workStartDate,
-            estEndAt: activityValue.workEndDate,
-            estCost: activityValue.estimatedCost,
-            equipmentCost: activityValue.estimatedCostOfEquipment,
-            materialCost: activityValue.estimatedMaterialCost || 0,
-            status: false, // Mark as inactive
-          };
-
-          await this.api.POST('api/subproject/work-details/save', workDetailPayload);
-        } catch (err: any) {
-          throw new Error(`Sub-project was saved, but deactivating work activity #${activityValue.id} failed. Error: ${err.message}`);
-        }
-      }
-
-      alert('Work proposal saved successfully!');
-      this.router.navigate(['/sub-project-list']);
+    } catch (err: any) {
+      console.error('Failed to save sub-project basic info', err);
+      alert(`Error: Could not save the work proposal's basic information. ${err.message}`);
       this.isLoading = false;
-      this.onAddNew();
-    } catch (err: any) { // Catch as any to access err.message
-      console.error('Failed to save sub-project', err);
-      // Display the specific error message from the thrown Error
-      alert(`Failed to save work proposal: ${err.message}`);
-    } finally {
-      this.isLoading = false;
+      this.cdr.detectChanges();
+      return; // Stop execution if sub-project fails to save
     }
+
+    // --- Step 2: Save Work Details and Attachments ---
+    for (const [index, activityControl] of this.workActivities.controls.entries()) {
+      const activityValue = activityControl.value;
+      let newWorkDetailId: number | null = null;
+
+      try {
+        const areaOfWorkId = activityValue.typeOfWork;
+        if (!areaOfWorkId) throw new Error(`"Area of Work" was not selected.`);
+        const workActivityId = activityValue.secondaryActivity;
+        if (!workActivityId) throw new Error(`"Work Activity" was not selected.`);
+
+        const workDetailPayload = {
+          subprojectId: newSubProjectId,
+          id: activityValue.id ? parseInt(activityValue.id, 10) : null,
+          workName: activityValue.name,
+          workCode: activityValue.code,
+          areaOfWorkId: Number(activityValue.typeOfWork),
+          workActivityId: Number(activityValue.secondaryActivity),
+          estManPower: activityValue.estimatedManpower || 0,
+          estDay: activityValue.estimatedManDays || 0,
+          estSkilledLabourDay: activityValue.estimatedSkillLabour || 0,
+          estStartAt: activityValue.workStartDate,
+          estEndAt: activityValue.workEndDate,
+          estCost: activityValue.estimatedCost || 0,
+          equipmentCost: activityValue.estimatedCostOfEquipment || 0,
+          materialCost: activityValue.estimatedMaterialCost || 0,
+          status: true,
+        };
+
+        const workDetailResponse = await this.api.POST('api/subproject/work-details/save', workDetailPayload);
+        newWorkDetailId = workDetailResponse.data.entityId;
+        if (!newWorkDetailId) throw new Error('Failed to get work detail ID after saving.');
+
+      } catch (err: any) {
+        alert(`The work proposal was saved, but saving Activity #${index + 1} ('${activityValue.name || 'Untitled'}') failed. Please review the proposal later. Error: ${err.message}`);
+        this.isLoading = false;
+        this.cdr.detectChanges();
+        return; // Stop further processing
+      }
+
+      // --- Step 3: Save Attachments for the current Work Detail ---
+      try {
+        const formData = new FormData();
+        let hasFiles = false;
+
+        if (activityValue.workPhoto) {
+          formData.append('workPhoto', activityValue.workPhoto, activityValue.workPhotoName);
+          hasFiles = true;
+        }
+        if (activityValue.equipmentPhoto) {
+          formData.append('equipmentPhoto', activityValue.equipmentPhoto, activityValue.equipmentPhotoName);
+          hasFiles = true;
+        }
+        if (activityValue.materialPhoto) {
+          formData.append('materialPhoto', activityValue.materialPhoto, activityValue.materialPhotoName);
+          hasFiles = true;
+        }
+
+        if (hasFiles) {
+          formData.append('projectId', projectId.toString());
+          formData.append('subprojectId', newSubProjectId.toString());
+          formData.append('subprojectWorkDetailId', newWorkDetailId.toString());
+          await this.api.POST_FORM_DATA('api/subproject/work-details/attachment/save', formData);
+        }
+      } catch (err: any) {
+        alert(`The work proposal and Activity #${index + 1} were saved, but uploading its attachments failed. Please edit the proposal later to add them. Error: ${err.message}`);
+        this.isLoading = false;
+        this.cdr.detectChanges();
+        return;
+      }
+    }
+
+    // --- Step 4: Deactivate Removed Work Activities ---
+    for (const activityValue of this.removedWorkActivities) {
+      try {
+        if (!activityValue.id) continue;
+
+        // Create a complete payload to prevent data loss on the backend
+        const workDetailPayload = {
+          subprojectId: newSubProjectId,
+          id: parseInt(activityValue.id, 10),
+          workName: activityValue.name,
+          workCode: activityValue.code,
+          areaOfWorkId: Number(activityValue.typeOfWork),
+          workActivityId: Number(activityValue.secondaryActivity),
+          estManPower: activityValue.estimatedManpower || 0,
+          estDay: activityValue.estimatedManDays || 0,
+          estSkilledLabourDay: activityValue.estimatedSkillLabour || 0,
+          estStartAt: activityValue.workStartDate,
+          estEndAt: activityValue.workEndDate,
+          estCost: activityValue.estimatedCost || 0,
+          equipmentCost: activityValue.estimatedCostOfEquipment || 0,
+          materialCost: activityValue.estimatedMaterialCost || 0,
+          status: false, // Mark as inactive
+        };
+
+        await this.api.POST('api/subproject/work-details/save', workDetailPayload);
+      } catch (err: any) {
+        alert(`The work proposal was saved, but failed to remove an old activity (ID: ${activityValue.id}). Please review the proposal. Error: ${err.message}`);
+        this.isLoading = false;
+        this.cdr.detectChanges();
+        return;
+      }
+    }
+
+    // --- Final Step: Success ---
+    alert('Work proposal saved successfully!');
+    this.router.navigate(['/sub-project-list']);
+    this.onAddNew(); // This also sets isLoading to false
+    this.cdr.detectChanges();
   }
 
   onAddNew(): void {

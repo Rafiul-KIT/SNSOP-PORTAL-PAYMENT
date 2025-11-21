@@ -5,7 +5,7 @@ import { ApiService } from './api.service';
 export const TypeOfMeetingEnum = [
   { id: '0', value: 'CC', label: 'Community Committee' },
   { id: '1', value: 'AM', label: 'Assessment Meeting' },
-  { id: '2', value: 'OT', label: 'On-site Training' }
+  { id: '2', value: 'OT', label: 'Others' }
 ];
  // Define Enum for status
 export const StatusEnum = [
