@@ -19,7 +19,7 @@ import { BeneficiaryRemove } from './pages/beneficiary-assignment/beneficiary-re
 import { BeneficiarySubprojectRemove } from './pages/beneficiary-assignment/beneficiary-subproject-remove/beneficiary-subproject-remove';
 import { BeneficiarySubprojectList } from './pages/beneficiary-assignment/beneficiary-subproject-list/beneficiary-subproject-list';
 import { WageRequestDrafts } from './pages/wages-request-approval/wage-request-drafts/wage-request-drafts';
-import { WageDashboard } from './pages/wages-request-approval/wage-dashboard/wage-dashboard';
+import { WageDashboard } from './pages/wages-request-approval/wage-dashboard-lipw/wage-dashboard';
 import { WageDashboardDis } from './pages/wages-request-approval/wage-dashboard-dis/wage-dashboard-dis';
 import { WageRequestDetails } from './pages/wages-request-approval/wage-request-details/wage-request-details';
 
