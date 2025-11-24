@@ -1,3 +1,4 @@
+import { Component } from '@angular/core';
 import { Routes } from '@angular/router';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { NotFound } from './components/not-found/not-found';
@@ -22,6 +23,7 @@ import { WageDashboard } from './pages/wages-request-approval/wage-dashboard/wag
 import { WageDashboardDis } from './pages/wages-request-approval/wage-dashboard-dis/wage-dashboard-dis';
 import { WageRequestDetails } from './pages/wages-request-approval/wage-request-details/wage-request-details';
 
+import { PayrollDownload } from './pages/payroll/payroll-download/payroll-download';
 
 
 
@@ -155,8 +157,12 @@ export const routes: Routes = [
     }
   ]
   },
+
+  { 
+    path: 'payroll', 
+    component: PayrollDownload
+  },
   
- 
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
   {
     component: NotFound,
