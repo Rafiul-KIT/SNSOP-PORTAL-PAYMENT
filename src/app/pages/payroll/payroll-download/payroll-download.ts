@@ -162,7 +162,7 @@ export class PayrollDownload implements OnInit {
     private api: ApiService,
     private lookup: LookupService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   private async loadInitialLookups() {
     await Promise.all([
@@ -285,12 +285,12 @@ export class PayrollDownload implements OnInit {
     const payrollType = formValues.payrollType;
 
     if (payrollType === 'single') {
-        paymentCycleValue = formValues.paymentCycle || '';
+      paymentCycleValue = formValues.paymentCycle || '';
     } else if (payrollType === 'combined') {
-        const selectedCycles = this.paymentCycles.controls
-            .filter(control => control.get('selected')?.value)
-            .map(control => control.get('id')?.value);
-        paymentCycleValue = selectedCycles.join(',');
+      const selectedCycles = this.paymentCycles.controls
+        .filter(control => control.get('selected')?.value)
+        .map(control => control.get('id')?.value);
+      paymentCycleValue = selectedCycles.join(',');
     }
 
     const requestBody = {
@@ -342,21 +342,30 @@ export class PayrollDownload implements OnInit {
   }
 
   resetForm() {
-    this.searchForm.reset();
-    this.searchForm.get('payrollType')?.setValue('single');
-    this.searchForm.get('county')?.disable();
-    this.searchForm.get('payam')?.disable();
-    this.searchForm.get('boma')?.disable();
-    this.counties = [];
-    this.payams = [];
-    this.bomas = [];
-    this.currentPage = 0;
-    this.fetchPage(this.currentPage, this.pageSize);
-    this.cdr.markForCheck();
+    // this.searchForm.reset();
+    // this.searchForm.get('payrollType')?.setValue('single');
+    // this.searchForm.get('county')?.disable();
+    // this.searchForm.get('payam')?.disable();
+    // this.searchForm.get('boma')?.disable();
+    // this.counties = [];
+    // this.payams = [];
+    // this.bomas = [];
+    // this.currentPage = 0;
+    // this.fetchPage(this.currentPage, this.pageSize);
+    this.ngOnInit();
+    // this.cdr.markForCheck();
   }
 
   get paymentCycles() {
     return this.searchForm.get('paymentCycles') as FormArray;
+  }
+
+
+  onDownloadPDFClick() {
+    throw new Error('Method not implemented.');
+  }
+  onDownloadClick() {
+    throw new Error('Method not implemented.');
   }
 
 }
