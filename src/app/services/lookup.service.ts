@@ -38,6 +38,20 @@ export const StatusWageEnum = [
   { id: '1003', value: 'RejectedAfterPay', label: 'Rejected after Pay' },
 ];
 
+export const PaymentCycleEnum = [
+  { label: 'Cycle 1', value: 1 },
+  { label: 'Cycle 2', value: 2 },
+  { label: 'Cycle 3', value: 3 },
+  { label: 'Cycle 4', value: 4 },
+  { label: 'Cycle 5', value: 5 },
+  { label: 'Cycle 6', value: 6 },
+  { label: 'Cycle 7', value: 7 },
+  { label: 'Cycle 8', value: 8 },
+  { label: 'Cycle 9', value: 9 },
+  { label: 'Cycle 10', value: 10 },
+  { label: 'Cycle 11', value: 11 },
+];
+
 // Define Enum for Screening Status
 export const ScreeningStatusEnum = [
  
@@ -995,6 +1009,10 @@ export class LookupService {
     } else {
       return '--';
     }
+  };
+
+  getPaymentCycleEnum = () => {
+    return PaymentCycleEnum;
   };
 
   // ---------- New methods for Sub-project page ----------
