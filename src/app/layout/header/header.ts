@@ -129,7 +129,21 @@ export class Header {
           },
         ],
       },
+
+      {
+        label: 'Payroll',
+        icon: 'fas fa-hand-holding-usd',
+        items: [
           {
+            label: 'Payroll Download',
+            icon: 'fas fa-hand-holding-usd',
+            routerLink: '/payroll',
+          }
+        ],
+      },
+          
+      
+      {
         label: 'Report',
         icon: 'fas fa-chart-line',
         items: [
