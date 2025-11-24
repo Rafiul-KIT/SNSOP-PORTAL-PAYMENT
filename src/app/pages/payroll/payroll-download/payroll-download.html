@@ -78,14 +78,13 @@
         <div class="col-md-12" *ngIf="searchForm.get('payrollType')?.value === 'combined'">
             <label class="mb-2">Payment Cycles</label>
             <div formArrayName="paymentCycles" class="d-flex flex-wrap gap-3">
-                <div *ngFor="let cycle of paymentCycles.controls; let i = index" [formGroupName]="i"
-                    class="form-check">
+                <div *ngFor="let cycle of paymentCycles.controls; let i = index" [formGroupName]="i" class="form-check">
                     <input type="checkbox" class="form-check-input" [id]="'cycle' + i" formControlName="selected">
                     <label class="form-check-label" [for]="'cycle' + i">{{ paymentCycleOptions[i].name }}</label>
                 </div>
             </div>
         </div>
-        
+
         <div class="col-12">
             <!-- Mobile: stacked full width; ≥sm: right-aligned row -->
             <div class="d-grid d-sm-flex justify-content-end align-items-center gap-2">
@@ -104,15 +103,29 @@
     </form>
 </div>
 
-<p-table [value]="payrollData" [scrollable]="true" [tableStyle]="{ 'min-width': '100%', 'margin-bottom': '5px' }" size="small">
+<p-table [value]="payrollData" [scrollable]="true" [tableStyle]="{ 'min-width': '100%', 'margin-bottom': '5px' }"
+    size="small">
 
     <ng-template pTemplate="header">
-        <tr>
-            <th colspan="18" class="text-end">
-                <p class="fw-bold mb-2">
-                    Showing <kbd>{{ payrollData.length }}</kbd> of
-                    <kbd>{{ totalRecords }}</kbd> Beneficiaries
-                </p>
+         <tr>
+            <th colspan="18">
+                <!-- Flexbox container to manage button and text placement -->
+                <div class="d-flex justify-content-between">
+                    <!-- Left-aligned Buttons -->
+                    <div>
+                        <!-- Download Button -->
+                        <button pButton type="button" label="Download" icon="pi pi-download" class="p-button p-button-rounded p-button-text mr-2" (click)="onDownloadClick()"></button>
+
+                        <!-- Download PDF Button -->
+                        <button pButton type="button" label="Download PDF" icon="pi pi-file-pdf" class="p-button p-button-rounded p-button-text" (click)="onDownloadPDFClick()"></button>
+                    </div>
+
+                    <!-- Right-aligned Text (Showing record count) -->
+                    <p class="fw-bold mb-2 text-end">
+                        Showing <kbd>{{ payrollData.length }}</kbd> of
+                        <kbd>{{ totalRecords }}</kbd> Beneficiaries
+                    </p>
+                </div>
             </th>
         </tr>
         <tr>
@@ -121,7 +134,7 @@
             <th>Exchange Rate At Time</th>
             <th>Beneficiary ID</th>
             <th>Wage Payment Req ID</th>
-            <th>Wages Req Ben Trans ID	</th>
+            <th>Wages Req Ben Trans ID </th>
             <th>Work ID</th>
             <th>Payment Cycle</th>
             <th>Req From Date</th>
