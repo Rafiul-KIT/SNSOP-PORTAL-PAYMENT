@@ -292,7 +292,6 @@ async onSubmitReview(): Promise<void> {
     ];
     this.reviewForm.markAllAsTouched();
 
-    // Show SweetAlert for form invalidation
     Swal.fire({
       icon: 'error',
       title: 'Error',
@@ -307,7 +306,6 @@ async onSubmitReview(): Promise<void> {
   const formData = new FormData();
   formData.append('wageRequestId', this.wageId.toString());
 
-  // Fix: Send as boolean, not string
   const approvedValue = this.reviewForm.get('approved')?.value;
   const approvedBoolean =
     approvedValue?.value !== undefined ? approvedValue.value : approvedValue;
@@ -334,7 +332,6 @@ async onSubmitReview(): Promise<void> {
         },
       ];
 
-      // Show SweetAlert for success
       Swal.fire({
         icon: 'success',
         title: 'Submitted',
