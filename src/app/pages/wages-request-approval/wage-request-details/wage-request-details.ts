@@ -3,7 +3,9 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { DividerModule } from 'primeng/divider';
-import { Breadcrumb } from 'primeng/breadcrumb';
+import { BreadcrumbModule } from 'primeng/breadcrumb';
+import { TableModule } from 'primeng/table';
+import { PaginatorModule } from 'primeng/paginator';
 import { Loader } from '../../../components/loader/loader';
 import { ApiService } from '../../../services/api.service';
 
@@ -30,6 +32,22 @@ interface Subproject {
   bomaName: string;
 }
 
+interface Beneficiary {
+  householdNumber: string;
+  beneficiaryName: string;
+  gender: string;
+  age: number;
+  phoneNo: string;
+  totalDays: number;
+  paymentStatus: number;
+  paymentDoneAt: string;
+  wageRateUSD: number;
+  exchangeRate: number;
+  wageRateSSP: number;
+  wageUsdTotal: number;
+  wageSspTotal: number;
+}
+
 interface ApiResponse {
   code: number;
   message: string;
@@ -52,7 +70,9 @@ interface StatusInfo {
     CommonModule,
     CardModule,
     DividerModule,
-    Breadcrumb,
+    BreadcrumbModule,
+    TableModule,
+    PaginatorModule,
     Loader
   ],
   templateUrl: './wage-request-details.html',
@@ -61,6 +81,11 @@ interface StatusInfo {
 export class WageRequestDetails implements OnInit {
   wageRequest: WageRequest | null = null;
   subproject: Subproject | null = null;
+  beneficiaries: Beneficiary[] = [];
+  totalBeneficiaries = 0;
+  beneficiaryCurrentPage = 0;
+  beneficiaryPageSize = 10;
+  isBeneficiaryLoading = false;
   isLoading = false;
   apiError = '';
   breadcrumbItems: any[] = [];
@@ -94,10 +119,12 @@ export class WageRequestDetails implements OnInit {
 
   ngOnInit(): void {
     this.initBreadcrumb();
-    const id = this.route.snapshot.paramMap.get('id');
+    const subprojectId = this.route.snapshot.paramMap.get('subprojectId');
+    const wageId = this.route.snapshot.paramMap.get('wageId');
+   
     
-    if (id) {
-      this.loadWageRequestDetails(+id);
+    if (subprojectId) {
+      this.loadWageRequestDetails(+subprojectId);
     } else {
       this.apiError = 'Invalid wage request ID';
     }
@@ -134,6 +161,7 @@ export class WageRequestDetails implements OnInit {
                     console.error('Failed to load subproject details:', subError);
                 }
             }
+            this.loadBeneficiaries(this.beneficiaryCurrentPage, this.beneficiaryPageSize);
         } else {
             this.apiError = 'No wage request found with the provided ID.';
         }
@@ -173,5 +201,30 @@ export class WageRequestDetails implements OnInit {
     return months[monthIndex - 1] || 'Unknown';
   }
 
+  async loadBeneficiaries(page: number, size: number): Promise<void> {
+    if (!this.wageRequest?.id) return;
 
+    this.isBeneficiaryLoading = true;
+    try {
+        const response: any = await this.apiService.GET(
+            `/api/wage-request/beneficiary-list/get?page=${page}&size=${size}&wageRequestId=${this.wageRequest.id}`
+        );
+
+        if (response?.data?.content) {
+            this.beneficiaries = response.data.content;
+            this.totalBeneficiaries = response.data.totalElements;
+        }
+    } catch (error) {
+        console.error('Failed to load beneficiaries:', error);
+    } finally {
+        this.isBeneficiaryLoading = false;
+        this.cdr.detectChanges();
+    }
+  }
+
+  onBeneficiaryPageChange(event: any): void {
+      this.beneficiaryCurrentPage = event.page;
+      this.beneficiaryPageSize = event.rows;
+      this.loadBeneficiaries(this.beneficiaryCurrentPage, this.beneficiaryPageSize);
+  }
 }

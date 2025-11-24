@@ -185,7 +185,7 @@
             <td>{{ item.toDate | date: 'dd/MM/yyyy' }}</td>
             <td>{{ item.requestYear }}</td>
             <td>{{ getMonthLabel(item.requestMonthIndex) }}</td>
-            <td>Cycle {{ item.paymentCycle }}</td>
+            <td>Payment Cycle {{ item.paymentCycle }}</td>
             <td>
                 <span [class]="'badge ' + getStatusClass(item.status)">
                     {{ getStatusLabel(item.status) }}
@@ -197,7 +197,7 @@
                    icon="fa-solid fa-eye fa-lg" pTooltip="view"
                     tooltipPosition="top"
                     appendTo="body" 
-                    (onClick)="viewWageRequest(item.subprojectId)" 
+                    (onClick)="viewWageRequest(item.id,item.subprojectId)" 
                     size="small" 
                     outlined="true" 
                     severity="secondary"

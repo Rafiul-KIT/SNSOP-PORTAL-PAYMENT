@@ -277,9 +277,14 @@ export class WageRequestDrafts implements OnInit {
     this.cdr.markForCheck();
   }
 
-  viewWageRequest(id: number) {
-    this.router.navigate(['/wage-request-approval/details', id]);
-  }
+viewWageRequest(wageId: number, subprojectId: number) {
+  this.router.navigate([
+    '/wage-request-approval/details',
+    wageId,
+    subprojectId
+  ]);
+}
+
 
   getStatusLabel(value: number): string {
     const found = this.statuses.find((item) => item.id == value);

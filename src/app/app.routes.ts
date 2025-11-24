@@ -132,7 +132,8 @@ export const routes: Routes = [
         component: WageDashboardDis ,
       },
       {
-        path: 'details/:id',
+       path: 'details/:wageId/:subprojectId',
+
         component: WageRequestDetails,
       }
            
