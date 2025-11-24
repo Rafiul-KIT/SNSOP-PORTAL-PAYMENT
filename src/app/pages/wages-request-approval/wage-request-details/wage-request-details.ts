@@ -1,11 +1,24 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
+import {
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { CardModule } from 'primeng/card';
 import { DividerModule } from 'primeng/divider';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { TableModule } from 'primeng/table';
 import { PaginatorModule } from 'primeng/paginator';
+import { Select } from 'primeng/select';
+import { InputNumber } from 'primeng/inputnumber';
+import { Textarea } from 'primeng/textarea';
+import { FileUploadModule } from 'primeng/fileupload';
+import { Message } from 'primeng/message';
+import { ButtonModule } from 'primeng/button';
 import { Loader } from '../../../components/loader/loader';
 import { ApiService } from '../../../services/api.service';
 
@@ -68,15 +81,21 @@ interface StatusInfo {
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
     CardModule,
     DividerModule,
     BreadcrumbModule,
     TableModule,
     PaginatorModule,
-    Loader
+    Select,
+    Message,
+    ButtonModule,
+    FileUploadModule,
+    Loader,
   ],
   templateUrl: './wage-request-details.html',
-  styleUrl: './wage-request-details.scss'
+  styleUrl: './wage-request-details.scss',
 })
 export class WageRequestDetails implements OnInit {
   wageRequest: WageRequest | null = null;
@@ -91,38 +110,128 @@ export class WageRequestDetails implements OnInit {
   breadcrumbItems: any[] = [];
   breadcrumbHome: any;
 
+  reviewForm!: FormGroup;
+  approvedOptions = [
+    { label: 'Approve', value: true },
+    { label: 'Reject', value: false },
+  ];
+  selectedFile: File | null = null;
+  isReviewSubmitting = false;
+  reviewMessage: any[] = [];
+
   private readonly statusMap = new Map<number, StatusInfo>([
     [0, { value: 'Draft', label: 'Draft', class: 'bg-secondary' }],
-    [1, { value: 'InitialReviewer', label: 'To be Reviewed at Initial Reviewer', class: 'bg-warning' }],
-    [2, { value: 'FinancialApprover', label: 'To be Reviewed at Financial Approver', class: 'bg-info' }],
-    [3, { value: 'FinalPaymentAuthorizer', label: 'To be Reviewed at Final Payment Authorizer', class: 'bg-primary' }],
-    [4, { value: 'FinalApproved', label: 'Approved at Final Payment Authorizer', class: 'bg-success' }],
+    [
+      1,
+      {
+        value: 'InitialReviewer',
+        label: 'To be Reviewed at Initial Reviewer',
+        class: 'bg-warning',
+      },
+    ],
+    [
+      2,
+      {
+        value: 'FinancialApprover',
+        label: 'To be Reviewed at Financial Approver',
+        class: 'bg-info',
+      },
+    ],
+    [
+      3,
+      {
+        value: 'FinalPaymentAuthorizer',
+        label: 'To be Reviewed at Final Payment Authorizer',
+        class: 'bg-primary',
+      },
+    ],
+    [
+      4,
+      {
+        value: 'FinalApproved',
+        label: 'Approved at Final Payment Authorizer',
+        class: 'bg-success',
+      },
+    ],
     [5, { value: 'PaidAPI', label: 'Paid from API', class: 'bg-success' }],
     [6, { value: 'PaidAPI', label: 'Paid from API', class: 'bg-success' }],
-    [100, { value: 'RejectedInitial', label: 'Rejected by Initial Reviewer', class: 'bg-danger' }],
-    [101, { value: 'RejectedFinancial', label: 'Rejected by Financial Approver', class: 'bg-danger' }],
-    [102, { value: 'RejectedFinal', label: 'Rejected by Final Payment Authorizer', class: 'bg-danger' }],
+    [
+      100,
+      {
+        value: 'RejectedInitial',
+        label: 'Rejected by Initial Reviewer',
+        class: 'bg-danger',
+      },
+    ],
+    [
+      101,
+      {
+        value: 'RejectedFinancial',
+        label: 'Rejected by Financial Approver',
+        class: 'bg-danger',
+      },
+    ],
+    [
+      102,
+      {
+        value: 'RejectedFinal',
+        label: 'Rejected by Final Payment Authorizer',
+        class: 'bg-danger',
+      },
+    ],
     [103, { value: 'ClearedWB', label: 'Cleared by WB', class: 'bg-success' }],
-    [105, { value: 'DraftRejected', label: 'Draft Rejected', class: 'bg-danger' }],
-    [1000, { value: 'RejectedAfterPay', label: 'Rejected after Pay', class: 'bg-danger' }],
-    [1001, { value: 'RejectedAfterPay', label: 'Rejected after Pay', class: 'bg-danger' }],
-    [1002, { value: 'RejectedAfterPay', label: 'Rejected after Pay', class: 'bg-danger' }],
-    [1003, { value: 'RejectedAfterPay', label: 'Rejected after Pay', class: 'bg-danger' }],
+    [
+      105,
+      { value: 'DraftRejected', label: 'Draft Rejected', class: 'bg-danger' },
+    ],
+    [
+      1000,
+      {
+        value: 'RejectedAfterPay',
+        label: 'Rejected after Pay',
+        class: 'bg-danger',
+      },
+    ],
+    [
+      1001,
+      {
+        value: 'RejectedAfterPay',
+        label: 'Rejected after Pay',
+        class: 'bg-danger',
+      },
+    ],
+    [
+      1002,
+      {
+        value: 'RejectedAfterPay',
+        label: 'Rejected after Pay',
+        class: 'bg-danger',
+      },
+    ],
+    [
+      1003,
+      {
+        value: 'RejectedAfterPay',
+        label: 'Rejected after Pay',
+        class: 'bg-danger',
+      },
+    ],
   ]);
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private apiService: ApiService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private fb: FormBuilder
   ) {}
 
   ngOnInit(): void {
     this.initBreadcrumb();
+    this.initReviewForm();
     const subprojectId = this.route.snapshot.paramMap.get('subprojectId');
     const wageId = this.route.snapshot.paramMap.get('wageId');
-   
-    
+
     if (subprojectId) {
       this.loadWageRequestDetails(+subprojectId);
     } else {
@@ -130,11 +239,126 @@ export class WageRequestDetails implements OnInit {
     }
   }
 
+  onFileSelected(event: any): void {
+    if (event.files && event.files.length > 0) {
+      this.selectedFile = event.files[0];
+      this.reviewForm.patchValue({
+        attachment: this.selectedFile?.name || null,
+      });
+      this.reviewMessage = [];
+    } else {
+      this.selectedFile = null;
+      this.reviewForm.patchValue({ attachment: null });
+    }
+  }
+
+  initReviewForm(): void {
+    this.reviewForm = this.fb.group({
+      approved: [null, Validators.required],
+      exchangeRate: [null],
+      comments: [''],
+      attachment: [null],
+    });
+  }
+
+  async onSubmitReview(): Promise<void> {
+    if (!this.wageRequest?.id) {
+      this.reviewMessage = [
+        {
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Wage Request ID is missing.',
+        },
+      ];
+      return;
+    }
+
+    if (this.reviewForm.invalid) {
+      this.reviewMessage = [
+        {
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Please fill all required fields.',
+        },
+      ];
+      this.reviewForm.markAllAsTouched();
+      return;
+    }
+
+    this.isReviewSubmitting = true;
+    this.reviewMessage = [];
+
+    const formData = new FormData();
+    formData.append('wageRequestId', this.wageRequest.id.toString());
+
+    // Fix: Send as boolean, not string
+    const approvedValue = this.reviewForm.get('approved')?.value;
+    const approvedBoolean =
+      approvedValue?.value !== undefined ? approvedValue.value : approvedValue;
+    formData.append('approved', approvedBoolean);
+
+    if (this.selectedFile) {
+      formData.append('attachment', this.selectedFile, this.selectedFile.name);
+    }
+
+    try {
+      const response: any = await this.apiService.POST_FORM_DATA(
+        '/api/wage-request-review/first',
+        formData
+      );
+
+      const responseData = response.data;
+
+      if (responseData?.code === 200 || responseData?.status === 'OK') {
+        this.reviewMessage = [
+          {
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Wage request review submitted successfully.',
+          },
+        ];
+        this.reviewForm.reset();
+        this.selectedFile = null;
+
+        const fileInput = document.getElementById(
+          'attachment'
+        ) as HTMLInputElement;
+        if (fileInput) fileInput.value = '';
+
+        if (this.wageRequest.subprojectId) {
+          this.loadWageRequestDetails(this.wageRequest.subprojectId);
+        }
+      } else {
+        this.reviewMessage = [
+          {
+            severity: 'error',
+            summary: 'Error',
+            detail: responseData?.message || 'Failed to submit review.',
+          },
+        ];
+      }
+    } catch (error: any) {
+      console.error('Error submitting review:', error);
+      console.error('Error response:', error.response?.data);
+      this.reviewMessage = [
+        {
+          severity: 'error',
+          summary: 'Error',
+          detail:
+            error.response?.data?.message || 'An unexpected error occurred.',
+        },
+      ];
+    } finally {
+      this.isReviewSubmitting = false;
+      this.cdr.detectChanges();
+    }
+  }
+
   initBreadcrumb(): void {
     this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
     this.breadcrumbItems = [
       { label: 'Wage Requests', routerLink: '/wage-requests' },
-      { label: 'Details' }
+      { label: 'Details' },
     ];
   }
 
@@ -143,44 +367,56 @@ export class WageRequestDetails implements OnInit {
     this.apiError = '';
 
     try {
-        const wageResponse: any = await this.apiService.POST('api/wage-request/get?page=0&size=10', { subprojectId: id });
+      const wageResponse: any = await this.apiService.POST(
+        'api/wage-request/get?page=0&size=10',
+        { subprojectId: id }
+      );
 
-        if (wageResponse?.data?.content?.length > 0) {
-            this.wageRequest = wageResponse.data.content[0];
-            
-            const subprojectId = this.wageRequest!.subprojectId;
-            if (subprojectId) {
-                try {
-                    const subprojectResponse: any = await this.apiService.POST('/api/subproject/get?page=0&size=10', { id: subprojectId });
-                    if (subprojectResponse?.data?.content?.length > 0) {
-                        this.subproject = subprojectResponse.data.content[0];
-                    } else {
-                        console.warn(`Subproject details not found for id: ${subprojectId}`);
-                    }
-                } catch (subError) {
-                    console.error('Failed to load subproject details:', subError);
-                }
+      if (wageResponse?.data?.content?.length > 0) {
+        this.wageRequest = wageResponse.data.content[0];
+
+        const subprojectId = this.wageRequest!.subprojectId;
+        if (subprojectId) {
+          try {
+            const subprojectResponse: any = await this.apiService.POST(
+              '/api/subproject/get?page=0&size=10',
+              { id: subprojectId }
+            );
+            if (subprojectResponse?.data?.content?.length > 0) {
+              this.subproject = subprojectResponse.data.content[0];
+            } else {
+              console.warn(
+                `Subproject details not found for id: ${subprojectId}`
+              );
             }
-            this.loadBeneficiaries(this.beneficiaryCurrentPage, this.beneficiaryPageSize);
-        } else {
-            this.apiError = 'No wage request found with the provided ID.';
+          } catch (subError) {
+            console.error('Failed to load subproject details:', subError);
+          }
         }
+        this.loadBeneficiaries(
+          this.beneficiaryCurrentPage,
+          this.beneficiaryPageSize
+        );
+      } else {
+        this.apiError = 'No wage request found with the provided ID.';
+      }
     } catch (error) {
-        console.error('Failed to load wage request details:', error);
-        this.apiError = 'Failed to load wage request details. Please try again.';
+      console.error('Failed to load wage request details:', error);
+      this.apiError = 'Failed to load wage request details. Please try again.';
     } finally {
-        this.isLoading = false;
-        this.cdr.detectChanges();
+      this.isLoading = false;
+      this.cdr.detectChanges();
     }
   }
 
-
   getStatusInfo(statusCode: number): StatusInfo {
-    return this.statusMap.get(statusCode) || { 
-      value: 'Unknown', 
-      label: 'Unknown Status', 
-      class: 'bg-secondary' 
-    };
+    return (
+      this.statusMap.get(statusCode) || {
+        value: 'Unknown',
+        label: 'Unknown Status',
+        class: 'bg-secondary',
+      }
+    );
   }
 
   formatDate(dateString: string): string {
@@ -189,14 +425,24 @@ export class WageRequestDetails implements OnInit {
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
   }
 
   getMonthName(monthIndex: number): string {
     const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
     return months[monthIndex - 1] || 'Unknown';
   }
@@ -206,25 +452,28 @@ export class WageRequestDetails implements OnInit {
 
     this.isBeneficiaryLoading = true;
     try {
-        const response: any = await this.apiService.GET(
-            `/api/wage-request/beneficiary-list/get?page=${page}&size=${size}&wageRequestId=${this.wageRequest.id}`
-        );
+      const response: any = await this.apiService.GET(
+        `/api/wage-request/beneficiary-list/get?page=${page}&size=${size}&wageRequestId=${this.wageRequest.id}`
+      );
 
-        if (response?.data?.content) {
-            this.beneficiaries = response.data.content;
-            this.totalBeneficiaries = response.data.totalElements;
-        }
+      if (response?.data?.content) {
+        this.beneficiaries = response.data.content;
+        this.totalBeneficiaries = response.data.totalElements;
+      }
     } catch (error) {
-        console.error('Failed to load beneficiaries:', error);
+      console.error('Failed to load beneficiaries:', error);
     } finally {
-        this.isBeneficiaryLoading = false;
-        this.cdr.detectChanges();
+      this.isBeneficiaryLoading = false;
+      this.cdr.detectChanges();
     }
   }
 
   onBeneficiaryPageChange(event: any): void {
-      this.beneficiaryCurrentPage = event.page;
-      this.beneficiaryPageSize = event.rows;
-      this.loadBeneficiaries(this.beneficiaryCurrentPage, this.beneficiaryPageSize);
+    this.beneficiaryCurrentPage = event.page;
+    this.beneficiaryPageSize = event.rows;
+    this.loadBeneficiaries(
+      this.beneficiaryCurrentPage,
+      this.beneficiaryPageSize
+    );
   }
 }
