@@ -995,7 +995,59 @@ export class LookupService {
     } else {
       return '--';
     }
+  }
+
+
+
+    SupportTypeEnum = [
+    {id: 1, value: "LIPW", label: "LIPW"},
+    {id: 2, value: "DIS", label: "DIS"},
+    {id: 3, value: "ALL", label: "ALL"},
+  ];
+
+  getSupportTypeEnum = () => {
+    return this.SupportTypeEnum;
   };
+
+  geSupportTypeEnumByValue = (value: any) => {
+    const dataFound = this.SupportTypeEnum.find(
+      (item: any) => item.value == value
+    );
+    if (dataFound) {
+      return dataFound.label;
+    } else {
+      return '--';
+    }
+  }
+
+    getSupportTypeList(): LookupItem[] {
+    return [
+      { id: 'LIPW', name: 'LIPW' },
+      { id: 'DIS', name: 'DIS' },
+      { id: 'ALL', name: 'ALL' },
+    ];
+  }
+
+
+  getPaymentCycleList(): LookupItem[] {
+    return [
+      { id: 'Payment Cycle 1', name: 'Payment Cycle 1' },
+      { id: 'Payment Cycle 2', name: 'Payment Cycle 2' },
+      { id: 'Payment Cycle 3', name: 'Payment Cycle 3' },
+      { id: 'Payment Cycle 4', name: 'Payment Cycle 4' },
+      { id: 'Payment Cycle 5', name: 'Payment Cycle 5' },
+      { id: 'Payment Cycle 6', name: 'Payment Cycle 6' },
+      { id: 'Payment Cycle 7', name: 'Payment Cycle 7' },
+      { id: 'Payment Cycle 8', name: 'Payment Cycle 8' },
+      { id: 'Payment Cycle 9', name: 'Payment Cycle 9' },
+      { id: 'Payment Cycle 10', name: 'Payment Cycle 10' },
+      // { id: 'Payment Cycle 11', name: 'Payment Cycle 11' },
+      // { id: 'Payment Cycle 12', name: 'Payment Cycle 12' },
+      // { id: 'Payment Cycle 13', name: 'Payment Cycle 13' },
+      // { id: 'Payment Cycle 14', name: 'Payment Cycle 14' },
+      // { id: 'Payment Cycle 15', name: 'Payment Cycle 15' },
+    ];
+  }
 
   // ---------- New methods for Sub-project page ----------
 

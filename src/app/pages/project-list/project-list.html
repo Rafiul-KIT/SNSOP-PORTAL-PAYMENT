@@ -26,10 +26,10 @@
     <tr>
       <th>Serial</th>
       <th>Name</th>
-      <th>Status</th>
       <th>Start Date</th>
       <th>End Date</th>
       <th>Incharge</th>
+      <th>Status</th>
       <th style="width:140px" class="text-center">Actions</th>
     </tr>
   </ng-template>
@@ -38,6 +38,9 @@
     <tr>
       <td>{{ (currentPage * pageSize) + i + 1 }}</td>
       <td>{{ project.projectName }}</td>
+      <td>{{ project.startAt }}</td>
+      <td>{{ project.endAt }}</td>
+      <td>{{ project.inchargeName }}</td>
       <td>
         <span class="badge" [ngClass]="{
       'bg-warning text-dark': project.status === 'InProgress',
@@ -46,10 +49,6 @@
           {{ project.status }}
         </span>
       </td>
-
-      <td>{{ project.startAt }}</td>
-      <td>{{ project.endAt }}</td>
-      <td>{{ project.inchargeName }}</td>
       <td class="text-center ">
 
 

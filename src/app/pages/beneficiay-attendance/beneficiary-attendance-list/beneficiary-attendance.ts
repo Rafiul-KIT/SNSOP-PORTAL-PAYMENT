@@ -52,7 +52,7 @@ interface SubProjectDto {
   selector: 'app-beneficiary-attendance',
   templateUrl: './beneficiary-attendance.html',
   styleUrl: './beneficiary-attendance.scss',
-   standalone: true,
+  standalone: true,
     imports: [
     CommonModule,
     FormsModule,
@@ -143,7 +143,7 @@ export class BeneficiaryAttendance implements OnInit {
       typeOfMeeting: [null],
       payam: [{ value: null, disabled: true }],
       boma: [{ value: null, disabled: true }],
-      status: 7,
+      status: ['InProgress'],
       workCode: [''],
       workActivity: [null],
       screeningStatus: [null],
