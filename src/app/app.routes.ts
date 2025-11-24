@@ -20,6 +20,8 @@ import { BeneficiarySubprojectList } from './pages/beneficiary-assignment/benefi
 import { WageRequestDrafts } from './pages/wages-request-approval/wage-request-drafts/wage-request-drafts';
 import { WageDashboard } from './pages/wages-request-approval/wage-dashboard/wage-dashboard';
 import { WageDashboardDis } from './pages/wages-request-approval/wage-dashboard-dis/wage-dashboard-dis';
+import { WageRequestDetails } from './pages/wages-request-approval/wage-request-details/wage-request-details';
+
 
 
 
@@ -129,6 +131,10 @@ export const routes: Routes = [
         path: 'dis',
         component: WageDashboardDis ,
       },
+      {
+        path: 'details/:id',
+        component: WageRequestDetails,
+      }
            
 
     ],

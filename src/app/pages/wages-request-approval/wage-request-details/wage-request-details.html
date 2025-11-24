@@ -1,1 +1,162 @@
-<p>wage-request-details works!</p>
+@if (isLoading) {
+<app-loader></app-loader>
+} @else {
+<div class="breadcrumb-wrapper">
+    <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
+</div>
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-11">
+            <!-- Error State -->
+            @if (apiError && !wageRequest) {
+            <div class="alert alert-danger d-flex align-items-center" role="alert">
+                <i class="pi pi-exclamation-triangle me-2"></i>
+                <div>{{ apiError }}</div>
+            </div>
+          
+            }
+
+            <!-- Success State - Wage Request Details -->
+            @if (wageRequest) {
+            <p-card class="shadow-sm border-0">
+                <!-- Header with Status -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="mb-0 text-success">
+                        <i class="pi pi-file-edit me-2"></i>
+                        Wage Request Details
+                    </h4>
+                
+                </div>
+
+                <p-divider></p-divider>
+
+                <!-- Request Information Section -->
+                <div class="row g-3 mb-3">
+                    <!-- Basic Information Card -->
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-secondary mb-3 d-flex align-items-center">
+                                    <i class="pi pi-info-circle me-2"></i>
+                                    <span>Basic Information</span>
+                                </h5>
+
+                                <div class="list-group list-group-flush">
+                                       @if (subproject) {
+                                
+                                        <div
+                                            class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                            <span class="text-muted">Project Name:</span>
+                                            <span class="fw-semibold text-dark">{{ subproject.projectName }}</span>
+                                        </div>
+                                                <div
+                                            class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                            <span class="text-muted">Work Code:</span>
+                                            <span class="fw-semibold text-dark">{{ subproject.workCode }}</span>
+                                        </div>
+                                        <div
+                                            class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                            <span class="text-muted">State:</span>
+                                            <span class="fw-semibold text-dark">{{ subproject.stateName }}</span>
+                                        </div>
+                                        <div
+                                            class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                            <span class="text-muted">County:</span>
+                                            <span class="fw-semibold text-dark">{{ subproject.countyName }}</span>
+                                        </div>
+                                        <div
+                                            class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                            <span class="text-muted">Payam:</span>
+                                            <span class="fw-semibold text-dark">{{ subproject.payamName }}</span>
+                                        </div>
+                                        <div
+                                            class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 py-2">
+                                            <span class="text-muted">Boma:</span>
+                                            <span class="fw-semibold text-dark">{{ subproject.bomaName }}</span>
+                                        </div>
+                                    }
+                                   
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Period & Schedule Card -->
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-secondary mb-3 d-flex align-items-center">
+                                    <i class="pi pi-calendar me-2"></i>
+                                    <span>Period & Schedule</span>
+                                </h5>
+
+                                <div class="list-group list-group-flush">
+                                     <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                        <span class="text-muted">Request Number:</span>
+                                        <span class="fw-semibold text-dark">{{ wageRequest.requestNumber || '—' }}</span>
+                                    </div>                              
+
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                        <span class="text-muted">Payment Cycle:</span>
+                                        <span class="fw-semibold text-dark">{{ wageRequest.paymentCycle }}</span>
+                                    </div>
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                        <span class="text-muted">Request Year:</span>
+                                        <span class="fw-semibold text-dark">{{ wageRequest.requestYear }}</span>
+                                    </div>
+
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                        <span class="text-muted">Request Month:</span>
+                                        <span class="fw-semibold text-dark">{{ getMonthName(wageRequest.requestMonthIndex) }}</span>
+                                    </div>
+
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                        <span class="text-muted">From Date:</span>
+                                        <span class="fw-semibold text-dark">{{ formatDate(wageRequest.fromDate) }}</span>
+                                    </div>
+
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                        <span class="text-muted">To Date:</span>
+                                        <span class="fw-semibold text-dark">{{ formatDate(wageRequest.toDate) }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Remarks Section (if exists) -->
+                @if (wageRequest.remarks) {
+                <p-divider></p-divider>
+
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title text-secondary mb-3 d-flex align-items-center">
+                                    <i class="pi pi-comment me-2"></i>
+                                    <span>Remarks</span>
+                                </h5>
+                                <p class="mb-0 text-dark">{{ wageRequest.remarks }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                }
+
+                <p-divider></p-divider>
+
+          
+            </p-card>
+            }
+        </div>
+    </div>
+</div>
+}
