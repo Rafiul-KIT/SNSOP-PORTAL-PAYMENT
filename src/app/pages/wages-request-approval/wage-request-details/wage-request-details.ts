@@ -21,6 +21,7 @@ import { Message } from 'primeng/message';
 import { ButtonModule } from 'primeng/button';
 import { Loader } from '../../../components/loader/loader';
 import { ApiService } from '../../../services/api.service';
+import Swal from 'sweetalert2';
 
 interface WageRequest {
   id: number;
@@ -109,7 +110,8 @@ export class WageRequestDetails implements OnInit {
   apiError = '';
   breadcrumbItems: any[] = [];
   breadcrumbHome: any;
-
+  wageId: number | null = null;
+  subprojectId: number | null = null;
   reviewForm!: FormGroup;
   approvedOptions = [
     { label: 'Approve', value: true },
@@ -231,9 +233,9 @@ export class WageRequestDetails implements OnInit {
     this.initReviewForm();
     const subprojectId = this.route.snapshot.paramMap.get('subprojectId');
     const wageId = this.route.snapshot.paramMap.get('wageId');
-
-    if (subprojectId) {
-      this.loadWageRequestDetails(+subprojectId);
+    if (wageId) {
+      this.wageId = +wageId; // Convert to number and store it
+      this.loadWageRequestDetails(this.wageId); // Call the method to load the details
     } else {
       this.apiError = 'Invalid wage request ID';
     }
@@ -261,98 +263,136 @@ export class WageRequestDetails implements OnInit {
     });
   }
 
-  async onSubmitReview(): Promise<void> {
-    if (!this.wageRequest?.id) {
-      this.reviewMessage = [
-        {
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Wage Request ID is missing.',
-        },
-      ];
-      return;
-    }
+async onSubmitReview(): Promise<void> {
+  if (!this.wageId) {
+    this.reviewMessage = [
+      {
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Wage Request ID is missing.',
+      },
+    ];
 
-    if (this.reviewForm.invalid) {
-      this.reviewMessage = [
-        {
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Please fill all required fields.',
-        },
-      ];
-      this.reviewForm.markAllAsTouched();
-      return;
-    }
-
-    this.isReviewSubmitting = true;
-    this.reviewMessage = [];
-
-    const formData = new FormData();
-    formData.append('wageRequestId', this.wageRequest.id.toString());
-
-    // Fix: Send as boolean, not string
-    const approvedValue = this.reviewForm.get('approved')?.value;
-    const approvedBoolean =
-      approvedValue?.value !== undefined ? approvedValue.value : approvedValue;
-    formData.append('approved', approvedBoolean);
-
-    if (this.selectedFile) {
-      formData.append('attachment', this.selectedFile, this.selectedFile.name);
-    }
-
-    try {
-      const response: any = await this.apiService.POST_FORM_DATA(
-        '/api/wage-request-review/first',
-        formData
-      );
-
-      const responseData = response.data;
-
-      if (responseData?.code === 200 || responseData?.status === 'OK') {
-        this.reviewMessage = [
-          {
-            severity: 'success',
-            summary: 'Success',
-            detail: 'Wage request review submitted successfully.',
-          },
-        ];
-        this.reviewForm.reset();
-        this.selectedFile = null;
-
-        const fileInput = document.getElementById(
-          'attachment'
-        ) as HTMLInputElement;
-        if (fileInput) fileInput.value = '';
-
-        if (this.wageRequest.subprojectId) {
-          this.loadWageRequestDetails(this.wageRequest.subprojectId);
-        }
-      } else {
-        this.reviewMessage = [
-          {
-            severity: 'error',
-            summary: 'Error',
-            detail: responseData?.message || 'Failed to submit review.',
-          },
-        ];
-      }
-    } catch (error: any) {
-      console.error('Error submitting review:', error);
-      console.error('Error response:', error.response?.data);
-      this.reviewMessage = [
-        {
-          severity: 'error',
-          summary: 'Error',
-          detail:
-            error.response?.data?.message || 'An unexpected error occurred.',
-        },
-      ];
-    } finally {
-      this.isReviewSubmitting = false;
-      this.cdr.detectChanges();
-    }
+    // Show SweetAlert for missing wage ID
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Wage Request ID is missing.',
+    });
+    return;
   }
+
+  if (this.reviewForm.invalid) {
+    this.reviewMessage = [
+      {
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Please fill all required fields.',
+      },
+    ];
+    this.reviewForm.markAllAsTouched();
+
+    // Show SweetAlert for form invalidation
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Please fill all required fields.',
+    });
+    return;
+  }
+
+  this.isReviewSubmitting = true;
+  this.reviewMessage = [];
+
+  const formData = new FormData();
+  formData.append('wageRequestId', this.wageId.toString());
+
+  // Fix: Send as boolean, not string
+  const approvedValue = this.reviewForm.get('approved')?.value;
+  const approvedBoolean =
+    approvedValue?.value !== undefined ? approvedValue.value : approvedValue;
+  formData.append('approved', approvedBoolean);
+
+  if (this.selectedFile) {
+    formData.append('attachment', this.selectedFile, this.selectedFile.name);
+  }
+
+  try {
+    const response: any = await this.apiService.POST_FORM_DATA(
+      '/api/wage-request-review/first',
+      formData
+    );
+
+    const responseData = response.data;
+
+    if (responseData?.code === 200 || responseData?.status === 'OK') {
+      this.reviewMessage = [
+        {
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Wage request review submitted successfully.',
+        },
+      ];
+
+      // Show SweetAlert for success
+      Swal.fire({
+        icon: 'success',
+        title: 'Submitted',
+        text: 'Wage request review submitted successfully.',
+      });
+
+      this.reviewForm.reset();
+      this.selectedFile = null;
+
+      const fileInput = document.getElementById(
+        'attachment'
+      ) as HTMLInputElement;
+      if (fileInput) fileInput.value = '';
+
+      if (this.subprojectId) {
+        this.loadWageRequestDetails(this.subprojectId);
+      }
+    } else {
+      this.reviewMessage = [
+        {
+          severity: 'error',
+          summary: 'Error',
+          detail: responseData?.message || 'Failed to submit review.',
+        },
+      ];
+
+      // Show SweetAlert for failure
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: responseData?.message || 'Failed to submit review.',
+      });
+    }
+  } catch (error: any) {
+    console.error('Error submitting review:', error);
+    console.error('Error response:', error.response?.data);
+    this.reviewMessage = [
+      {
+        severity: 'error',
+        summary: 'Error',
+        detail:
+          error.response?.data?.message || 'An unexpected error occurred.',
+      },
+    ];
+
+    // Show SweetAlert for unexpected error
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text:
+        error.response?.data?.message || 'An unexpected error occurred.',
+    });
+  } finally {
+    this.isReviewSubmitting = false;
+    this.cdr.detectChanges();
+  }
+}
+
 
   initBreadcrumb(): void {
     this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
@@ -367,9 +407,11 @@ export class WageRequestDetails implements OnInit {
     this.apiError = '';
 
     try {
+    
+
       const wageResponse: any = await this.apiService.POST(
         'api/wage-request/get?page=0&size=10',
-        { subprojectId: id }
+        { wageRequestId: id } // Pass wageRequestId instead of subprojectId
       );
 
       if (wageResponse?.data?.content?.length > 0) {
@@ -393,6 +435,7 @@ export class WageRequestDetails implements OnInit {
             console.error('Failed to load subproject details:', subError);
           }
         }
+
         this.loadBeneficiaries(
           this.beneficiaryCurrentPage,
           this.beneficiaryPageSize
@@ -448,12 +491,15 @@ export class WageRequestDetails implements OnInit {
   }
 
   async loadBeneficiaries(page: number, size: number): Promise<void> {
-    if (!this.wageRequest?.id) return;
+    if (!this.wageId) {
+      console.error('wageId is not defined');
+      return;
+    }
 
     this.isBeneficiaryLoading = true;
     try {
       const response: any = await this.apiService.GET(
-        `/api/wage-request/beneficiary-list/get?page=${page}&size=${size}&wageRequestId=${this.wageRequest.id}`
+        `/api/wage-request/beneficiary-list/get?page=${page}&size=${size}&wageRequestId=${this.wageId}`
       );
 
       if (response?.data?.content) {
