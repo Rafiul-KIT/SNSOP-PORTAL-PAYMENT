@@ -278,7 +278,7 @@ export class WageRequestDrafts implements OnInit {
   }
 
   viewWageRequest(id: number) {
-    this.router.navigate(['/wage-request-details', id]);
+    this.router.navigate(['/wage-request-approval/details', id]);
   }
 
   getStatusLabel(value: number): string {
