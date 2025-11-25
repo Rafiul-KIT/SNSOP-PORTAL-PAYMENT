@@ -108,6 +108,7 @@ export class WageRequestDetails implements OnInit {
   isBeneficiaryLoading = false;
   isLoading = false;
   apiError = '';
+   roleId!: number | null;
   breadcrumbItems: any[] = [];
   breadcrumbHome: any;
   wageId: number | null = null;
@@ -229,6 +230,7 @@ export class WageRequestDetails implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.roleId = this.apiService.getUserRole();
     this.initBreadcrumb();
     this.initReviewForm();
     const subprojectId = this.route.snapshot.paramMap.get('subprojectId');
@@ -416,7 +418,7 @@ async onSubmitReview(): Promise<void> {
         this.wageRequest = wageResponse.data.content[0];
 
         const subprojectId = this.subprojectId;
-        console.log(subprojectId);
+       
         if (subprojectId) {
           try {
             const subprojectResponse: any = await this.apiService.POST(

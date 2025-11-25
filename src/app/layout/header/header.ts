@@ -97,14 +97,19 @@ export class Header {
         icon: 'fas fa-hand-holding-usd',
         items: [
           {
-            label: 'Wages Request For LIPW',
+            label: 'Apply For LIPW',
             icon: 'fas fa-list',
             routerLink: '/apply-wage-request/lipw',
           },
           {
-            label: 'Benefits For DIS',
+            label: 'Apply For DIS',
             icon: 'fas fa-list',
             routerLink: '/apply-wage-request/dis',
+          },
+             {
+            label: 'List of Wages',
+            icon: 'fas fa-list',
+            routerLink: '/apply-wage-request/wages',
           },
         ],
       },
