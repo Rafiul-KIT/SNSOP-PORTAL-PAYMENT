@@ -103,8 +103,7 @@
     </form>
 </div>
 
-<p-table [value]="payrollData" [scrollable]="true" [tableStyle]="{ 'min-width': '100%', 'margin-bottom': '5px' }"
-    size="small">
+<p-table [value]="payrollData" [scrollable]="true" [tableStyle]="{ 'min-width': '100%', 'margin-bottom': '5px'  }" size="small">
 
     <ng-template pTemplate="header">
          <tr>
@@ -129,47 +128,47 @@
             </th>
         </tr>
         <tr>
-            <th>Enrollment No</th>
-            <th>Date Of Creation</th>
-            <th>Exchange Rate At Time</th>
-            <th>Beneficiary ID</th>
-            <th>Wage Payment Req ID</th>
-            <th>Wages Req Ben Trans ID </th>
-            <th>Work ID</th>
-            <th>Payment Cycle</th>
-            <th>Req From Date</th>
-            <th>Req No</th>
-            <th>Req To Date</th>
-            <th>Status</th>
-            <th>Support Type</th>
-            <th>Total Attendance</th>
-            <th>Wage Rate SSP Total</th>
-            <th>Wage Rate USD</th>
-            <th>Wage Rate USD Total</th>
-            <th>Work Code</th>
+            <th class="light-blue-row">Enrollment No</th>
+            <th class="light-blue-row">Date Of Creation</th>
+            <th class="light-blue-row">Exchange Rate At Time</th>
+            <th class="light-blue-row">Beneficiary ID</th>
+            <th class="light-blue-row">Wage Payment Req ID</th>
+            <th class="light-blue-row">Wages Req Ben Trans ID </th>
+            <th class="light-blue-row">Work ID</th>
+            <th class="light-blue-row">Payment Cycle</th>
+            <th class="light-blue-row">Req From Date</th>
+            <th class="light-blue-row">Req No</th>
+            <th class="light-blue-row">Req To Date</th>
+            <th class="light-blue-row">Status</th>
+            <th class="light-blue-row">Support Type</th>
+            <th class="light-blue-row">Total Attendance</th>
+            <th class="light-blue-row">Wage Rate SSP Total</th>
+            <th class="light-blue-row">Wage Rate USD</th>
+            <th class="light-blue-row">Wage Rate USD Total</th>
+            <th class="light-blue-row">Work Code</th>
         </tr>
     </ng-template>
 
     <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
-        <tr>
-            <td>{{ item.enrollmentNo }}</td>
-            <td>{{ item.dateofCreation }}</td>
-            <td>{{ item.exchangerateattime }}</td>
-            <td>{{ item.intBenid }}</td>
-            <td>{{ item.intWagePaymentReqid }}</td>
-            <td>{{ item.intWagesReqBenTransid }}</td>
-            <td>{{ item.intWorkid }}</td>
-            <td>{{ item.paymentCycle }}</td>
-            <td>{{ item.reqFromDate }}</td>
-            <td>{{ item.reqNo }}</td>
-            <td>{{ item.reqToDate }}</td>
-            <td>{{ item.status }}</td>
-            <td>{{ item.supportType }}</td>
-            <td>{{ item.totAttendance }}</td>
-            <td>{{ item.wageRateSSPTotal }}</td>
-            <td>{{ item.wageRateUSD }}</td>
-            <td>{{ item.wageRateUSDTotal }}</td>
-            <td>{{ item.workCode }}</td>
+        <tr class="bordered-row">
+            <td class="bordered-cell">{{ item.enrollmentNo }}</td>
+            <td class="bordered-cell">{{ item.dateofCreation }}</td>
+            <td class="bordered-cell">{{ item.exchangerateattime }}</td>
+            <td class="bordered-cell">{{ item.intBenid }}</td>
+            <td class="bordered-cell">{{ item.intWagePaymentReqid }}</td>
+            <td class="bordered-cell">{{ item.intWagesReqBenTransid }}</td>
+            <td class="bordered-cell">{{ item.intWorkid }}</td>
+            <td class="bordered-cell">{{ item.paymentCycle }}</td>
+            <td class="bordered-cell">{{ item.reqFromDate }}</td>
+            <td class="bordered-cell">{{ item.reqNo }}</td>
+            <td class="bordered-cell">{{ item.reqToDate }}</td>
+            <td class="bordered-cell">{{ item.status }}</td>
+            <td class="bordered-cell">{{ item.supportType }}</td>
+            <td class="bordered-cell">{{ item.totAttendance }}</td>
+            <td class="bordered-cell">{{ item.wageRateSSPTotal }}</td>
+            <td class="bordered-cell">{{ item.wageRateUSD }}</td>
+            <td class="bordered-cell">{{ item.wageRateUSDTotal }}</td>
+            <td class="bordered-cell">{{ item.workCode }}</td>
         </tr>
     </ng-template>
 
