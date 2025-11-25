@@ -15,8 +15,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { ApiService } from '../../../services/api.service';
 import { Loader } from "../../../components/loader/loader";
 import { LookupService, LookupItem } from '../../../services/lookup.service';
-import {MessageService} from "primeng/api";
-import {ToastModule} from "primeng/toast";
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-apply-for-dis-payment',
@@ -35,9 +34,8 @@ import {ToastModule} from "primeng/toast";
     TableModule,
     CheckboxModule,
     InputNumberModule,
-    ToastModule
   ],
-  providers: [MessageService]
+  providers: []
 })
 export class ApplyForDisPayment implements OnInit {
   wagesForm!: FormGroup;
@@ -46,6 +44,8 @@ export class ApplyForDisPayment implements OnInit {
   selectedBeneficiaries: any[] = [];
   attachmentFile: File | null = null; // To store the selected file
   showResults = false;
+  totalRecords: number = 0;
+  rows: number = 10;
 
   // Dropdown options
   years: any[] = [];
@@ -68,8 +68,7 @@ export class ApplyForDisPayment implements OnInit {
     private apiService: ApiService,
     private lookupService: LookupService,
     private router: Router,
-    private cdr: ChangeDetectorRef,
-    private messageService: MessageService
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -130,7 +129,7 @@ export class ApplyForDisPayment implements OnInit {
 
   initializeSubmissionForm(): void {
     this.submissionForm = this.fb.group({
-      totalDays: [1, [Validators.required, Validators.min(1)]],
+      totalDays: [null, [Validators.required, Validators.min(1)]],
       attachment: [null]
     });
   }
@@ -156,7 +155,7 @@ export class ApplyForDisPayment implements OnInit {
       await this.loadStates();
       this.loadPaymentCycles();
     } catch (error) {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load initial data' });
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to load initial data' });
     } finally {
       this.isLoading = false;
       this.cdr.detectChanges();
@@ -167,31 +166,34 @@ export class ApplyForDisPayment implements OnInit {
     try {
       this.states = await this.lookupService.getOrFetchStateList();
     } catch (error) {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error loading states' });
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Error loading states' });
     }
   }
 
   async loadCounties(stateId: string): Promise<void> {
     try {
       this.counties = await this.lookupService.getCountyListByStateId(stateId);
+      this.cdr.detectChanges();
     } catch (error) {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error loading counties' });
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Error loading counties' });
     }
   }
 
   async loadPayams(countyId: string): Promise<void> {
     try {
       this.payams = await this.lookupService.getPayamListByCountyId(countyId);
+      this.cdr.detectChanges();
     } catch (error) {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error loading payams' });
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Error loading payams' });
     }
   }
 
   async loadBomas(payamId: string): Promise<void> {
     try {
       this.bomas = await this.lookupService.getBomaListByPayamId(payamId);
+      this.cdr.detectChanges();
     } catch (error) {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error loading bomas' });
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Error loading bomas' });
     }
   }
 
@@ -216,14 +218,27 @@ export class ApplyForDisPayment implements OnInit {
   async onSearch(): Promise<void> {
     if (this.wagesForm.invalid) {
       this.markFormGroupTouched(this.wagesForm);
-      this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'Please fill all required fields' });
+      Swal.fire({ icon: 'warning', title: 'Warning', text: 'Please fill all required fields' });
       return;
     }
 
-    this.loading = true;
     this.beneficiaries = [];
     this.selectedBeneficiaries = [];
-    this.showResults = false;
+    this.totalRecords = 0;
+    this.showResults = true; // Show table container immediately
+
+    await this.fetchBeneficiaries(0, this.rows);
+  }
+
+  onPageChange(event: any): void {
+    this.loading = true;
+    this.rows = event.rows;
+    const page = event.first / event.rows;
+    this.fetchBeneficiaries(page, this.rows);
+  }
+
+  private async fetchBeneficiaries(page: number, size: number): Promise<void> {
+    this.loading = true;
 
     const formValue = this.wagesForm.getRawValue();
     const requestBody = {
@@ -233,25 +248,27 @@ export class ApplyForDisPayment implements OnInit {
       paymentCycleId: formValue.paymentCycleId
     };
 
-    const page = 0;
-    const size = 10;
     const url = `api/wage-request/dis/beneficiary/can-be-included?page=${page}&size=${size}`;
 
     try {
       const response: any = await this.apiService.POST(url, requestBody);
       if ((response.data.code === 200) && response.data && response.data.content) {
         this.beneficiaries = response.data.content;
-        if(this.beneficiaries.length === 0){
-            this.messageService.add({ severity: 'info', summary: 'Info', detail: 'No beneficiaries found for the selected criteria.' });
+        this.totalRecords = response.data.totalElements; // Assuming this property exists
+        if (this.beneficiaries.length === 0) {
+          Swal.fire({ icon: 'info', title: 'Info', text: 'No beneficiaries found for the selected criteria.' });
         }
       } else {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: response.message || 'No beneficiaries found or API error' });
+        this.beneficiaries = [];
+        this.totalRecords = 0;
+        Swal.fire({ icon: 'error', title: 'Error', text: response.message || 'No beneficiaries found or API error' });
       }
     } catch (error: any) {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: error.message || 'API call failed' });
+      this.beneficiaries = [];
+      this.totalRecords = 0;
+      Swal.fire({ icon: 'error', title: 'Error', text: error.message || 'API call failed' });
     } finally {
       this.loading = false;
-      this.showResults = true;
       this.cdr.detectChanges();
     }
   }
@@ -259,66 +276,58 @@ export class ApplyForDisPayment implements OnInit {
   async onSubmitDisRequest(): Promise<void> {
     if (this.submissionForm.invalid) {
       this.markFormGroupTouched(this.submissionForm);
-      this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'Please fill all required fields for submission.' });
+      Swal.fire({ icon: 'warning', title: 'Warning', text: 'Please fill all required fields for submission.' });
       return;
     }
     if (this.selectedBeneficiaries.length === 0) {
-      this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'Please select at least one beneficiary.' });
+      Swal.fire({ icon: 'warning', title: 'Warning', text: 'Please select at least one beneficiary.' });
       return;
     }
 
     this.loading = true;
 
-    let attachmentBase64: string | null = null;
-    if (this.attachmentFile) {
-      attachmentBase64 = await this.fileToBase64(this.attachmentFile);
-    }
-
     const searchFormValue = this.wagesForm.getRawValue();
     const submissionFormValue = this.submissionForm.getRawValue();
+    const beneficiaryIds = this.selectedBeneficiaries.map(b => b.beneficiaryId);
 
-    const payload = {
-      requestYear: searchFormValue.requestYear,
-      requestMonthIndex: searchFormValue.requestMonthIndex,
-      bomaId: parseInt(searchFormValue.bomaId, 10),
-      paymentCycleId: searchFormValue.paymentCycleId,
-      totalDays: submissionFormValue.totalDays,
-      attachment: attachmentBase64,
-      beneficiaryIds: this.selectedBeneficiaries.map(b => b.beneficiaryId)
-    };
+    const formData = new FormData();
+    formData.append('requestYear', searchFormValue.requestYear);
+    formData.append('requestMonthIndex', searchFormValue.requestMonthIndex);
+    formData.append('bomaId', searchFormValue.bomaId);
+    formData.append('paymentCycleId', searchFormValue.paymentCycleId);
+    formData.append('totalDays', submissionFormValue.totalDays);
+
+    beneficiaryIds.forEach(id => {
+      formData.append('beneficiaryIds', id);
+    });
+
+    if (this.attachmentFile) {
+      formData.append('attachment', this.attachmentFile, this.attachmentFile.name);
+    }
 
     const url = 'api/wage-request/dis/beneficiary/include';
 
     try {
-      const response: any = await this.apiService.POST(url, payload);
-      if (response.code === 0) {
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: response.message || 'DIS wage request submitted successfully.' });
+      const response: any = await this.apiService.POST_FORM_DATA(url, formData);
+      if (response.data && response.data.code === 200) {
+        Swal.fire({ icon: 'success', title: 'Success', text: response.data.message || 'DIS wage request submitted successfully.' });
         this.beneficiaries = [];
         this.selectedBeneficiaries = [];
-        this.submissionForm.reset({ totalDays: 1 });
+        this.submissionForm.reset({ totalDays: null });
         this.attachmentFile = null;
         this.showResults = false;
       } else {
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: response.message || 'Failed to submit DIS wage request.' });
+        Swal.fire({ icon: 'error', title: 'Error', text: (response.data && response.data.message) || 'Failed to submit DIS wage request.' });
       }
     } catch (error: any) {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: error.message || 'API call failed' });
+      Swal.fire({ icon: 'error', title: 'Error', text: error.message || 'API call failed' });
     } finally {
       this.loading = false;
       this.cdr.detectChanges();
     }
   }
 
-  fileToBase64(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        resolve((reader.result as string).split(',')[1]);
-      };
-      reader.onerror = error => reject(error);
-    });
-  }
+
 
   onCancel(): void {
     this.router.navigate(['/']);
