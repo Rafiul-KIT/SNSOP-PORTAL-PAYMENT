@@ -22,11 +22,11 @@ export const StatusEnum = [
 export const StatusWageEnum = [
   { id: '0', value: 'Draft', label: 'Draft' },
   { id: '1', value: 'InitialReviewer', label: 'To be Reviewed at Initial Reviewer' },
-  { id: '2', value: 'FinancialApprover', label: 'To be Reviewed at Financial Approver' },
+  { id: '2', value: 'Financial                              Approver', label: 'To be Reviewed at Financial Approver' },
   { id: '3', value: 'FinalPaymentAuthorizer', label: 'To be Reviewed at Final Payment Authorizer' },
   { id: '4', value: 'FinalApproved', label: 'Approved at Final Payment Authorizer' },
   { id: '5', value: 'PaidAPI', label: 'Paid from API' },
-  { id: '6', value: 'PaidAPI', label: 'Paid from API' },
+  { id: '6', value: 'PaidAPI', label: 'Paid from API' },                                                                                             
   { id: '100', value: 'RejectedInitial', label: 'Rejected by Initial Reviewer' },
   { id: '101', value: 'RejectedFinancial', label: 'Rejected by Financial Approver' },
   { id: '102', value: 'RejectedFinal', label: 'Rejected by Final Payment Authorizer' },
@@ -36,6 +36,20 @@ export const StatusWageEnum = [
   { id: '1001', value: 'RejectedAfterPay', label: 'Rejected after Pay' },
   { id: '1002', value: 'RejectedAfterPay', label: 'Rejected after Pay' },
   { id: '1003', value: 'RejectedAfterPay', label: 'Rejected after Pay' },
+];
+
+export const PaymentCycleEnum = [
+  { label: 'Cycle 1', value: 1 },
+  { label: 'Cycle 2', value: 2 },
+  { label: 'Cycle 3', value: 3 },
+  { label: 'Cycle 4', value: 4 },
+  { label: 'Cycle 5', value: 5 },
+  { label: 'Cycle 6', value: 6 },
+  { label: 'Cycle 7', value: 7 },
+  { label: 'Cycle 8', value: 8 },
+  { label: 'Cycle 9', value: 9 },
+  { label: 'Cycle 10', value: 10 },
+  { label: 'Cycle 11', value: 11 },
 ];
 
 // Define Enum for Screening Status
@@ -995,6 +1009,62 @@ export class LookupService {
     } else {
       return '--';
     }
+  }
+
+
+
+    SupportTypeEnum = [
+    {id: 1, value: "LIPW", label: "LIPW"},
+    {id: 2, value: "DIS", label: "DIS"},
+    {id: 3, value: "ALL", label: "ALL"},
+  ];
+
+  getSupportTypeEnum = () => {
+    return this.SupportTypeEnum;
+  };
+
+  geSupportTypeEnumByValue = (value: any) => {
+    const dataFound = this.SupportTypeEnum.find(
+      (item: any) => item.value == value
+    );
+    if (dataFound) {
+      return dataFound.label;
+    } else {
+      return '--';
+    }
+  }
+
+    getSupportTypeList(): LookupItem[] {
+    return [
+      { id: 'LIPW', name: 'LIPW' },
+      { id: 'DIS', name: 'DIS' },
+      { id: 'ALL', name: 'ALL' },
+    ];
+  }
+
+
+  getPaymentCycleList(): LookupItem[] {
+    return [
+      { id: 'Payment Cycle 1', name: 'Payment Cycle 1' },
+      { id: 'Payment Cycle 2', name: 'Payment Cycle 2' },
+      { id: 'Payment Cycle 3', name: 'Payment Cycle 3' },
+      { id: 'Payment Cycle 4', name: 'Payment Cycle 4' },
+      { id: 'Payment Cycle 5', name: 'Payment Cycle 5' },
+      { id: 'Payment Cycle 6', name: 'Payment Cycle 6' },
+      { id: 'Payment Cycle 7', name: 'Payment Cycle 7' },
+      { id: 'Payment Cycle 8', name: 'Payment Cycle 8' },
+      { id: 'Payment Cycle 9', name: 'Payment Cycle 9' },
+      { id: 'Payment Cycle 10', name: 'Payment Cycle 10' },
+      // { id: 'Payment Cycle 11', name: 'Payment Cycle 11' },
+      // { id: 'Payment Cycle 12', name: 'Payment Cycle 12' },
+      // { id: 'Payment Cycle 13', name: 'Payment Cycle 13' },
+      // { id: 'Payment Cycle 14', name: 'Payment Cycle 14' },
+      // { id: 'Payment Cycle 15', name: 'Payment Cycle 15' },
+    ];
+  }
+
+  getPaymentCycleEnum = () => {
+    return PaymentCycleEnum;
   };
 
   // ---------- New methods for Sub-project page ----------
