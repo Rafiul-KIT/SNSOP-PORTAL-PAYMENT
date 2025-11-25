@@ -22,7 +22,7 @@ import { WageRequestDrafts } from './pages/wages-request-approval/wage-request-d
 import { WageDashboard } from './pages/wages-request-approval/wage-dashboard-lipw/wage-dashboard';
 import { WageDashboardDis } from './pages/wages-request-approval/wage-dashboard-dis/wage-dashboard-dis';
 import { WageRequestDetails } from './pages/wages-request-approval/wage-request-details/wage-request-details';
-
+import { WageRequestApproval } from './pages/wages-request-approval/wage-request-approval/wage-request-approval';
 import { PayrollDownload } from './pages/payroll/payroll-download/payroll-download';
 
 
@@ -126,12 +126,8 @@ export const routes: Routes = [
         component:  WageRequestDrafts,
       },
         {
-        path: 'lipw',
-       component: WageDashboard ,
-      },
-         {
-        path: 'dis',
-        component: WageDashboardDis ,
+        path: 'wage-request-approval',
+       component: WageRequestApproval,
       },
       {
        path: 'details/:wageId/:subprojectId',

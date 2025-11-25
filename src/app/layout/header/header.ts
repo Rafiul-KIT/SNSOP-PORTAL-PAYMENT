@@ -118,15 +118,11 @@ export class Header {
             routerLink: '/wage-request-approval/drafts',
           },
           {
-            label: 'Wage Request For Lipw ',
+            label: 'Wage Request Approval',
             icon: 'fa fa-check',
-            routerLink: '/wage-request-approval/lipw',
+            routerLink: '/wage-request-approval/wage-request-approval',
           },
-            {
-            label: 'Benefits For Dis ',
-            icon: 'fa fa-check',
-            routerLink: '/wage-request-approval/dis',
-          },
+
         ],
       },
 
