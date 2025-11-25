@@ -149,7 +149,7 @@ export class BeneficiarySubprojectRemove implements OnInit {
       typeOfWork: [null],
       payam: [{ value: null, disabled: true }],
       boma: [{ value: null, disabled: true }],
-      status: [null],
+      status: ['InProgress'],
       workCode: [''],
       workActivity: [null],
       screeningStatus: [null],

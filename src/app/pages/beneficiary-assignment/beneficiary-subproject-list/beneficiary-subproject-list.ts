@@ -148,7 +148,7 @@ export class BeneficiarySubprojectList implements OnInit {
       typeOfWork: [null],
       payam: [{ value: null, disabled: true }],
       boma: [{ value: null, disabled: true }],
-      status: [null],
+      status: ['TST_Approved'],
       workCode: [''],
       workActivity: [null],
       screeningStatus: [null],
