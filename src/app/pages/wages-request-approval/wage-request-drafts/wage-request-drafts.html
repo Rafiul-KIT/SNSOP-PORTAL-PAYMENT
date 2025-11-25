@@ -57,6 +57,18 @@
             </p-floatlabel>
         </div>
 
+        <!-- Payment Cycle -->
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select 
+                    [options]="paymentCycles" 
+                    optionLabel="label" 
+                    optionValue="value"
+                    formControlName="paymentCycle">
+                </p-select>
+                <label>Payment Cycle</label>
+            </p-floatlabel>
+        </div>
         <!-- Request Year -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
@@ -83,18 +95,6 @@
             </p-floatlabel>
         </div>
 
-        <!-- Payment Cycle -->
-        <div class="col-md-3">
-            <p-floatlabel variant="on" class="w-100">
-                <p-select 
-                    [options]="paymentCycles" 
-                    optionLabel="label" 
-                    optionValue="value"
-                    formControlName="paymentCycle">
-                </p-select>
-                <label>Payment Cycle</label>
-            </p-floatlabel>
-        </div>
 
         <!-- Status -->
         <div class="col-md-3">
@@ -185,7 +185,7 @@
             <td>{{ item.toDate | date: 'dd/MM/yyyy' }}</td>
             <td>{{ item.requestYear }}</td>
             <td>{{ getMonthLabel(item.requestMonthIndex) }}</td>
-            <td>Cycle {{ item.paymentCycle }}</td>
+            <td>Payment Cycle {{ item.paymentCycle }}</td>
             <td>
                 <span [class]="'badge ' + getStatusClass(item.status)">
                     {{ getStatusLabel(item.status) }}
@@ -194,26 +194,15 @@
             <td class="text-center">
                 <p-button 
                     type="button" 
-                    icon="fas fa-pencil-alt" 
-                    pTooltip="Edit" 
+                   icon="fa-solid fa-eye fa-lg" pTooltip="view"
                     tooltipPosition="top"
                     appendTo="body" 
-                    (onClick)="editWageRequest(item.id)" 
+                    (onClick)="viewWageRequest(item.id,item.subprojectId)" 
                     size="small" 
                     outlined="true" 
                     severity="secondary"
-                    class="me-2 big-icon-btn" />
-                <p-button 
-                    type="button" 
-                    icon="fas fa-times-circle" 
-                    pTooltip="Reject Request" 
-                    tooltipPosition="top"
-                    appendTo="body" 
-                    (onClick)="deleteWageRequest(item.id)" 
-                    size="small" 
-                    [outlined]="true" 
-                    severity="danger"
-                    class="me-2" />
+                    class="me-2 big-icon-btn"/>
+                
             </td>
         </tr>
     </ng-template>
@@ -239,34 +228,4 @@
 
 }
 
-<p-dialog 
-    header="Confirm Rejection" 
-    [(visible)]="displayDeleteDialog" 
-    [modal]="true" 
-    [style]="{width: '450px'}">
-    <div class="confirmation-content d-flex align-items-center">
-        <i class="pi pi-exclamation-triangle me-3" style="font-size: 2rem"></i>
-        <span>Are you sure you want to reject this wage request?</span>
-    </div>
-    <textarea 
-        pInputTextarea 
-        [(ngModel)]="deleteComment" 
-        placeholder="Add a comment (optional)..." 
-        rows="3" 
-        class="w-100 mt-3">
-    </textarea>
-    <ng-template pTemplate="footer">
-        <p-button 
-            label="No" 
-            icon="pi pi-times" 
-            severity="danger" 
-            (click)="cancelDelete()">
-        </p-button>
-        <p-button 
-            label="Yes" 
-            icon="pi pi-check" 
-            severity="success" 
-            (click)="confirmDelete()">
-        </p-button>
-    </ng-template>
-</p-dialog>
+
