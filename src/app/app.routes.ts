@@ -24,6 +24,7 @@ import { WageDashboardDis } from './pages/wages-request-approval/wage-dashboard-
 import { WageRequestDetails } from './pages/wages-request-approval/wage-request-details/wage-request-details';
 
 import { PayrollDownload } from './pages/payroll/payroll-download/payroll-download';
+import { ListOfWages } from './pages/apply-wages-request/list-of-wages/list-of-wages';
 
 
 
@@ -113,6 +114,10 @@ export const routes: Routes = [
          {
         path: 'create/:id',
         component: ApplyForWagesPaymentComponent ,
+      },
+       {
+        path: 'wages',
+        component: ListOfWages,
       },
            
 
