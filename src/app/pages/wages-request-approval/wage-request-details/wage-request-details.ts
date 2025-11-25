@@ -232,10 +232,12 @@ export class WageRequestDetails implements OnInit {
     this.initBreadcrumb();
     this.initReviewForm();
     const subprojectId = this.route.snapshot.paramMap.get('subprojectId');
+   
     const wageId = this.route.snapshot.paramMap.get('wageId');
-    if (wageId) {
-      this.wageId = +wageId; // Convert to number and store it
-      this.loadWageRequestDetails(this.wageId); // Call the method to load the details
+    if (wageId && subprojectId) {
+      this.wageId = +wageId; 
+      this.subprojectId = +subprojectId;
+      this.loadWageRequestDetails(this.wageId); 
     } else {
       this.apiError = 'Invalid wage request ID';
     }
@@ -346,8 +348,8 @@ async onSubmitReview(): Promise<void> {
       ) as HTMLInputElement;
       if (fileInput) fileInput.value = '';
 
-      if (this.subprojectId) {
-        this.loadWageRequestDetails(this.subprojectId);
+      if (this.wageId) {
+        this.loadWageRequestDetails(this.wageId);
       }
     } else {
       this.reviewMessage = [
@@ -405,16 +407,16 @@ async onSubmitReview(): Promise<void> {
 
     try {
     
-
       const wageResponse: any = await this.apiService.POST(
         'api/wage-request/get?page=0&size=10',
-        { wageRequestId: id } // Pass wageRequestId instead of subprojectId
+        { id: id } 
       );
 
       if (wageResponse?.data?.content?.length > 0) {
         this.wageRequest = wageResponse.data.content[0];
 
-        const subprojectId = this.wageRequest!.subprojectId;
+        const subprojectId = this.subprojectId;
+        console.log(subprojectId);
         if (subprojectId) {
           try {
             const subprojectResponse: any = await this.apiService.POST(
