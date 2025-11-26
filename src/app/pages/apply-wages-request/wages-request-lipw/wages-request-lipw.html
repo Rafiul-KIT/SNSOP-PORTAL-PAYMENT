@@ -123,7 +123,7 @@
       <td class="text-center">{{ item.countyName }}</td>
       <td class="text-center">{{ item.payamName }}</td>
       <td class="text-center">{{ item.bomaName }}</td>
-      <td class="text-center">{{ item.typeOfMeeting }}</td>
+      <td class="text-center">{{ getTypeOfMeetingLabel(item.typeOfMeeting) }}</td>
       <td class="text-center">{{ item.meetingDate | date: 'dd/MM/yyyy' }}</td>
    <td class="text-center">{{ getScreeningStatusLabel(item.screeningStatus) }}</td>
       <td class="text-center">
