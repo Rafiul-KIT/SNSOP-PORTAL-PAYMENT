@@ -27,7 +27,6 @@ import { MessageService } from 'primeng/api';
 import { ApiService } from '../../../services/api.service';
 import {
   LookupService,
-  StatusEnum,
   StatusWageEnum,
   PaymentCycleEnum,
 } from '../../../services/lookup.service';
@@ -152,7 +151,9 @@ export class WageRequestDrafts implements OnInit {
   }
 
   async ngOnInit() {
-    this.statuses = StatusWageEnum;
+    this.statuses = StatusWageEnum.filter(
+      (status) => Number(status.id) === 0 || Number(status.id) === 100
+    ).map((status) => ({ id: Number(status.id), label: status.label }));
     this.paymentCycles = this.lookup.getPaymentCycleEnum();
     this.initBreadcrumb();
     this.initForm();
@@ -201,7 +202,7 @@ export class WageRequestDrafts implements OnInit {
 
   private buildSearchBody(page: number, size: number) {
     const f = this.searchForm.value;
-    return {
+    const body: any = {
       id: null,
       subprojectId: f.subprojectId || null,
       fromDate: f.fromDate ? this.formatDate(f.fromDate) : null,
@@ -209,10 +210,17 @@ export class WageRequestDrafts implements OnInit {
       requestYear: f.requestYear || null,
       requestMonthIndex: f.requestMonthIndex || null,
       paymentCycle: f.paymentCycle || null,
-      status: f.status !== null ? f.status : null,
       requestNumber: f.requestNumber ? f.requestNumber.trim() : null,
       remarks: null,
     };
+
+    if (f.status !== null && f.status !== undefined) {
+      body.status = f.status;
+    } else {
+      body.status = 0; // Default search for Draft
+    }
+
+    return body;
   }
 
   private formatDate(date: Date): string {
@@ -287,7 +295,7 @@ viewWageRequest(wageId: number, subprojectId: number) {
 
 
   getStatusLabel(value: number): string {
-    const found = this.statuses.find((item) => item.id == value);
+    const found = StatusWageEnum.find((item) => Number(item.id) === value);
     return found ? found.label : value.toString();
   }
 
