@@ -5,7 +5,6 @@
     <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
 </div>
 
-<p-toast></p-toast>
 
 
   <div class="card p-3 mb-2">
@@ -150,7 +149,7 @@
                 }
                 <td class="text-center">
                     <p-select [options]="approvalOptions" [(ngModel)]="item.selectedStatus" placeholder="Select Action"
-                        styleClass="w-100" />
+                        styleClass="w-100" appendTo="body" />
                 </td>
                 <td class="text-center">
                     <textarea pInputText [(ngModel)]="item.remarksText" rows="1" class="w-100"></textarea>
