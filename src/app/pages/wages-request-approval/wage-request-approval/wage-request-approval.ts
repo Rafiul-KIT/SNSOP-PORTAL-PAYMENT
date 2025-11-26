@@ -5,7 +5,12 @@ import {
   ChangeDetectorRef,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
@@ -22,7 +27,7 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { InputTextModule } from 'primeng/inputtext';
-import {LookupService} from "../../../services/lookup.service";
+import { LookupService } from '../../../services/lookup.service';
 import Swal from 'sweetalert2';
 
 interface WageRequest {
@@ -84,7 +89,7 @@ interface StatusInfo {
 export class WageRequestApproval implements OnInit {
   isLoading = true;
   searchForm!: FormGroup;
-  
+
   years: any[] = [];
   months: any[] = [
     { label: 'January', value: 1 },
@@ -114,7 +119,7 @@ export class WageRequestApproval implements OnInit {
 
   currentPage = 0;
   pageSize = 10;
-  
+
   roleId: number | null = null;
 
   approvalOptions = [
@@ -124,21 +129,101 @@ export class WageRequestApproval implements OnInit {
 
   private readonly statusMap = new Map<number, StatusInfo>([
     [0, { value: 'Draft', label: 'Draft', class: 'bg-secondary' }],
-    [1, { value: 'InitialReviewer', label: 'To be Reviewed at Initial Reviewer', class: 'bg-warning'}],
-    [2, { value: 'FinancialApprover', label: 'To be Reviewed at Financial Approver', class: 'bg-info'}],
-    [3, { value: 'FinalPaymentAuthorizer', label: 'To be Reviewed at Final Payment Authorizer', class: 'bg-primary'}],
-    [4, { value: 'FinalApproved', label: 'Approved at Final Payment Authorizer', class: 'bg-success'}],
+    [
+      1,
+      {
+        value: 'InitialReviewer',
+        label: 'To be Reviewed at Initial Reviewer',
+        class: 'bg-warning',
+      },
+    ],
+    [
+      2,
+      {
+        value: 'FinancialApprover',
+        label: 'To be Reviewed at Financial Approver',
+        class: 'bg-info',
+      },
+    ],
+    [
+      3,
+      {
+        value: 'FinalPaymentAuthorizer',
+        label: 'To be Reviewed at Final Payment Authorizer',
+        class: 'bg-primary',
+      },
+    ],
+    [
+      4,
+      {
+        value: 'FinalApproved',
+        label: 'Approved at Final Payment Authorizer',
+        class: 'bg-success',
+      },
+    ],
     [5, { value: 'PaidAPI', label: 'Paid from API', class: 'bg-success' }],
     [6, { value: 'PaidAPI', label: 'Paid from API', class: 'bg-success' }],
-    [100, { value: 'RejectedInitial', label: 'Rejected by Initial Reviewer', class: 'bg-danger'}],
-    [101, { value: 'RejectedFinancial', label: 'Rejected by Financial Approver', class: 'bg-danger'}],
-    [102, { value: 'RejectedFinal', label: 'Rejected by Final Payment Authorizer', class: 'bg-danger'}],
+    [
+      100,
+      {
+        value: 'RejectedInitial',
+        label: 'Rejected by Initial Reviewer',
+        class: 'bg-danger',
+      },
+    ],
+    [
+      101,
+      {
+        value: 'RejectedFinancial',
+        label: 'Rejected by Financial Approver',
+        class: 'bg-danger',
+      },
+    ],
+    [
+      102,
+      {
+        value: 'RejectedFinal',
+        label: 'Rejected by Final Payment Authorizer',
+        class: 'bg-danger',
+      },
+    ],
     [103, { value: 'ClearedWB', label: 'Cleared by WB', class: 'bg-success' }],
-    [105, { value: 'DraftRejected', label: 'Draft Rejected', class: 'bg-danger' }],
-    [1000, { value: 'RejectedAfterPay', label: 'Rejected after Pay', class: 'bg-danger'}],
-    [1001, { value: 'RejectedAfterPay', label: 'Rejected after Pay', class: 'bg-danger'}],
-    [1002, { value: 'RejectedAfterPay', label: 'Rejected after Pay', class: 'bg-danger'}],
-    [1003, { value: 'RejectedAfterPay', label: 'Rejected after Pay', class: 'bg-danger'}],
+    [
+      105,
+      { value: 'DraftRejected', label: 'Draft Rejected', class: 'bg-danger' },
+    ],
+    [
+      1000,
+      {
+        value: 'RejectedAfterPay',
+        label: 'Rejected after Pay',
+        class: 'bg-danger',
+      },
+    ],
+    [
+      1001,
+      {
+        value: 'RejectedAfterPay',
+        label: 'Rejected after Pay',
+        class: 'bg-danger',
+      },
+    ],
+    [
+      1002,
+      {
+        value: 'RejectedAfterPay',
+        label: 'Rejected after Pay',
+        class: 'bg-danger',
+      },
+    ],
+    [
+      1003,
+      {
+        value: 'RejectedAfterPay',
+        label: 'Rejected after Pay',
+        class: 'bg-danger',
+      },
+    ],
   ]);
 
   constructor(
@@ -179,12 +264,15 @@ export class WageRequestApproval implements OnInit {
   async toggleAdvanceSearch() {
     this.advanceSearchPanelVisible = !this.advanceSearchPanelVisible;
   }
-  
+
   private async loadInitialLookups() {
     this.isLoading = true;
     this.cdr.markForCheck();
     try {
-      const subProjectRes: any = await this.api.POST('api/subproject/get?page=0&size=1000', {});
+      const subProjectRes: any = await this.api.POST(
+        'api/subproject/get?page=0&size=1000',
+        {}
+      );
       if (subProjectRes.data && subProjectRes.data.content) {
         this.subProjects = subProjectRes.data.content.map((sp: any) => ({
           id: sp.id,
@@ -200,7 +288,7 @@ export class WageRequestApproval implements OnInit {
       }
 
       this.paymentCycles = this.lookup.getPaymentCycleEnum();
-      
+
       this.statuses = this.getRoleSpecificStatuses();
 
       this.lookupsLoaded = true;
@@ -217,7 +305,7 @@ export class WageRequestApproval implements OnInit {
     }
   }
 
-  private getRoleSpecificStatuses(): {id: number, label: string}[] {
+  private getRoleSpecificStatuses(): { id: number; label: string }[] {
     let statusIds: number[] = [];
     switch (Number(this.roleId)) {
       case 2:
@@ -237,7 +325,26 @@ export class WageRequestApproval implements OnInit {
       .filter(([key]) => statusIds.includes(key))
       .map(([id, { label }]) => ({ id, label }));
   }
-
+  getStatusLabel(value: number): string {
+    const found = this.statuses.find((item) => item.id == value);
+    return found ? found.label : value.toString();
+  }
+  getStatusClass(status: number): string {
+    switch (status) {
+      case 0:
+        return 'bg-secondary'; // Draft
+      case 1:
+        return 'bg-info'; // Submitted
+      case 2:
+        return 'bg-success'; // Approved
+      case 3:
+        return 'bg-danger'; // Rejected
+      case 4:
+        return 'bg-primary'; // Paid
+      default:
+        return 'bg-secondary';
+    }
+  }
   private buildSearchBody() {
     console.log('DEBUG: Current Role ID is:', this.roleId);
     const f = this.searchForm.value;
@@ -311,14 +418,25 @@ export class WageRequestApproval implements OnInit {
         this.cdr.markForCheck();
       });
   }
-  
+
   async submitRowReview(wageRequest: WageRequest) {
-    if (wageRequest.selectedStatus === null || wageRequest.selectedStatus === undefined) {
-      this.messageService.add({ severity: 'warn', summary: 'Validation Error', detail: 'Please select an approval status.' });
+    if (
+      wageRequest.selectedStatus === null ||
+      wageRequest.selectedStatus === undefined
+    ) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Validation Error',
+        detail: 'Please select an approval status.',
+      });
       return;
     }
     if (wageRequest.selectedStatus === false && !wageRequest.remarksText) {
-      this.messageService.add({ severity: 'warn', summary: 'Validation Error', detail: 'Remarks are required for rejection.' });
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Validation Error',
+        detail: 'Remarks are required for rejection.',
+      });
       return;
     }
 
@@ -331,17 +449,27 @@ export class WageRequestApproval implements OnInit {
     if (wageRequest.remarksText) {
       formData.append('comments', wageRequest.remarksText);
     }
-    
+
     let endpoint = '';
-    switch(Number(this.roleId)) {
-        case 2: endpoint = '/api/wage-request-review/first'; break;
-        case 11: endpoint = '/api/wage-request-review/second'; break;
-        case 6: endpoint = '/api/wage-request-review/third'; break;
-        default:
-            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Invalid user role for submission.' });
-            wageRequest.isSubmitting = false;
-            this.cdr.markForCheck();
-            return;
+    switch (Number(this.roleId)) {
+      case 2:
+        endpoint = '/api/wage-request-review/first';
+        break;
+      case 11:
+        endpoint = '/api/wage-request-review/second';
+        break;
+      case 6:
+        endpoint = '/api/wage-request-review/third';
+        break;
+      default:
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Invalid user role for submission.',
+        });
+        wageRequest.isSubmitting = false;
+        this.cdr.markForCheck();
+        return;
     }
 
     try {
@@ -356,7 +484,7 @@ export class WageRequestApproval implements OnInit {
         });
         this.fetchPage(this.currentPage, this.pageSize);
       } else {
-         Swal.fire({
+        Swal.fire({
           icon: 'error',
           title: 'Error',
           text: responseData?.message || 'Failed to submit review.',
@@ -392,27 +520,25 @@ export class WageRequestApproval implements OnInit {
   }
 
   viewWageRequest(wageId: number, subprojectId: number) {
-    this.router.navigate(['/wage-request-approval/details', wageId, subprojectId]);
-  }
-
-  getStatusInfo(statusCode: number): StatusInfo {
-    return (
-      this.statusMap.get(statusCode) || {
-        value: 'Unknown',
-        label: 'Unknown Status',
-        class: 'bg-secondary',
-      }
-    );
+    this.router.navigate([
+      '/wage-request-approval/details',
+      wageId,
+      subprojectId,
+    ]);
   }
 
   getMonthLabel(value: number): string {
     const found = this.months.find((item) => item.value === value);
-    return found ? found.label : (value ? value.toString() : '');
+    return found ? found.label : value ? value.toString() : '';
   }
 
   getSubProjectName(id: number): string {
     const found = this.subProjects.find((sp) => sp.id === id);
-    return found ? `${found.workCode} - ${found.projectName}` : (id ? id.toString() : '');
+    return found
+      ? `${found.workCode} - ${found.projectName}`
+      : id
+      ? id.toString()
+      : '';
   }
 
   formatDate(date: Date | string): string {
