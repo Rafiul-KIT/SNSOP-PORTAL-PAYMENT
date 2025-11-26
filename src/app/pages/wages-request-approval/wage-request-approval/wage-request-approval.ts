@@ -276,8 +276,10 @@ export class WageRequestApproval implements OnInit {
     return body;
   }
 
-  fetchPage(page: number, size: number) {
-    this.isLoading = true;
+  fetchPage(page: number, size: number, showLoader: boolean = true) {
+    if (showLoader) {
+      this.isLoading = true;
+    }
     const body = this.buildSearchBody();
 
     this.api
@@ -311,6 +313,7 @@ export class WageRequestApproval implements OnInit {
           summary: 'Error',
           detail: 'Failed to fetch wage requests for approval.',
         });
+        this.wageRequests.forEach(req => req.isSubmitting = false);
       })
       .finally(() => {
         this.isLoading = false;
@@ -345,7 +348,6 @@ export class WageRequestApproval implements OnInit {
       });
       return;
     }
-
     wageRequest.isSubmitting = true;
     this.cdr.markForCheck();
 
@@ -394,13 +396,14 @@ export class WageRequestApproval implements OnInit {
           title: 'Submitted',
           text: 'Wage request review submitted successfully.',
         });
-        this.fetchPage(this.currentPage, this.pageSize);
+        this.fetchPage(this.currentPage, this.pageSize, false); // Pass false to not show full-page loader
       } else {
         Swal.fire({
           icon: 'error',
           title: 'Error',
           text: responseData?.message || 'Failed to submit review.',
         });
+        wageRequest.isSubmitting = false;
       }
     } catch (error: any) {
       console.error('Error submitting review:', error);
@@ -409,8 +412,8 @@ export class WageRequestApproval implements OnInit {
         title: 'Error',
         text: error.response?.data?.message || 'An unexpected error occurred.',
       });
-    } finally {
       wageRequest.isSubmitting = false;
+    } finally {
       this.cdr.markForCheck();
     }
   }
