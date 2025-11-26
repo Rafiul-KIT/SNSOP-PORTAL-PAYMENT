@@ -163,30 +163,30 @@
             </th>
         </tr>
         <tr>
-            <th>Serial</th>
-            <th>Request Number</th>
-            <th>Sub-Project</th>
-            <th>From Date</th>
-            <th>To Date</th>
-            <th>Year</th>
-            <th>Month</th>
-            <th>Payment Cycle</th>
-            <th>Status</th>
+            <th class="text-center">Serial</th>
+            <th class="text-center">Request Number</th>
+            <th class="text-center">Sub-Project</th>
+            <th class="text-center">From Date</th>
+            <th class="text-center">To Date</th>
+            <th class="text-center">Year</th>
+            <th class="text-center">Month</th>
+            <th class="text-center">Payment Cycle</th>
+            <th class="text-center">Status</th>
             <th class="text-center" [style]="{ width: '185px' }">Action</th>
         </tr>
     </ng-template>
 
     <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
         <tr>
-            <td>{{ rowIndex + 1 }}</td>
-            <td>{{ item.requestNumber || 'N/A' }}</td>
-            <td>{{ getSubProjectName(item.subprojectId) }}</td>
-            <td>{{ item.fromDate | date: 'dd/MM/yyyy' }}</td>
-            <td>{{ item.toDate | date: 'dd/MM/yyyy' }}</td>
-            <td>{{ item.requestYear }}</td>
-            <td>{{ getMonthLabel(item.requestMonthIndex) }}</td>
-            <td>Payment Cycle {{ item.paymentCycle }}</td>
-            <td>
+            <td class="text-center">{{ rowIndex + 1 }}</td>
+            <td class="text-center">{{ item.requestNumber || 'N/A' }}</td>
+            <td class="text-center">{{ getSubProjectName(item.subprojectId) }}</td>
+            <td class="text-center">{{ item.fromDate | date: 'dd/MM/yyyy' }}</td>
+            <td class="text-center">{{ item.toDate | date: 'dd/MM/yyyy' }}</td>
+            <td class="text-center">{{ item.requestYear }}</td>
+            <td class="text-center">{{ getMonthLabel(item.requestMonthIndex) }}</td>
+            <td class="text-center">Payment Cycle {{ item.paymentCycle }}</td>
+            <td class="text-center">
                 <span [class]="'badge ' + getStatusClass(item.status)">
                     {{ getStatusLabel(item.status) }}
                 </span>
