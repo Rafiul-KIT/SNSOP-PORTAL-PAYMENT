@@ -1,17 +1,20 @@
 <div class="header">
-<div class="portals" (click)="showPortalOptions = !showPortalOptions">
-  <i class="fas fa-braille hand"></i>
-  <div>
-    <small>Portal</small>
-    <span class="name">Payment</span>
-  </div>
-  <i class="fas fa-angle-{{ showPortalOptions ? 'down' : 'right' }} hand"></i>
-  <span class="vertical-line"></span>
-</div>
+  <!-- Portal selector (left) -->
+  <!-- <img src="SNSOP_logo.png" style="height: 30px; width: auto" />
+  &nbsp;&nbsp;&nbsp; -->
 
-<div class="menues">
-  <p-menubar [model]="menuList"></p-menubar>
-</div>
+  <div class="portals" (click)="showPortalOptions = !showPortalOptions">
+    <i class="fas fa-braille hand"></i>
+    <div>
+     <strong><h3 class="name">SNSOP</h3>
+     <span>Payment</span></strong>
+    </div>
+    <i class="fas fa-angle-{{ showPortalOptions ? 'down' : 'right' }} hand"></i>
+    <span class="vertical-line"></span>
+  </div>
+  <div class="menues">
+    <p-menubar [model]="menuList"></p-menubar>
+  </div>
 
 <div
   class="portals-option-wrapper"
@@ -34,7 +37,7 @@
   <div class="user-menu {{showUsermenu ? 'show' : ''}}" (mouseleave)="showUsermenu = false">
     <div class="item" (click)="goToProfile()">
       <i class="fas fa-user me-2"></i>
-      Profile
+       Profile
     </div>
     <div class="item" (click)="logout()">
       <i class="fas fa-sign-out-alt me-2"></i>

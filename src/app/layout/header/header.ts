@@ -201,9 +201,9 @@ export class Header {
 
     effect(() => {
       this.userInfo = this.apiService.loginState()?.user;
-      // if (this.userInfo?.roleId) {
-      //   this.loadMenusForUser(this.userInfo.roleId);
-      // }
+      if (this.userInfo?.roleId) {
+        // this.loadMenusForUser(this.userInfo.roleId);
+      }
     });
   }
 
@@ -212,7 +212,7 @@ export class Header {
   }
 
   goToProfile = () => {
-    window.location.href = `${environment.portals.master}/home/profile`;
+    this.router.navigateByUrl('/profile');
   };
 
   logout() {

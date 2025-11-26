@@ -22,6 +22,7 @@ import { WageRequestDrafts } from './pages/wages-request-approval/wage-request-d
 import { WageDashboard } from './pages/wages-request-approval/wage-dashboard/wage-dashboard';
 import { WageDashboardDis } from './pages/wages-request-approval/wage-dashboard-dis/wage-dashboard-dis';
 import { PayrollDownload } from './pages/payroll/payroll-download/payroll-download';
+import { Profile } from './pages/profile/profile';
 
 
 
@@ -29,6 +30,10 @@ export const routes: Routes = [
   {
     component: Dashboard,
     path: 'dashboard',
+  },
+   {
+    component: Profile,
+    path: 'profile',
   },
   {
     component: ProjectList,

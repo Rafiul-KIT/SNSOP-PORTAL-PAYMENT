@@ -1,0 +1,53 @@
+.profile-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 50px;
+}
+
+.profile-card {
+  text-align: center;
+  background: #fff;
+  padding: 100px 80px;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+.avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.custom-hr {
+  border: none; /* remove default border */
+  height: 4px; /* thickness of the line — make this larger for more boldness */
+  background-color: #007bff; /* any color you like */
+  width: 80%; /* optional: control width */
+  margin: 30px auto; /* center the hr and add space above/below */
+  border-radius: 50%; /* optional: rounded edges */
+}
+
+.uploader {
+  height: 50px;
+  width: 50px;
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff;
+  border: 2px solid orange;
+  color: orange;
+  transition: 0.3s;
+
+  &:hover {
+    background-color: orange;
+    border: 2px solid #ffffff;
+    color: #ffffff;
+    cursor: pointer;
+  }
+}
