@@ -4,7 +4,6 @@ import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { ChangeDetectorRef } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
-import { HttpClientModule } from '@angular/common/http'; 
 import {
   FormControl,
   FormGroup,
@@ -32,7 +31,7 @@ interface RoleInfo {
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [Loader, ButtonModule, CardModule, RouterModule, ReactiveFormsModule, BreadcrumbModule, Loader, Toast, HttpClientModule],
+  imports: [Loader, ButtonModule, CardModule, RouterModule, ReactiveFormsModule, BreadcrumbModule, Loader, Toast],
   templateUrl: './profile.html',
   styleUrl: './profile.scss',
   providers: [MessageService, HttpClient]
