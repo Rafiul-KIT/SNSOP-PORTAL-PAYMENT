@@ -27,7 +27,7 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { InputTextModule } from 'primeng/inputtext';
-import { LookupService } from '../../../services/lookup.service';
+import { LookupService, StatusWageEnum } from '../../../services/lookup.service';
 import Swal from 'sweetalert2';
 
 interface WageRequest {
@@ -45,18 +45,14 @@ interface WageRequest {
   selectedStatus?: boolean | null;
   remarksText?: string;
   isSubmitting?: boolean;
+  exchangeRate?: number;
+  attachment?: File;
 }
 
 interface SubProjectLookup {
   id: number;
   workCode: string;
   projectName: string;
-}
-
-interface StatusInfo {
-  value: string;
-  label: string;
-  class: string;
 }
 
 @Component({
@@ -126,105 +122,6 @@ export class WageRequestApproval implements OnInit {
     { label: 'Approve', value: true },
     { label: 'Reject', value: false },
   ];
-
-  private readonly statusMap = new Map<number, StatusInfo>([
-    [0, { value: 'Draft', label: 'Draft', class: 'bg-secondary' }],
-    [
-      1,
-      {
-        value: 'InitialReviewer',
-        label: 'To be Reviewed at Initial Reviewer',
-        class: 'bg-warning',
-      },
-    ],
-    [
-      2,
-      {
-        value: 'FinancialApprover',
-        label: 'To be Reviewed at Financial Approver',
-        class: 'bg-info',
-      },
-    ],
-    [
-      3,
-      {
-        value: 'FinalPaymentAuthorizer',
-        label: 'To be Reviewed at Final Payment Authorizer',
-        class: 'bg-primary',
-      },
-    ],
-    [
-      4,
-      {
-        value: 'FinalApproved',
-        label: 'Approved at Final Payment Authorizer',
-        class: 'bg-success',
-      },
-    ],
-    [5, { value: 'PaidAPI', label: 'Paid from API', class: 'bg-success' }],
-    [6, { value: 'PaidAPI', label: 'Paid from API', class: 'bg-success' }],
-    [
-      100,
-      {
-        value: 'RejectedInitial',
-        label: 'Rejected by Initial Reviewer',
-        class: 'bg-danger',
-      },
-    ],
-    [
-      101,
-      {
-        value: 'RejectedFinancial',
-        label: 'Rejected by Financial Approver',
-        class: 'bg-danger',
-      },
-    ],
-    [
-      102,
-      {
-        value: 'RejectedFinal',
-        label: 'Rejected by Final Payment Authorizer',
-        class: 'bg-danger',
-      },
-    ],
-    [103, { value: 'ClearedWB', label: 'Cleared by WB', class: 'bg-success' }],
-    [
-      105,
-      { value: 'DraftRejected', label: 'Draft Rejected', class: 'bg-danger' },
-    ],
-    [
-      1000,
-      {
-        value: 'RejectedAfterPay',
-        label: 'Rejected after Pay',
-        class: 'bg-danger',
-      },
-    ],
-    [
-      1001,
-      {
-        value: 'RejectedAfterPay',
-        label: 'Rejected after Pay',
-        class: 'bg-danger',
-      },
-    ],
-    [
-      1002,
-      {
-        value: 'RejectedAfterPay',
-        label: 'Rejected after Pay',
-        class: 'bg-danger',
-      },
-    ],
-    [
-      1003,
-      {
-        value: 'RejectedAfterPay',
-        label: 'Rejected after Pay',
-        class: 'bg-danger',
-      },
-    ],
-  ]);
 
   constructor(
     private fb: FormBuilder,
@@ -321,12 +218,12 @@ export class WageRequestApproval implements OnInit {
         statusIds = [];
         break;
     }
-    return Array.from(this.statusMap.entries())
-      .filter(([key]) => statusIds.includes(key))
-      .map(([id, { label }]) => ({ id, label }));
+    return StatusWageEnum
+      .filter(status => statusIds.includes(Number(status.id)))
+      .map(({ id, label }) => ({ id: Number(id), label }));
   }
   getStatusLabel(value: number): string {
-    const found = this.statuses.find((item) => item.id == value);
+    const found = StatusWageEnum.find(item => Number(item.id) === value);
     return found ? found.label : value.toString();
   }
   getStatusClass(status: number): string {
@@ -394,6 +291,8 @@ export class WageRequestApproval implements OnInit {
           selectedStatus: null,
           remarksText: '',
           isSubmitting: false,
+          exchangeRate: undefined,
+          attachment: undefined,
         }));
         this.totalRecords = data.totalElements || 0;
 
@@ -417,6 +316,13 @@ export class WageRequestApproval implements OnInit {
         this.isLoading = false;
         this.cdr.markForCheck();
       });
+  }
+
+  onFileSelect(event: any, item: WageRequest) {
+    const file = event.target.files[0];
+    if (file) {
+      item.attachment = file;
+    }
   }
 
   async submitRowReview(wageRequest: WageRequest) {
@@ -453,13 +359,19 @@ export class WageRequestApproval implements OnInit {
     let endpoint = '';
     switch (Number(this.roleId)) {
       case 2:
-        endpoint = '/api/wage-request-review/first';
-        break;
-      case 11:
         endpoint = '/api/wage-request-review/second';
         break;
-      case 6:
+      case 11:
         endpoint = '/api/wage-request-review/third';
+        if (wageRequest.exchangeRate) {
+          formData.append('exchangeRate', wageRequest.exchangeRate.toString());
+        }
+        if (wageRequest.attachment) {
+          formData.append('attachment', wageRequest.attachment);
+        }
+        break;
+      case 6:
+        endpoint = '/api/wage-request-review/fourth';
         break;
       default:
         this.messageService.add({
