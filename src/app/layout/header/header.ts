@@ -93,7 +93,7 @@ export class Header {
         routerLinkActiveOptions: 'active',
       },
       {
-        label: ' Wage Request ',
+        label: 'Wage Request Apply ',
         icon: 'fas fa-hand-holding-usd',
         items: [
           {
