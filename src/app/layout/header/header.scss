@@ -22,7 +22,15 @@
     .name {
       color: #0ea5e9;
       text-transform: uppercase;
+      margin: 0;
+      line-height: 1.1;
     }
+
+    strong span {
+      display: block;
+      margin-top: 2px;
+    }
+
 
     i {
       font-size: 24px;
@@ -66,9 +74,11 @@
     &.show {
       right: 0px;
     }
+
     .item {
       width: 100%;
       padding: 5px 10px;
+
       &:hover {
         cursor: pointer;
         background-color: #b7cfe7;
