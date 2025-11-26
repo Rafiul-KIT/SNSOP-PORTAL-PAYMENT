@@ -76,7 +76,7 @@
                                   <div class="col-md-6 col-lg-6 mb-3">
                                     <label for="countyId" class="form-label fw-semibold">County <span class="text-danger">*</span></label>
                                                           <p-select id="countyId" formControlName="countyId" [options]="counties" optionLabel="name" optionValue="id" placeholder="Select County" class="w-100"
-                                              [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('countyId') }" [disabled]="counties.length === 0"></p-select>                                    @if (isFieldInvalid('countyId')) {
+                                              [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('countyId') }" ></p-select>                                    @if (isFieldInvalid('countyId')) {
                                       <small class="text-danger">County is required</small>
                                     }
                                   </div>
@@ -84,7 +84,7 @@
                                   <div class="col-md-6 col-lg-6 mb-3">
                                     <label for="payamId" class="form-label fw-semibold">Payam <span class="text-danger">*</span></label>
                                                           <p-select id="payamId" formControlName="payamId" [options]="payams" optionLabel="name" optionValue="id" placeholder="Select Payam" class="w-100"
-                                              [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('payamId') }" [disabled]="payams.length === 0"></p-select>                                    @if (isFieldInvalid('payamId')) {
+                                              [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('payamId') }" ></p-select>                                    @if (isFieldInvalid('payamId')) {
                                       <small class="text-danger">Payam is required</small>
                                     }
                                   </div>
@@ -92,7 +92,7 @@
                                   <div class="col-md-6 col-lg-6 mb-3">
                                     <label for="bomaId" class="form-label fw-semibold">Boma <span class="text-danger">*</span></label>
                                                           <p-select id="bomaId" formControlName="bomaId" [options]="bomas" optionLabel="name" optionValue="id" placeholder="Select Boma" class="w-100"
-                                              [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('bomaId') }" [disabled]="bomas.length === 0"></p-select>                                    @if (isFieldInvalid('bomaId')) {
+                                              [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('bomaId') }" ></p-select>                                    @if (isFieldInvalid('bomaId')) {
                                       <small class="text-danger">Boma is required</small>
                                     }
                                   </div>

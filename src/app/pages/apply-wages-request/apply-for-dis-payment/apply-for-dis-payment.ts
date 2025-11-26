@@ -85,47 +85,56 @@ export class ApplyForDisPayment implements OnInit {
     this.breadcrumbItems = [{ label: 'Apply for DIS Payment' }];
   }
 
-  initializeForm(): void {
-    this.wagesForm = this.fb.group({
-      requestYear: [new Date().getFullYear(), Validators.required],
-      requestMonthIndex: [new Date().getMonth() + 1, Validators.required],
-      stateId: [null, Validators.required],
-      countyId: [null, Validators.required],
-      payamId: [null, Validators.required],
-      bomaId: [null, Validators.required],
-      paymentCycleId: [null, Validators.required]
-    });
+initializeForm(): void {
+  this.wagesForm = this.fb.group({
+    requestYear: [new Date().getFullYear(), Validators.required],
+    requestMonthIndex: [new Date().getMonth() + 1, Validators.required],
+    stateId: [null, Validators.required],
+    countyId: [{ value: null, disabled: true }, Validators.required],
+    payamId: [{ value: null, disabled: true }, Validators.required],
+    bomaId: [{ value: null, disabled: true }, Validators.required],
+    paymentCycleId: [null, Validators.required]
+  });
 
-    this.wagesForm.get('stateId')?.valueChanges.subscribe(stateId => {
-      this.wagesForm.get('countyId')?.reset();
-      this.wagesForm.get('payamId')?.reset();
-      this.wagesForm.get('bomaId')?.reset();
-      this.counties = [];
-      this.payams = [];
-      this.bomas = [];
-      if (stateId) {
-        this.loadCounties(stateId);
-      }
-    });
+  this.wagesForm.get('stateId')?.valueChanges.subscribe(stateId => {
+    this.wagesForm.get('countyId')?.reset();
+    this.wagesForm.get('payamId')?.reset();
+    this.wagesForm.get('bomaId')?.reset();
+    this.counties = [];
+    this.payams = [];
+    this.bomas = [];
+    if (stateId) {
+      this.wagesForm.get('countyId')?.enable();
+      this.loadCounties(stateId);
+    } else {
+      this.wagesForm.get('countyId')?.disable();
+    }
+  });
 
-    this.wagesForm.get('countyId')?.valueChanges.subscribe(countyId => {
-      this.wagesForm.get('payamId')?.reset();
-      this.wagesForm.get('bomaId')?.reset();
-      this.payams = [];
-      this.bomas = [];
-      if (countyId) {
-        this.loadPayams(countyId);
-      }
-    });
+  this.wagesForm.get('countyId')?.valueChanges.subscribe(countyId => {
+    this.wagesForm.get('payamId')?.reset();
+    this.wagesForm.get('bomaId')?.reset();
+    this.payams = [];
+    this.bomas = [];
+    if (countyId) {
+      this.wagesForm.get('payamId')?.enable();
+      this.loadPayams(countyId);
+    } else {
+      this.wagesForm.get('payamId')?.disable();
+    }
+  });
 
-    this.wagesForm.get('payamId')?.valueChanges.subscribe(payamId => {
-      this.wagesForm.get('bomaId')?.reset();
-      this.bomas = [];
-      if (payamId) {
-        this.loadBomas(payamId);
-      }
-    });
-  }
+  this.wagesForm.get('payamId')?.valueChanges.subscribe(payamId => {
+    this.wagesForm.get('bomaId')?.reset();
+    this.bomas = [];
+    if (payamId) {
+      this.wagesForm.get('bomaId')?.enable();
+      this.loadBomas(payamId);
+    } else {
+      this.wagesForm.get('bomaId')?.disable();
+    }
+  });
+}
 
   initializeSubmissionForm(): void {
     this.submissionForm = this.fb.group({
