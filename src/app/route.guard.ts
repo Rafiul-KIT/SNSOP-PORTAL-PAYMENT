@@ -1,61 +1,98 @@
 import { inject } from '@angular/core';
-import { CanActivateChildFn, Router } from '@angular/router';
+import { CanActivateFn, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
 import { jwtDecode } from 'jwt-decode';
 import { environment } from '../environments/environment';
 
-export const routeGuard: CanActivateChildFn = (route: any) => {
+export const routeGuard: CanActivateFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
   const cookieService = inject(CookieService);
   const router = inject(Router);
-  let lState: boolean = true; // Default state is true, meaning access is allowed
 
   const ACCESS_TOKEN = environment.cookie_name;
   const token = cookieService.get(ACCESS_TOKEN);
 
-  // Step 1: Check if the user is logged in (token exists in cookies)
-  const isLoggedIn = token ? true : false;
-  if (!isLoggedIn) {
-    lState = false; // Set to false if the user is not logged in
-    const redirectUrl = `${environment.portals.master}/#/landing`; // Use hash-based routing for production
-    window.location.href = redirectUrl; // Redirect to the correct landing page
+  // Check if the user is logged in
+  if (!token) {
+    const redirectUrl = `${environment.portals.master}/#/landing`;
+    window.location.href = redirectUrl;
+    return false;
   }
 
-  // Step 2: If the user is logged in, decode the JWT token
+  // Decode the JWT token
   let decoded: any;
   try {
     decoded = jwtDecode(token);
   } catch {
-    router.navigateByUrl('/landing'); // If decoding fails, redirect to the landing page
-    return false; // Prevent access to the route
+    router.navigateByUrl('/landing');
+    return false;
   }
 
-  // Step 3: Check if the token is expired
+  // Check if the token is expired
   if (decoded.exp && Date.now() >= decoded.exp * 1000) {
-    router.navigateByUrl('/landing'); // If expired, redirect to landing
-    return false; // Prevent access to the route
+    router.navigateByUrl('/landing');
+    return false;
   }
 
-  // Step 4: Get the menus from sessionStorage for the current user's role
+  // Get menus from sessionStorage
   const menus = sessionStorage.getItem(`menus_${decoded.roleId}`);
   if (!menus) {
-    router.navigateByUrl('/unauthorized'); // If no menus found in sessionStorage, redirect to unauthorized
-    return false; // Prevent access to the route
+    router.navigateByUrl('/unauthorized');
+    return false;
   }
 
-  // Parse the menus to check for route access
   const permittedMenus = JSON.parse(menus);
+  const targetUrl = state.url.split('?')[0]; // Strip query parameters
 
-  // Step 5: Check if the target route is allowed based on the user's role
-  const targetUrl = route.routeConfig?.path; // The current route's path
-  const allowed = permittedMenus.some((menu: any) => menu.url === targetUrl);
+  const hasAccess = (menus: any[], url: string): boolean => {
+    const cleanUrl = url.split('?')[0]; // Remove query parameters from the URL
+    const urlSegments = cleanUrl.split('/').filter(s => s.length > 0);
+
+    for (const menu of menus) {
+      if (!menu.url) continue;
+
+      const menuUrlSegments = menu.url.split('/').filter((s: string) => s.length > 0);
+
+      // Check for exact match or parameterized match
+      if (urlSegments.length === menuUrlSegments.length) {
+        let match = true;
+        for (let i = 0; i < urlSegments.length; i++) {
+          // If the menu segment is a parameter placeholder (e.g., ':id'), it matches any value
+          // Otherwise, segments must match exactly
+          if (menuUrlSegments[i].startsWith(':') || menuUrlSegments[i] === urlSegments[i]) {
+            continue;
+          } else {
+            match = false;
+            break;
+          }
+        }
+        if (match) {
+          return true;
+        }
+      }
+    }
+    // If the route is not found in the menu, allow access to known dynamic paths like:
+    //  - /beneficiary/details/:id
+    //  - /beneficiary/edit/:applicationId
+    //  - Any other parameterized route you want to allow
+    const dynamicRoutePrefixes = ['/beneficiary/details/','/beneficiary/edit/','/beneficiary/migrate/', '/adjudication/', '/report/', '/restore/', '/pending-beneficiary/', '/beneficiary-approval/', '/beneficiary-audit/'];
+
+    // Check if the route starts with any of the dynamic prefixes
+    for (const prefix of dynamicRoutePrefixes) {
+      if (cleanUrl.startsWith(prefix)) {
+        return true; // Allow access to dynamic routes
+      }
+    }
+
+    return false;
+  };
+
+  const allowed = hasAccess(permittedMenus, targetUrl);
 
   if (!allowed) {
     console.warn('Access denied for route:', targetUrl);
-    router.navigateByUrl('/unauthorized'); // Redirect to unauthorized if no access
-    return false; // Prevent access to the route
+    router.navigateByUrl('/unauthorized');
+    return false;
   }
 
-  // If all checks pass, allow access to the route
-  return lState; // Return the value of lState, which is true if the user is logged in and authorized
+  return true;
 };
-

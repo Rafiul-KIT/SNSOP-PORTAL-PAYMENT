@@ -23,6 +23,7 @@ import { WageDashboard } from './pages/wages-request-approval/wage-dashboard/wag
 import { WageDashboardDis } from './pages/wages-request-approval/wage-dashboard-dis/wage-dashboard-dis';
 import { PayrollDownload } from './pages/payroll/payroll-download/payroll-download';
 import { Profile } from './pages/profile/profile';
+import { routeGuard } from './route.guard';
 
 
 
@@ -37,7 +38,7 @@ export const routes: Routes = [
   },
   {
     component: ProjectList,
-    path: 'project-list',  
+    path: 'project-list',
   },
     {
     component: SubProjectList,
@@ -61,7 +62,7 @@ export const routes: Routes = [
   },
     {
     component: BeneficiaryAttendance,
-    path: 'beneficiary-attendance',  
+    path: 'beneficiary-attendance', 
   },
 
     {
