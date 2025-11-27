@@ -149,7 +149,7 @@ export class BeneficiarySubprojectRemove implements OnInit {
       typeOfWork: [null],
       payam: [{ value: null, disabled: true }],
       boma: [{ value: null, disabled: true }],
-      status: [null],
+      status: ['InProgress'],
       workCode: [''],
       workActivity: [null],
       screeningStatus: [null],
@@ -310,7 +310,10 @@ export class BeneficiarySubprojectRemove implements OnInit {
     this.fetchPage(this.currentPage, this.pageSize);
     this.cdr.markForCheck();
   }
-
+  getTypeOfMeetingLabel(value: string): string {
+    const found = TypeOfMeetingEnum.find(item => item.value === value);
+    return found ? found.label : value;
+  }
   // ---------- Actions ----------
   beneficiaryAssignment(item: SubProjectDto) {
     if (!item?.id) return;

@@ -1,1 +1,283 @@
-<p>wage-request-details works!</p>
+@if (isLoading) {
+<app-loader></app-loader>
+} @else {
+<div class="breadcrumb-wrapper">
+    <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
+</div>
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-11">
+            <!-- Error State -->
+            @if (apiError && !wageRequest) {
+            <div class="alert alert-danger d-flex align-items-center" role="alert">
+                <i class="pi pi-exclamation-triangle me-2"></i>
+                <div>{{ apiError }}</div>
+            </div>
+
+            }
+
+            <!-- Success State - Wage Request Details -->
+            @if (wageRequest) {
+            <p-card class="shadow-sm border-0">
+                <!-- Header with Status -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="mb-0 text-success">
+                        <i class="pi pi-file-edit me-2"></i>
+                        Wage Request Details
+                    </h4>
+
+                </div>
+
+                <p-divider></p-divider>
+
+                <!-- Request Information Section -->
+                <div class="row g-3 mb-3">
+                    <!-- Basic Information Card -->
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-secondary mb-3 d-flex align-items-center">
+                                    <i class="pi pi-info-circle me-2"></i>
+                                    <span>Basic Information</span>
+                                </h5>
+
+                                <div class="list-group list-group-flush">
+                                    @if (subproject) {
+
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                        <span class="text-muted">Project Name:</span>
+                                        <span class="fw-semibold text-dark">{{ subproject.projectName }}</span>
+                                    </div>
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                        <span class="text-muted">Work Code:</span>
+                                        <span class="fw-semibold text-dark">{{ subproject.workCode }}</span>
+                                    </div>
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                        <span class="text-muted">State:</span>
+                                        <span class="fw-semibold text-dark">{{ subproject.stateName }}</span>
+                                    </div>
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                        <span class="text-muted">County:</span>
+                                        <span class="fw-semibold text-dark">{{ subproject.countyName }}</span>
+                                    </div>
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                        <span class="text-muted">Payam:</span>
+                                        <span class="fw-semibold text-dark">{{ subproject.payamName }}</span>
+                                    </div>
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 py-2">
+                                        <span class="text-muted">Boma:</span>
+                                        <span class="fw-semibold text-dark">{{ subproject.bomaName }}</span>
+                                    </div>
+                                    }
+                                    @else {
+                                           <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                        <span class="text-muted">Project Name:</span>
+                                        <span class="fw-semibold text-dark">Direct Income Support</span>
+                                    </div>
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                        <span class="text-muted">Work Code:</span>
+                                        <span class="fw-semibold text-dark">DIS-Direct Income Support</span>
+                                    </div>
+                                    }
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Period & Schedule Card -->
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-secondary mb-3 d-flex align-items-center">
+                                    <i class="pi pi-calendar me-2"></i>
+                                    <span>Period & Schedule</span>
+                                </h5>
+
+                                <div class="list-group list-group-flush">
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                        <span class="text-muted">Request Number:</span>
+                                        <span class="fw-semibold text-dark">{{ wageRequest.requestNumber || '—'
+                                            }}</span>
+                                    </div>
+
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                        <span class="text-muted">Payment Cycle:</span>
+                                        <span class="fw-semibold text-dark">{{ wageRequest.paymentCycle }}</span>
+                                    </div>
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                        <span class="text-muted">Request Year:</span>
+                                        <span class="fw-semibold text-dark">{{ wageRequest.requestYear }}</span>
+                                    </div>
+
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                        <span class="text-muted">Request Month:</span>
+                                        <span class="fw-semibold text-dark">{{
+                                            getMonthName(wageRequest.requestMonthIndex) }}</span>
+                                    </div>
+
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                        <span class="text-muted">From Date:</span>
+                                        <span class="fw-semibold text-dark">{{ formatDate(wageRequest.fromDate)
+                                            }}</span>
+                                    </div>
+
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                        <span class="text-muted">To Date:</span>
+                                        <span class="fw-semibold text-dark">{{ formatDate(wageRequest.toDate) }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Remarks Section (if exists) -->
+                @if (wageRequest.remarks) {
+                <p-divider></p-divider>
+
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title text-secondary mb-3 d-flex align-items-center">
+                                    <i class="pi pi-comment me-2"></i>
+                                    <span>Remarks</span>
+                                </h5>
+                                <p class="mb-0 text-dark">{{ wageRequest.remarks }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                }
+
+                <p-divider></p-divider>
+
+                <!-- Beneficiary List Table -->
+                @if (wageRequest) {
+                <p-card class="mt-4 shadow-sm border-0">
+                    <h5 class="mb-3 text-success">
+                        <i class="pi pi-users me-2"></i>
+                        Beneficiaries
+                    </h5>
+                    <p-table [value]="beneficiaries" [loading]="isBeneficiaryLoading" responsiveLayout="scroll"
+                        [paginator]="true" [rows]="beneficiaryPageSize" [totalRecords]="totalBeneficiaries"
+                        (onPageChange)="onBeneficiaryPageChange($event)" [lazy]="true"
+                        [rowsPerPageOptions]="[10, 25, 50]" class="p-datatable-sm">
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th>House Hold Number</th>
+                                <th>Name</th>
+                                <th>Gender</th>
+                                <th>Age</th>
+                                <th>Phone</th>
+                                <th>Total Days</th>
+                                <th>Payment Status</th>
+                                <th>Payment Date</th>
+                                <th>Wage (USD)</th>
+                                <th>Exchange Rate</th>
+                                <th>Wage (SSP)</th>
+                                <th>Total (USD)</th>
+                                <th>Total (SSP)</th>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="body" let-bene>
+                            <tr>
+                                <td>{{ bene.householdNumber }}</td>
+                                <td>{{ bene.beneficiaryName }}</td>
+                                <td>{{ bene.gender }}</td>
+                                <td>{{ bene.age }}</td>
+                                <td>{{ bene.phoneNo }}</td>
+                                <td>{{ bene.totalDays }}</td>
+                                <td>{{ bene.paymentStatus == 1 ? 'Paid' : 'Unpaid' }}</td>
+
+                                <td>{{ formatDate(bene.paymentDoneAt) }}</td>
+                                <td>{{ bene.wageRateUSD | number:'1.2-2' }}</td>
+                                <td>{{ bene.exchangeRate | number:'1.2-2' }}</td>
+                                <td>{{ bene.wageRateSSP | number:'1.2-2' }}</td>
+                                <td>{{ bene.wageUsdTotal | number:'1.2-2' }}</td>
+                                <td>{{ bene.wageSspTotal | number:'1.2-2' }}</td>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="emptymessage">
+                            <tr>
+                                <td colspan="13" class="text-center">No beneficiaries found.</td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
+                </p-card>
+                }
+                <!-- Review Form Card -->
+                @if (wageRequest && roleId === 14) {
+                <p-card class="mt-4 shadow-sm border-0">
+                    <h5 class="mb-3 text-success">
+                        <i class="pi pi-check-circle me-2"></i>
+                        Review Wage Request
+                    </h5>
+                    <form [formGroup]="reviewForm" (ngSubmit)="onSubmitReview()">
+                        <div class="row d-flex flex-column g-3">
+                            <div class="d-flex flex-column col-2 gap-2">
+                                <label for="approved" class="form-label fw-semibold">Approval Status</label>
+                                <p-select id="approved" formControlName="approved" [options]="approvedOptions"
+                                    optionLabel="label" placeholder="Select Approval Status"
+                                    [ngClass]="{ 'ng-invalid ng-dirty border-danger': reviewForm.get('approved')?.invalid && reviewForm.get('approved')?.touched }"
+                                    class="w-10">
+                                </p-select>
+                                @if (reviewForm.get('approved')?.invalid && reviewForm.get('approved')?.touched) {
+                                <small class="p-error text-danger mt-1 d-block">Approval Status is required.</small>
+                                }
+                            </div>
+
+                       
+
+                            <!-- <div class="col-2">
+                                <label for="attachment" class="form-label fw-semibold">Attachment (Optional)</label>
+                                <input type="file" class="form-control " id="attachment"
+                                    (change)="onFileSelected($event)" accept="image/*,.pdf">
+                                @if (selectedFile) {
+                                <div class="mt-2 text-muted">
+                                    <i class="pi pi-file me-1"></i>
+                                    Selected file: {{ selectedFile.name }}
+                                </div>
+                                }
+                            </div> -->
+
+                            <div class="col-2">
+                                @for (msg of reviewMessage; track msg) {
+                                <p-message [severity]="msg.severity" [text]="msg.detail" class="mb-2 d-block">
+                                </p-message>
+                                }
+                            </div>
+
+                            <div class="col-12">
+                                <p-button type="submit" label="Submit Review" icon="pi pi-send"
+                                    [loading]="isReviewSubmitting"
+                                    [disabled]="reviewForm.invalid || isReviewSubmitting">
+                                </p-button>
+                            </div>
+                        </div>
+                    </form>
+                </p-card>
+                }
+
+            </p-card>
+            }
+        </div>
+    </div>
+</div>
+}
