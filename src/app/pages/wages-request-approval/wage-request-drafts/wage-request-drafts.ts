@@ -10,6 +10,8 @@ import {
   FormGroup,
   FormsModule,
   ReactiveFormsModule,
+  ValidatorFn,
+  AbstractControl,
 } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -50,6 +52,18 @@ interface SubProjectLookup {
   workCode: string;
   projectName: string;
 }
+
+const dateRangeValidator: ValidatorFn = (
+  control: AbstractControl
+): { [key: string]: boolean } | null => {
+  const fromDate = control.get('fromDate')?.value;
+  const toDate = control.get('toDate')?.value;
+
+  if (fromDate && toDate && fromDate > toDate) {
+    return { dateRangeInvalid: true };
+  }
+  return null;
+};
 
 @Component({
   selector: 'app-wage-request-list',
@@ -170,7 +184,7 @@ export class WageRequestDrafts implements OnInit {
       paymentCycle: [null],
       status: [null],
       requestNumber: [''],
-    });
+    }, { validators: dateRangeValidator });
   }
 
   initBreadcrumb() {
@@ -274,6 +288,14 @@ export class WageRequestDrafts implements OnInit {
   }
 
   searchWageRequests() {
+    if (this.searchForm.invalid) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Validation Error',
+        detail: 'From Date cannot be after To Date.',
+      });
+      return;
+    }
     this.currentPage = 0;
     this.fetchPage(this.currentPage, this.pageSize);
   }

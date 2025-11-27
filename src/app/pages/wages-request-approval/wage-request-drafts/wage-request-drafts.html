@@ -55,6 +55,11 @@
                 </p-datepicker >
                 <label>To Date</label>
             </p-floatlabel>
+            @if(searchForm.hasError('dateRangeInvalid')) {
+            <div class="text-danger small-text mt-1">
+                From Date cannot be after To Date.
+            </div>
+            }
         </div>
 
         <!-- Payment Cycle -->
@@ -222,5 +227,3 @@
 </p-paginator>
 
 }
-
-
