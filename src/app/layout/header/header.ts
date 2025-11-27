@@ -93,18 +93,23 @@ export class Header {
         routerLinkActiveOptions: 'active',
       },
       {
-        label: ' Wage Request ',
+        label: 'Wage Request Apply ',
         icon: 'fas fa-hand-holding-usd',
         items: [
           {
-            label: 'Wages Request For LIPW',
+            label: 'Apply For LIPW',
             icon: 'fas fa-list',
             routerLink: '/apply-wage-request/lipw',
           },
           {
-            label: 'Benefits For DIS',
+            label: 'Apply For DIS',
             icon: 'fas fa-list',
             routerLink: '/apply-wage-request/dis',
+          },
+             {
+            label: 'List of Wages',
+            icon: 'fas fa-list',
+            routerLink: '/apply-wage-request/wages',
           },
         ],
       },
@@ -118,15 +123,11 @@ export class Header {
             routerLink: '/wage-request-approval/drafts',
           },
           {
-            label: 'Wage Request For Lipw ',
+            label: 'Wage Request Approval',
             icon: 'fa fa-check',
-            routerLink: '/wage-request-approval/lipw',
+            routerLink: '/wage-request-approval/wage-request-approval',
           },
-            {
-            label: 'Benefits For Dis ',
-            icon: 'fa fa-check',
-            routerLink: '/wage-request-approval/dis',
-          },
+
         ],
       },
 

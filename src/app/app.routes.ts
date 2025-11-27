@@ -19,9 +19,12 @@ import { BeneficiaryRemove } from './pages/beneficiary-assignment/beneficiary-re
 import { BeneficiarySubprojectRemove } from './pages/beneficiary-assignment/beneficiary-subproject-remove/beneficiary-subproject-remove';
 import { BeneficiarySubprojectList } from './pages/beneficiary-assignment/beneficiary-subproject-list/beneficiary-subproject-list';
 import { WageRequestDrafts } from './pages/wages-request-approval/wage-request-drafts/wage-request-drafts';
-import { WageDashboard } from './pages/wages-request-approval/wage-dashboard/wage-dashboard';
+import { WageDashboard } from './pages/wages-request-approval/wage-dashboard-lipw/wage-dashboard';
 import { WageDashboardDis } from './pages/wages-request-approval/wage-dashboard-dis/wage-dashboard-dis';
+import { WageRequestDetails } from './pages/wages-request-approval/wage-request-details/wage-request-details';
+import { WageRequestApproval } from './pages/wages-request-approval/wage-request-approval/wage-request-approval';
 import { PayrollDownload } from './pages/payroll/payroll-download/payroll-download';
+import { ListOfWages } from './pages/apply-wages-request/list-of-wages/list-of-wages';
 import { Profile } from './pages/profile/profile';
 import { routeGuard } from './route.guard';
 
@@ -126,6 +129,12 @@ export const routes: Routes = [
         path: 'create/:id',
         component: ApplyForWagesPaymentComponent,
       },
+       {
+        path: 'wages',
+        component: ListOfWages,
+      },
+           
+
     ],
   },
   {
@@ -135,15 +144,16 @@ export const routes: Routes = [
         path: 'drafts',
         component: WageRequestDrafts,
       },
-      {
-        path: 'lipw',
-        component: WageDashboard,
+        {
+        path: 'wage-request-approval',
+       component: WageRequestApproval,
       },
       {
-        path: 'dis',
-        component: WageDashboardDis,
-      },
+       path: 'details/:wageId/:subprojectId',
 
+        component: WageRequestDetails,
+      }
+           
 
     ],
   },

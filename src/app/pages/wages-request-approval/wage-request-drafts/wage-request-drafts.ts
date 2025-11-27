@@ -20,12 +20,16 @@ import { TooltipModule } from 'primeng/tooltip';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { SelectModule } from 'primeng/select';
-import { DialogModule } from 'primeng/dialog';
+
 import { DatePickerModule } from 'primeng/datepicker';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageService } from 'primeng/api';
 import { ApiService } from '../../../services/api.service';
-import { LookupService, StatusEnum, StatusWageEnum } from '../../../services/lookup.service';
+import {
+  LookupService,
+  StatusWageEnum,
+  PaymentCycleEnum,
+} from '../../../services/lookup.service';
 import { Loader } from '../../../components/loader/loader';
 
 interface WageRequestDto {
@@ -50,7 +54,7 @@ interface SubProjectLookup {
 @Component({
   selector: 'app-wage-request-list',
   templateUrl: './wage-request-drafts.html',
-  styleUrl: './wage-request-drafts.html',
+  styleUrl: './wage-request-drafts.scss',
   standalone: true,
   imports: [
     CommonModule,
@@ -59,7 +63,6 @@ interface SubProjectLookup {
     TableModule,
     ButtonModule,
     ToastModule,
-    DialogModule,
     PaginatorModule,
     BreadcrumbModule,
     FloatLabelModule,
@@ -95,14 +98,8 @@ export class WageRequestDrafts implements OnInit {
     { label: 'November', value: 11 },
     { label: 'December', value: 12 },
   ];
-  paymentCycles: any[] = [
-    { label: 'Cycle 1', value: 1 },
-    { label: 'Cycle 2', value: 2 },
-    { label: 'Cycle 3', value: 3 },
-    { label: 'Cycle 4', value: 4 },
-  ];
+  paymentCycles: any[] = [];
   statuses: any[] = [];
-
   wageRequests: WageRequestDto[] = [];
   totalRecords = 0;
 
@@ -112,10 +109,6 @@ export class WageRequestDrafts implements OnInit {
   currentPage = 0;
   pageSize = 10;
   advanceSearchPanelVisible = false;
-
-  displayDeleteDialog = false;
-  deleteComment = '';
-  currentRequestIdToDelete: number | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -158,7 +151,10 @@ export class WageRequestDrafts implements OnInit {
   }
 
   async ngOnInit() {
-    this.statuses = StatusWageEnum;
+    this.statuses = StatusWageEnum.filter(
+      (status) => Number(status.id) === 0 || Number(status.id) === 100
+    ).map((status) => ({ id: Number(status.id), label: status.label }));
+    this.paymentCycles = this.lookup.getPaymentCycleEnum();
     this.initBreadcrumb();
     this.initForm();
     this.fetchPage(this.currentPage, this.pageSize);
@@ -206,7 +202,7 @@ export class WageRequestDrafts implements OnInit {
 
   private buildSearchBody(page: number, size: number) {
     const f = this.searchForm.value;
-    return {
+    const body: any = {
       id: null,
       subprojectId: f.subprojectId || null,
       fromDate: f.fromDate ? this.formatDate(f.fromDate) : null,
@@ -214,10 +210,17 @@ export class WageRequestDrafts implements OnInit {
       requestYear: f.requestYear || null,
       requestMonthIndex: f.requestMonthIndex || null,
       paymentCycle: f.paymentCycle || null,
-      status: f.status !== null ? f.status : null,
       requestNumber: f.requestNumber ? f.requestNumber.trim() : null,
       remarks: null,
     };
+
+    if (f.status !== null && f.status !== undefined) {
+      body.status = f.status;
+    } else {
+      body.status = 0; // Default search for Draft
+    }
+
+    return body;
   }
 
   private formatDate(date: Date): string {
@@ -282,82 +285,17 @@ export class WageRequestDrafts implements OnInit {
     this.cdr.markForCheck();
   }
 
-  editWageRequest(id: number) {
-    this.router.navigate(['/wage-request', id]);
-  }
+viewWageRequest(wageId: number, subprojectId: number) {
+  this.router.navigate([
+    '/wage-request-approval/details',
+    wageId,
+    subprojectId
+  ]);
+}
 
-  deleteWageRequest(id: number) {
-    this.currentRequestIdToDelete = id;
-    this.deleteComment = '';
-    this.displayDeleteDialog = true;
-    this.cdr.markForCheck();
-  }
-
-  async confirmDelete() {
-    if (this.currentRequestIdToDelete === null) return;
-
-    try {
-      const getPayload = { id: this.currentRequestIdToDelete };
-      const wageRequestDetailsRes: any = await this.api.POST(
-        `api/wage-request/get?page=0&size=1`,
-        getPayload
-      );
-
-      if (
-        !wageRequestDetailsRes.data ||
-        !wageRequestDetailsRes.data.content ||
-        wageRequestDetailsRes.data.content.length === 0
-      ) {
-        throw new Error('Wage request details not found.');
-      }
-
-      const wageRequestToUpdate: WageRequestDto =
-        wageRequestDetailsRes.data.content[0];
-
-      wageRequestToUpdate.status = 3; // Rejected
-      const finalPayload = {
-        ...wageRequestToUpdate,
-        remarks: this.deleteComment,
-      };
-
-      const res: any = await this.api.POST(
-        `api/wage-request/save`,
-        finalPayload
-      );
-
-      if (res.data) {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Request Rejected',
-          detail: `Wage request ${this.currentRequestIdToDelete} was successfully rejected.`,
-        });
-        this.fetchPage(this.currentPage, this.pageSize);
-      } else {
-        throw new Error('API did not return success response.');
-      }
-    } catch (err: any) {
-      console.error('Error rejecting wage request:', err);
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: `Failed to reject wage request: ${
-          err.message || 'Unknown error'
-        }.`,
-      });
-    } finally {
-      this.cancelDelete();
-    }
-  }
-
-  cancelDelete() {
-    this.displayDeleteDialog = false;
-    this.currentRequestIdToDelete = null;
-    this.deleteComment = '';
-    this.cdr.markForCheck();
-  }
 
   getStatusLabel(value: number): string {
-    const found = this.statuses.find((item) => item.value === value);
+    const found = StatusWageEnum.find((item) => Number(item.id) === value);
     return found ? found.label : value.toString();
   }
 
