@@ -1,0 +1,53 @@
+<!-- <div class="profile-container">
+  <div class="profile-card">
+    <img src="/../images/dummyHuman.jpg" alt="User Avatar" class="avatar mb-3" />
+    <hr class="custom-hr" />
+    <h4 align="left">Name: {{ user.username }}</h4>
+    <h5 align="left" class="text-muted">Role: {{ user.role }}</h5>
+    <h5 align="left">Mail: {{ user.email }}</h5>
+  </div>
+</div> -->
+
+@if (isLoading) {
+<app-loader></app-loader>
+}@else{
+<div class="row align-items-center justify-content-center mt-5">
+  <div class="col-12 col-md-9 col-lg-7">
+    <h4 class="text-center">My Profile</h4>
+    <hr />
+  </div>
+</div>
+<div class="row align-items-center justify-content-center">
+  <div class="col-12 col-md-3 col-lg-2 text-center">
+    <div class="d-inline-block position-relative">
+       <img [src]="'images/dummyHuman.jpg'" class="img-thumbnail mb-3" width="200"
+        alt="User Avatar"
+        class="mw-100 img-thubmail rounded-circle"
+      />
+      <span class="uploader">
+        <i class="fas fa-upload"></i>
+      </span>
+    </div>
+  </div>
+  <div class="col-12 col-md-6 col-lg-5">
+      <p-card>
+        <div class="card-body">
+          <dl class="row">
+            <dt class="col-sm-3">Name</dt>
+            <dd class="col-sm-9">{{ user?.fullName }}</dd>
+
+            <dt class="col-sm-3">Email</dt>
+            <dd class="col-sm-9">{{ user?.email }}</dd>
+
+            <dt class="col-sm-3">Role</dt>
+            <dd class="col-sm-9">{{ user?.role }}</dd>
+          </dl>
+          
+          <div class="text-end mt-3">
+            <!-- Add action buttons or more content here -->
+          </div>
+        </div>
+      </p-card>
+    </div>
+</div>
+}
