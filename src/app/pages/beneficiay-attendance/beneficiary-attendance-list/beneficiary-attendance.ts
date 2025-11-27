@@ -307,7 +307,7 @@ export class BeneficiaryAttendance implements OnInit {
 
   // ---------- Actions ----------
   editSubProject(id: number) {
-    this.router.navigate(['beneficiary-attendance/view', id]);
+    this.router.navigate(['beneficiaries/attendance/view', id]);
   }
 
 

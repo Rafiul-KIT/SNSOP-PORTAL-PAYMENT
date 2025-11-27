@@ -316,7 +316,7 @@ export class BeneficiarySubprojectList implements OnInit {
   // ---------- Actions ----------
   beneficiaryAssignment(item: SubProjectDto) {
     if (!item?.id) return;
-    this.router.navigate(['beneficiary-assignment/assign', item.id]);
+    this.router.navigate(['beneficiaries/assignment-assign', item.id]);
   }
     getScreeningStatusLabel(value: string): string {
     const numericValue = parseInt(value, 10);

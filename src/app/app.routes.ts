@@ -74,17 +74,17 @@ export const routes: Routes = [
         component: SubProject,
       },
       {
-        path: 'work-approval',
+        path: 'approval',
         component: WorkApproval,
       },
       {
-        path: 'work-review',
+        path: 'approval-details',
         component: WorkReview,
       },
     ],
   },
   {
-    path: 'beneficiary',
+    path: 'beneficiaries',
     canActivate: [routeGuard],
     children: [
       {
@@ -114,15 +114,15 @@ export const routes: Routes = [
     ],
   },
   {
-    path: 'apply-wage-request',
+    path: 'wage-request',
     canActivate: [routeGuard],
     children: [
       {
-        path: 'lipw',
+        path: 'apply-lipw',
         component: WagesRequestLipw,
       },
       {
-        path: 'dis',
+        path: 'apply-dis',
         component: ApplyForDisPayment,
       },
       {
@@ -130,31 +130,31 @@ export const routes: Routes = [
         component: ApplyForWagesPaymentComponent,
       },
        {
-        path: 'wages',
+        path: 'list',
         component: ListOfWages,
       },
-           
-
+      {
+        path: 'details/:wageId/:subprojectId',
+        component: WageRequestDetails,
+      }   
     ],
   },
   {
     path: 'wage-request-approval',
+    canActivate: [routeGuard],
     children: [
+       {
+        path: 'list',
+       component: WageRequestApproval,
+      },
       {
         path: 'drafts',
         component: WageRequestDrafts,
       },
-        {
-        path: 'wage-request-approval',
-       component: WageRequestApproval,
-      },
       {
-       path: 'details/:wageId/:subprojectId',
-
+        path: 'details/:wageId/:subprojectId',
         component: WageRequestDetails,
       }
-           
-
     ],
   },
   {

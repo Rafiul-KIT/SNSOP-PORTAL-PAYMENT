@@ -304,7 +304,7 @@ export class ListOfWages implements OnInit {
 
 viewWageRequest(wageId: number, subprojectId: number) {
   this.router.navigate([
-    '/wage-request-approval/details',
+    '/wage-request/details',
     wageId,
     subprojectId
   ]);

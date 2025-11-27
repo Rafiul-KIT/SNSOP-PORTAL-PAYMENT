@@ -306,7 +306,7 @@ export class WagesRequestLipw   implements OnInit {
   }
   // ---------- Actions ----------
   viewSubProject(id: number) {
-    this.router.navigate(['/apply-wage-request/create', id]);
+    this.router.navigate(['/wage-request/create', id]);
   }
   getTypeOfMeetingLabel(value: string): string {
     const found = TypeOfMeetingEnum.find(item => item.value === value);
