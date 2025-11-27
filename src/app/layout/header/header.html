@@ -16,32 +16,30 @@
     <p-menubar [model]="menuList"></p-menubar>
   </div>
 
-<div
-  class="portals-option-wrapper"
-  [class.show]="showPortalOptions"
-  (mouseleave)="showPortalOptions = false"
->
-  <div class="portal-items">
-    @for (portal of portalList; track portal) {
-      <a class="item" [href]="portal.link" target="_blank">
+  <div class="portals-option-wrapper {{ showPortalOptions ? 'show' : '' }}" (mouseleave)="showPortalOptions = false">
+    <div class="portal-items">
+      @for (portal of portalList; track portal) {
+      <a class="item" [href]="portal.link">
         <i class="{{ portal.icon }} w-50"></i>
         <span>{{ portal.label }}</span>
       </a>
-    }
+      }
+    </div>
   </div>
-</div>
+  <!-- Logged In User -->
+  @if(userInfo){
+  <p-button [text]="true" icon="fas fa-user-circle fa-lg" severity="info"
+    (onClick)="showUsermenu = !showUsermenu"></p-button>
 
-
-  <p-button variant="text" icon="fas fa-user-circle" severity="info" (onClick)="showUsermenu = !showUsermenu" />
-
-  <div class="user-menu {{showUsermenu ? 'show' : ''}}" (mouseleave)="showUsermenu = false">
+  <div class="user-menu {{ showUsermenu ? 'show' : '' }}" (mouseleave)="showUsermenu = false">
     <div class="item" (click)="goToProfile()">
       <i class="fas fa-user me-2"></i>
-       Profile
+      Profile
     </div>
     <div class="item" (click)="logout()">
       <i class="fas fa-sign-out-alt me-2"></i>
       Logout
     </div>
   </div>
+  }
 </div>

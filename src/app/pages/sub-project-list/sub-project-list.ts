@@ -316,10 +316,10 @@ export class SubProjectList implements OnInit {
 
   // ---------- Actions ----------
   editSubProject(id: number) {
-    this.router.navigate(['/sub-project', id]);
+    this.router.navigate(['/sub-project/details/', id]);
   }
     newProject() {
-    this.router.navigate(['/sub-project']);
+    this.router.navigate(['/sub-project/add-new']);
   }
 
   deleteProject(id: number) {

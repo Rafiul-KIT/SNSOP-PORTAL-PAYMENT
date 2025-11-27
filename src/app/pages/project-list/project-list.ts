@@ -128,13 +128,10 @@ export class ProjectList implements OnInit {
   }
 
   newProject() {
-    this.router.navigate(['/project']);
+    this.router.navigate(['/project/add-new']);
   }
   editProject(id: number) {
-    this.router.navigate(['/project', id]);
-  }
-  viewProject(id: number) {
-    this.router.navigate(['/project', id]);
+    this.router.navigate(['/project/details', id]);
   }
 
 async deleteProject(id: number) {

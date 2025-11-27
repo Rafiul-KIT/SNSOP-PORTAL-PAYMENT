@@ -317,7 +317,7 @@ export class BeneficiarySubprojectRemove implements OnInit {
   // ---------- Actions ----------
   beneficiaryAssignment(item: SubProjectDto) {
     if (!item?.id) return;
-    this.router.navigate(['beneficiary-assignment/remove', item.id]);
+    this.router.navigate(['beneficiaries/assignment-remove', item.id]);
   }
     getScreeningStatusLabel(value: string): string {
     const numericValue = parseInt(value, 10);
