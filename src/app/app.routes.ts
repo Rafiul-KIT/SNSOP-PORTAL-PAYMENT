@@ -3,7 +3,7 @@ import { Routes } from '@angular/router';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { NotFound } from './components/not-found/not-found';
 import { ProjectList } from './pages/project-list/project-list';
-import {Project} from './pages/project/project';
+import { Project } from './pages/project/project';
 import { SubProject } from './pages/sub-project/sub-project';
 import { BeneficiaryAttendance } from './pages/beneficiay-attendance/beneficiary-attendance-list/beneficiary-attendance';
 import { SubProjectList } from './pages/sub-project-list/sub-project-list';
@@ -25,6 +25,8 @@ import { WageRequestDetails } from './pages/wages-request-approval/wage-request-
 import { WageRequestApproval } from './pages/wages-request-approval/wage-request-approval/wage-request-approval';
 import { PayrollDownload } from './pages/payroll/payroll-download/payroll-download';
 import { ListOfWages } from './pages/apply-wages-request/list-of-wages/list-of-wages';
+import { Profile } from './pages/profile/profile';
+import { routeGuard } from './route.guard';
 
 
 
@@ -34,136 +36,149 @@ export const routes: Routes = [
     path: 'dashboard',
   },
   {
-    component: ProjectList,
-    path: 'project-list',  
-  },
-    {
-    component: SubProjectList,
-    path: 'sub-project-list',
+    component: Profile,
+    path: 'profile',
   },
   {
-    component: SubProject,
-    path: 'sub-project',
-  },
-   {
-    component: WorkApproval,
-    path: 'work-approval',
-  },
-    {
-    component: WorkReview,
-    path: 'work-review',
-  },
-  {
-    component: SubProject,
-    path: 'sub-project/:id',
-  },
-    {
-    component: BeneficiaryAttendance,
-    path: 'beneficiary-attendance',  
-  },
-
-    {
-    path: 'beneficiary-assignment',
+    path: 'project',
+    canActivate: [routeGuard],
     children: [
       {
-        path: 'asign-list',
-        component:  BeneficiarySubprojectList,
+        path: 'list',
+        component: ProjectList,
       },
-        {
-        path: 'remove-list',
-       component: BeneficiarySubprojectRemove  ,
+      {
+        path: 'add-new',
+        component: Project,
       },
-         {
-        path: 'assign/:id',
-        component: BeneficiaryAssignment ,
+      {
+        path: 'details/:id',
+        component: Project,
       },
-         {
-        path: 'remove/:id',
-        component: BeneficiaryRemove ,
-      },
-           
-
     ],
   },
-  
-     {
-    component: BeneficiaryAttendancePerform,
-    path: 'beneficiary-attendance/view/:id',  
-  
-  },
-  {
-    component: Project,
-    path: 'project', 
-  },
-
-  {
-    path: 'project/:id',
-    component: Project, 
-  },
-  {
-    path: 'apply-wage-request',
+    {
+    path: 'sub-project',
+    canActivate: [routeGuard],
     children: [
       {
-        path: 'lipw',
-        component:  WagesRequestLipw,
+        path: 'list',
+        component: SubProjectList,
       },
-        {
-        path: 'dis',
-       component: ApplyForDisPayment ,
+      {
+        path: 'add-new',
+        component: SubProject,
       },
-         {
+      {
+        path: 'details/:id',
+        component: SubProject,
+      },
+      {
+        path: 'approval',
+        component: WorkApproval,
+      },
+      {
+        path: 'approval-details',
+        component: WorkReview,
+      },
+    ],
+  },
+  {
+    path: 'beneficiaries',
+    canActivate: [routeGuard],
+    children: [
+      {
+        path: 'assignment-asign-list',
+        component: BeneficiarySubprojectList,
+      },
+      {
+        path: 'assignment-remove-list',
+        component: BeneficiarySubprojectRemove,
+      },
+      {
+        path: 'assignment-assign/:id',
+        component: BeneficiaryAssignment,
+      },
+      {
+        path: 'assignment-remove/:id',
+        component: BeneficiaryRemove,
+      },
+      {
+        path: 'attendance',
+        component: BeneficiaryAttendance,
+      },
+      {
+        path: 'attendance/view/:id',
+        component: BeneficiaryAttendancePerform,
+      },
+    ],
+  },
+  {
+    path: 'wage-request',
+    canActivate: [routeGuard],
+    children: [
+      {
+        path: 'apply-lipw',
+        component: WagesRequestLipw,
+      },
+      {
+        path: 'apply-dis',
+        component: ApplyForDisPayment,
+      },
+      {
         path: 'create/:id',
-        component: ApplyForWagesPaymentComponent ,
+        component: ApplyForWagesPaymentComponent,
       },
        {
-        path: 'wages',
+        path: 'list',
         component: ListOfWages,
       },
-           
-
+      {
+        path: 'details/:wageId/:subprojectId',
+        component: WageRequestDetails,
+      }   
     ],
   },
-   {
+  {
     path: 'wage-request-approval',
+    canActivate: [routeGuard],
     children: [
-      {
-        path: 'drafts',
-        component:  WageRequestDrafts,
-      },
-        {
-        path: 'wage-request-approval',
+       {
+        path: 'list',
        component: WageRequestApproval,
       },
       {
-       path: 'details/:wageId/:subprojectId',
-
+        path: 'drafts',
+        component: WageRequestDrafts,
+      },
+      {
+        path: 'details/:wageId/:subprojectId',
         component: WageRequestDetails,
       }
-           
-
     ],
   },
-    {
+  {
     path: 'report',
-   children: [
-    {
-      path: 'details',
-      loadComponent: () => import('./pages/report/report').then(m => m.ReportComponent),
-      data: { reportType: 9, reportTitle: 'Reconciliation Detail Report' }
-    },
-    {
-      path: 'summary',
-      loadComponent: () => import('./pages/report/report').then(m => m.ReportComponent),
-      data: { reportType: 10, reportTitle: 'Reconciliation Summary Report' }
-    }
-  ]
+    children: [
+      {
+        path: 'details',
+        loadComponent: () => import('./pages/report/report').then(m => m.ReportComponent),
+        data: { reportType: 9, reportTitle: 'Reconciliation Detail Report' }
+      },
+      {
+        path: 'summary',
+        loadComponent: () => import('./pages/report/report').then(m => m.ReportComponent),
+        data: { reportType: 10, reportTitle: 'Reconciliation Summary Report' }
+      }
+    ]
   },
 
-  { 
-    path: 'payroll', 
-    component: PayrollDownload
+  {
+    path: 'payroll',
+    component: PayrollDownload,
+    canActivate: [routeGuard],
   },
-  
+
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
   {
     component: NotFound,

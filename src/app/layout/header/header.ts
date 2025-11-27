@@ -1,23 +1,26 @@
-import { Component, effect, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, effect } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { PopoverModule } from 'primeng/popover';
 import { MenubarModule } from 'primeng/menubar';
 import { environment } from '../../../environments/environment';
 import { ApiService } from '../../services/api.service';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-header',
   imports: [RouterModule, ButtonModule, PopoverModule, MenubarModule],
   templateUrl: './header.html',
-  styleUrl: './header.scss',
+  styleUrls: ['./header.scss'],
 })
 export class Header {
-  showPortalOptions: boolean = false;
-  showUsermenu: boolean = false;
-  menuList: any = [];
+
+  showPortalOptions = false;
+  showUsermenu = false;
+  menuList: any[] = [];
   userInfo: any = null;
-  userMenuList: any = [];
+  menusLoaded = false; // ✅ controls when to render
 
   portalList = [
     {
@@ -30,9 +33,10 @@ export class Header {
       link: environment.portals.payment,
       icon: 'fas fa-credit-card',
     },
-    { label: 'GRM', icon: 'fas fa-sitemap' },
+    { label: 'GRM', link: environment.portals.grm, icon: 'fas fa-sitemap' },
     {
       label: 'Report',
+      link: environment.portals.report,
       icon: 'fas fa-chart-line',
     },
     {
@@ -43,181 +47,181 @@ export class Header {
     { label: 'Survey CTO', icon: 'fas fa-poll' },
   ];
 
-  constructor(private router: Router, private apiService: ApiService) {
-    this.menuList = [
-      {
-        label: 'Dashboard',
-        icon: 'fas fa-dashboard',
-        routerLink: 'dashboard',
-        routerLinkActiveOptions: { exact: true },
-      },
-      {
-        label: 'Project',
-        icon: 'fas fa-project-diagram',
-        routerLink: 'project-list',
-        routerLinkActiveOptions: 'active',
-      },
-      {
-        label: 'Sub-Project',
-        icon: 'fas fa-tasks',
-        routerLink: 'sub-project-list',
-        routerLinkActiveOptions: 'active',
-      },
-       {
-        label: 'Work Approval',
-        icon: 'fa fa-check',
-        routerLink: 'work-approval',
-        routerLinkActiveOptions: 'active',
-      },
-       
-        {
-        label: 'Beneficiary Assignment',
-        icon: 'fa fa-check',
-        items: [
-          {
-            label: 'Assign Beneficiary',
-            icon: 'fa fa-check',
-            routerLink: '/beneficiary-assignment/asign-list',
-          },
-          {
-            label: 'Remove Beneficiary ',
-            icon: 'fa fa-check',
-            routerLink: '/beneficiary-assignment/remove-list',
-          },
-        ],
-      },
-       {
-        label: 'Beneficiary Attendance',
-        icon: 'fas fa-users',
-         routerLink: 'beneficiary-attendance',
-        routerLinkActiveOptions: 'active',
-      },
-      {
-        label: 'Wage Request Apply ',
-        icon: 'fas fa-hand-holding-usd',
-        items: [
-          {
-            label: 'Apply For LIPW',
-            icon: 'fas fa-list',
-            routerLink: '/apply-wage-request/lipw',
-          },
-          {
-            label: 'Apply For DIS',
-            icon: 'fas fa-list',
-            routerLink: '/apply-wage-request/dis',
-          },
-             {
-            label: 'List of Wages',
-            icon: 'fas fa-list',
-            routerLink: '/apply-wage-request/wages',
-          },
-        ],
-      },
-        {
-        label: 'Wage Request Approval',
-        icon: 'fa fa-check',
-        items: [
-          {
-            label: 'Wage Request Drafts',
-            icon: 'fa fa-check',
-            routerLink: '/wage-request-approval/drafts',
-          },
-          {
-            label: 'Wage Request Approval',
-            icon: 'fa fa-check',
-            routerLink: '/wage-request-approval/wage-request-approval',
-          },
-
-        ],
-      },
-
-      {
-        label: 'Payroll',
-        icon: 'fas fa-hand-holding-usd',
-        items: [
-          {
-            label: 'Payroll Download',
-            icon: 'fas fa-hand-holding-usd',
-            routerLink: '/payroll',
-          }
-        ],
-      },
-          
-      
-      {
-        label: 'Report',
-        icon: 'fas fa-chart-line',
-        items: [
-          {
-            label: ' Reconciliation Detail',
-            icon: 'fas fa-list',
-            routerLink: '/report/details',
-          },
-          {
-            label: 'Reconciliation Summary',
-            icon: 'fas fa-list',
-            routerLink: '/report/summary' ,
-          },
-        ],
-      },
-     
-      // {
-      //   label: 'Creating Payroll',
-      //   icon: 'fas fa-file-invoice-dollar',
-      //   routerLink: 'dashboard',
-      //   routerLinkActiveOptions: 'active',
-      // },
-        
-      // {
-      //   label: 'Payroll Download',
-      //   icon: 'fas fa-download',
-      //   routerLink: 'dashboard',
-      //   routerLinkActiveOptions: 'active',
-      // },
-      // {
-      //   label: 'Sub Payroll',
-      //   icon: 'fas fa-list-alt',
-      //   routerLink: 'dashboard',
-      //   routerLinkActiveOptions: 'active',
-      // },
-      // {
-      //   label: 'Supplementary Payroll',
-      //   icon: 'fas fa-clipboard-check',
-      //   routerLink: 'dashboard',
-      //   routerLinkActiveOptions: 'active',
-      // },
-      // {
-      //   label: 'Payroll for Mobile Wallet',
-      //   icon: 'fas fa-mobile-alt',
-      //   routerLink: 'dashboard',
-      //   routerLinkActiveOptions: 'active',
-      // },
-      // {
-      //   label: 'Payroll Reconcile',
-      //   icon: 'fas fa-sync-alt',
-      //   routerLink: 'dashboard',
-      //   routerLinkActiveOptions: 'active',
-      // },
-    ];
-
+  constructor(
+    private router: Router,
+    private apiService: ApiService,
+    private http: HttpClient,
+    private cdRef: ChangeDetectorRef
+  ) {
+    // Watch login state and load menus dynamically
     effect(() => {
       this.userInfo = this.apiService.loginState()?.user;
-      // if (this.userInfo?.roleId) {
-      //   this.loadMenusForUser(this.userInfo.roleId);
-      // }
+      if (this.userInfo?.roleId) {
+        this.loadMenusForUser(this.userInfo.roleId);
+      }
     });
   }
 
-  isActive(route: string): boolean {
-    return this.router.isActive(route, true);
+  async loadMenusForUser(roleId: number) {
+    try {
+      const menus = sessionStorage.getItem(`menus_${roleId}`);
+      if (menus) {
+        const responseData = JSON.parse(menus);
+
+        // Handle empty response
+        if (responseData.length === 0) {
+          console.warn(`No menus found for role ${roleId}`);
+          this.menuList = [];
+          this.menusLoaded = true;
+          this.cdRef.detectChanges();
+          return;
+        }
+
+        const allowedNames = responseData.map((menu: any) => menu.name);
+        const allMenus = this.getStaticMenus();
+
+        // ✅ Update safely and trigger view refresh
+        this.menuList = this.filterMenusByAccess(allMenus, allowedNames);
+        this.menusLoaded = true;
+        this.cdRef.detectChanges();
+      } else {
+        console.warn(`No menus found in sessionStorage for role ${roleId}`);
+        this.menuList = [];
+        this.menusLoaded = true;
+        this.cdRef.detectChanges();
+      }
+    } catch (error) {
+      console.error('Error loading menus:', error);
+      this.menusLoaded = true;
+      this.cdRef.detectChanges();
+    }
   }
 
-  goToProfile = () => {
-    window.location.href = `${environment.portals.master}/home/profile`;
-  };
+  getStaticMenus(): any[] {
+    return [
+      {
+        label: 'Dashboard',
+        icon: 'fas fa-tachometer-alt',
+        routerLink: 'dashboard',
+      },
+
+      {
+        label: 'Project',
+        icon: 'fas fa-people-group',
+        items: [
+          
+          {
+            label: 'Project List',
+            icon: 'fas fa-user-gear',
+            routerLink: 'project/list',
+          }
+        ],
+      },
+      {
+        label: 'Sub-project',
+        icon: 'fas fa-users-viewfinder',
+        items: [
+          
+          {
+            label: 'Sub-project List',
+            icon: 'fas fa-user-gear',
+            routerLink: 'sub-project/list',
+          },
+          {
+            label: 'Sub-project approval',
+            icon: 'fas fa-user-gear',
+            routerLink: 'sub-project/approval',
+          }
+        ],
+      },
+      {
+        label: 'Beneficiary Assignment',
+        icon: 'fas fa-users-viewfinder',
+        items: [
+          
+          {
+            label: 'Assign Beneficiary',
+            icon: 'fas fa-user-gear',
+            routerLink: 'beneficiaries/assignment-asign-list',
+          },
+          {
+            label: 'Remove Beneficiary',
+            icon: 'fas fa-user-gear',
+            routerLink: 'beneficiaries/assignment-remove-list',
+          },
+          {
+            label: 'Beneficiary Attendance',
+            icon: 'fas fa-user-gear',
+            routerLink: 'beneficiaries/attendance',
+          }
+        ],
+      },
+      {
+        label: 'Apply Wage Request',
+        icon: 'fas fa-users-viewfinder',
+        items: [
+          {
+            label: 'List of Wages',
+            icon: 'fas fa-user-gear',
+            routerLink: 'wage-request/list',
+          },
+          {
+            label: 'Apply for LIPW',
+            icon: 'fas fa-user-gear',
+            routerLink: 'wage-request/apply-lipw',
+          },
+          {
+            label: 'Apply for DIS',
+            icon: 'fas fa-user-gear',
+            routerLink: 'wage-request/apply-dis',
+          },
+          
+        ],
+      },
+      {
+        label: 'Wage Request Approval',
+        icon: 'fas fa-users-viewfinder',
+        items: [
+          {
+            label: 'Draft Requests',
+            icon: 'fas fa-user-gear',
+            routerLink: 'wage-request-approval/drafts',
+          },
+          {
+            label: 'Pending Approval',
+            icon: 'fas fa-user-gear',
+            routerLink: 'wage-request-approval/list',
+          }
+        ],
+      },
+      {
+        label: 'Payroll Download',
+        icon: 'fas fa-users-viewfinder',
+        routerLink: 'payroll'
+      },
+      
+      
+    ];
+  }
+
+  // ✅ Recursive filter: keep only allowed menus (parent and child)
+  filterMenusByAccess(menus: any[], allowedNames: string[]): any[] {
+    return menus
+      .filter((menu) => allowedNames.includes(menu.label)) // filter parent menus
+      .map((menu) => ({
+        ...menu,
+        // Recursively filter child menus if the parent is allowed
+        items: menu.items
+          ? this.filterMenusByAccess(menu.items, allowedNames)
+          : undefined,
+      }));
+  }
 
   logout() {
     this.apiService.logout();
     window.location.href = `${environment.portals.master}/#/landing`;
   }
+  goToProfile = () => {
+    this.router.navigateByUrl('/profile');
+  };
 }
