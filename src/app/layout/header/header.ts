@@ -107,29 +107,29 @@ export class Header {
 
       {
         label: 'Project',
-        icon: 'fas fa-people-group',
+        icon: 'fas fa-project-diagram',
         items: [
           
           {
             label: 'Project List',
-            icon: 'fas fa-user-gear',
+            icon: 'fas fa-clipboard',
             routerLink: 'project/list',
           }
         ],
       },
       {
         label: 'Sub-project',
-        icon: 'fas fa-users-viewfinder',
+        icon: 'fas fa-sitemap',
         items: [
           
           {
             label: 'Sub-project List',
-            icon: 'fas fa-user-gear',
+            icon: 'fas fa-clipboard',
             routerLink: 'sub-project/list',
           },
           {
             label: 'Sub-project approval',
-            icon: 'fas fa-user-gear',
+            icon: '	fas fa-tasks',
             routerLink: 'sub-project/approval',
           }
         ],
@@ -141,38 +141,38 @@ export class Header {
           
           {
             label: 'Assign Beneficiary',
-            icon: 'fas fa-user-gear',
+            icon: 'fas fa-user-plus',
             routerLink: 'beneficiaries/assignment-asign-list',
           },
           {
             label: 'Remove Beneficiary',
-            icon: 'fas fa-user-gear',
+            icon: 'fas fa-user-minus',
             routerLink: 'beneficiaries/assignment-remove-list',
           },
           {
             label: 'Beneficiary Attendance',
-            icon: 'fas fa-user-gear',
+            icon: 'fas fa-user-edit',
             routerLink: 'beneficiaries/attendance',
           }
         ],
       },
       {
         label: 'Apply Wage Request',
-        icon: 'fas fa-users-viewfinder',
+        icon: 'fas fa-receipt',
         items: [
           {
             label: 'List of Wages',
-            icon: 'fas fa-user-gear',
+            icon: 'fas fa-clipboard',
             routerLink: 'wage-request/list',
           },
           {
             label: 'Apply for LIPW',
-            icon: 'fas fa-user-gear',
+            icon: 'fas fa-file-invoice',
             routerLink: 'wage-request/apply-lipw',
           },
           {
             label: 'Apply for DIS',
-            icon: 'fas fa-user-gear',
+            icon: 'fas fa-file-invoice',
             routerLink: 'wage-request/apply-dis',
           },
           
@@ -180,23 +180,23 @@ export class Header {
       },
       {
         label: 'Wage Request Approval',
-        icon: 'fas fa-users-viewfinder',
+        icon: 'fas fa-check',
         items: [
           {
             label: 'Draft Requests',
-            icon: 'fas fa-user-gear',
+            icon: '	fas fa-bell',
             routerLink: 'wage-request-approval/drafts',
           },
           {
             label: 'Pending Approval',
-            icon: 'fas fa-user-gear',
+            icon: 'fas fa-repeat',
             routerLink: 'wage-request-approval/list',
           }
         ],
       },
       {
         label: 'Payroll Download',
-        icon: 'fas fa-users-viewfinder',
+        icon: 'fas fa-donate',
         routerLink: 'payroll'
       },
       
