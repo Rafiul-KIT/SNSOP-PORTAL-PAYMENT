@@ -26,7 +26,8 @@ import { SelectModule } from 'primeng/select';
 
 import { DatePickerModule } from 'primeng/datepicker';
 import { InputTextModule } from 'primeng/inputtext';
-import { MessageService } from 'primeng/api';
+import { MessageService, ConfirmationService } from 'primeng/api';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ApiService } from '../../../services/api.service';
 import {
   LookupService,
@@ -35,6 +36,7 @@ import {
   PaymentCycleEnum,
 } from '../../../services/lookup.service';
 import { Loader } from '../../../components/loader/loader';
+import Swal from 'sweetalert2';
 
 interface WageRequestDto {
   id: number;
@@ -88,9 +90,10 @@ const dateRangeValidator: ValidatorFn = (
     TooltipModule,
     DatePickerModule,
     InputTextModule,
-    Loader
+    Loader,
+    ConfirmDialogModule
 ],
-  providers: [MessageService],
+  providers: [MessageService, ConfirmationService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ListOfWages implements OnInit {
@@ -134,7 +137,8 @@ export class ListOfWages implements OnInit {
     private route: ActivatedRoute,
     private api: ApiService,
     private lookup: LookupService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private confirmationService: ConfirmationService
   ) {}
 
   private async loadInitialLookups() {
@@ -240,8 +244,10 @@ export class ListOfWages implements OnInit {
     return `${year}-${month}-${day}`;
   }
 
-  fetchPage(page: number, size: number) {
-    this.isLoading = true;
+  fetchPage(page: number, size: number, showLoader: boolean = true) {
+    if (showLoader) {
+        this.isLoading = true;
+    }
     const body = this.buildSearchBody(page, size);
 
     this.api
@@ -271,7 +277,9 @@ export class ListOfWages implements OnInit {
         });
       })
       .finally(() => {
-        this.isLoading = false;
+        if (showLoader) {
+            this.isLoading = false;
+        }
         this.cdr.markForCheck();
       });
   }
@@ -308,6 +316,41 @@ viewWageRequest(wageId: number, subprojectId: number) {
     wageId,
     subprojectId
   ]);
+}
+
+removeWageRequest(wageRequest: WageRequestDto) {
+  Swal.fire({
+    title: 'Confirm Deletion',
+    text: `Are you sure you want to remove this wage request (${wageRequest.requestNumber || 'N/A'})?`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, remove it',
+    cancelButtonText: 'Cancel'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.api.PATCH(`api/wage-request/remove/${wageRequest.id}`, {})
+        .then(() => {
+          Swal.fire({
+            icon: 'success',
+            title: 'Removed!',
+            text: 'Wage request removed successfully.'
+          });
+
+          this.fetchPage(this.currentPage, this.pageSize, false);
+        })
+        .catch(err => {
+          console.error('Remove wage request error:', err);
+
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to remove wage request.'
+          });
+
+          this.cdr.markForCheck();
+        });
+    }
+  });
 }
 
 

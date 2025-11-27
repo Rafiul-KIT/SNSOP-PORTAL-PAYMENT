@@ -1,3 +1,5 @@
+<p-toast></p-toast>
+<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
 @if (isLoading) {
 <app-loader></app-loader>
 } @else {
@@ -207,6 +209,18 @@
                     outlined="true" 
                     severity="secondary"
                     class="me-2 big-icon-btn"/>
+  <!-- *ngIf="item.status === 0" -->
+                    <p-button 
+                  
+                    type="button" 
+                    icon="fa-solid fa-trash-can fa-lg" pTooltip="Remove"
+                    tooltipPosition="top"
+                    appendTo="body" 
+                    (onClick)="removeWageRequest(item)"
+                    size="small" 
+                    outlined="true" 
+                    severity="danger"
+                    class="big-icon-btn"/>
                 
             </td>
         </tr>
@@ -232,5 +246,3 @@
 </p-paginator>
 
 }
-
-
