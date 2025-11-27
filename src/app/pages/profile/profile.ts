@@ -12,7 +12,6 @@ import {
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { MenuItem } from 'primeng/api';
 import { MessageService } from 'primeng/api';
-import { Toast } from 'primeng/toast';
 import { ApiService } from '../../services/api.service';
 import { HttpClient } from '@angular/common/http';
 
@@ -31,7 +30,7 @@ interface RoleInfo {
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [Loader, ButtonModule, CardModule, RouterModule, ReactiveFormsModule, BreadcrumbModule, Loader, Toast],
+  imports: [Loader, ButtonModule, CardModule, RouterModule, ReactiveFormsModule, BreadcrumbModule, Loader],
   templateUrl: './profile.html',
   styleUrl: './profile.scss',
   providers: [MessageService, HttpClient]
