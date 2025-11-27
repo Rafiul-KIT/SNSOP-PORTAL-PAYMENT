@@ -116,6 +116,7 @@ export class Profile implements OnInit {
 
       // URL to fetch user details directly
       const url = `https://devgwapp.southsudansafetynet.info/mis_auth/api/users/findOne?id=${userId}`;
+      // const url = `https://gwapp.southsudansafetynet.info/mis_auth/api/users/findOne?id=${userId}`;
 
     // Use HttpClient to make a GET request
     const res = await this.http.get<any>(url).toPromise();
