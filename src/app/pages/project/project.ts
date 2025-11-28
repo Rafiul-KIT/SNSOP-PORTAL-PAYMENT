@@ -337,6 +337,14 @@ async onSave(): Promise<void> {
     });
     return;
   }
+  if (!this.isEditMode && this.targets.length === 0) {
+    Swal.fire({
+      title: 'Validation Error',
+      text: 'Please add at least one State/County target before saving a new project.',
+      icon: 'warning',
+    });
+    return;
+  }
 
 
   try {
@@ -433,18 +441,5 @@ async onSave(): Promise<void> {
   }
 
   // Cancel the operation
-  onCancel(): void {
-    if (this.isEditMode) {
-      // Reload original data
-      if (this.projectId) {
-        this.loadProjectData(this.projectId);
-        this.loadProjectDetails(this.projectId);
-      }
-      this.statusMsg = 'Changes cancelled.';
-    } else {
-      // Clear form for new project
-      this.onClear();
-      this.statusMsg = 'Action cancelled.';
-    }
-  }
+
 }

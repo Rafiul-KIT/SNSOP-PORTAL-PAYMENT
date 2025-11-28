@@ -97,7 +97,7 @@ export class WorkReview implements OnInit, OnDestroy {
   }
   private initApprovalForm(): void {
     this.approvalForm = this.fb.group({
-      pdcApproveDate: [{ value: '', disabled: this.roleId !== 12 }],
+      pdcApproveDate: [{ value: '', disabled: this.roleId !== 12 }, Validators.required],
       attachment: [''],
       comments: ['', Validators.required],
       approved: ['', Validators.required],
@@ -130,10 +130,26 @@ async submitApproval(): Promise<void> {
 
   if (this.approvalForm.invalid) {
     this.approvalForm.markAllAsTouched();
+    const invalidFields = [];
+    const controls = this.approvalForm.controls;
+    const fieldNames: { [key: string]: string } = {
+      pdcApproveDate: 'PDC Approve Date',
+      comments: 'Comments',
+      approved: 'Status',
+    };
+
+    for (const name in controls) {
+      if (controls[name].invalid) {
+        invalidFields.push(fieldNames[name] || name);
+      }
+    }
+    const errorText = `Please provide values for the following required fields: ${invalidFields.join(
+      ', '
+    )}`;
     Swal.fire({
       icon: 'warning',
       title: 'Validation Error',
-      text: 'Please fill all required fields, including comments.',
+      text: errorText,
     });
     return;
   }

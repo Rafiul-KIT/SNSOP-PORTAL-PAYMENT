@@ -131,7 +131,7 @@
                             <p-table [value]="canBeAssignedBeneficiaries" [lazy]="true" [paginator]="true"
                                 [rows]="canBeAssignedRows" [totalRecords]="canBeAssignedTotalRecords"
                                 [first]="canBeAssignedFirst" [loading]="isLoadingCanBeAssigned"
-                                (onLazyLoad)="onCanBeAssignedPageChange($event)" [rowsPerPageOptions]="[10, 20, 50]"
+                                (onLazyLoad)="onCanBeAssignedPageChange($event)" [rowsPerPageOptions]="[10, 50, 100, {showAll: 'All'}]"
                                 [showCurrentPageReport]="true"
                                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} beneficiaries"
                                 class="p-datatable-sm p-datatable-striped">
