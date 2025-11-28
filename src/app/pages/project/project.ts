@@ -144,7 +144,12 @@ private showToast(severity: 'success' | 'info' | 'warn' | 'error', summary: stri
         ],
         inchargeMobile: [
           '',
-          [Validators.required, Validators.pattern(/^[0-9]{9,13}$/)],
+          [
+            Validators.required,
+            Validators.minLength(9),
+            Validators.maxLength(13),
+            Validators.pattern(/^(?:\+\d{8,12}|\d{9,13})$/),
+          ],
         ],
         inchargeEmail: ['', [Validators.required, Validators.email]],
         status: ['', Validators.required],
