@@ -322,7 +322,7 @@ export class WorkApproval implements OnInit {
   // ---------- Actions ----------
   editBeneficiary(item: SubProjectDto) {
     if (!item?.id) return;
-    this.router.navigate(['/sub-project/approval-details'], {
+    this.router.navigate(['sub-project/approval-details'], {
       queryParams: { id: item.id },
     });
   }
