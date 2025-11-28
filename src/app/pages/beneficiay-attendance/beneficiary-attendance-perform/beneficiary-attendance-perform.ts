@@ -14,8 +14,7 @@ import { TableModule } from 'primeng/table';
 import { PaginatorModule } from 'primeng/paginator';
 import { CheckboxModule } from 'primeng/checkbox';
 import { InputGroupModule } from 'primeng/inputgroup';
-import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
+import Swal from 'sweetalert2';
 import { ApiService } from '../../../services/api.service';
 import { SelectModule } from 'primeng/select';
 import { Loader } from "../../../components/loader/loader";
@@ -41,82 +40,43 @@ interface SubProject {
 }
 
 interface BeneficiaryAttendanceRecord {
-
   beneficiaryId: number;
-
   householdNumber: string;
-
   beneficiaryName: string;
-
   gender: string;
-
   age: number;
-
   phoneNo: string;
-
   present: boolean | null;
-
   finlitAttended: boolean | null;
-
   ecdAttended: boolean | null;
-
   washAttended: boolean | null;
-
   gbvAttended: boolean | null;
-
 }
 
-
-
 @Component({
-
   selector: 'app-beneficiary-attendance-perform',
-
   templateUrl: './beneficiary-attendance-perform.html',
-
   styleUrl: './beneficiary-attendance-perform.scss',
-
   standalone: true,
-
   imports: [
-
     CommonModule,
-
     FormsModule,
-
     ReactiveFormsModule,
-
     CardModule,
-
     InputTextModule,
-
     DatePickerModule,
-
     ButtonModule,
-
     InputNumberModule,
-
     DividerModule,
-
     SelectModule,
-
     Loader,
-
     BreadcrumbModule,
-
     TableModule,
-
     PaginatorModule,
-
     CheckboxModule,
-
-    ToastModule,
-
     InputGroupModule
-
 ],
-
-  providers: [MessageService],
+  providers: [],
 
 })
 
@@ -166,21 +126,31 @@ export class BeneficiaryAttendancePerform implements OnInit {
 
 
 
-  constructor(
+    constructor(
 
-    private fb: FormBuilder,
 
-    private api: ApiService,
 
-    private route: ActivatedRoute,
+      private fb: FormBuilder,
 
-    private router: Router,
 
-    private cdr: ChangeDetectorRef,
 
-    private messageService: MessageService
+      private api: ApiService,
 
-  ) {}
+
+
+      private route: ActivatedRoute,
+
+
+
+      private router: Router,
+
+
+
+      private cdr: ChangeDetectorRef
+
+
+
+    ) {}
 
 
 
@@ -510,15 +480,15 @@ export class BeneficiaryAttendancePerform implements OnInit {
 
     if (!this.subproject || this.isAttendanceDateInvalid()) {
 
-      this.messageService.add({
+            Swal.fire({
 
-        severity: 'warn',
+              icon: 'warning',
 
-        summary: 'Validation Error',
+              title: 'Validation Error',
 
-        detail: 'Please select a subproject and a valid attendance date.',
+              text: 'Please select a subproject and a valid attendance date.',
 
-      });
+            });
 
       return;
 
@@ -528,15 +498,15 @@ export class BeneficiaryAttendancePerform implements OnInit {
 
     if (!this.selectedBeneficiaries || this.selectedBeneficiaries.length === 0) {
 
-      this.messageService.add({
+            Swal.fire({
 
-        severity: 'warn',
+              icon: 'warning',
 
-        summary: 'Validation Error',
+              title: 'Validation Error',
 
-        detail: 'Please select at least one beneficiary.',
+              text: 'Please select at least one beneficiary.',
 
-      });
+            });
 
       return;
 
@@ -548,15 +518,15 @@ export class BeneficiaryAttendancePerform implements OnInit {
 
     if (beneficiaryWithNoStatus) {
 
-      this.messageService.add({
+            Swal.fire({
 
-        severity: 'warn',
+              icon: 'warning',
 
-        summary: 'Validation Error',
+              title: 'Validation Error',
 
-        detail: `Please set a status for selected beneficiary: ${beneficiaryWithNoStatus.beneficiaryName}.`,
+              text: `Please set a status for selected beneficiary: ${beneficiaryWithNoStatus.beneficiaryName}.`,
 
-      });
+            });
 
       return;
 
@@ -574,15 +544,15 @@ export class BeneficiaryAttendancePerform implements OnInit {
 
     if (!this.attendanceDate) {
 
-      this.messageService.add({
+            Swal.fire({
 
-        severity: 'error',
+              icon: 'error',
 
-        summary: 'Internal Error',
+              title: 'Internal Error',
 
-        detail: 'Date is missing after validation.',
+              text: 'Date is missing after validation.',
 
-      });
+            });
 
       this.loading = false;
 
@@ -638,15 +608,15 @@ export class BeneficiaryAttendancePerform implements OnInit {
 
         if (res && res.data.code === 200) {
 
-          this.messageService.add({
+                    Swal.fire({
 
-            severity: 'success',
+                      icon: 'success',
 
-            summary: 'Success',
+                      title: 'Success',
 
-            detail: 'Attendance saved successfully!',
+                      text: 'Attendance saved successfully!',
 
-          });
+                    });
 
           // After success, clear the fields and table
 
@@ -664,15 +634,15 @@ export class BeneficiaryAttendancePerform implements OnInit {
 
         } else {
 
-          this.messageService.add({
+                    Swal.fire({
 
-            severity: 'error',
+                      icon: 'error',
 
-            summary: 'Save Failed',
+                      title: 'Save Failed',
 
-            detail: res.message || 'An unknown error occurred while saving.',
+                      text: res.message || 'An unknown error occurred while saving.',
 
-          });
+                    });
 
         }
 
@@ -682,15 +652,15 @@ export class BeneficiaryAttendancePerform implements OnInit {
 
         console.error('Error saving attendance:', err);
 
-        this.messageService.add({
+                Swal.fire({
 
-          severity: 'error',
+                  icon: 'error',
 
-          summary: 'API Error',
+                  title: 'API Error',
 
-          detail: 'Failed to save attendance. Please check the console for details.',
+                  text: 'Failed to save attendance. Please check the console for details.',
 
-        });
+                });
 
       })
 
