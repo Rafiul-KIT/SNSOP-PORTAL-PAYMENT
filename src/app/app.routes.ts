@@ -27,6 +27,7 @@ import { PayrollDownload } from './pages/payroll/payroll-download/payroll-downlo
 import { ListOfWages } from './pages/apply-wages-request/list-of-wages/list-of-wages';
 import { Profile } from './pages/profile/profile';
 import { routeGuard } from './route.guard';
+import { Unauthorized } from './components/unauthorized/unauthorized';
 
 
 
@@ -46,14 +47,17 @@ export const routes: Routes = [
       {
         path: 'list',
         component: ProjectList,
+        canActivate: [routeGuard],
       },
       {
         path: 'add-new',
         component: Project,
+        canActivate: [routeGuard],
       },
       {
         path: 'details/:id',
         component: Project,
+        canActivate: [routeGuard],
       },
     ],
   },
@@ -64,22 +68,27 @@ export const routes: Routes = [
       {
         path: 'list',
         component: SubProjectList,
+        canActivate: [routeGuard],
       },
       {
         path: 'add-new',
         component: SubProject,
+        canActivate: [routeGuard],
       },
       {
         path: 'details/:id',
         component: SubProject,
+        canActivate: [routeGuard],
       },
       {
         path: 'approval',
         component: WorkApproval,
+        canActivate: [routeGuard],
       },
       {
         path: 'approval-details',
         component: WorkReview,
+        canActivate: [routeGuard],
       },
     ],
   },
@@ -90,26 +99,32 @@ export const routes: Routes = [
       {
         path: 'assignment-asign-list',
         component: BeneficiarySubprojectList,
+        canActivate: [routeGuard],
       },
       {
         path: 'assignment-remove-list',
         component: BeneficiarySubprojectRemove,
+        canActivate: [routeGuard],
       },
       {
         path: 'assignment-assign/:id',
         component: BeneficiaryAssignment,
+        canActivate: [routeGuard],
       },
       {
         path: 'assignment-remove/:id',
         component: BeneficiaryRemove,
+        canActivate: [routeGuard],
       },
       {
         path: 'attendance',
         component: BeneficiaryAttendance,
+        canActivate: [routeGuard],
       },
       {
         path: 'attendance/view/:id',
         component: BeneficiaryAttendancePerform,
+        canActivate: [routeGuard],
       },
     ],
   },
@@ -120,22 +135,27 @@ export const routes: Routes = [
       {
         path: 'apply-lipw',
         component: WagesRequestLipw,
+        canActivate: [routeGuard],
       },
       {
         path: 'apply-dis',
         component: ApplyForDisPayment,
+        canActivate: [routeGuard],
       },
       {
         path: 'create/:id',
         component: ApplyForWagesPaymentComponent,
+        canActivate: [routeGuard],
       },
        {
         path: 'list',
         component: ListOfWages,
+        canActivate: [routeGuard],
       },
       {
         path: 'details/:wageId/:subprojectId',
         component: WageRequestDetails,
+        canActivate: [routeGuard],
       }   
     ],
   },
@@ -146,14 +166,17 @@ export const routes: Routes = [
        {
         path: 'list',
        component: WageRequestApproval,
+       canActivate: [routeGuard],
       },
       {
         path: 'drafts',
         component: WageRequestDrafts,
+        canActivate: [routeGuard],
       },
       {
         path: 'details/:wageId/:subprojectId',
         component: WageRequestDetails,
+        canActivate: [routeGuard],
       }
     ],
   },
@@ -177,6 +200,9 @@ export const routes: Routes = [
     path: 'payroll',
     component: PayrollDownload,
     canActivate: [routeGuard],
+  },
+  { path: 'unauthorized', 
+    component: Unauthorized 
   },
 
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
