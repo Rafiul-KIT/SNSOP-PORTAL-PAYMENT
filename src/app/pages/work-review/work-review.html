@@ -36,18 +36,8 @@
                         <label class="form-label text-secondary fw-semibold">Project Name</label>
                         <input type="text" class="form-control" formControlName="projectName" readonly />
                       </div>
-                      <div class="col-md-12">
-                        <label class="form-label text-secondary fw-semibold">Target Beneficiaries</label>
-                        <input type="number" class="form-control" formControlName="targetbeneficiaries" readonly />
-                      </div>
-                      <div class="col-md-12">
-                        <label class="form-label text-secondary fw-semibold">Project Cost</label>
-                        <div class="input-group">
-                          <span class="input-group-text"><i class="fas text-secondary fa-dollar-sign"></i></span>
-                          <input type="number" class="form-control" formControlName="projectCost" placeholder="0.00"
-                            readonly />
-                        </div>
-                      </div>
+                     
+                      
                     </div>
                   </div>
                   <div class="col-md-6">
@@ -400,7 +390,7 @@
                   <div class="row g-3">
                     <!-- PDC Approve Date (enabled only if roleId === 12) -->
                     <div class="col-md-6 col-lg-3">
-                      <label class="form-label text-secondary fw-semibold">PDC Approve Date</label>
+                      <label class="form-label text-secondary fw-semibold">PDC Approve Date <span class="text-danger">*</span></label>
                       <input type="date" class="form-control" formControlName="pdcApproveDate" />
 
                     </div>

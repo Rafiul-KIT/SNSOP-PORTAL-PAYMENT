@@ -233,12 +233,18 @@ export class BeneficiaryAssignment implements OnInit {
     }
   }
 
-  onCanBeAssignedPageChange(event: any): void {
-    const page = event.first / event.rows;
-    this.canBeAssignedFirst = event.first;
-    this.canBeAssignedRows = event.rows;
-    this.loadCanBeAssignedBeneficiaries(page, this.canBeAssignedRows);
-  }
+onCanBeAssignedPageChange(event: any): void {
+  const page = event.first / event.rows;
+  this.canBeAssignedFirst = event.first;
+  this.canBeAssignedRows = event.rows;
+  
+  // Handle "Show All" case
+  const size = event.rows === this.canBeAssignedTotalRecords 
+    ? this.canBeAssignedTotalRecords 
+    : event.rows;
+  
+  this.loadCanBeAssignedBeneficiaries(page, size);
+}
 
   getSelectedCanBeAssignedIds(): number[] {
     return Array.from(this.selectedBeneficiaryIds);

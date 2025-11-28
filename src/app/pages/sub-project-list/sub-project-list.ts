@@ -33,6 +33,7 @@ import {
 } from '../../services/lookup.service';
 import { ApiService } from '../../services/api.service';
 import { Loader } from '../../components/loader/loader';
+import Swal from 'sweetalert2';
 
 interface SubProjectDto {
   id: number;
@@ -324,65 +325,99 @@ export class SubProjectList implements OnInit {
     this.router.navigate(['/sub-project/add-new']);
   }
 
-  deleteProject(id: number) {
-    this.currentProjectIdToDelete = id;
-    this.deleteComment = '';
-    this.displayDeleteDialog = true;
-    this.cdr.markForCheck();
-  }
+// Add this property with other class properties
+isDeleting = false;
 
-  async confirmDelete() {
-    if (this.currentProjectIdToDelete === null) return;
+// Update deleteProject method
+deleteProject(id: number) {
+  this.currentProjectIdToDelete = id;
+  this.deleteComment = '';
+  this.displayDeleteDialog = true;
+  this.cdr.markForCheck();
+}
 
-    try {
-      // 1. Fetch Sub-Project Details
-      const getPayload = { id: this.currentProjectIdToDelete };
-      const subProjectDetailsRes: any = await this.api.POST(`api/subproject/get?page=0&size=1`, getPayload);
+// Update confirmDelete method
+async confirmDelete() {
+  if (this.currentProjectIdToDelete === null || this.isDeleting) return;
 
-      if (!subProjectDetailsRes.data || !subProjectDetailsRes.data.content || subProjectDetailsRes.data.content.length === 0) {
-        throw new Error('Sub-project details not found.');
-      }
+  this.isDeleting = true;
+  this.cdr.markForCheck();
 
-      const subProjectToUpdate: SubProjectDto = subProjectDetailsRes.data.content[0];
+  try {
+    // 1. Fetch details
+    const getPayload = { id: this.currentProjectIdToDelete };
+    const subProjectDetailsRes: any = await this.api.POST(
+      `api/subproject/get?page=0&size=1`,
+      getPayload
+    );
 
-      // 2. Modify Details
-      subProjectToUpdate.status = 'Completed';
-      // Assuming 'remarks' can be added to the payload for the save endpoint
-      const finalPayload = {
-        ...subProjectToUpdate,
-        remarks: this.deleteComment
-      };
-
-      // 3. Send Updated Payload
-      const res: any = await this.api.POST(`api/subproject/save`, finalPayload);
-
-      if (res.data && res.data.entityId) {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Project Closed',
-          detail: `Sub-project with ID ${this.currentProjectIdToDelete} was successfully closed.`,
-        });
-        this.fetchPage(this.currentPage, this.pageSize);
-      } else {
-        throw new Error('API did not return entityId on successful save.');
-      }
-    } catch (err: any) {
-      console.error('Error closing project:', err);
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: `Failed to close sub-project: ${err.message || 'Unknown error'}.`,
-      });
-    } finally {
-      this.cancelDelete(); // Close dialog and reset state
+    if (!subProjectDetailsRes.data?.content?.length) {
+      throw new Error('Sub-project details not found.');
     }
-  }
 
-  cancelDelete() {
+    const subProjectToUpdate = subProjectDetailsRes.data.content[0];
+    const workCode = subProjectToUpdate.workCode || 'N/A';
+
+    // 2. Update status to Completed
+    subProjectToUpdate.status = 'Completed';
+
+    const finalPayload = {
+      ...subProjectToUpdate,
+      remarks: this.deleteComment,
+    };
+
+    const res: any = await this.api.POST(`api/subproject/save`, finalPayload);
+
+    // Close PrimeNG dialog FIRST
     this.displayDeleteDialog = false;
+    this.cdr.detectChanges();
+
+    // Small delay to ensure dialog closes
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    if (res.data?.entityId) {
+      await Swal.fire({
+        title: 'Closed',
+        html: `Work Code <b>${workCode}</b> closed successfully.`,
+        icon: 'success',
+      });
+
+      this.fetchPage(this.currentPage, this.pageSize);
+    } else {
+      throw new Error(
+        'Failed to close sub-project. Server did not confirm the action.'
+      );
+    }
+  } catch (err: any) {
+    console.error('Error closing project:', err);
+    
+    // Close PrimeNG dialog before showing error
+    this.displayDeleteDialog = false;
+    this.cdr.detectChanges();
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    await Swal.fire({
+      title: 'Error',
+      text: err.message || 'Unknown error occurred',
+      icon: 'error',
+    });
+  } finally {
+    this.isDeleting = false;
     this.currentProjectIdToDelete = null;
     this.deleteComment = '';
+    this.displayDeleteDialog = false;
+    this.cdr.markForCheck();
   }
+}
+
+// Update cancelDelete method
+cancelDelete() {
+  this.displayDeleteDialog = false;
+  this.currentProjectIdToDelete = null;
+  this.deleteComment = '';
+  this.isDeleting = false;
+  this.cdr.markForCheck();
+}
     getScreeningStatusLabel(value: string): string {
     const numericValue = parseInt(value, 10);
     const found = ScreeningStatusEnum.find(item => item.value === numericValue);
