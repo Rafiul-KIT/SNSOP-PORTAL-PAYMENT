@@ -22,7 +22,7 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { SelectModule } from 'primeng/select';
 import { DialogModule } from 'primeng/dialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { InputTextModule } from 'primeng/inputtext';
 import {
   LookupItem,
   LookupService,
@@ -75,6 +75,7 @@ interface SubProjectDto {
     RouterModule,
     TooltipModule,
     Loader,
+    InputTextModule
   ],
   providers: [MessageService],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -132,6 +133,7 @@ export class SubProjectList implements OnInit {
 
     this.cdr.markForCheck();
   }
+
 
   async ngOnInit() {
     this.workTypes = TypeOfMeetingEnum;
@@ -231,7 +233,7 @@ export class SubProjectList implements OnInit {
     const f = this.searchForm.value;
     return {
       id: null,
-      workCode: f.workCode ? f.workCode.trim() : null,
+       workCode: f.workCode ? f.workCode.trim() : null,
       projectId: f.projectId ? Number(f.projectId) : null,
 
       projectName: f.projectName || null,
@@ -387,10 +389,11 @@ export class SubProjectList implements OnInit {
     return found ? found.label : value;
   }
 
-  trackById = (_: number, row: SubProjectDto) => row.id;
+
 
   getTypeOfMeetingLabel(value: string): string {
     const found = TypeOfMeetingEnum.find(item => item.value === value);
     return found ? found.label : value;
   }
+    trackById = (_: number, row: SubProjectDto) => row.id;
 }
