@@ -96,7 +96,7 @@ export class BeneficiaryAssignment implements OnInit {
 
     if (this.subprojectId) {
       this.loadProjectData(this.subprojectId);
-      this.loadCanBeAssignedBeneficiaries(0, this.canBeAssignedRows);
+    
     }
   }
 
