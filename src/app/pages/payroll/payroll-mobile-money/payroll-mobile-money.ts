@@ -134,7 +134,7 @@ export class PayrollMobileMoney implements OnInit {
   counties: LookupItem[] = [];
   payams: LookupItem[] = [];
   bomas: LookupItem[] = [];
-
+  registrationPhaseOptions: LookupItem[] = [];
   projects: ProjectNameDescription[] = [];
   workTypes: any[] = [];
   workActivities: LookupItem[] = [];
@@ -161,6 +161,7 @@ export class PayrollMobileMoney implements OnInit {
     private route: ActivatedRoute,
     private api: ApiService,
     private lookup: LookupService,
+    
     private cdr: ChangeDetectorRef
   ) { }
 
@@ -168,7 +169,7 @@ export class PayrollMobileMoney implements OnInit {
     await Promise.all([
       this.lookup.getOrFetchStateList(),
     ]);
-
+ this.registrationPhaseOptions = this.lookup.getRegistrationPhaseList();
     this.states = this.lookup.getStateList();
     this.projects = this.lookup.projectNameDescriptionList;
     this.supportTypeOptions = this.lookup.getSupportTypeList();
@@ -578,8 +579,16 @@ export class PayrollMobileMoney implements OnInit {
     // Implement export file logic here
   }
 
-  importFile() {
-    console.log('Import File button clicked!');
-    // Implement import file logic here
+  onFileSelect(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.importFile(input.files[0]);
+    }
+  }
+
+  importFile(file: File) {
+    this.messageService.add({ severity: 'info', summary: 'File Selected', detail: file.name });
+    this.cdr.markForCheck();
+    // Implement your file upload logic here, e.g., send the file to a service
   }
 }
