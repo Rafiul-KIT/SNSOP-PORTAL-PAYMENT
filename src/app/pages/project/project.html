@@ -172,16 +172,21 @@
                 type="text"
                 class="form-control"
                 formControlName="inchargeMobile"
+                pattern="^(\+\d{8,12}|\d{9,13})$"
               />
-              @if (projectForm.get('inchargeMobile')?.invalid &&
-              projectForm.get('inchargeMobile')?.touched) {
+              @if (projectForm.get('inchargeMobile')?.invalid && projectForm.get('inchargeMobile')?.touched) {
               <small class="text-danger">
                 @if (projectForm.get('inchargeMobile')?.hasError('required')) {
-                Mobile number is required. } @if
-                (projectForm.get('inchargeMobile')?.hasError('pattern')) { Valid
-                mobile number required (9 to 13 digits). }
+                  Mobile number is required.
+                } @else if (projectForm.get('inchargeMobile')?.hasError('maxlength')) {
+                  The mobile number cannot exceed 13 characters.
+                } @else if (projectForm.get('inchargeMobile')?.hasError('minlength')) {
+                  The mobile number must be at least 9 characters.
+                } @else if (projectForm.get('inchargeMobile')?.hasError('pattern')) {
+                  Valid mobile number required (first character can be '+' or a digit, followed by only digits; total 9 to 13 characters).
+                }
               </small>
-              }
+            }
             </div>
           </div>
 

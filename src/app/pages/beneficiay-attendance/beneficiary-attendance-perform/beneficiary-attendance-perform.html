@@ -117,33 +117,29 @@
                     [tableStyle]="{'min-width': '50rem'}">
                     <ng-template pTemplate="header">
                         <tr>
-                            <th style="width: 4rem"><p-tableHeaderCheckbox></p-tableHeaderCheckbox></th>
-                            <th>Household No.</th>
-                            <th>Beneficiary Name</th>
-                            <th>Gender</th>
-                            <th>Age</th>
-                            <th>Phone No.</th>
-                            <th>FINLIT <p-checkbox [(ngModel)]="allFinlit" (onChange)="onSelectAll('finlitAttended', $event)" [binary]="true"></p-checkbox></th>
-                            <th>ECD <p-checkbox [(ngModel)]="allEcd" (onChange)="onSelectAll('ecdAttended', $event)" [binary]="true"></p-checkbox></th>
-                            <th>WASH <p-checkbox [(ngModel)]="allWash" (onChange)="onSelectAll('washAttended', $event)" [binary]="true"></p-checkbox></th>
-                            <th>GBV <p-checkbox [(ngModel)]="allGbv" (onChange)="onSelectAll('gbvAttended', $event)" [binary]="true"></p-checkbox></th>
-                            <th>Status <p-select [options]="statusOptions" (onChange)="onSelectAllStatus($event)" placeholder="--select--" appendTo="body"></p-select></th>
+                            <th style="width: 4rem">
+                               ALL <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+                            </th>
+                            <th class="text-center-aligned">Household No.</th>
+                            <th class="text-center-aligned">Beneficiary Name</th>
+                            <th class="text-center-aligned">Gender</th>
+                            <th class="text-center-aligned">Age</th>
+                            <th class="text-center-aligned">Phone No.</th>
+                            <th class="text-center-aligned">Status <p-select [options]="statusOptions" (onChange)="onSelectAllStatus($event)" placeholder="--select--" appendTo="body" [disabled]="selectedBeneficiaries.length === 0"></p-select></th>
                         </tr>
                     </ng-template>
                     <ng-template pTemplate="body" let-beneficiary>
                         <tr>
-                            <td><p-tableCheckbox [value]="beneficiary"></p-tableCheckbox></td>
-                            <td>{{beneficiary.householdNumber}}</td>
-                            <td>{{beneficiary.beneficiaryName}}</td>
-                            <td>{{beneficiary.gender}}</td>
-                            <td>{{beneficiary.age}}</td>
-                            <td>{{beneficiary.phoneNo}}</td>
-                            <td><p-checkbox [(ngModel)]="beneficiary.finlitAttended" [binary]="true"></p-checkbox></td>
-                            <td><p-checkbox [(ngModel)]="beneficiary.ecdAttended" [binary]="true"></p-checkbox></td>
-                            <td><p-checkbox [(ngModel)]="beneficiary.washAttended" [binary]="true"></p-checkbox></td>
-                            <td><p-checkbox [(ngModel)]="beneficiary.gbvAttended" [binary]="true"></p-checkbox></td>
                             <td>
-                                <p-select [options]="statusOptions" [(ngModel)]="beneficiary.present" optionLabel="label" optionValue="value" appendTo="body" placeholder="--select--"></p-select>
+                                <p-tableCheckbox [value]="beneficiary"></p-tableCheckbox>
+                            </td>
+                            <td class="text-center-aligned">{{beneficiary.householdNumber}}</td>
+                            <td class="text-center-aligned">{{beneficiary.beneficiaryName}}</td>
+                            <td class="text-center-aligned">{{beneficiary.gender}}</td>
+                            <td class="text-center-aligned">{{beneficiary.age}}</td>
+                            <td class="text-center-aligned">{{beneficiary.phoneNo}}</td>
+                            <td class="text-center-aligned">
+                                <p-select [options]="statusOptions" [(ngModel)]="beneficiary.present" optionLabel="label" optionValue="value" appendTo="body" placeholder="--select--" [disabled]="!selectedBeneficiaries.includes(beneficiary)"></p-select>
                             </td>
                         </tr>
                     </ng-template>
@@ -160,5 +156,4 @@
                         </div>
                     </div>
                 </div>
-                <p-toast></p-toast>
                 }
