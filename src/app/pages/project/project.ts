@@ -343,10 +343,10 @@ async onSave(): Promise<void> {
     });
     return;
   }
-  if (!this.isEditMode && this.targets.length === 0) {
+  if (this.targets.length === 0) {
     Swal.fire({
       title: 'Validation Error',
-      text: 'Please add at least one State/County target before saving a new project.',
+      text: 'Please add at least one State/County target before saving.',
       icon: 'warning',
     });
     return;
