@@ -407,7 +407,7 @@ async onSave(): Promise<void> {
         text: `Project ${this.isEditMode ? 'updated' : 'saved'} successfully!`,
         icon: 'success',
       }).then(() => {
-      
+        this.router.navigate(['/project/list']);
       });
     } else {
       // Failure modal
@@ -415,7 +415,8 @@ async onSave(): Promise<void> {
         title: 'Error',
         text: `Failed to save project: ${projectData?.message || 'Unknown error'}`,
         icon: 'error',
-      });
+      })
+      ;
     }
   } catch (err: any) {
     console.error('Failed to save project:', err);

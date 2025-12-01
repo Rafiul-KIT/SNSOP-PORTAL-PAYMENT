@@ -43,7 +43,7 @@
       <td class="text-center">{{ project.inchargeName }}</td>
       <td class="text-center">
         <span class="badge" [ngClass]="{
-      'bg-warning ': project.status === 'InProgress',
+      'bg-success ': project.status === 'InProgress',
       'bg-secondary': project.status === 'Closed'
     }">
           {{ project.status }}
