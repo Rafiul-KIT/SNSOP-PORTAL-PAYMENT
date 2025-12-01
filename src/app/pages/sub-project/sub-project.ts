@@ -84,7 +84,7 @@ export class SubProject implements OnInit {
 
   ngOnInit(): void {
     this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
-    this.breadcrumbItems = [{ label: 'Project List', icon: 'fas fa-home', routerLink: 'sub-project-list'  }, { label: 'Sub-Project' }];
+    this.breadcrumbItems = [{ label: 'Sub-Project List', icon: '', routerLink: '/sub-project/list'  }, { label: 'Sub-Project' }];
 
     this.loadAvailableProjects();
     this.loadAvailableTypesOfWork();

@@ -2,12 +2,8 @@
 <app-loader></app-loader>
 } @else {
 <!-- Breadcrumb -->
-<div class="breadcrumb-wrapper mb-3">
-  <p-breadcrumb
-    [model]="breadCrumbItems"
-    [home]="breadcrumbHome"
-    class="max-w-full"
-  ></p-breadcrumb>
+<div class="breadcrumb-wrapper">
+  <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
 </div>
 <p-toast position="bottom-right"></p-toast>
 <!-- Outer panel -->
@@ -316,12 +312,16 @@
         severity="primary"
         (click)="onSave()"
       ></p-button>
-      <!-- <p-button
+      @if(!isEditMode) {
+          <p-button
         label="Clear All"
         icon="fas fa-eraser"
         severity="warn"
         (click)="onClear()"
-      ></p-button> -->
+      ></p-button>
+
+      }
+    
  
     </div>
   </div>
