@@ -227,12 +227,21 @@ export class BeneficiaryRemove implements OnInit {
     }
   }
 
-  onExistingPageChange(event: any): void {
-    const page = event.first / event.rows;
-    this.existingFirst = event.first;
-    this.existingRows = event.rows;
-    this.loadExistingBeneficiaries(page, this.existingRows);
-  }
+onExistingPageChange(event: any): void {
+  const page = event.first / event.rows;
+
+  this.existingFirst = event.first;
+  this.existingRows = event.rows;
+
+  // Handle "Show All"
+  const size =
+    event.rows === this.existingTotalRecords
+      ? this.existingTotalRecords
+      : event.rows;
+
+  this.loadExistingBeneficiaries(page, size);
+}
+
 
   getSelectedExistingIds(): number[] {
     return Array.from(this.selectedBeneficiaryIds);
