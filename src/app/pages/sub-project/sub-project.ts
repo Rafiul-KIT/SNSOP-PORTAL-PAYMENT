@@ -18,6 +18,7 @@ import { ButtonModule } from 'primeng/button';
 import { CookieService } from 'ngx-cookie-service';
 import { environment } from '../../../environments/environment';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 import { DatePickerModule } from 'primeng/datepicker';
 
 @Component({
@@ -164,7 +165,7 @@ export class SubProject implements OnInit {
       this.proposalForm.patchValue({
         stateName: selectedTarget.stateName,
         countyName: selectedTarget.countyName,
-        payamName: '', // Reset payam and boma
+        payamName: '',
         bomaName: '',
       });
 
@@ -286,13 +287,13 @@ export class SubProject implements OnInit {
   private createWorkActivity(): FormGroup {
     return this.fb.group({
       id: [null],
-      name: [''],
-      code: [''],
-      typeOfWork: [''],
-      secondaryActivity: [''],
-      estimatedManpower: [null],
-      estimatedManDays: [null],
-      estimatedCostOfEquipment: [null],
+      name: ['', Validators.required],
+      code: ['', Validators.required],
+      typeOfWork: ['', Validators.required],
+      secondaryActivity: ['', Validators.required],
+      estimatedManpower: [null, Validators.required],
+      estimatedManDays: [null, Validators.required],
+      estimatedCostOfEquipment: [null, Validators.required],
       workPhoto: [null],
       workPhotoName: [''],
       workPhotoSize: [null],
@@ -308,11 +309,11 @@ export class SubProject implements OnInit {
       startCoordinate: [''],
       endCoordinate: [''],
 
-      workStartDate: [''],
-      workEndDate: [''],
-      estimatedCost: [null],
-      estimatedSkillLabour: [null],
-      estimatedMaterialCost: [null],
+      workStartDate: ['', Validators.required],
+      workEndDate: ['', Validators.required],
+      estimatedCost: [null, Validators.required],
+      estimatedSkillLabour: [null, Validators.required],
+      estimatedMaterialCost: [null, Validators.required],
     });
   }
 
@@ -338,7 +339,11 @@ export class SubProject implements OnInit {
 
     if (file) {
       if (file.size > MAX_FILE_SIZE_BYTES) {
-        alert(`File size exceeds the limit of ${MAX_FILE_SIZE_MB} MB. Please select a smaller file.`);
+        Swal.fire({
+          icon: 'error',
+          title: 'File Too Large',
+          text: `File size exceeds the limit of ${MAX_FILE_SIZE_MB} MB. Please select a smaller file.`,
+        });
         // Clear the input field
         if (input) {
           input.value = '';
@@ -440,7 +445,11 @@ export class SubProject implements OnInit {
 
   async viewAttachment(path: string): Promise<void> {
     if (!path) {
-      alert('No attachment path found.');
+      Swal.fire({
+        icon: 'warning',
+        title: 'No Attachment',
+        text: 'No attachment path found.',
+      });
       return;
     }
 
@@ -500,7 +509,11 @@ export class SubProject implements OnInit {
 
     } catch (err) {
       console.error('Failed to fetch attachment', err);
-      alert('Failed to fetch attachment. See console for details.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Load Failed',
+        text: 'Failed to fetch attachment. See console for details.',
+      });
     }
     finally {
       this.isLoading = false;
@@ -510,7 +523,11 @@ export class SubProject implements OnInit {
 
   async onSubmit(): Promise<void> {
     if (!this.proposalForm.valid) {
-      alert('Please fill in all required fields.');
+      Swal.fire({
+        icon: 'error',
+        title: 'Incomplete Form',
+        text: 'Please fill in all required fields.',
+      });
       this.proposalForm.markAllAsTouched();
       return;
     }
@@ -572,14 +589,18 @@ export class SubProject implements OnInit {
       newSubProjectId = subProjectResponse.data.entityId;
       if (!newSubProjectId) throw new Error('Failed to get sub-project ID after saving.');
 
-      if (!this.subprojectId) {
-        const workCode = `${year}-SNSOP-${projectName}-${newSubProjectId}`;
-        const updatePayload = { ...subProjectPayload, id: newSubProjectId, workCode: workCode };
-        await this.api.POST('api/subproject/save', updatePayload);
-      }
+      // if (!this.subprojectId) {
+      //   const workCode = `${year}-SNSOP-${projectName}-${newSubProjectId}`;
+      //   const updatePayload = { ...subProjectPayload, id: newSubProjectId, workCode: workCode };
+      //   await this.api.POST('api/subproject/save', updatePayload);
+      // }
     } catch (err: any) {
       console.error('Failed to save sub-project basic info', err);
-      alert(`Error: Could not save the work proposal's basic information. ${err.message}`);
+      Swal.fire({
+        icon: 'error',
+        title: 'Save Failed',
+        text: `Error: Could not save the work proposal's basic information. ${err.message}`,
+      });
       this.isLoading = false;
       this.cdr.detectChanges();
       return; // Stop execution if sub-project fails to save
@@ -619,7 +640,11 @@ export class SubProject implements OnInit {
         if (!newWorkDetailId) throw new Error('Failed to get work detail ID after saving.');
 
       } catch (err: any) {
-        alert(`The work proposal was saved, but saving Activity #${index + 1} ('${activityValue.name || 'Untitled'}') failed. Please review the proposal later. Error: ${err.message}`);
+        Swal.fire({
+          icon: 'error',
+          title: 'Activity Save Failed',
+          text: `The work proposal was saved, but saving Activity #${index + 1} ('${activityValue.name || 'Untitled'}') failed. Please review the proposal later. Error: ${err.message}`,
+        });
         this.isLoading = false;
         this.cdr.detectChanges();
         return; // Stop further processing
@@ -650,7 +675,11 @@ export class SubProject implements OnInit {
           await this.api.POST_FORM_DATA('api/subproject/work-details/attachment/save', formData);
         }
       } catch (err: any) {
-        alert(`The work proposal and Activity #${index + 1} were saved, but uploading its attachments failed. Please edit the proposal later to add them. Error: ${err.message}`);
+        Swal.fire({
+          icon: 'error',
+          title: 'Attachment Upload Failed',
+          text: `The work proposal and Activity #${index + 1} were saved, but uploading its attachments failed. Please edit the proposal later to add them. Error: ${err.message}`,
+        });
         this.isLoading = false;
         this.cdr.detectChanges();
         return;
@@ -683,38 +712,97 @@ export class SubProject implements OnInit {
 
         await this.api.POST('api/subproject/work-details/save', workDetailPayload);
       } catch (err: any) {
-        alert(`The work proposal was saved, but failed to remove an old activity (ID: ${activityValue.id}). Please review the proposal. Error: ${err.message}`);
+        Swal.fire({
+          icon: 'error',
+          title: 'Activity Removal Failed',
+          text: `The work proposal was saved, but failed to remove an old activity (ID: ${activityValue.id}). Please review the proposal. Error: ${err.message}`,
+        });
         this.isLoading = false;
         this.cdr.detectChanges();
         return;
       }
     }
 
-    // --- Final Step: Success ---
-    alert('Work proposal saved successfully!');
-    this.router.navigate(['/sub-project-list']);
-    this.onAddNew(); // This also sets isLoading to false
-    this.cdr.detectChanges();
+    Swal.fire({
+      title: 'Success!',
+      text: 'Work proposal saved successfully!',
+      icon: 'success',
+      confirmButtonText: 'OK'
+    }).then(() => {
+      this.router.navigate(['/sub-project-list']);
+      this.onAddNew();
+      this.cdr.detectChanges();
+    });
   }
 
   onAddNew(): void {
-
     this.proposalForm.reset();
     this.workActivities.clear();
     this.addWorkActivity();
     this.isLoading = false;
     this.removedWorkActivities = [];
+    this.targets = []; // Clear targets
+    this.selectedTargetId = null; // Clear selected target
+    this.availablePayams = []; // Clear available payams
+    this.availableBomas = []; // Clear available bomas
   }
 
   onCancel(): void {
-    if (confirm('Are you sure you want to cancel? All unsaved changes will be lost.')) {
-      this.onAddNew();
-    }
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'All unsaved changes will be lost.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, cancel it!',
+      cancelButtonText: 'No, keep editing'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.onAddNew();
+      }
+    });
   }
 
   onClearAll(): void {
-    if (confirm('Are you sure you want to clear all fields?')) {
-      this.onAddNew();
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'This will clear all fields.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, clear it!',
+      cancelButtonText: 'No, keep it'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.onAddNew();
+      }
+    });
+  }
+
+  limitToTwoDecimals(event: Event, controlName: string, index: number): void {
+    const inputElement = event.target as HTMLInputElement;
+    let value = inputElement.value;
+
+    // Regex to match numbers with up to two decimal places
+    const regex = /^-?\d*\.?\d{0,2}/;
+    const matched = value.match(regex);
+
+    if (matched) {
+      const newValue = matched[0];
+      if (value !== newValue) {
+        inputElement.value = newValue; // Update the displayed value
+        const activity = this.workActivities.at(index);
+        const control = activity.get(controlName);
+        if (control && control.value !== newValue) { // Prevent unnecessary updates
+          control.setValue(newValue, { emitEvent: false }); // Update form control, suppress further input events
+        }
+      }
+    } else {
+      // If the input doesn't match the regex (e.g., more than 2 decimals), clear it
+      inputElement.value = ''; // Clear invalid input for safety
+      const activity = this.workActivities.at(index);
+      const control = activity.get(controlName);
+      if (control) {
+        control.setValue('', { emitEvent: false });
+      }
     }
   }
 
