@@ -48,7 +48,14 @@
                 <label>Support Type</label>
             </p-floatlabel>
         </div>
-
+       <!-- payment cycle dropdown -->
+        <div class="col-md-3" *ngIf="searchForm.get('payrollType')?.value === 'single'">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="paymentCycleOptions" optionLabel="name" optionValue="id"
+                    formControlName="paymentCycle"></p-select>
+                <label>Payment Cycle</label>
+            </p-floatlabel>
+        </div>
         <!-- payment cycle -->
         <div class="col-md-3">
             <div class="d-flex align-items-center h-100">
@@ -65,14 +72,7 @@
             </div>
         </div>
 
-        <!-- payment cycle dropdown -->
-        <div class="col-md-3" *ngIf="searchForm.get('payrollType')?.value === 'single'">
-            <p-floatlabel variant="on" class="w-100">
-                <p-select [options]="paymentCycleOptions" optionLabel="name" optionValue="id"
-                    formControlName="paymentCycle"></p-select>
-                <label>Payment Cycle</label>
-            </p-floatlabel>
-        </div>
+ 
 
         <!-- payment cycles checkboxes -->
         <div class="col-md-12" *ngIf="searchForm.get('payrollType')?.value === 'combined'">
