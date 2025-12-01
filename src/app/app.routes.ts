@@ -28,6 +28,7 @@ import { ListOfWages } from './pages/apply-wages-request/list-of-wages/list-of-w
 import { Profile } from './pages/profile/profile';
 import { routeGuard } from './route.guard';
 import { Unauthorized } from './components/unauthorized/unauthorized';
+import { PayrollMobileMoney } from './pages/payroll/payroll-mobile-money/payroll-mobile-money';
 
 
 
@@ -195,12 +196,23 @@ export const routes: Routes = [
       }
     ]
   },
-
   {
     path: 'payroll',
-    component: PayrollDownload,
     canActivate: [routeGuard],
+    children: [
+       {
+        path: 'download',
+       component: PayrollDownload,
+       canActivate: [routeGuard],
+      },
+      {
+        path: 'mobile-money-download',
+        component: PayrollMobileMoney,
+        canActivate: [routeGuard],
+      },
+    ],
   },
+
   { path: 'unauthorized', 
     component: Unauthorized 
   },
