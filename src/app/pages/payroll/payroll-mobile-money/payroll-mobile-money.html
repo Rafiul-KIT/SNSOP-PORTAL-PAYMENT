@@ -100,7 +100,7 @@
                         (onClick)="fileInput.click()">
                     </p-button>
                     <input type="file" #fileInput (change)="onFileSelect($event)" hidden
-                        accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, text/csv" />
+                       accept="all" />
                     <p-button label="Export File" icon="fas fa-file-export" severity="success" size="small"
                         (onClick)="exportFile()">
                     </p-button>
