@@ -165,7 +165,7 @@ export class SubProject implements OnInit {
       this.proposalForm.patchValue({
         stateName: selectedTarget.stateName,
         countyName: selectedTarget.countyName,
-        payamName: '', // Reset payam and boma
+        payamName: '',
         bomaName: '',
       });
 
@@ -589,11 +589,11 @@ export class SubProject implements OnInit {
       newSubProjectId = subProjectResponse.data.entityId;
       if (!newSubProjectId) throw new Error('Failed to get sub-project ID after saving.');
 
-      if (!this.subprojectId) {
-        const workCode = `${year}-SNSOP-${projectName}-${newSubProjectId}`;
-        const updatePayload = { ...subProjectPayload, id: newSubProjectId, workCode: workCode };
-        await this.api.POST('api/subproject/save', updatePayload);
-      }
+      // if (!this.subprojectId) {
+      //   const workCode = `${year}-SNSOP-${projectName}-${newSubProjectId}`;
+      //   const updatePayload = { ...subProjectPayload, id: newSubProjectId, workCode: workCode };
+      //   await this.api.POST('api/subproject/save', updatePayload);
+      // }
     } catch (err: any) {
       console.error('Failed to save sub-project basic info', err);
       Swal.fire({
