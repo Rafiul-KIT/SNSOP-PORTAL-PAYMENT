@@ -195,12 +195,21 @@ export class Header {
         ],
       },
       {
-        label: 'Payroll Download',
+        label: 'Payroll',
         icon: 'fas fa-donate',
-        routerLink: 'payroll'
-      },
-      
-      
+        items: [
+          {
+            label: 'Payroll Download',
+            icon: 'fas fa-donate',
+            routerLink: 'payroll/download',
+          },
+          {
+            label: 'Mobile Money Download',
+            icon: 'fas fa-donate',
+            routerLink: 'payroll/mobile-money-download',
+          }
+        ],
+      }
     ];
   }
 
