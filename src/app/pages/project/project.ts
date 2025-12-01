@@ -51,7 +51,8 @@ providers: [MessageService],
 export class Project implements OnInit {
   projectForm!: FormGroup;
   targetForm!: FormGroup;
-
+  breadcrumbItems: any[] = [];
+  breadcrumbHome: any;
   projectId: string | null = null;
   savedProjectId: number | null = null; // Store the ID after saving
   isEditMode = false;
@@ -60,9 +61,6 @@ export class Project implements OnInit {
   statusList = ['InProgress', 'Closed'];
   states: any[] = [];
   counties: any[] = [];
-
-  breadCrumbItems = [{ label: 'Settings' }, { label: 'Project Registration' }];
-  breadcrumbHome = { icon: 'pi pi-home', routerLink: '/' };
 
   targets: {
     id: number;
@@ -99,6 +97,9 @@ private showToast(severity: 'success' | 'info' | 'warn' | 'error', summary: stri
   }
 
   ngOnInit(): void {
+        this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
+    this.breadcrumbItems = [{ label: 'Project List', icon: '', routerLink: '/project/list'  }, { label: 'Project' }];
+
     this.projectId = this.route.snapshot.paramMap.get('id');
     this.loadStateList();
 
