@@ -127,12 +127,20 @@
 
                         <div class="p-4">
                             <h5 class="mb-3">Currently Assigned Beneficiaries <span class="badge bg-danger ms-2">{{ getSelectedExistingIds().length }} selected</span></h5>
-                            <p-table [value]="existingBeneficiaries" [lazy]="true" [paginator]="true"
-                                [rows]="existingRows" [totalRecords]="existingTotalRecords" [first]="existingFirst"
-                                [loading]="isLoadingExisting" (onLazyLoad)="onExistingPageChange($event)"
-                                [rowsPerPageOptions]="[10, 20, 50]" [showCurrentPageReport]="true"
-                                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} beneficiaries"
-                                class="p-datatable-sm p-datatable-striped">
+                           <p-table 
+    [value]="existingBeneficiaries"
+    [lazy]="true"
+    [paginator]="true"
+    [rows]="existingRows"
+    [totalRecords]="existingTotalRecords"
+    [first]="existingFirst"
+    [loading]="isLoadingExisting"
+    (onLazyLoad)="onExistingPageChange($event)"
+    [rowsPerPageOptions]="[10, 50, 100, {showAll: 'All'}]"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} beneficiaries"
+    class="p-datatable-sm p-datatable-striped">
+
 
                                 <ng-template pTemplate="header">
                                     <tr>
