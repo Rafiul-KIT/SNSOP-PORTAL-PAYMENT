@@ -36,6 +36,7 @@ export const routes: Routes = [
   {
     component: Dashboard,
     path: 'dashboard',
+    canActivate: [routeGuard],
   },
   {
     component: Profile,
