@@ -56,6 +56,7 @@ export class SubProject implements OnInit {
 
   targets: any[] = [];  // List to hold targets
   selectedTargetId: number | null = null; // To store the selected target's ID
+  
   private removedWorkActivities: any[] = [];
 
   constructor(
@@ -75,8 +76,10 @@ export class SubProject implements OnInit {
       projectCost: [0],
       stateName: [''],
       countyName: [''],
-      payamName: ['', Validators.required],
-      bomaName: ['', Validators.required],
+      stateId: [''],
+      countyId: [''],
+      payamId: ['', Validators.required],
+      bomaId: ['', Validators.required],
       workActivities: this.fb.array([this.createWorkActivity()]),
       paperScreeningStatus: ['', Validators.required],
     });
@@ -101,29 +104,50 @@ export class SubProject implements OnInit {
 
 
 
-  async onCountyChange(event: Event): Promise<void> {
-    const countyName = (event.target as HTMLSelectElement).value;
+  private async loadPayamsForCounty(countyId: string): Promise<void> {
+    if (!countyId) {
+      this.availablePayams = [];
+      this.availableBomas = [];
+      this.proposalForm.patchValue({ payamId: '', bomaId: '' });
+      this.cdr.detectChanges();
+      return;
+    }
+
     try {
-      const countyId = await this.lookupService.getCountyIdByName(countyName);
-      if (countyId) {
-        this.availablePayams = await this.lookupService.getPayamListByCountyId(String(countyId));
-        this.cdr.detectChanges();
-      }
+      this.availablePayams = await this.lookupService.getPayamListByCountyId(countyId);
+      this.cdr.detectChanges();
     } catch (err) {
       console.error('Failed to load available payams', err);
+      this.availablePayams = [];
+    }
+  }
+
+  private async loadBomasForPayam(payamId: string): Promise<void> {
+    if (!payamId) {
+      this.availableBomas = [];
+      this.proposalForm.patchValue({ bomaId: '' });
+      this.cdr.detectChanges();
+      return;
+    }
+
+    try {
+      this.availableBomas = await this.lookupService.getBomaListByPayamId(payamId);
+      this.cdr.detectChanges();
+    } catch (err) {
+      console.error('Failed to load available bomas', err);
+      this.availableBomas = [];
     }
   }
 
   async onPayamChange(event: Event): Promise<void> {
-    const payamName = (event.target as HTMLSelectElement).value;
-    try {
-      const payamId = await this.lookupService.getPayamIdByName(payamName);
-      if (payamId) {
-        this.availableBomas = await this.lookupService.getBomaListByPayamId(String(payamId));
-        this.cdr.detectChanges();
-      }
-    } catch (err) {
-      console.error('Failed to load available bomas', err);
+    const payamId = (event.target as HTMLSelectElement).value;
+    
+    // Reset Boma selection
+    this.proposalForm.get('bomaId')?.setValue('');
+    this.availableBomas = [];
+    
+    if (payamId) {
+      await this.loadBomasForPayam(payamId);
     }
   }
 
@@ -154,6 +178,16 @@ export class SubProject implements OnInit {
 
   async onTargetSelect(): Promise<void> {
     if (this.selectedTargetId === null) {
+      this.proposalForm.patchValue({
+        stateName: '',
+        countyName: '',
+        stateId: '',
+        countyId: '',
+        payamId: '',
+        bomaId: '',
+      });
+      this.availablePayams = [];
+      this.availableBomas = [];
       return;
     }
 
@@ -165,15 +199,14 @@ export class SubProject implements OnInit {
       this.proposalForm.patchValue({
         stateName: selectedTarget.stateName,
         countyName: selectedTarget.countyName,
-        payamName: '',
-        bomaName: '',
+        stateId: selectedTarget.stateId,
+        countyId: selectedTarget.countyId,
+        payamId: '',
+        bomaId: '',
       });
 
-      // Trigger updates for dependent dropdowns
-
-      await this.onCountyChange({
-        target: { value: selectedTarget.countyName },
-      } as any);
+      // Directly call the efficient helper method with the known ID
+      await this.loadPayamsForCounty(selectedTarget.countyId);
 
       this.cdr.detectChanges();
     }
@@ -204,27 +237,31 @@ export class SubProject implements OnInit {
         const projectExists = this.availableProjects.some(p => p.id === subProjectData.projectId);
         if (!projectExists) {
           this.availableProjects.push({ id: Number(subProjectData.projectId), name: String(subProjectData.projectName) });
+          this.cdr.detectChanges(); // Manually trigger change detection after modifying array for dropdown
         }
       }
 
+      // Assuming subProjectData from the API includes stateId and countyId
       this.proposalForm.patchValue({
-        projectName: subProjectData.projectId,
+        projectName: Number(subProjectData.projectId), // Re-insert and ensure project ID is a number for dropdown selection
         typeOfMeeting: subProjectData.typeOfMeeting,
         meetingDate: subProjectData.meetingDate ? new Date(subProjectData.meetingDate) : null,
         stateName: subProjectData.stateName,
         countyName: subProjectData.countyName,
-        payamName: subProjectData.payamName,
-        bomaName: subProjectData.bomaName,
+        stateId: subProjectData.stateId,
+        countyId: subProjectData.countyId,
+        payamId: String(subProjectData.payamId || ''),
+        bomaId: String(subProjectData.bomaId || ''),
         paperScreeningStatus: subProjectData.screeningStatus,
       });
 
       this.cdr.detectChanges();
 
-      if (subProjectData.countyName) {
-        this.onCountyChange({ target: { value: subProjectData.countyName } } as any);
+      if (subProjectData.countyId) {
+        await this.loadPayamsForCounty(String(subProjectData.countyId));
       }
-      if (subProjectData.payamName) {
-        this.onPayamChange({ target: { value: subProjectData.payamName } } as any);
+      if (subProjectData.payamId) {
+        await this.loadBomasForPayam(String(subProjectData.payamId));
       }
 
 
@@ -538,6 +575,7 @@ export class SubProject implements OnInit {
     let newSubProjectId: number | null = null;
     let projectId: number;
     let projectName: string;
+    let finalWorkCode: string = ''; // Initialize to an empty string
 
     try {
       // --- Step 1: Prepare and Save Sub-project Basic Info ---
@@ -552,23 +590,34 @@ export class SubProject implements OnInit {
       projectName = selectedProject ? selectedProject.name : '';
       if (!projectName) throw new Error(`Project name not found for ID: ${projectId}.`);
 
-      const stateId = await this.lookupService.getStateIdByName(formValue.stateName);
-      if (stateId === null) throw new Error(`State '${formValue.stateName}' not found.`);
+      const stateId = formValue.stateId;
+      if (!stateId) throw new Error(`State ID for '${formValue.stateName}' was not found. Please re-select the project target.`);
 
-      const countyId = await this.lookupService.getCountyIdByName(formValue.countyName);
-      if (countyId === null) throw new Error(`County '${formValue.countyName}' not found.`);
+      const countyId = formValue.countyId;
+      if (!countyId) throw new Error(`County ID for '${formValue.countyName}' was not found. Please re-select the project target.`);
 
-      const payamId = await this.lookupService.getPayamIdByName(formValue.payamName);
-      if (payamId === null) throw new Error(`Payam '${formValue.payamName}' not found.`);
+      const payamId = formValue.payamId;
+      if (!payamId) throw new Error(`Payam ID could not be found. Please re-select the payam.`);
+      const payam = this.availablePayams.find(p => p.id === payamId);
+      const payamName = payam ? payam.name : '';
+      if (!payamName) throw new Error(`Payam name for ID '${payamId}' could not be found.`);
 
-      const bomaId = await this.lookupService.getBomaIdByName(formValue.bomaName);
-      if (bomaId === null) throw new Error(`Boma '${formValue.bomaName}' not found.`);
+      const bomaId = formValue.bomaId;
+      if (!bomaId) throw new Error(`Boma ID could not be found. Please re-select the boma.`);
+      const boma = this.availableBomas.find(b => b.id === bomaId);
+      const bomaName = boma ? boma.name : '';
+      if (!bomaName) throw new Error(`Boma name for ID '${bomaId}' could not be found.`);
 
       const year = new Date().getFullYear();
 
+      // Calculate finalWorkCode for existing sub-projects before the API call
+      if (this.subprojectId) {
+        finalWorkCode = `${year}-SNSOP-${projectName}-${this.subprojectId}`;
+      }
+
       const subProjectPayload: any = {
         id: this.subprojectId ? parseInt(this.subprojectId, 10) : null,
-        workCode: this.subprojectId ? `${year}-SNSOP-${projectName}-${this.subprojectId}` : null,
+        workCode: this.subprojectId ? finalWorkCode : null, // Pass workCode if existing, null if new (backend expected to handle for new)
         projectId: projectId,
         projectName: projectName,
         stateId: stateId,
@@ -576,9 +625,9 @@ export class SubProject implements OnInit {
         countyId: countyId,
         countyName: formValue.countyName,
         payamId: payamId,
-        payamName: formValue.payamName,
+        payamName: payamName,
         bomaId: bomaId,
-        bomaName: formValue.bomaName,
+        bomaName: bomaName,
         typeOfMeeting: formValue.typeOfMeeting,
         meetingDate: formValue.meetingDate,
         screeningStatus: formValue.paperScreeningStatus ? parseInt(formValue.paperScreeningStatus, 10) : null,
@@ -588,6 +637,13 @@ export class SubProject implements OnInit {
       const subProjectResponse = await this.api.POST('api/subproject/save', subProjectPayload);
       newSubProjectId = subProjectResponse.data.entityId;
       if (!newSubProjectId) throw new Error('Failed to get sub-project ID after saving.');
+
+      // If it was a new sub-project, calculate finalWorkCode for display only.
+      if (!this.subprojectId) {
+        finalWorkCode = `${year}-SNSOP-${projectName}-${newSubProjectId}`;
+      }
+      // At this point, finalWorkCode holds the correct workCode for both new and existing sub-projects for the message.
+
 
       // if (!this.subprojectId) {
       //   const workCode = `${year}-SNSOP-${projectName}-${newSubProjectId}`;
@@ -723,13 +779,19 @@ export class SubProject implements OnInit {
       }
     }
 
+    this.isLoading = false;
+    this.cdr.detectChanges();
+
+    this.isLoading = false;
+    this.cdr.detectChanges();
+
     Swal.fire({
       title: 'Success!',
-      text: 'Work proposal saved successfully!',
+      text: `Work proposal ${finalWorkCode} saved successfully!`,
       icon: 'success',
       confirmButtonText: 'OK'
     }).then(() => {
-      this.router.navigate(['/sub-project-list']);
+      this.router.navigate(['/sub-project/list']);
       this.onAddNew();
       this.cdr.detectChanges();
     });
