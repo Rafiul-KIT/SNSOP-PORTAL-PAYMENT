@@ -205,6 +205,7 @@ export class PayrollMobileMoney implements OnInit {
       workActivity: [null],
       screeningStatus: [null],
       supportType: [''],
+      registrationPhase: [''],
       paymentCycle: [''],
       paymentCycles: this.fb.array(this.paymentCycleOptions.map(c => this.fb.group({
         id: c.id,
