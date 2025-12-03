@@ -37,7 +37,10 @@
                         <input type="text" class="form-control" formControlName="projectName" readonly />
                       </div>
                      
-                      
+                        <div class="col-md-12">
+                        <label class="form-label text-secondary fw-semibold">Paper Screening Status</label>
+                        <input type="text" class="form-control" formControlName="screeningStatus" readonly />
+                      </div>
                     </div>
                   </div>
                   <div class="col-md-6">
@@ -50,10 +53,7 @@
                         <label class="form-label text-secondary fw-semibold">Meeting Date</label>
                         <input type="date" class="form-control" formControlName="meetingDate" readonly />
                       </div>
-                      <div class="col-md-12">
-                        <label class="form-label text-secondary fw-semibold">Paper Screening Status</label>
-                        <input type="text" class="form-control" formControlName="screeningStatus" readonly />
-                      </div>
+                    
                     </div>
                   </div>
                 </div>
@@ -136,8 +136,8 @@
                         <div class="col-md-6">
                           <label class="form-label text-secondary fw-semibold">Equipment Photo</label>
                           <div class="border rounded p-2">
-                            <a [href]="activity.get('equipmentPhotoUrl')?.value" target="_blank" class="text-primary">
-                              <i class="fas fa-image me-2"></i>View Equipment Photo
+                            <a class="text-primary" (click)="viewAttachment(activity.get('equipmentPhotoUrl')?.value)">
+                              <i class="fas fa-image me-2"></i>Download Equipment Photo
                             </a>
                           </div>
                         </div>
@@ -160,8 +160,8 @@
                         <div class="col-md-6">
                           <label class="form-label text-secondary fw-semibold">Work Photo</label>
                           <div class="border rounded p-2">
-                            <a [href]="activity.get('workPhotoUrl')?.value" target="_blank" class="text-primary">
-                              <i class="fas fa-image me-2"></i>View Work Photo
+                            <a class="text-primary" (click)="viewAttachment(activity.get('workPhotoUrl')?.value)">
+                              <i class="fas fa-image me-2"></i>Download Work Photo
                             </a>
                           </div>
                         </div>
@@ -171,8 +171,8 @@
                         <div class="col-md-6">
                           <label class="form-label text-secondary fw-semibold">Materials Photo</label>
                           <div class="border rounded p-2">
-                            <a [href]="activity.get('materialPhotoUrl')?.value" target="_blank" class="text-primary">
-                              <i class="fas fa-image me-2"></i>View Materials Photo
+                            <a class="text-primary" (click)="viewAttachment(activity.get('materialPhotoUrl')?.value)">
+                              <i class="fas fa-image me-2"></i>Download Materials Photo
                             </a>
                           </div>
                         </div>
@@ -319,8 +319,8 @@
                         <!-- Equipment Photo -->
                         <td class="text-center">
                           @if (activity.get('equipmentPhotoUrl')?.value) {
-                          <a [href]="activity.get('equipmentPhotoUrl')?.value" target="_blank" class="text-primary"
-                            title="View Equipment Photo">
+                          <a class="text-primary" title="Download Equipment Photo"
+                            (click)="viewAttachment(activity.get('equipmentPhotoUrl')?.value)">
                             <i class="fas fa-image fa-lg"></i>
                           </a>
                           } @else {
@@ -335,8 +335,7 @@
                         <!-- Work Photo -->
                         <td class="text-center">
                           @if (activity.get('workPhotoUrl')?.value) {
-                          <a [href]="activity.get('workPhotoUrl')?.value" target="_blank" class="text-primary"
-                            title="View Work Photo">
+                          <a class="text-primary" title="Download Work Photo" (click)="viewAttachment(activity.get('workPhotoUrl')?.value)">
                             <i class="fas fa-image fa-lg"></i>
                           </a>
                           } @else {
@@ -348,8 +347,8 @@
                         <!-- Materials Photo -->
                         <td class="text-center">
                           @if (activity.get('materialPhotoUrl')?.value) {
-                          <a [href]="activity.get('materialPhotoUrl')?.value" target="_blank" class="text-primary"
-                            title="View Materials Photo">
+                          <a class="text-primary" title="Download Materials Photo"
+                            (click)="viewAttachment(activity.get('materialPhotoUrl')?.value)">
                             <i class="fas fa-image fa-lg"></i>
                           </a>
                           } @else {

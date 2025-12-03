@@ -272,6 +272,63 @@ async submitApproval(): Promise<void> {
     }
   }
 
+  async viewAttachment(path: string | null | undefined): Promise<void> {
+    if (!path) {
+      this.msg.add({
+        severity: 'warn',
+        summary: 'Warning',
+        detail: 'No attachment path found.',
+      });
+      return;
+    }
+
+    this.isLoading.set(true);
+    try {
+      const token = this.api.getToken();
+      if (!token) {
+        this.msg.add({
+          severity: 'error',
+          summary: 'Authentication Error',
+          detail: 'Authentication token not found. Please log in again.',
+        });
+        return;
+      }
+
+      const response = await this.api.axiosInstance.get(
+        `api/subproject/work-details/attachment/get`,
+        {
+          params: { filePath: path },
+          responseType: 'blob',
+        }
+      );
+
+      const blob = response.data;
+      const objectUrl = URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = objectUrl;
+
+      let filename = path.split('/').pop()?.split('?')[0] || 'download';
+      link.setAttribute('download', decodeURIComponent(filename));
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 100);
+
+    } catch (err) {
+      console.error('Failed to fetch attachment:', err);
+      this.msg.add({
+        severity: 'error',
+        summary: 'Load Failed',
+        detail: 'Failed to fetch attachment. It may no longer exist or you do not have permission.',
+      });
+    } finally {
+      this.isLoading.set(false);
+      this.cdr.detectChanges();
+    }
+  }
   private async fetchWorkDetails(
     subprojectId: number
   ): Promise<WorkActivity[]> {
