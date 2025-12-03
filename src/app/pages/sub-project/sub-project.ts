@@ -56,6 +56,7 @@ export class SubProject implements OnInit {
 
   targets: any[] = [];  // List to hold targets
   selectedTargetId: number | null = null; // To store the selected target's ID
+  
   private removedWorkActivities: any[] = [];
 
   constructor(
@@ -75,8 +76,10 @@ export class SubProject implements OnInit {
       projectCost: [0],
       stateName: [''],
       countyName: [''],
-      payamName: ['', Validators.required],
-      bomaName: ['', Validators.required],
+      stateId: [''],
+      countyId: [''],
+      payamId: ['', Validators.required],
+      bomaId: ['', Validators.required],
       workActivities: this.fb.array([this.createWorkActivity()]),
       paperScreeningStatus: ['', Validators.required],
     });
@@ -101,29 +104,50 @@ export class SubProject implements OnInit {
 
 
 
-  async onCountyChange(event: Event): Promise<void> {
-    const countyName = (event.target as HTMLSelectElement).value;
+  private async loadPayamsForCounty(countyId: string): Promise<void> {
+    if (!countyId) {
+      this.availablePayams = [];
+      this.availableBomas = [];
+      this.proposalForm.patchValue({ payamId: '', bomaId: '' });
+      this.cdr.detectChanges();
+      return;
+    }
+
     try {
-      const countyId = await this.lookupService.getCountyIdByName(countyName);
-      if (countyId) {
-        this.availablePayams = await this.lookupService.getPayamListByCountyId(String(countyId));
-        this.cdr.detectChanges();
-      }
+      this.availablePayams = await this.lookupService.getPayamListByCountyId(countyId);
+      this.cdr.detectChanges();
     } catch (err) {
       console.error('Failed to load available payams', err);
+      this.availablePayams = [];
+    }
+  }
+
+  private async loadBomasForPayam(payamId: string): Promise<void> {
+    if (!payamId) {
+      this.availableBomas = [];
+      this.proposalForm.patchValue({ bomaId: '' });
+      this.cdr.detectChanges();
+      return;
+    }
+
+    try {
+      this.availableBomas = await this.lookupService.getBomaListByPayamId(payamId);
+      this.cdr.detectChanges();
+    } catch (err) {
+      console.error('Failed to load available bomas', err);
+      this.availableBomas = [];
     }
   }
 
   async onPayamChange(event: Event): Promise<void> {
-    const payamName = (event.target as HTMLSelectElement).value;
-    try {
-      const payamId = await this.lookupService.getPayamIdByName(payamName);
-      if (payamId) {
-        this.availableBomas = await this.lookupService.getBomaListByPayamId(String(payamId));
-        this.cdr.detectChanges();
-      }
-    } catch (err) {
-      console.error('Failed to load available bomas', err);
+    const payamId = (event.target as HTMLSelectElement).value;
+    
+    // Reset Boma selection
+    this.proposalForm.get('bomaId')?.setValue('');
+    this.availableBomas = [];
+    
+    if (payamId) {
+      await this.loadBomasForPayam(payamId);
     }
   }
 
@@ -154,6 +178,16 @@ export class SubProject implements OnInit {
 
   async onTargetSelect(): Promise<void> {
     if (this.selectedTargetId === null) {
+      this.proposalForm.patchValue({
+        stateName: '',
+        countyName: '',
+        stateId: '',
+        countyId: '',
+        payamId: '',
+        bomaId: '',
+      });
+      this.availablePayams = [];
+      this.availableBomas = [];
       return;
     }
 
@@ -165,15 +199,14 @@ export class SubProject implements OnInit {
       this.proposalForm.patchValue({
         stateName: selectedTarget.stateName,
         countyName: selectedTarget.countyName,
-        payamName: '',
-        bomaName: '',
+        stateId: selectedTarget.stateId,
+        countyId: selectedTarget.countyId,
+        payamId: '',
+        bomaId: '',
       });
 
-      // Trigger updates for dependent dropdowns
-
-      await this.onCountyChange({
-        target: { value: selectedTarget.countyName },
-      } as any);
+      // Directly call the efficient helper method with the known ID
+      await this.loadPayamsForCounty(selectedTarget.countyId);
 
       this.cdr.detectChanges();
     }
@@ -204,27 +237,31 @@ export class SubProject implements OnInit {
         const projectExists = this.availableProjects.some(p => p.id === subProjectData.projectId);
         if (!projectExists) {
           this.availableProjects.push({ id: Number(subProjectData.projectId), name: String(subProjectData.projectName) });
+          this.cdr.detectChanges(); // Manually trigger change detection after modifying array for dropdown
         }
       }
 
+      // Assuming subProjectData from the API includes stateId and countyId
       this.proposalForm.patchValue({
-        projectName: subProjectData.projectId,
+        projectName: Number(subProjectData.projectId), // Re-insert and ensure project ID is a number for dropdown selection
         typeOfMeeting: subProjectData.typeOfMeeting,
         meetingDate: subProjectData.meetingDate ? new Date(subProjectData.meetingDate) : null,
         stateName: subProjectData.stateName,
         countyName: subProjectData.countyName,
-        payamName: subProjectData.payamName,
-        bomaName: subProjectData.bomaName,
+        stateId: subProjectData.stateId,
+        countyId: subProjectData.countyId,
+        payamId: String(subProjectData.payamId || ''),
+        bomaId: String(subProjectData.bomaId || ''),
         paperScreeningStatus: subProjectData.screeningStatus,
       });
 
       this.cdr.detectChanges();
 
-      if (subProjectData.countyName) {
-        this.onCountyChange({ target: { value: subProjectData.countyName } } as any);
+      if (subProjectData.countyId) {
+        await this.loadPayamsForCounty(String(subProjectData.countyId));
       }
-      if (subProjectData.payamName) {
-        this.onPayamChange({ target: { value: subProjectData.payamName } } as any);
+      if (subProjectData.payamId) {
+        await this.loadBomasForPayam(String(subProjectData.payamId));
       }
 
 
@@ -334,8 +371,8 @@ export class SubProject implements OnInit {
   private handleFileInput(event: Event, index: number, fileControlName: string, fileNameControlName: string, fileSizeControlName: string): void {
     const input = event.target as HTMLInputElement;
     const file = input?.files?.[0];
-    const MAX_FILE_SIZE_MB = 3;
-    const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024; // 3 MB
+    const MAX_FILE_SIZE_MB = 1;
+    const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
     if (file) {
       if (file.size > MAX_FILE_SIZE_BYTES) {
@@ -538,9 +575,11 @@ export class SubProject implements OnInit {
     let newSubProjectId: number | null = null;
     let projectId: number;
     let projectName: string;
+    let finalWorkCode: string = '';
+    const submissionWarnings: string[] = [];
 
+    // --- Step 1: Prepare and Save Sub-project Basic Info ---
     try {
-      // --- Step 1: Prepare and Save Sub-project Basic Info ---
       const formValue = this.proposalForm.value;
 
       const rawProjectId = formValue.projectName;
@@ -549,36 +588,37 @@ export class SubProject implements OnInit {
       if (isNaN(projectId)) throw new Error(`Invalid Project ID.`);
 
       const selectedProject = this.availableProjects.find(p => p.id === projectId);
-      projectName = selectedProject ? selectedProject.name : '';
-      if (!projectName) throw new Error(`Project name not found for ID: ${projectId}.`);
+      if (!selectedProject) throw new Error(`Project name not found for ID: ${projectId}.`);
+      projectName = selectedProject.name;
 
-      const stateId = await this.lookupService.getStateIdByName(formValue.stateName);
-      if (stateId === null) throw new Error(`State '${formValue.stateName}' not found.`);
+      const { stateId, stateName, countyId, countyName, payamId, bomaId } = formValue;
+      if (!stateId) throw new Error(`State ID for '${stateName}' was not found. Please re-select the project target.`);
+      if (!countyId) throw new Error(`County ID for '${countyName}' was not found. Please re-select the project target.`);
 
-      const countyId = await this.lookupService.getCountyIdByName(formValue.countyName);
-      if (countyId === null) throw new Error(`County '${formValue.countyName}' not found.`);
-
-      const payamId = await this.lookupService.getPayamIdByName(formValue.payamName);
-      if (payamId === null) throw new Error(`Payam '${formValue.payamName}' not found.`);
-
-      const bomaId = await this.lookupService.getBomaIdByName(formValue.bomaName);
-      if (bomaId === null) throw new Error(`Boma '${formValue.bomaName}' not found.`);
+      const payam = this.availablePayams.find(p => p.id === payamId);
+      if (!payam) throw new Error(`Payam name for ID '${payamId}' could not be found.`);
+      const boma = this.availableBomas.find(b => b.id === bomaId);
+      if (!boma) throw new Error(`Boma name for ID '${bomaId}' could not be found.`);
 
       const year = new Date().getFullYear();
 
+      if (this.subprojectId) {
+        finalWorkCode = `${year}-SNSOP-${projectName}-${this.subprojectId}`;
+      }
+
       const subProjectPayload: any = {
         id: this.subprojectId ? parseInt(this.subprojectId, 10) : null,
-        workCode: this.subprojectId ? `${year}-SNSOP-${projectName}-${this.subprojectId}` : null,
-        projectId: projectId,
-        projectName: projectName,
-        stateId: stateId,
-        stateName: formValue.stateName,
-        countyId: countyId,
-        countyName: formValue.countyName,
-        payamId: payamId,
-        payamName: formValue.payamName,
-        bomaId: bomaId,
-        bomaName: formValue.bomaName,
+        workCode: this.subprojectId ? finalWorkCode : null,
+        projectId,
+        projectName,
+        stateId,
+        stateName,
+        countyId,
+        countyName,
+        payamId,
+        payamName: payam.name,
+        bomaId,
+        bomaName: boma.name,
         typeOfMeeting: formValue.typeOfMeeting,
         meetingDate: formValue.meetingDate,
         screeningStatus: formValue.paperScreeningStatus ? parseInt(formValue.paperScreeningStatus, 10) : null,
@@ -589,34 +629,31 @@ export class SubProject implements OnInit {
       newSubProjectId = subProjectResponse.data.entityId;
       if (!newSubProjectId) throw new Error('Failed to get sub-project ID after saving.');
 
-      // if (!this.subprojectId) {
-      //   const workCode = `${year}-SNSOP-${projectName}-${newSubProjectId}`;
-      //   const updatePayload = { ...subProjectPayload, id: newSubProjectId, workCode: workCode };
-      //   await this.api.POST('api/subproject/save', updatePayload);
-      // }
+      // Update the work code for the final message
+      if (!this.subprojectId) {
+        finalWorkCode = `${year}-SNSOP-${projectName}-${newSubProjectId}`;
+      }
+      // Update the component's subprojectId to prevent re-creation on a subsequent failed step
+      this.subprojectId = newSubProjectId.toString();
+
     } catch (err: any) {
       console.error('Failed to save sub-project basic info', err);
       Swal.fire({
         icon: 'error',
         title: 'Save Failed',
-        text: `Error: Could not save the work proposal's basic information. ${err.message}`,
+        text: `Critical Error: Could not save the work proposal's basic information. ${err.message}`,
       });
       this.isLoading = false;
       this.cdr.detectChanges();
-      return; // Stop execution if sub-project fails to save
+      return;
     }
 
-    // --- Step 2: Save Work Details and Attachments ---
+    // --- Step 2 & 3: Save Work Details and Attachments ---
     for (const [index, activityControl] of this.workActivities.controls.entries()) {
       const activityValue = activityControl.value;
       let newWorkDetailId: number | null = null;
 
       try {
-        const areaOfWorkId = activityValue.typeOfWork;
-        if (!areaOfWorkId) throw new Error(`"Area of Work" was not selected.`);
-        const workActivityId = activityValue.secondaryActivity;
-        if (!workActivityId) throw new Error(`"Work Activity" was not selected.`);
-
         const workDetailPayload = {
           subprojectId: newSubProjectId,
           id: activityValue.id ? parseInt(activityValue.id, 10) : null,
@@ -638,51 +675,32 @@ export class SubProject implements OnInit {
         const workDetailResponse = await this.api.POST('api/subproject/work-details/save', workDetailPayload);
         newWorkDetailId = workDetailResponse.data.entityId;
         if (!newWorkDetailId) throw new Error('Failed to get work detail ID after saving.');
+        activityControl.patchValue({ id: newWorkDetailId }); // Update ID in the form
 
       } catch (err: any) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Activity Save Failed',
-          text: `The work proposal was saved, but saving Activity #${index + 1} ('${activityValue.name || 'Untitled'}') failed. Please review the proposal later. Error: ${err.message}`,
-        });
-        this.isLoading = false;
-        this.cdr.detectChanges();
-        return; // Stop further processing
+        submissionWarnings.push(`Saving Activity #${index + 1} ('${activityValue.name || 'Untitled'}') failed: ${err.message}`);
+        continue; // Skip to next activity if this one failed
       }
 
-      // --- Step 3: Save Attachments for the current Work Detail ---
+      // --- Attachment Saving ---
       try {
         const formData = new FormData();
         let hasFiles = false;
-
-        if (activityValue.workPhoto) {
-          formData.append('workPhoto', activityValue.workPhoto, activityValue.workPhotoName);
-          hasFiles = true;
-        }
-        if (activityValue.equipmentPhoto) {
-          formData.append('equipmentPhoto', activityValue.equipmentPhoto, activityValue.equipmentPhotoName);
-          hasFiles = true;
-        }
-        if (activityValue.materialPhoto) {
-          formData.append('materialPhoto', activityValue.materialPhoto, activityValue.materialPhotoName);
-          hasFiles = true;
-        }
+        ['workPhoto', 'equipmentPhoto', 'materialPhoto'].forEach(photoType => {
+          if (activityValue[photoType]) {
+            formData.append(photoType, activityValue[photoType], activityValue[`${photoType}Name`]);
+            hasFiles = true;
+          }
+        });
 
         if (hasFiles) {
-          formData.append('projectId', projectId.toString());
+          formData.append('projectId', projectId!.toString());
           formData.append('subprojectId', newSubProjectId.toString());
           formData.append('subprojectWorkDetailId', newWorkDetailId.toString());
           await this.api.POST_FORM_DATA('api/subproject/work-details/attachment/save', formData);
         }
       } catch (err: any) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Attachment Upload Failed',
-          text: `The work proposal and Activity #${index + 1} were saved, but uploading its attachments failed. Please edit the proposal later to add them. Error: ${err.message}`,
-        });
-        this.isLoading = false;
-        this.cdr.detectChanges();
-        return;
+        submissionWarnings.push(`Uploading attachments for Activity #${index + 1} failed: ${err.message}. Please add them later by editing.`);
       }
     }
 
@@ -691,7 +709,6 @@ export class SubProject implements OnInit {
       try {
         if (!activityValue.id) continue;
 
-        // Create a complete payload to prevent data loss on the backend
         const workDetailPayload = {
           subprojectId: newSubProjectId,
           id: parseInt(activityValue.id, 10),
@@ -707,32 +724,47 @@ export class SubProject implements OnInit {
           estCost: activityValue.estimatedCost || 0,
           equipmentCost: activityValue.estimatedCostOfEquipment || 0,
           materialCost: activityValue.estimatedMaterialCost || 0,
-          status: false, // Mark as inactive
+          status: false,
         };
 
         await this.api.POST('api/subproject/work-details/save', workDetailPayload);
       } catch (err: any) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Activity Removal Failed',
-          text: `The work proposal was saved, but failed to remove an old activity (ID: ${activityValue.id}). Please review the proposal. Error: ${err.message}`,
-        });
-        this.isLoading = false;
-        this.cdr.detectChanges();
-        return;
+        submissionWarnings.push(`Failed to remove an old activity (ID: ${activityValue.id}): ${err.message}.`);
       }
     }
+    
+    this.removedWorkActivities = []; // Clear the array after processing
+    this.isLoading = false;
+    this.cdr.detectChanges();
 
-    Swal.fire({
-      title: 'Success!',
-      text: 'Work proposal saved successfully!',
-      icon: 'success',
-      confirmButtonText: 'OK'
-    }).then(() => {
-      this.router.navigate(['/sub-project-list']);
-      this.onAddNew();
-      this.cdr.detectChanges();
-    });
+    // --- Final Step: Show Summary and Redirect ---
+    if (submissionWarnings.length === 0) {
+      Swal.fire({
+        title: 'Success!',
+        text: `Work proposal ${finalWorkCode} was saved successfully.`,
+        icon: 'success',
+        confirmButtonText: 'OK'
+      }).then(() => {
+        this.router.navigate(['/sub-project/list']);
+      });
+    } else {
+      const warningHtml = submissionWarnings.map(msg => `<li>${msg}</li>`).join('');
+      Swal.fire({
+        title: 'Saved with Warnings',
+        html: `
+          <div style="text-align: left;">
+            <p><strong>Work proposal ${finalWorkCode} was saved, but some issues occurred:</strong></p>
+            <ul style="padding-left: 20px;">
+              ${warningHtml}
+            </ul>
+          </div>
+        `,
+        icon: 'warning',
+        confirmButtonText: 'OK'
+      }).then(() => {
+        this.router.navigate(['/sub-project/list']);
+      });
+    }
   }
 
   onAddNew(): void {
