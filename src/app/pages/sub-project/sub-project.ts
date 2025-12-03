@@ -371,8 +371,8 @@ export class SubProject implements OnInit {
   private handleFileInput(event: Event, index: number, fileControlName: string, fileNameControlName: string, fileSizeControlName: string): void {
     const input = event.target as HTMLInputElement;
     const file = input?.files?.[0];
-    const MAX_FILE_SIZE_MB = 3;
-    const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024; // 3 MB
+    const MAX_FILE_SIZE_MB = 1;
+    const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
     if (file) {
       if (file.size > MAX_FILE_SIZE_BYTES) {
@@ -575,10 +575,11 @@ export class SubProject implements OnInit {
     let newSubProjectId: number | null = null;
     let projectId: number;
     let projectName: string;
-    let finalWorkCode: string = ''; // Initialize to an empty string
+    let finalWorkCode: string = '';
+    const submissionWarnings: string[] = [];
 
+    // --- Step 1: Prepare and Save Sub-project Basic Info ---
     try {
-      // --- Step 1: Prepare and Save Sub-project Basic Info ---
       const formValue = this.proposalForm.value;
 
       const rawProjectId = formValue.projectName;
@@ -587,47 +588,37 @@ export class SubProject implements OnInit {
       if (isNaN(projectId)) throw new Error(`Invalid Project ID.`);
 
       const selectedProject = this.availableProjects.find(p => p.id === projectId);
-      projectName = selectedProject ? selectedProject.name : '';
-      if (!projectName) throw new Error(`Project name not found for ID: ${projectId}.`);
+      if (!selectedProject) throw new Error(`Project name not found for ID: ${projectId}.`);
+      projectName = selectedProject.name;
 
-      const stateId = formValue.stateId;
-      if (!stateId) throw new Error(`State ID for '${formValue.stateName}' was not found. Please re-select the project target.`);
+      const { stateId, stateName, countyId, countyName, payamId, bomaId } = formValue;
+      if (!stateId) throw new Error(`State ID for '${stateName}' was not found. Please re-select the project target.`);
+      if (!countyId) throw new Error(`County ID for '${countyName}' was not found. Please re-select the project target.`);
 
-      const countyId = formValue.countyId;
-      if (!countyId) throw new Error(`County ID for '${formValue.countyName}' was not found. Please re-select the project target.`);
-
-      const payamId = formValue.payamId;
-      if (!payamId) throw new Error(`Payam ID could not be found. Please re-select the payam.`);
       const payam = this.availablePayams.find(p => p.id === payamId);
-      const payamName = payam ? payam.name : '';
-      if (!payamName) throw new Error(`Payam name for ID '${payamId}' could not be found.`);
-
-      const bomaId = formValue.bomaId;
-      if (!bomaId) throw new Error(`Boma ID could not be found. Please re-select the boma.`);
+      if (!payam) throw new Error(`Payam name for ID '${payamId}' could not be found.`);
       const boma = this.availableBomas.find(b => b.id === bomaId);
-      const bomaName = boma ? boma.name : '';
-      if (!bomaName) throw new Error(`Boma name for ID '${bomaId}' could not be found.`);
+      if (!boma) throw new Error(`Boma name for ID '${bomaId}' could not be found.`);
 
       const year = new Date().getFullYear();
 
-      // Calculate finalWorkCode for existing sub-projects before the API call
       if (this.subprojectId) {
         finalWorkCode = `${year}-SNSOP-${projectName}-${this.subprojectId}`;
       }
 
       const subProjectPayload: any = {
         id: this.subprojectId ? parseInt(this.subprojectId, 10) : null,
-        workCode: this.subprojectId ? finalWorkCode : null, // Pass workCode if existing, null if new (backend expected to handle for new)
-        projectId: projectId,
-        projectName: projectName,
-        stateId: stateId,
-        stateName: formValue.stateName,
-        countyId: countyId,
-        countyName: formValue.countyName,
-        payamId: payamId,
-        payamName: payamName,
-        bomaId: bomaId,
-        bomaName: bomaName,
+        workCode: this.subprojectId ? finalWorkCode : null,
+        projectId,
+        projectName,
+        stateId,
+        stateName,
+        countyId,
+        countyName,
+        payamId,
+        payamName: payam.name,
+        bomaId,
+        bomaName: boma.name,
         typeOfMeeting: formValue.typeOfMeeting,
         meetingDate: formValue.meetingDate,
         screeningStatus: formValue.paperScreeningStatus ? parseInt(formValue.paperScreeningStatus, 10) : null,
@@ -638,41 +629,31 @@ export class SubProject implements OnInit {
       newSubProjectId = subProjectResponse.data.entityId;
       if (!newSubProjectId) throw new Error('Failed to get sub-project ID after saving.');
 
-      // If it was a new sub-project, calculate finalWorkCode for display only.
+      // Update the work code for the final message
       if (!this.subprojectId) {
         finalWorkCode = `${year}-SNSOP-${projectName}-${newSubProjectId}`;
       }
-      // At this point, finalWorkCode holds the correct workCode for both new and existing sub-projects for the message.
+      // Update the component's subprojectId to prevent re-creation on a subsequent failed step
+      this.subprojectId = newSubProjectId.toString();
 
-
-      // if (!this.subprojectId) {
-      //   const workCode = `${year}-SNSOP-${projectName}-${newSubProjectId}`;
-      //   const updatePayload = { ...subProjectPayload, id: newSubProjectId, workCode: workCode };
-      //   await this.api.POST('api/subproject/save', updatePayload);
-      // }
     } catch (err: any) {
       console.error('Failed to save sub-project basic info', err);
       Swal.fire({
         icon: 'error',
         title: 'Save Failed',
-        text: `Error: Could not save the work proposal's basic information. ${err.message}`,
+        text: `Critical Error: Could not save the work proposal's basic information. ${err.message}`,
       });
       this.isLoading = false;
       this.cdr.detectChanges();
-      return; // Stop execution if sub-project fails to save
+      return;
     }
 
-    // --- Step 2: Save Work Details and Attachments ---
+    // --- Step 2 & 3: Save Work Details and Attachments ---
     for (const [index, activityControl] of this.workActivities.controls.entries()) {
       const activityValue = activityControl.value;
       let newWorkDetailId: number | null = null;
 
       try {
-        const areaOfWorkId = activityValue.typeOfWork;
-        if (!areaOfWorkId) throw new Error(`"Area of Work" was not selected.`);
-        const workActivityId = activityValue.secondaryActivity;
-        if (!workActivityId) throw new Error(`"Work Activity" was not selected.`);
-
         const workDetailPayload = {
           subprojectId: newSubProjectId,
           id: activityValue.id ? parseInt(activityValue.id, 10) : null,
@@ -694,51 +675,32 @@ export class SubProject implements OnInit {
         const workDetailResponse = await this.api.POST('api/subproject/work-details/save', workDetailPayload);
         newWorkDetailId = workDetailResponse.data.entityId;
         if (!newWorkDetailId) throw new Error('Failed to get work detail ID after saving.');
+        activityControl.patchValue({ id: newWorkDetailId }); // Update ID in the form
 
       } catch (err: any) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Activity Save Failed',
-          text: `The work proposal was saved, but saving Activity #${index + 1} ('${activityValue.name || 'Untitled'}') failed. Please review the proposal later. Error: ${err.message}`,
-        });
-        this.isLoading = false;
-        this.cdr.detectChanges();
-        return; // Stop further processing
+        submissionWarnings.push(`Saving Activity #${index + 1} ('${activityValue.name || 'Untitled'}') failed: ${err.message}`);
+        continue; // Skip to next activity if this one failed
       }
 
-      // --- Step 3: Save Attachments for the current Work Detail ---
+      // --- Attachment Saving ---
       try {
         const formData = new FormData();
         let hasFiles = false;
-
-        if (activityValue.workPhoto) {
-          formData.append('workPhoto', activityValue.workPhoto, activityValue.workPhotoName);
-          hasFiles = true;
-        }
-        if (activityValue.equipmentPhoto) {
-          formData.append('equipmentPhoto', activityValue.equipmentPhoto, activityValue.equipmentPhotoName);
-          hasFiles = true;
-        }
-        if (activityValue.materialPhoto) {
-          formData.append('materialPhoto', activityValue.materialPhoto, activityValue.materialPhotoName);
-          hasFiles = true;
-        }
+        ['workPhoto', 'equipmentPhoto', 'materialPhoto'].forEach(photoType => {
+          if (activityValue[photoType]) {
+            formData.append(photoType, activityValue[photoType], activityValue[`${photoType}Name`]);
+            hasFiles = true;
+          }
+        });
 
         if (hasFiles) {
-          formData.append('projectId', projectId.toString());
+          formData.append('projectId', projectId!.toString());
           formData.append('subprojectId', newSubProjectId.toString());
           formData.append('subprojectWorkDetailId', newWorkDetailId.toString());
           await this.api.POST_FORM_DATA('api/subproject/work-details/attachment/save', formData);
         }
       } catch (err: any) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Attachment Upload Failed',
-          text: `The work proposal and Activity #${index + 1} were saved, but uploading its attachments failed. Please edit the proposal later to add them. Error: ${err.message}`,
-        });
-        this.isLoading = false;
-        this.cdr.detectChanges();
-        return;
+        submissionWarnings.push(`Uploading attachments for Activity #${index + 1} failed: ${err.message}. Please add them later by editing.`);
       }
     }
 
@@ -747,7 +709,6 @@ export class SubProject implements OnInit {
       try {
         if (!activityValue.id) continue;
 
-        // Create a complete payload to prevent data loss on the backend
         const workDetailPayload = {
           subprojectId: newSubProjectId,
           id: parseInt(activityValue.id, 10),
@@ -763,38 +724,47 @@ export class SubProject implements OnInit {
           estCost: activityValue.estimatedCost || 0,
           equipmentCost: activityValue.estimatedCostOfEquipment || 0,
           materialCost: activityValue.estimatedMaterialCost || 0,
-          status: false, // Mark as inactive
+          status: false,
         };
 
         await this.api.POST('api/subproject/work-details/save', workDetailPayload);
       } catch (err: any) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Activity Removal Failed',
-          text: `The work proposal was saved, but failed to remove an old activity (ID: ${activityValue.id}). Please review the proposal. Error: ${err.message}`,
-        });
-        this.isLoading = false;
-        this.cdr.detectChanges();
-        return;
+        submissionWarnings.push(`Failed to remove an old activity (ID: ${activityValue.id}): ${err.message}.`);
       }
     }
-
+    
+    this.removedWorkActivities = []; // Clear the array after processing
     this.isLoading = false;
     this.cdr.detectChanges();
 
-    this.isLoading = false;
-    this.cdr.detectChanges();
-
-    Swal.fire({
-      title: 'Success!',
-      text: `Work proposal ${finalWorkCode} saved successfully!`,
-      icon: 'success',
-      confirmButtonText: 'OK'
-    }).then(() => {
-      this.router.navigate(['/sub-project/list']);
-      this.onAddNew();
-      this.cdr.detectChanges();
-    });
+    // --- Final Step: Show Summary and Redirect ---
+    if (submissionWarnings.length === 0) {
+      Swal.fire({
+        title: 'Success!',
+        text: `Work proposal ${finalWorkCode} was saved successfully.`,
+        icon: 'success',
+        confirmButtonText: 'OK'
+      }).then(() => {
+        this.router.navigate(['/sub-project/list']);
+      });
+    } else {
+      const warningHtml = submissionWarnings.map(msg => `<li>${msg}</li>`).join('');
+      Swal.fire({
+        title: 'Saved with Warnings',
+        html: `
+          <div style="text-align: left;">
+            <p><strong>Work proposal ${finalWorkCode} was saved, but some issues occurred:</strong></p>
+            <ul style="padding-left: 20px;">
+              ${warningHtml}
+            </ul>
+          </div>
+        `,
+        icon: 'warning',
+        confirmButtonText: 'OK'
+      }).then(() => {
+        this.router.navigate(['/sub-project/list']);
+      });
+    }
   }
 
   onAddNew(): void {
