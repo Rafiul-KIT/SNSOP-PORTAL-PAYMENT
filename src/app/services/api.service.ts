@@ -75,6 +75,10 @@ getUserRole(): number | null {
   }
 }
 
+  getToken(): string | null {
+    return this.cookieService.get(this.ACCESS_TOKEN) || null;
+  }
+
   logout = () => {
     const host = (() => {
       try {
