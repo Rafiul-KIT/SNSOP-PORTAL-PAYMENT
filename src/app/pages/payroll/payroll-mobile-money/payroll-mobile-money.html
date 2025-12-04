@@ -99,13 +99,13 @@
             <div class="d-flex justify-content-between align-items-center">
                 <!-- Left-aligned Import/Export Buttons -->
                 <div class="d-grid d-sm-flex gap-2">
-                    <!-- <p-button label="Import File" icon="fas fa-file-import" severity="secondary" size="small"
+                    <p-button label="Import File" icon="fas fa-file-import" severity="secondary" size="small"
                         (onClick)="fileInput.click()">
-                    </p-button> -->
+                    </p-button>
                     <input type="file" #fileInput (change)="onFileSelect($event)" hidden
                        accept="*" />
                     <p-button label="Export File" icon="fas fa-file-export" severity="success" size="small"
-                        (onClick)="exportFile()">
+                        (onClick)="exportFile()" [disabled]="!hasSearched">
                     </p-button>
                 </div>
 
@@ -132,7 +132,7 @@
         <tr>
             <th colspan="5">
                 <!-- Flexbox container to manage button and text placement -->
-                <div class="d-flex justify-content-between">
+                <div class="d-flex justify-content-end">
                     <!-- Left-aligned Buttons -->
                     <div>
                         <!-- Download Button -->
@@ -140,8 +140,8 @@
                             class="p-button p-button-rounded p-button-text mr-2" (click)="onDownloadClick()"></button> -->
 
                         <!-- Download PDF Button -->
-                        <button pButton type="button" label="Download PDF" icon="pi pi-file-pdf"
-                            class="p-button p-button-rounded p-button-text" (click)="onDownloadPDFClick()"></button>
+                        <!-- <button pButton type="button" label="Download PDF" icon="pi pi-file-pdf"
+                            class="p-button p-button-rounded p-button-text" (click)="onDownloadPDFClick()"></button> -->
                     </div>
 
                     <!-- Right-aligned Text (Showing record count) -->
