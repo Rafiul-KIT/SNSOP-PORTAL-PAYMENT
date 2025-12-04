@@ -117,6 +117,7 @@ export class BeneficiaryAssignment implements OnInit {
         if (input) {
           input.value = '';
         }
+        
         this.selectedFile = null;
         this.cdr.detectChanges();
         return;
