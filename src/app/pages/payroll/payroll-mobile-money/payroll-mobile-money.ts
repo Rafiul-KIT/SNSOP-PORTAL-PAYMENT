@@ -25,78 +25,17 @@ import { SelectModule } from 'primeng/select';
 
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { LookupItem, LookupService, ProjectNameDescription, ScreeningStatusEnum, StatusEnum, TypeOfMeetingEnum } from '../../../services/lookup.service';
+import { LookupItem, LookupItemPayroll, LookupService, ProjectNameDescription, ScreeningStatusEnum, StatusEnum, TypeOfMeetingEnum } from '../../../services/lookup.service';
 import { ApiService } from '../../../services/api.service';
 import { Loader } from "../../../components/loader/loader";
 
 
 interface PayrollItemDto {
-  intWagePaymentReqid: number;
-  reqFromDate: string;
-  reqToDate: string;
-  exchangerateattime: number;
-  wageRateUSD: number;
-  reqNo: string;
-  intWagesReqBenTransid: number;
-  intBenid: number;
-  enrollmentNo: string;
-  intWorkid: number;
-  workCode: string;
-  totAttendance: number;
-  wageRateUSDTotal: number;
-  dateofCreation: string;
-  status: string;
-  paymentCycle: string;
-  wageRateSSPTotal: number;
-  supportType: string;
-  houseHoldDetail: {
-    houseHoldNumber: string;
-    firstName: string;
-    middleName: string;
-    lastName: string;
-    nickName: string;
-    age: number;
-    gender: number;
-    phoneNumber: string;
-    biometric: {
-      photo: string;
-      leftSmall: string;
-      leftRing: string;
-      leftMiddle: string;
-      leftIndex: string;
-      leftThumb: string;
-      rightSmall: string;
-      rightRing: string;
-      rightMiddle: string;
-      rightIndex: string;
-      rightThumb: string;
-    };
-  };
-  alternates: {
-    id: number;
-    altIndex: number;
-    firstName: string;
-    middleName: string;
-    lastName: string;
-    nickName: string;
-    age: number;
-    gender: number;
-    phoneNumber: string;
-    nationalId: string;
-    biometric: {
-      photo: string;
-      leftSmall: string;
-      leftRing: string;
-      leftMiddle: string;
-      leftIndex: string;
-      leftThumb: string;
-      rightSmall: string;
-      rightRing: string;
-      rightMiddle: string;
-      rightIndex: string;
-      rightThumb: string;
-    };
-  }[];
+  txnId: string;
+  recipientFullName: string;
+  accountNumber: string;
+  phoneNumber: string;
+  amount: number;
 }
 
 @Component({
@@ -134,7 +73,7 @@ export class PayrollMobileMoney implements OnInit {
   counties: LookupItem[] = [];
   payams: LookupItem[] = [];
   bomas: LookupItem[] = [];
-  registrationPhaseOptions: LookupItem[] = [];
+ 
   projects: ProjectNameDescription[] = [];
   workTypes: any[] = [];
   workActivities: LookupItem[] = [];
@@ -151,7 +90,8 @@ export class PayrollMobileMoney implements OnInit {
   currentPage = 0; // 0-based
   pageSize = 10;
   supportTypeOptions: LookupItem[] = [];
-  paymentCycleOptions: LookupItem[] = [];
+  paymentCycleOptions: LookupItemPayroll[] = [];
+  providerOptions: any[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -169,7 +109,6 @@ export class PayrollMobileMoney implements OnInit {
     await Promise.all([
       this.lookup.getOrFetchStateList(),
     ]);
- this.registrationPhaseOptions = this.lookup.getRegistrationPhaseList();
     this.states = this.lookup.getStateList();
     this.projects = this.lookup.projectNameDescriptionList;
     this.supportTypeOptions = this.lookup.getSupportTypeList();
@@ -182,11 +121,16 @@ export class PayrollMobileMoney implements OnInit {
     this.workTypes = TypeOfMeetingEnum;
     this.statuses = StatusEnum;
     this.screeningStatuses = ScreeningStatusEnum;
+    this.providerOptions = [
+      { name: 'MOMO', id: 'MOMO' },
+      { name: 'MGURUSH', id: 'MGURUSH' },
+      { name: 'DIGICASH', id: 'DIGICASH' },
+    ];
     this.initBreadcrumb();
     await this.loadInitialLookups();
     this.initForm();
     this.isLoading = false;
-    // this.fetchPage(this.currentPage, this.pageSize);
+    this.cdr.markForCheck();
   }
 
 
@@ -205,8 +149,8 @@ export class PayrollMobileMoney implements OnInit {
       workActivity: [null],
       screeningStatus: [null],
       supportType: [''],
-      registrationPhase: [''],
       paymentCycle: [''],
+      provider: ['MOMO'],
       paymentCycles: this.fb.array(this.paymentCycleOptions.map(c => this.fb.group({
         id: c.id,
         name: c.name,
@@ -277,263 +221,65 @@ export class PayrollMobileMoney implements OnInit {
     this.cdr.markForCheck();
   }
 
-  // async fetchPage(currentPage: number, pageSize: number) {
-  //   this.isLoading = true;
-  //   this.cdr.markForCheck();
-
-  //   const formValues = this.searchForm.value;
-
-  //   let paymentCycleValue: string = '';
-  //   const payrollType = formValues.payrollType;
-
-  //   if (payrollType === 'single') {
-  //     paymentCycleValue = formValues.paymentCycle || '';
-  //   } else if (payrollType === 'combined') {
-  //     const selectedCycles = this.paymentCycles.controls
-  //       .filter(control => control.get('selected')?.value)
-  //       .map(control => control.get('id')?.value);
-  //     paymentCycleValue = selectedCycles.join(',');
-  //   }
-
-  //   const requestBody = {
-  //     state: formValues.state?.id || 0,
-  //     county: formValues.county?.id || 0,
-  //     payam: formValues.payam?.id || 0,
-  //     boma: formValues.boma?.id || 0,
-  //     supportType: formValues.supportType || '',
-  //     paymentCycle: paymentCycleValue,
-  //     page: currentPage + 1, // API is 1-based, currentPage is 0-based
-  //     pageSize: pageSize
-  //   };
-
-  //   try {
-  //     const response: any = await this.api.POST('/api/payroll/getPayroll', requestBody);
-  //     const responseData = response.data;
-
-  //     if (responseData.operationResult) {
-  //       this.payrollData = responseData.data.flatMap((item: any) => item.payrollData);
-  //       this.totalRecords = responseData.totalCount;
-  //       this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Payroll data fetched successfully.' });
-  //     } else {
-  //       this.payrollData = [];
-  //       this.totalRecords = 0;
-  //       this.messageService.add({ severity: 'error', summary: 'Error', detail: responseData.errorMsg || 'Failed to fetch payroll data.' });
-  //     }
-  //   } catch (error: any) {
-  //     console.error('Error fetching payroll data:', error);
-  //     this.payrollData = [];
-  //     this.totalRecords = 0;
-  //     this.messageService.add({ severity: 'error', summary: 'Error', detail: error.message || 'An unexpected error occurred.' });
-  //   } finally {
-  //     this.isLoading = false;
-  //     this.cdr.markForCheck();
-  //   }
-  // }
 
   async fetchPage(currentPage: number, pageSize: number) {
     this.isLoading = true;
     this.cdr.markForCheck();
 
-    // Example of hardcoded response
-    const mockResponse = {
-      operationResult: true,
-      errorMsg: null,
-      errorCode: null,
-      data: [
-        {
-          id: 6489,
-          state: 92,
-          county: 9202,
-          payam: 920205,
-          boma: 920205004,
-          lockedStatus: 'UNLOCKED',
-          payrollData: [
-            {
-              intWagePaymentReqid: 1268248,
-              reqFromDate: '2025-03-11',
-              reqToDate: '2025-04-07',
-              exchangerateattime: 5000.0,
-              wageRateUSD: 2.7,
-              reqNo: '2025-SNSOPWR-1268248',
-              intWagesReqBenTransid: 10056019,
-              intBenid: 153766,
-              enrollmentNo: 'HA/02/195',
-              intWorkid: 3622,
-              workCode: '2024-SNSOP-SNSOP 2023-3622',
-              totAttendance: 18,
-              wageRateUSDTotal: 48.6,
-              dateofCreation: '29/04/2025',
-              status: '0',
-              paymentCycle: 'Merge:Payment Cycle 3',
-              wageRateSSPTotal: 243000.0,
-              supportType: 'LIPW',
-              houseHoldDetail: {
-                houseHoldNumber: '0ebe433b-f800-4cf4-8bce-e30f9c51865c',
-                firstName: 'Viola',
-                middleName: 'Adio',
-                lastName: 'James',
-                nickName: null,
-                age: 40,
-                gender: 1,
-                phoneNumber: '',
-                biometric: {
-                  photo: 'path-to-photo',
-                  leftSmall: 'path-to-left-small',
-                  leftRing: 'path-to-left-ring',
-                  leftMiddle: 'path-to-left-middle',
-                  leftIndex: 'path-to-left-index',
-                  leftThumb: 'path-to-left-thumb',
-                  rightSmall: 'path-to-right-small',
-                  rightRing: 'path-to-right-ring',
-                  rightMiddle: 'path-to-right-middle',
-                  rightIndex: 'path-to-right-index',
-                  rightThumb: 'path-to-right-thumb',
-                },
-              },
-              alternates: [],
-            },
-          ],
-          alternates: [],
-        },
-        {
-          id: 6489,
-          state: 92,
-          county: 9202,
-          payam: 920205,
-          boma: 920205004,
-          lockedStatus: 'UNLOCKED',
-          payrollData: [
-            {
-              intWagePaymentReqid: 1268248,
-              reqFromDate: '2025-03-11',
-              reqToDate: '2025-04-07',
-              exchangerateattime: 5000.0,
-              wageRateUSD: 2.7,
-              reqNo: '2025-SNSOPWR-1268248',
-              intWagesReqBenTransid: 10056019,
-              intBenid: 153766,
-              enrollmentNo: 'HA/02/195',
-              intWorkid: 3622,
-              workCode: '2024-SNSOP-SNSOP 2023-3622',
-              totAttendance: 18,
-              wageRateUSDTotal: 48.6,
-              dateofCreation: '29/04/2025',
-              status: '0',
-              paymentCycle: 'Merge:Payment Cycle 3',
-              wageRateSSPTotal: 243000.0,
-              supportType: 'LIPW',
-              houseHoldDetail: {
-                houseHoldNumber: '0ebe433b-f800-4cf4-8bce-e30f9c51865c',
-                firstName: 'Viola',
-                middleName: 'Adio',
-                lastName: 'James',
-                nickName: null,
-                age: 40,
-                gender: 1,
-                phoneNumber: '',
-                biometric: {
-                  photo: 'path-to-photo',
-                  leftSmall: 'path-to-left-small',
-                  leftRing: 'path-to-left-ring',
-                  leftMiddle: 'path-to-left-middle',
-                  leftIndex: 'path-to-left-index',
-                  leftThumb: 'path-to-left-thumb',
-                  rightSmall: 'path-to-right-small',
-                  rightRing: 'path-to-right-ring',
-                  rightMiddle: 'path-to-right-middle',
-                  rightIndex: 'path-to-right-index',
-                  rightThumb: 'path-to-right-thumb',
-                },
-              },
-              alternates: [],
-            },
-          ],
-          alternates: [],
-        },
-        {
-          id: 6489,
-          state: 92,
-          county: 9202,
-          payam: 920205,
-          boma: 920205004,
-          lockedStatus: 'UNLOCKED',
-          payrollData: [
-            {
-              intWagePaymentReqid: 1268248,
-              reqFromDate: '2025-03-11',
-              reqToDate: '2025-04-07',
-              exchangerateattime: 5000.0,
-              wageRateUSD: 2.7,
-              reqNo: '2025-SNSOPWR-1268248',
-              intWagesReqBenTransid: 10056019,
-              intBenid: 153766,
-              enrollmentNo: 'HA/02/195',
-              intWorkid: 3622,
-              workCode: '2024-SNSOP-SNSOP 2023-3622',
-              totAttendance: 18,
-              wageRateUSDTotal: 48.6,
-              dateofCreation: '29/04/2025',
-              status: '0',
-              paymentCycle: 'Merge:Payment Cycle 3',
-              wageRateSSPTotal: 243000.0,
-              supportType: 'LIPW',
-              houseHoldDetail: {
-                houseHoldNumber: '0ebe433b-f800-4cf4-8bce-e30f9c51865c',
-                firstName: 'Viola',
-                middleName: 'Adio',
-                lastName: 'James',
-                nickName: null,
-                age: 40,
-                gender: 1,
-                phoneNumber: '',
-                biometric: {
-                  photo: 'path-to-photo',
-                  leftSmall: 'path-to-left-small',
-                  leftRing: 'path-to-left-ring',
-                  leftMiddle: 'path-to-left-middle',
-                  leftIndex: 'path-to-left-index',
-                  leftThumb: 'path-to-left-thumb',
-                  rightSmall: 'path-to-right-small',
-                  rightRing: 'path-to-right-ring',
-                  rightMiddle: 'path-to-right-middle',
-                  rightIndex: 'path-to-right-index',
-                  rightThumb: 'path-to-right-thumb',
-                },
-              },
-              alternates: [],
-            },
-          ],
-          alternates: [],
-        },
-      ],
-      totalCount: 3,
-    };
+    try {
+      const formValue = this.searchForm.value;
+      const payrollType = formValue.payrollType;
+      
+      let paymentCycleArray: number[] = [];
+      
+      if (payrollType === 'single') {
+        // For single payroll, use the selected payment cycle
+        if (formValue.paymentCycle) {
+          paymentCycleArray = [formValue.paymentCycle];
+        }
+      } else {
+        // For combined payroll, collect all selected cycles
+        const cyclesFormArray = this.paymentCycles.value;
+        paymentCycleArray = cyclesFormArray
+          .filter((cycle: any) => cycle.selected)
+          .map((cycle: any) => cycle.id);
+      }
 
-    // Simulate the response by assigning the mock data
-    const responseData = mockResponse;
+      const requestPayload = {
+        state: formValue.state?.id || 0,
+        county: formValue.county?.id || 0,
+        payam: formValue.payam?.id || 0,
+        boma: formValue.boma?.id || 0,
+        paymentCycle: paymentCycleArray,
+        provider: formValue.provider
+      };
 
-    if (responseData.operationResult) {
-      this.payrollData = responseData.data.flatMap((item: any) => item.payrollData);
-      this.totalRecords = responseData.totalCount;
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Payroll data fetched successfully.',
-      });
-    } else {
-      this.payrollData = [];
-      this.totalRecords = 0;
+      const response = await this.api.POST('/api/payroll/getMobileMoneyPayrollData', requestPayload);
+      
+      if (response.data) {
+        this.payrollData = response.data.payrollList || [];
+        this.totalRecords = response.data.total || 0;
+        
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: `Loaded ${this.payrollData.length} records`
+        });
+      }
+    } catch (error: any) {
+      console.error('Error fetching payroll data:', error);
       this.messageService.add({
         severity: 'error',
         summary: 'Error',
-        detail: responseData.errorMsg || 'Failed to fetch payroll data.',
+        detail: error?.response?.data?.message || 'Failed to fetch payroll data'
       });
+      this.payrollData = [];
+      this.totalRecords = 0;
+    } finally {
+      this.isLoading = false;
+      this.cdr.markForCheck();
     }
-
-    this.isLoading = false;
-    this.cdr.markForCheck();
   }
-
 
 
   onPageChange(event: any) {
@@ -544,23 +290,59 @@ export class PayrollMobileMoney implements OnInit {
 
 
   searchPayroll() {
+    const formValue = this.searchForm.value;
+    const payrollType = formValue.payrollType;
+    
+    // Validation
+    if (payrollType === 'single' && !formValue.paymentCycle) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Validation Error',
+        detail: 'Please select a payment cycle'
+      });
+      return;
+    }
+    
+    if (payrollType === 'combined') {
+      const selectedCycles = this.paymentCycles.value.filter((c: any) => c.selected);
+      if (selectedCycles.length === 0) {
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Validation Error',
+          detail: 'Please select at least one payment cycle'
+        });
+        return;
+      }
+    }
+
     this.currentPage = 0;
     this.fetchPage(this.currentPage, this.pageSize);
   }
 
   resetForm() {
-    // this.searchForm.reset();
-    // this.searchForm.get('payrollType')?.setValue('single');
-    // this.searchForm.get('county')?.disable();
-    // this.searchForm.get('payam')?.disable();
-    // this.searchForm.get('boma')?.disable();
-    // this.counties = [];
-    // this.payams = [];
-    // this.bomas = [];
-    // this.currentPage = 0;
-    // this.fetchPage(this.currentPage, this.pageSize);
-    this.ngOnInit();
-    // this.cdr.markForCheck();
+    this.searchForm.reset({
+      payrollType: 'single',
+      state: null,
+      county: { value: null, disabled: true },
+      payam: { value: null, disabled: true },
+      boma: { value: null, disabled: true },
+      supportType: '',
+      paymentCycle: '',
+      provider: 'MOMO'
+    });
+    
+    this.paymentCycles.controls.forEach(control => {
+      control.get('selected')?.setValue(false);
+    });
+    
+    this.counties = [];
+    this.payams = [];
+    this.bomas = [];
+    this.payrollData = [];
+    this.totalRecords = 0;
+    this.currentPage = 0;
+    
+    this.cdr.markForCheck();
   }
 
   get paymentCycles() {
@@ -568,16 +350,90 @@ export class PayrollMobileMoney implements OnInit {
   }
 
 
-  onDownloadPDFClick() {
-    throw new Error('Method not implemented.');
+  async onDownloadClick() {
+    try {
+      this.isLoading = true;
+      this.cdr.markForCheck();
+
+      const formValue = this.searchForm.value;
+      const payrollType = formValue.payrollType;
+      
+      let paymentCycleArray: number[] = [];
+      
+      if (payrollType === 'single') {
+        if (formValue.paymentCycle) {
+          paymentCycleArray = [formValue.paymentCycle];
+        }
+      } else {
+        const cyclesFormArray = this.paymentCycles.value;
+        paymentCycleArray = cyclesFormArray
+          .filter((cycle: any) => cycle.selected)
+          .map((cycle: any) => cycle.id);
+      }
+
+      if (paymentCycleArray.length === 0) {
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Validation Error',
+          detail: 'Please select at least one payment cycle'
+        });
+        return;
+      }
+
+      const requestPayload = {
+        state: formValue.state?.id || 0,
+        county: formValue.county?.id || 0,
+        payam: formValue.payam?.id || 0,
+        boma: formValue.boma?.id || 0,
+        paymentCycle: paymentCycleArray,
+        provider: formValue.provider
+      };
+
+      const response = await this.api.axiosInstance.post('/api/payroll/export', requestPayload, {
+        responseType: 'blob'
+      });
+
+      // Create blob and download
+      const blob = new Blob([response.data], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `MoMo_Payroll_${new Date().toISOString().split('T')[0]}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'File downloaded successfully'
+      });
+    } catch (error: any) {
+      console.error('Error downloading file:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: error?.response?.data?.message || 'Failed to download file'
+      });
+    } finally {
+      this.isLoading = false;
+      this.cdr.markForCheck();
+    }
   }
-  onDownloadClick() {
-    throw new Error('Method not implemented.');
+
+  onDownloadPDFClick() {
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Info',
+      detail: 'PDF download functionality coming soon'
+    });
   }
 
   exportFile() {
-    console.log('Export File button clicked!');
-    // Implement export file logic here
+    this.onDownloadClick();
   }
 
   onFileSelect(event: Event) {
@@ -590,6 +446,6 @@ export class PayrollMobileMoney implements OnInit {
   importFile(file: File) {
     this.messageService.add({ severity: 'info', summary: 'File Selected', detail: file.name });
     this.cdr.markForCheck();
-    // Implement your file upload logic here, e.g., send the file to a service
+    // Implement your file upload logic here
   }
 }

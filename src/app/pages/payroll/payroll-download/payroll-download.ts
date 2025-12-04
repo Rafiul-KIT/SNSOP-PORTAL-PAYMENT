@@ -25,7 +25,7 @@ import { SelectModule } from 'primeng/select';
 
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { LookupItem, LookupService, ProjectNameDescription, ScreeningStatusEnum, StatusEnum, TypeOfMeetingEnum } from '../../../services/lookup.service';
+import { LookupItem, LookupItemPayroll, LookupService, ProjectNameDescription, ScreeningStatusEnum, StatusEnum, TypeOfMeetingEnum } from '../../../services/lookup.service';
 import { ApiService } from '../../../services/api.service';
 import { Loader } from "../../../components/loader/loader";
 
@@ -151,7 +151,7 @@ export class PayrollDownload implements OnInit {
   currentPage = 0; // 0-based
   pageSize = 10;
   supportTypeOptions: LookupItem[] = [];
-  paymentCycleOptions: LookupItem[] = [];
+  paymentCycleOptions: LookupItemPayroll[] = [];
 
   constructor(
     private fb: FormBuilder,

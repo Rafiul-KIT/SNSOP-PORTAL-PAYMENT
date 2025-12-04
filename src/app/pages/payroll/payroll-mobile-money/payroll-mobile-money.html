@@ -41,20 +41,24 @@
         </div>
 
         <!-- Support type -->
-        <div class="col-md-3">
+        <!-- <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
                 <p-select [options]="supportTypeOptions" optionLabel="name" optionValue="id"
                     formControlName="supportType"></p-select>
                 <label>Support Type</label>
             </p-floatlabel>
+            
+        </div> -->
+
+        <!-- provider dropdown -->
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="providerOptions" optionLabel="name" optionValue="id"
+                    formControlName="provider"></p-select>
+                <label>Provider</label>
+            </p-floatlabel>
         </div>
-            <div class="col-md-3">
-      <p-floatlabel variant="on" class="w-100">
-        <p-select [options]="registrationPhaseOptions" optionLabel="name" optionValue="id"
-          formControlName="registrationPhase"></p-select>
-        <label>Registration Phase</label>
-      </p-floatlabel>
-    </div>
+ 
         <!-- payment cycle dropdown -->
         <div class="col-md-3" *ngIf="searchForm.get('payrollType')?.value === 'single'">
             <p-floatlabel variant="on" class="w-100">
@@ -64,19 +68,6 @@
             </p-floatlabel>
         </div>
 
-
-
-        <!-- payment cycles checkboxes -->
-        <div class="col-md-12" *ngIf="searchForm.get('payrollType')?.value === 'combined'">
-            <label class="mb-2">Payment Cycles</label>
-            <div formArrayName="paymentCycles" class="d-flex flex-wrap gap-3">
-                <div *ngFor="let cycle of paymentCycles.controls; let i = index" [formGroupName]="i" class="form-check">
-                    <input type="checkbox" class="form-check-input" [id]="'cycle' + i" formControlName="selected">
-                    <label class="form-check-label" [for]="'cycle' + i">{{ paymentCycleOptions[i].name }}</label>
-                </div>
-            </div>
-        </div>
-  
         <!-- payment cycle -->
         <div class="col-md-3">
             <div class="d-flex align-items-center h-100">
@@ -92,6 +83,18 @@
                 </div>
             </div>
         </div>
+
+        <!-- payment cycles checkboxes -->
+        <div class="col-md-12" *ngIf="searchForm.get('payrollType')?.value === 'combined'">
+            <label class="mb-2">Payment Cycles</label>
+            <div formArrayName="paymentCycles" class="d-flex flex-wrap gap-3">
+                <div *ngFor="let cycle of paymentCycles.controls; let i = index" [formGroupName]="i" class="form-check">
+                    <input type="checkbox" class="form-check-input" [id]="'cycle' + i" formControlName="selected">
+                    <label class="form-check-label" [for]="'cycle' + i">{{ paymentCycleOptions[i].name }}</label>
+                </div>
+            </div>
+        </div>
+
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <!-- Left-aligned Import/Export Buttons -->
@@ -100,7 +103,7 @@
                         (onClick)="fileInput.click()">
                     </p-button>
                     <input type="file" #fileInput (change)="onFileSelect($event)" hidden
-                       accept="all" />
+                       accept="*" />
                     <p-button label="Export File" icon="fas fa-file-export" severity="success" size="small"
                         (onClick)="exportFile()">
                     </p-button>
@@ -127,13 +130,13 @@
 
     <ng-template pTemplate="header">
         <tr>
-            <th colspan="18">
+            <th colspan="5">
                 <!-- Flexbox container to manage button and text placement -->
                 <div class="d-flex justify-content-between">
                     <!-- Left-aligned Buttons -->
                     <div>
                         <!-- Download Button -->
-                        <button pButton type="button" label="Download" icon="pi pi-download"
+                        <button pButton type="button" label="Download Excel" icon="pi pi-download"
                             class="p-button p-button-rounded p-button-text mr-2" (click)="onDownloadClick()"></button>
 
                         <!-- Download PDF Button -->
@@ -150,53 +153,27 @@
             </th>
         </tr>
         <tr>
-            <th class="light-blue-row">Enrollment No</th>
-            <th class="light-blue-row">Date Of Creation</th>
-            <th class="light-blue-row">Exchange Rate At Time</th>
-            <th class="light-blue-row">Beneficiary ID</th>
-            <th class="light-blue-row">Wage Payment Req ID</th>
-            <th class="light-blue-row">Wages Req Ben Trans ID </th>
-            <th class="light-blue-row">Work ID</th>
-            <th class="light-blue-row">Payment Cycle</th>
-            <th class="light-blue-row">Req From Date</th>
-            <th class="light-blue-row">Req No</th>
-            <th class="light-blue-row">Req To Date</th>
-            <th class="light-blue-row">Status</th>
-            <th class="light-blue-row">Support Type</th>
-            <th class="light-blue-row">Total Attendance</th>
-            <th class="light-blue-row">Wage Rate SSP Total</th>
-            <th class="light-blue-row">Wage Rate USD</th>
-            <th class="light-blue-row">Wage Rate USD Total</th>
-            <th class="light-blue-row">Work Code</th>
+            <th class="light-blue-row">Transaction ID</th>
+            <th class="light-blue-row">Recipient Full Name</th>
+            <th class="light-blue-row">Account Number</th>
+            <th class="light-blue-row">Phone Number</th>
+            <th class="light-blue-row">Amount</th>
         </tr>
     </ng-template>
 
     <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
         <tr class="bordered-row">
-            <td class="bordered-cell">{{ item.enrollmentNo }}</td>
-            <td class="bordered-cell">{{ item.dateofCreation }}</td>
-            <td class="bordered-cell">{{ item.exchangerateattime }}</td>
-            <td class="bordered-cell">{{ item.intBenid }}</td>
-            <td class="bordered-cell">{{ item.intWagePaymentReqid }}</td>
-            <td class="bordered-cell">{{ item.intWagesReqBenTransid }}</td>
-            <td class="bordered-cell">{{ item.intWorkid }}</td>
-            <td class="bordered-cell">{{ item.paymentCycle }}</td>
-            <td class="bordered-cell">{{ item.reqFromDate }}</td>
-            <td class="bordered-cell">{{ item.reqNo }}</td>
-            <td class="bordered-cell">{{ item.reqToDate }}</td>
-            <td class="bordered-cell">{{ item.status }}</td>
-            <td class="bordered-cell">{{ item.supportType }}</td>
-            <td class="bordered-cell">{{ item.totAttendance }}</td>
-            <td class="bordered-cell">{{ item.wageRateSSPTotal }}</td>
-            <td class="bordered-cell">{{ item.wageRateUSD }}</td>
-            <td class="bordered-cell">{{ item.wageRateUSDTotal }}</td>
-            <td class="bordered-cell">{{ item.workCode }}</td>
+            <td class="bordered-cell">{{ item.txnId }}</td>
+            <td class="bordered-cell">{{ item.recipientFullName }}</td>
+            <td class="bordered-cell">{{ item.accountNumber }}</td>
+            <td class="bordered-cell">{{ item.phoneNumber }}</td>
+            <td class="bordered-cell">{{ item.amount }}</td>
         </tr>
     </ng-template>
 
     <ng-template pTemplate="emptymessage">
         <tr>
-            <td colspan="18" class="text-center text-danger">
+            <td colspan="5" class="text-center text-danger">
                 <b>No payroll data found!</b>
             </td>
         </tr>

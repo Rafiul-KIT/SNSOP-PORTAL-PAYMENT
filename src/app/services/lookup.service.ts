@@ -50,6 +50,10 @@ export const PaymentCycleEnum = [
   { label: 'Cycle 9', value: 9 },
   { label: 'Cycle 10', value: 10 },
   { label: 'Cycle 11', value: 11 },
+   { label: 'Cycle 12', value: 12 },
+    { label: 'Cycle 13', value: 13 },
+     { label: 'Cycle 14', value: 14 },
+      { label: 'Cycle 15', value: 15 },
 ];
 
 // Define Enum for Screening Status
@@ -70,6 +74,10 @@ export interface GetLookupRequest {
 
 export interface LookupItem {
   id: string;
+  name: string;
+}
+export interface LookupItemPayroll{
+    id: Number;
   name: string;
 }
 
@@ -1044,23 +1052,23 @@ export class LookupService {
   }
 
 
-  getPaymentCycleList(): LookupItem[] {
+  getPaymentCycleList(): LookupItemPayroll[] {
     return [
-      { id: 'Payment Cycle 1', name: 'Payment Cycle 1' },
-      { id: 'Payment Cycle 2', name: 'Payment Cycle 2' },
-      { id: 'Payment Cycle 3', name: 'Payment Cycle 3' },
-      { id: 'Payment Cycle 4', name: 'Payment Cycle 4' },
-      { id: 'Payment Cycle 5', name: 'Payment Cycle 5' },
-      { id: 'Payment Cycle 6', name: 'Payment Cycle 6' },
-      { id: 'Payment Cycle 7', name: 'Payment Cycle 7' },
-      { id: 'Payment Cycle 8', name: 'Payment Cycle 8' },
-      { id: 'Payment Cycle 9', name: 'Payment Cycle 9' },
-      { id: 'Payment Cycle 10', name: 'Payment Cycle 10' },
-      // { id: 'Payment Cycle 11', name: 'Payment Cycle 11' },
-      // { id: 'Payment Cycle 12', name: 'Payment Cycle 12' },
-      // { id: 'Payment Cycle 13', name: 'Payment Cycle 13' },
-      // { id: 'Payment Cycle 14', name: 'Payment Cycle 14' },
-      // { id: 'Payment Cycle 15', name: 'Payment Cycle 15' },
+ { id: 1, name: 'Cycle 1' },
+  { id: 2, name: 'Cycle 2' },
+  { id: 3, name: 'Cycle 3' },
+  { id: 4, name: 'Cycle 4' },
+  { id: 5, name: 'Cycle 5' },
+  { id: 6, name: 'Cycle 6' },
+  { id: 7, name: 'Cycle 7' },
+  { id: 8, name: 'Cycle 8' },
+  { id: 9, name: 'Cycle 9' },
+  { id: 10, name: 'Cycle 10' },
+  { id: 11, name: 'Cycle 11' },
+  { id: 12, name: 'Cycle 12' },
+  { id: 13, name: 'Cycle 13' },
+  { id: 14, name: 'Cycle 14' },
+  { id: 15, name: 'Cycle 15' },
     ];
   }
 
