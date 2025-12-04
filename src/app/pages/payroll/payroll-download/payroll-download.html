@@ -93,7 +93,7 @@
                 </p-button>
 
                 <p-button label="Search" icon="fas fa-search" severity="primary" size="small"
-                    (onClick)="searchPayroll()">
+                    (onClick)="searchPayroll()" [disabled]="searchForm.invalid || isSearchDisabledForCombined">
                 </p-button>
 
 

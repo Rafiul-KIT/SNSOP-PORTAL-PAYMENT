@@ -11,6 +11,7 @@ import {
   FormsModule,
   ReactiveFormsModule,
   FormArray,
+  Validators,
 } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -138,6 +139,7 @@ export class PayrollDownload implements OnInit {
   payrollData: PayrollItemDto[] = [];
   private fullPayrollData: PayrollItemDto[] = [];
   totalRecords = 0;
+  isSearchDisabledForCombined: boolean = false; // New property for simple button control
 
   breadcrumbItems: any[] = [];
   breadcrumbHome: any;
@@ -175,18 +177,18 @@ export class PayrollDownload implements OnInit {
     await this.loadInitialLookups();
     this.initForm();
     this.isLoading = false;
-    this.fetchPage();
+    // this.fetchPage(); //<- removed api call
   }
 
   initForm() {
     this.searchForm = this.fb.group({
       payrollType: ['single'],
-      state: [null],
-      county: [{ value: null, disabled: true }],
-      payam: [{ value: null, disabled: true }],
-      boma: [{ value: null, disabled: true }],
-      supportType: [''],
-      paymentCycle: [''],
+      state: [null, [Validators.required]],
+      county: [{ value: null, disabled: true }, [Validators.required]],
+      payam: [{ value: null, disabled: true }, [Validators.required]],
+      boma: [{ value: null, disabled: true }, [Validators.required]],
+      supportType: ['', [Validators.required]],
+      paymentCycle: ['', [Validators.required]],
       paymentCycles: this.fb.array(this.paymentCycleOptions.map(c => this.fb.group({
         id: c.id,
         name: c.name,
@@ -195,15 +197,26 @@ export class PayrollDownload implements OnInit {
     });
 
     this.searchForm.get('payrollType')?.valueChanges.subscribe(value => {
+      const paymentCycleControl = this.searchForm.get('paymentCycle');
       if (value === 'single') {
-        this.searchForm.get('paymentCycle')?.enable();
+        paymentCycleControl?.setValidators([Validators.required]);
+        paymentCycleControl?.enable();
         this.searchForm.get('paymentCycles')?.disable();
         this.paymentCycles.controls.forEach(control => control.get('selected')?.setValue(false, { emitEvent: false }));
+        this.isSearchDisabledForCombined = false;
+        if (this.searchForm.hasError('combinedNotAvailable')) {
+          this.searchForm.setErrors(null); // Explicitly clear custom form error
+        }
       } else { // combined
-        this.searchForm.get('paymentCycle')?.disable();
-        this.searchForm.get('paymentCycle')?.reset('');
+        paymentCycleControl?.clearValidators();
+        paymentCycleControl?.disable();
+        paymentCycleControl?.reset('');
         this.searchForm.get('paymentCycles')?.enable();
+        this.isSearchDisabledForCombined = true; // Disable search for combined
+        this.searchForm.setErrors({ 'combinedNotAvailable': true }); // Set a custom error to ensure form is invalid
       }
+      paymentCycleControl?.updateValueAndValidity(); // Recalculate paymentCycle validity
+      this.searchForm.updateValueAndValidity(); // Recalculate form validity
       this.cdr.markForCheck();
     });
 
@@ -321,6 +334,24 @@ export class PayrollDownload implements OnInit {
 
 
   searchPayroll() {
+    if (this.searchForm.get('payrollType')?.value === 'combined') {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Not Available',
+        detail: 'Combined payroll search is not yet available.',
+      });
+      return;
+    }
+
+    if (this.searchForm.invalid) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Invalid Form',
+        detail: 'Please fill in all required fields.',
+      });
+      return;
+    }
+
     this.currentPage = 0;
     this.fetchPage();
   }
