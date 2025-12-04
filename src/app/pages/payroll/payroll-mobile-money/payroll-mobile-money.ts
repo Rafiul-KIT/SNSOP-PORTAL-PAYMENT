@@ -83,6 +83,7 @@ export class PayrollMobileMoney implements OnInit {
 
   payrollData: PayrollItemDto[] = [];
   totalRecords = 0;
+  hasSearched = false;
 
   breadcrumbItems: any[] = [];
   breadcrumbHome: any;
@@ -315,6 +316,7 @@ export class PayrollMobileMoney implements OnInit {
       }
     }
 
+    this.hasSearched = true;
     this.currentPage = 0;
     this.fetchPage(this.currentPage, this.pageSize);
   }
@@ -341,6 +343,7 @@ export class PayrollMobileMoney implements OnInit {
     this.payrollData = [];
     this.totalRecords = 0;
     this.currentPage = 0;
+    this.hasSearched = false;
     
     this.cdr.markForCheck();
   }
