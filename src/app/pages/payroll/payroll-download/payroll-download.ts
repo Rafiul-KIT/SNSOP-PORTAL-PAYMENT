@@ -135,14 +135,8 @@ export class PayrollDownload implements OnInit {
   payams: LookupItem[] = [];
   bomas: LookupItem[] = [];
 
-  projects: ProjectNameDescription[] = [];
-  workTypes: any[] = [];
-  workActivities: LookupItem[] = [];
-
-  statuses: any[] = [];
-  screeningStatuses: any[] = [];
-
   payrollData: PayrollItemDto[] = [];
+  private fullPayrollData: PayrollItemDto[] = [];
   totalRecords = 0;
 
   breadcrumbItems: any[] = [];
@@ -170,7 +164,6 @@ export class PayrollDownload implements OnInit {
     ]);
 
     this.states = this.lookup.getStateList();
-    this.projects = this.lookup.projectNameDescriptionList;
     this.supportTypeOptions = this.lookup.getSupportTypeList();
     this.paymentCycleOptions = this.lookup.getPaymentCycleList();
     this.cdr.markForCheck();
@@ -178,31 +171,20 @@ export class PayrollDownload implements OnInit {
 
   async ngOnInit() {
     this.isLoading = true;
-    this.workTypes = TypeOfMeetingEnum;
-    this.statuses = StatusEnum;
-    this.screeningStatuses = ScreeningStatusEnum;
     this.initBreadcrumb();
     await this.loadInitialLookups();
     this.initForm();
     this.isLoading = false;
-    // this.fetchPage(this.currentPage, this.pageSize);
+    this.fetchPage();
   }
-
 
   initForm() {
     this.searchForm = this.fb.group({
       payrollType: ['single'],
-      projectId: [null],
       state: [null],
       county: [{ value: null, disabled: true }],
-      projectName: [null],
-      typeOfMeeting: [null],
       payam: [{ value: null, disabled: true }],
       boma: [{ value: null, disabled: true }],
-      status: [''],
-      workCode: [''],
-      workActivity: [null],
-      screeningStatus: [null],
       supportType: [''],
       paymentCycle: [''],
       paymentCycles: this.fb.array(this.paymentCycleOptions.map(c => this.fb.group({
@@ -277,46 +259,93 @@ export class PayrollDownload implements OnInit {
 
 
 
-  async fetchPage(currentPage: number, pageSize: number) {
-  this.isLoading = true;
-  this.cdr.markForCheck();
+  async fetchPage() {
+    this.isLoading = true;
+    this.cdr.markForCheck();
 
+    const formValues = this.searchForm.value;
+    const payload = {
+      state: formValues.state?.id ?? 0,
+      county: formValues.county?.id ?? 0,
+      payam: formValues.payam?.id ?? 0,
+      boma: formValues.boma?.id ?? 0,
+      supportType: formValues.supportType,
+      paymentCycle: formValues.paymentCycle
+    };
 
+    try {
+      const response = await this.api.POST('api/payroll/getPayroll', payload);
+      if (response.data.operationResult) {
+        this.fullPayrollData = response.data.data.payrollData;
+        this.totalRecords = response.data.totalCount;
+        this.updateDisplayedData();
+      } else {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: response.data.errorMsg,
+        });
+        this.fullPayrollData = [];
+        this.payrollData = [];
+        this.totalRecords = 0;
+      }
+    } catch (error) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'An error occurred while fetching payroll data.',
+      });
+      this.fullPayrollData = [];
+      this.payrollData = [];
+      this.totalRecords = 0;
+    } finally {
+      this.isLoading = false;
+      this.cdr.markForCheck();
+    }
+  }
 
-
-
-
-  this.isLoading = false;
-  this.cdr.markForCheck();
-}
+  updateDisplayedData() {
+    const startIndex = this.currentPage * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.payrollData = this.fullPayrollData.slice(startIndex, endIndex);
+    this.cdr.markForCheck();
+  }
 
 
 
   onPageChange(event: any) {
     this.currentPage = event.page;
     this.pageSize = event.rows;
-    this.fetchPage(this.currentPage, this.pageSize);
+    this.updateDisplayedData();
   }
 
 
   searchPayroll() {
     this.currentPage = 0;
-    this.fetchPage(this.currentPage, this.pageSize);
+    this.fetchPage();
   }
 
   resetForm() {
-    // this.searchForm.reset();
-    // this.searchForm.get('payrollType')?.setValue('single');
-    // this.searchForm.get('county')?.disable();
-    // this.searchForm.get('payam')?.disable();
-    // this.searchForm.get('boma')?.disable();
-    // this.counties = [];
-    // this.payams = [];
-    // this.bomas = [];
-    // this.currentPage = 0;
-    // this.fetchPage(this.currentPage, this.pageSize);
-    this.ngOnInit();
-    // this.cdr.markForCheck();
+    this.searchForm.reset({
+      payrollType: 'single',
+      state: null,
+      county: { value: null, disabled: true },
+      payam: { value: null, disabled: true },
+      boma: { value: null, disabled: true },
+      supportType: '',
+      paymentCycle: '',
+    });
+
+    this.paymentCycles.controls.forEach(control => control.get('selected')?.setValue(false));
+    this.searchForm.get('paymentCycles')?.disable();
+
+
+    this.counties = [];
+    this.payams = [];
+    this.bomas = [];
+    this.currentPage = 0;
+    this.fetchPage();
+    this.cdr.markForCheck();
   }
 
   get paymentCycles() {
