@@ -392,10 +392,12 @@ export class PayrollMobileMoney implements OnInit {
         provider: formValue.provider
       };
 
-      const fileBlob = await this.api.downloadFile('/api/payroll/export', requestPayload);
+      const response = await this.api.axiosInstance.post('/api/payroll/export', requestPayload, {
+        responseType: 'blob'
+      });
 
       // Create blob and download
-      const blob = new Blob([fileBlob], { 
+      const blob = new Blob([response.data], { 
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
       });
       const url = window.URL.createObjectURL(blob);
