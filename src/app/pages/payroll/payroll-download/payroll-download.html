@@ -5,7 +5,7 @@
     <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
 </div>
 
-<div class="card p-3 mb-2">
+<div class="card p-3 mb-3">
     <form [formGroup]="searchForm" class="row g-3">
         <!-- State -->
         <div class="col-md-3">
@@ -24,6 +24,7 @@
                 <label>County Name</label>
             </p-floatlabel>
         </div>
+
         <!-- Payam -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
@@ -32,6 +33,7 @@
                 <label>Payam Name</label>
             </p-floatlabel>
         </div>
+
         <!-- Boma -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
@@ -48,144 +50,77 @@
                 <label>Support Type</label>
             </p-floatlabel>
         </div>
-       <!-- payment cycle dropdown -->
-        <div class="col-md-3" *ngIf="searchForm.get('payrollType')?.value === 'single'">
-            <p-floatlabel variant="on" class="w-100">
-                <p-select [options]="paymentCycleOptions" optionLabel="name" optionValue="id"
-                    formControlName="paymentCycle"></p-select>
-                <label>Payment Cycle</label>
-            </p-floatlabel>
-        </div>
-        <!-- payment cycle -->
+
+        <!-- Status -->
         <div class="col-md-3">
-            <div class="d-flex align-items-center h-100">
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" id="singlePayroll" value="single"
-                        formControlName="payrollType">
-                    <label class="form-check-label" for="singlePayroll">Single Payroll</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" id="combinedPayroll" value="combined"
-                        formControlName="payrollType">
-                    <label class="form-check-label" for="combinedPayroll">Combined Payroll</label>
-                </div>
-            </div>
-        </div>
-
- 
-
-        <!-- payment cycles checkboxes -->
-        <div class="col-md-12" *ngIf="searchForm.get('payrollType')?.value === 'combined'">
-            <label class="mb-2">Payment Cycles</label>
-            <div formArrayName="paymentCycles" class="d-flex flex-wrap gap-3">
-                <div *ngFor="let cycle of paymentCycles.controls; let i = index" [formGroupName]="i" class="form-check">
-                    <input type="checkbox" class="form-check-input" [id]="'cycle' + i" formControlName="selected">
-                    <label class="form-check-label" [for]="'cycle' + i">{{ paymentCycleOptions[i].name }}</label>
-                </div>
-            </div>
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="statusOptions" optionLabel="name" optionValue="id"
+                    formControlName="status"></p-select>
+                <label>Status</label>
+            </p-floatlabel>
         </div>
 
         <div class="col-12">
-            <!-- Mobile: stacked full width; ≥sm: right-aligned row -->
             <div class="d-grid d-sm-flex justify-content-end align-items-center gap-2">
                 <p-button label="Reset" icon="fas fa-refresh" severity="danger" size="small" [outlined]="true"
                     (onClick)="resetForm()">
                 </p-button>
 
                 <p-button label="Search" icon="fas fa-search" severity="primary" size="small"
-                    (onClick)="searchPayroll()">
+                    (onClick)="searchRequests()">
                 </p-button>
-
-
             </div>
         </div>
-
     </form>
 </div>
 
-<p-table [value]="payrollData" [scrollable]="true" [tableStyle]="{ 'min-width': '100%', 'margin-bottom': '5px'  }" size="small">
+<div class="card">
+    <p-table [value]="requestsData" [scrollable]="true" scrollHeight="400px">
+        <ng-template pTemplate="header">
+            <tr>
+                <th>Request ID</th>
+                <th>Location (State/County/Payam/Boma)</th>
+                <th>Payment Cycles</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-request>
+            <tr>
+                <td>{{ request.requestId }}</td>
+                <td>
+                    {{ getStateName(request.state) }} / 
+                    {{ getCountyName(request.county) }} / 
+                    {{ getPayamName(request.payam) }} / 
+                    {{ getBomaName(request.boma) }}
+                </td>
+                <td>{{ getPaymentCycleNames(request.paymentCycles) }}</td>
+                <td>
+                    <p-tag [severity]="getStatusSeverity(request.status)" [value]="request.status"></p-tag>
+                </td>
+                <td>
+<p-button
+  icon="pi pi-download"
+  (onClick)="onDownloadClick(request)"
+  [disabled]="request.status !== 'SUCCESS'"
+  pTooltip="Download Payroll"
+  tooltipPosition="top"
+  [style]="{ width: '40px', height: '40px', padding: '0' }">
+</p-button>
 
-    <ng-template pTemplate="header">
-         <tr>
-            <th colspan="18">
-                <!-- Flexbox container to manage button and text placement -->
-                <div class="d-flex justify-content-between">
-                    <!-- Left-aligned Buttons -->
-                    <div>
-                        <!-- Download Button -->
-                        <button pButton type="button" label="Download" icon="pi pi-download" class="p-button p-button-rounded p-button-text mr-2" (click)="onDownloadClick()"></button>
 
-                        <!-- Download PDF Button -->
-                        <button pButton type="button" label="Download PDF" icon="pi pi-file-pdf" class="p-button p-button-rounded p-button-text" (click)="onDownloadPDFClick()"></button>
-                    </div>
-
-                    <!-- Right-aligned Text (Showing record count) -->
-                    <p class="fw-bold mb-2 text-end">
-                        Showing <kbd>{{ payrollData.length }}</kbd> of
-                        <kbd>{{ totalRecords }}</kbd> Beneficiaries
-                    </p>
-                </div>
-            </th>
-        </tr>
-        <tr>
-            <th class="light-blue-row">Enrollment No</th>
-            <th class="light-blue-row">Date Of Creation</th>
-            <th class="light-blue-row">Exchange Rate At Time</th>
-            <th class="light-blue-row">Beneficiary ID</th>
-            <th class="light-blue-row">Wage Payment Req ID</th>
-            <th class="light-blue-row">Wages Req Ben Trans ID </th>
-            <th class="light-blue-row">Work ID</th>
-            <th class="light-blue-row">Payment Cycle</th>
-            <th class="light-blue-row">Req From Date</th>
-            <th class="light-blue-row">Req No</th>
-            <th class="light-blue-row">Req To Date</th>
-            <th class="light-blue-row">Status</th>
-            <th class="light-blue-row">Support Type</th>
-            <th class="light-blue-row">Total Attendance</th>
-            <th class="light-blue-row">Wage Rate SSP Total</th>
-            <th class="light-blue-row">Wage Rate USD</th>
-            <th class="light-blue-row">Wage Rate USD Total</th>
-            <th class="light-blue-row">Work Code</th>
-        </tr>
-    </ng-template>
-
-    <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
-        <tr class="bordered-row">
-            <td class="bordered-cell">{{ item.enrollmentNo }}</td>
-            <td class="bordered-cell">{{ item.dateofCreation }}</td>
-            <td class="bordered-cell">{{ item.exchangerateattime }}</td>
-            <td class="bordered-cell">{{ item.intBenid }}</td>
-            <td class="bordered-cell">{{ item.intWagePaymentReqid }}</td>
-            <td class="bordered-cell">{{ item.intWagesReqBenTransid }}</td>
-            <td class="bordered-cell">{{ item.intWorkid }}</td>
-            <td class="bordered-cell">{{ item.paymentCycle }}</td>
-            <td class="bordered-cell">{{ item.reqFromDate }}</td>
-            <td class="bordered-cell">{{ item.reqNo }}</td>
-            <td class="bordered-cell">{{ item.reqToDate }}</td>
-            <td class="bordered-cell">{{ item.status }}</td>
-            <td class="bordered-cell">{{ item.supportType }}</td>
-            <td class="bordered-cell">{{ item.totAttendance }}</td>
-            <td class="bordered-cell">{{ item.wageRateSSPTotal }}</td>
-            <td class="bordered-cell">{{ item.wageRateUSD }}</td>
-            <td class="bordered-cell">{{ item.wageRateUSDTotal }}</td>
-            <td class="bordered-cell">{{ item.workCode }}</td>
-        </tr>
-    </ng-template>
-
-    <ng-template pTemplate="emptymessage">
-        <tr>
-            <td colspan="18" class="text-center text-danger">
-                <b>No payroll data found!</b>
-            </td>
-        </tr>
-    </ng-template>
-</p-table>
-
-<p-paginator class="paginator-sticky" [rows]="pageSize" [totalRecords]="totalRecords"
-    [rowsPerPageOptions]="[10, 25, 50]" (onPageChange)="onPageChange($event)" [first]="(currentPage) * pageSize"
-    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
-</p-paginator>
-
+                </td>
+            </tr>
+        </ng-template>
+         <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="5" class="text-center">No payroll requests found.</td>
+            </tr>
+        </ng-template>
+    </p-table>
+     <p-paginator (onPageChange)="onPageChange($event)" [rows]="pageSize" [totalRecords]="totalRecords" [rowsPerPageOptions]="[10, 20, 50]"></p-paginator>
+</div>
 }
 
 <p-toast position="bottom-right"></p-toast>
+<p-confirmDialog></p-confirmDialog>
