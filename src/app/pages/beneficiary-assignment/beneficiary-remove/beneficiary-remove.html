@@ -44,7 +44,7 @@
                                 </h5>
 
                                 <div class="row g-3 p-4">
-                                       <div
+                                    <div
                                         class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom">
                                         <span class="text-muted">State:</span>
                                         <span class="fw-semibold text-dark">{{ projectInfo?.stateName || '—' }}</span>
@@ -67,7 +67,7 @@
                                         <span class="fw-semibold text-dark">{{ projectInfo?.bomaName || '—' }}</span>
                                     </div>
 
-                                 
+
                                 </div>
                             </div>
                         </div>
@@ -98,7 +98,12 @@
                             <div class="col-md-6">
                                 <label for="inchargeName" class="form-label">Incharge Name</label>
                                 <input type="text" id="inchargeName" formControlName="inchargeName" class="form-control"
-                                    placeholder="Enter incharge name">
+                                    placeholder="Enter incharge name"
+                                    [class.ng-invalid]="projectForm.get('inchargeName')?.invalid && projectForm.get('inchargeName')?.touched">
+                                @if (isSubmitted && projectForm.get('inchargeName')?.errors?.['pattern']) {
+                                <small class="text-danger">Incharge name should not contain numbers or special
+                                    characters.</small>
+                                }
                             </div>
 
                             <div class="col-md-6">
@@ -126,20 +131,14 @@
                         <p-divider></p-divider>
 
                         <div class="p-4">
-                            <h5 class="mb-3">Currently Assigned Beneficiaries <span class="badge bg-danger ms-2">{{ getSelectedExistingIds().length }} selected</span></h5>
-                           <p-table 
-    [value]="existingBeneficiaries"
-    [lazy]="true"
-    [paginator]="true"
-    [rows]="existingRows"
-    [totalRecords]="existingTotalRecords"
-    [first]="existingFirst"
-    [loading]="isLoadingExisting"
-    (onLazyLoad)="onExistingPageChange($event)"
-    [rowsPerPageOptions]="[10, 50, 100, {showAll: 'All'}]"
-    [showCurrentPageReport]="true"
-    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} beneficiaries"
-    class="p-datatable-sm p-datatable-striped">
+                            <h5 class="mb-3">Currently Assigned Beneficiaries <span class="badge bg-danger ms-2">{{
+                                    getSelectedExistingIds().length }} selected</span></h5>
+                            <p-table [value]="existingBeneficiaries" [lazy]="true" [paginator]="true"
+                                [rows]="existingRows" [totalRecords]="existingTotalRecords" [first]="existingFirst"
+                                [loading]="isLoadingExisting" (onLazyLoad)="onExistingPageChange($event)"
+                                [rowsPerPageOptions]="[10, 50, 100, {showAll: 'All'}]" [showCurrentPageReport]="true"
+                                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} beneficiaries"
+                                class="p-datatable-sm p-datatable-striped">
 
 
                                 <ng-template pTemplate="header">

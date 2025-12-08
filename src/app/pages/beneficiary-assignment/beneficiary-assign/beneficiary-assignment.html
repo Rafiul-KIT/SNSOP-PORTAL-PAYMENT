@@ -98,7 +98,11 @@
                             <div class="col-md-6">
                                 <label for="inchargeName" class="form-label">Incharge Name</label>
                                 <input type="text" id="inchargeName" formControlName="inchargeName" class="form-control"
-                                    placeholder="Enter incharge name">
+                                    placeholder="Enter incharge name"
+                                    [class.ng-invalid]="projectForm.get('inchargeName')?.invalid && projectForm.get('inchargeName')?.touched">
+                                @if (isSubmitted && projectForm.get('inchargeName')?.errors?.['pattern']) {
+                                <small class="text-danger">Incharge name should not contain numbers or special characters.</small>
+                                }
                             </div>
 
                             <div class="col-md-6">
