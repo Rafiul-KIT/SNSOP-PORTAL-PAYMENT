@@ -189,7 +189,7 @@ async submitApproval(): Promise<void> {
 
 
   try {
-    await this.api.postFormData(endpoint, fd);
+    await this.api.axiosInstance.post(`/${endpoint}`, fd, {});
     
     const statusMessage = approvedStr === 'true' ? 'Approved' : 'Rejected';
 
@@ -294,7 +294,7 @@ async submitApproval(): Promise<void> {
         return;
       }
 
-      const response = await this.api.GET(
+      const response = await this.api.axiosInstance.get(
         `api/subproject/work-details/attachment/get`,
         {
           params: { filePath: path },
