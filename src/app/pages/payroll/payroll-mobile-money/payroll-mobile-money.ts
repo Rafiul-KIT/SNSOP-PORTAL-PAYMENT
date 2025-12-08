@@ -156,7 +156,8 @@ export class PayrollMobileMoney implements OnInit {
         id: c.id,
         name: c.name,
         selected: false
-      })))
+      }))),
+      processType: [null]
     });
 
     this.searchForm.get('payrollType')?.valueChanges.subscribe(value => {
@@ -330,7 +331,8 @@ export class PayrollMobileMoney implements OnInit {
       boma: { value: null, disabled: true },
       supportType: '',
       paymentCycle: '',
-      provider: 'MOMO'
+      provider: 'MOMO',
+      processType: null
     });
     
     this.paymentCycles.controls.forEach(control => {
