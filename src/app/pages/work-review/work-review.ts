@@ -198,6 +198,7 @@ async submitApproval(): Promise<void> {
       title: 'Success',
       text: `Status ${statusMessage} Submitted successfully!`,
     });
+    this.router.navigate(['/sub-project/approval']);
   } catch (err) {
     console.error(err);
     Swal.fire({
@@ -205,6 +206,7 @@ async submitApproval(): Promise<void> {
       title: 'Error',
       text: 'Failed to submit approval.',
     });
+    
   } finally {
     this.isLoading.set(false);
   }
