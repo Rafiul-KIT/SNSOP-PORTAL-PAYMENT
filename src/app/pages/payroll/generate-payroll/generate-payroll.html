@@ -1,0 +1,183 @@
+@if (isLoading) {
+<app-loader></app-loader>
+} @else {
+<div class="breadcrumb-wrapper">
+    <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
+</div>
+
+<div class="card p-3 mb-3">
+     <form [formGroup]="searchForm" class="row g-3">
+        <!-- State -->
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="states" optionLabel="name" formControlName="state"
+                    (onChange)="onStateChange($event.value)" />
+                <label>State Name</label>
+            </p-floatlabel>
+        </div>
+
+        <!-- County -->
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="counties" optionLabel="name" formControlName="county"
+                    (onChange)="onCountyChange($event.value)" />
+                <label>County Name</label>
+            </p-floatlabel>
+        </div>
+        <!-- Payam -->
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="payams" optionLabel="name" formControlName="payam"
+                    (onChange)="onPayamChange($event.value)" />
+                <label>Payam Name</label>
+            </p-floatlabel>
+        </div>
+        <!-- Boma -->
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="bomas" optionLabel="name" formControlName="boma" />
+                <label>Boma Name</label>
+            </p-floatlabel>
+        </div>
+
+        <!-- Support type -->
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="supportTypeOptions" optionLabel="name" optionValue="id"
+                    formControlName="supportType"></p-select>
+                <label>Support Type</label>
+            </p-floatlabel>
+        </div>
+        <!-- payment cycle dropdown -->
+        <div class="col-md-3" *ngIf="searchForm.get('payrollType')?.value === 'single'">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="paymentCycleOptions" optionLabel="name" optionValue="id"
+                    formControlName="paymentCycle"></p-select>
+                <label>Payment Cycle</label>
+            </p-floatlabel>
+        </div>
+        <!-- payment cycle -->
+        <div class="col-md-3">
+            <div class="d-flex align-items-center h-100">
+                <div class="d-flex align-items-center me-4">
+                    <p-radioButton name="payrollType" value="single" formControlName="payrollType"
+                        inputId="singlePayroll"></p-radioButton>
+                    <label for="singlePayroll" class="ms-2">Single Payroll</label>
+                </div>
+                <div class="d-flex align-items-center">
+                    <p-radioButton name="payrollType" value="combined" formControlName="payrollType"
+                        inputId="combinedPayroll"></p-radioButton>
+                    <label for="combinedPayroll" class="ms-2">Combined Payroll</label>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- payment cycles checkboxes -->
+        <div class="col-md-12" *ngIf="searchForm.get('payrollType')?.value === 'combined'">
+            <label class="mb-2">Payment Cycles</label>
+            <div formArrayName="paymentCycles" class="d-flex flex-wrap gap-3">
+                <div *ngFor="let cycle of paymentCycles.controls; let i = index" [formGroupName]="i"
+                    class="d-flex align-items-center">
+                    <p-checkbox [formControlName]="'selected'" [binary]="true" [inputId]="'cycle' + i"></p-checkbox>
+                    <label [for]="'cycle' + i" class="ms-2">{{ paymentCycleOptions[i].name }}</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <!-- Mobile: stacked full width; ≥sm: right-aligned row -->
+            <div class="d-grid d-sm-flex justify-content-end align-items-center gap-2">
+                <p-button label="Reset" icon="fas fa-refresh" severity="danger" size="small" [outlined]="true"
+                    (onClick)="resetForm()" [disabled]="isGenerating">
+                </p-button>
+
+                <p-button label="Generate Payroll" icon="fas fa-cog" severity="success" size="small"
+                    (onClick)="generatePayroll()" [loading]="isGenerating" [disabled]="isGenerating">
+                </p-button>
+
+
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<!-- Generation Status Card -->
+@if (generationStatus || lastGenerationResult) {
+<div class="card p-4 mb-3">
+    <h5 class="mb-3">
+        <i class="fas fa-info-circle me-2"></i>Generation Status
+    </h5>
+    
+    @if (isGenerating) {
+    <div class="d-flex align-items-center mb-3">
+        <i class="pi pi-spin pi-spinner me-3" style="font-size: 1.5rem;"></i>
+        <span class="text-muted">{{ generationStatus }}</span>
+    </div>
+    }
+    
+    @if (lastGenerationResult && !isGenerating) {
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="status-item">
+                <strong>Request ID:</strong>
+                <span class="ms-2 badge bg-secondary">{{ lastGenerationResult.requestId }}</span>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="status-item">
+                <strong>Status:</strong>
+                <span class="ms-2 badge" 
+                      [ngClass]="{
+                        'bg-success': lastGenerationResult.status === 'SUCCESS',
+                        'bg-danger': lastGenerationResult.status === 'FAILED',
+                        'bg-warning': lastGenerationResult.status === 'PENDING',
+                        'bg-info': lastGenerationResult.status === 'IN_PROGRESS'
+                      }">
+                    {{ lastGenerationResult.status }}
+                </span>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="status-item">
+                <strong>Request Date:</strong>
+                <span class="ms-2">{{ lastGenerationResult.requestDate | date:'medium' }}</span>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="status-item">
+                <strong>Operation Type:</strong>
+                <span class="ms-2 badge bg-primary">{{ lastGenerationResult.operationType }}</span>
+            </div>
+        </div>
+        
+        @if (lastGenerationResult.errorReason) {
+        <div class="col-12">
+            <div class="alert alert-danger mb-0">
+                <strong>Error Reason:</strong> {{ lastGenerationResult.errorReason }}
+            </div>
+        </div>
+        }
+        
+        @if (lastGenerationResult.status === 'SUCCESS') {
+        <div class="col-12">
+            <div class="alert alert-success mb-0">
+                <i class="fas fa-check-circle me-2"></i>
+                Payroll has been generated successfully!
+            </div>
+        </div>
+        }
+    </div>
+    }
+</div>
+}
+
+}
+
+<p-toast position="bottom-right"></p-toast>
+<p-confirmDialog></p-confirmDialog>
