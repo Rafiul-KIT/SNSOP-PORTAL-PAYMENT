@@ -12,6 +12,5 @@ export const environment = {
     grm: 'https://newmis.southsudansafetynet.info/trial/grm',
     report: 'https://newmis.southsudansafetynet.info/trial/report',
   },
-  authBackend: 'https://devgwapp.southsudansafetynet.info/mis_auth',
   cookie_name:'mis_ta'
 };
