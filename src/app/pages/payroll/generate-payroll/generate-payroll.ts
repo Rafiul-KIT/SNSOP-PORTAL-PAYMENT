@@ -40,7 +40,7 @@ interface PayrollGenerationResponse {
   updatedBy: number;
   requestData: string;
   errorReason: string;
-  status: 'FAILED' | 'SUCCESS' | 'PENDING' | 'IN_PROGRESS';
+  status: 'FAILED' | 'SUCCESS' | 'PENDING' | 'PROCESSING';
   operationType: 'RECONCILIATION' | 'GENERATION';
 }
 
