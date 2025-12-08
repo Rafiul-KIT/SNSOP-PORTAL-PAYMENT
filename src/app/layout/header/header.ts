@@ -157,7 +157,7 @@ export class Header {
         ],
       },
       {
-        label: 'Apply Wage Request',
+        label: 'Wage Request',
         icon: 'fas fa-receipt',
         items: [
           {
