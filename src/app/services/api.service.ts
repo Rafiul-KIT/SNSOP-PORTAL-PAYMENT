@@ -1,104 +1,83 @@
 import { Injectable, signal } from '@angular/core';
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosHeaders } from 'axios';
+import axios from 'axios';
 import { CookieService } from 'ngx-cookie-service';
+import { environment } from '../../environments/environment';
 import { jwtDecode } from 'jwt-decode';
 import { Router } from '@angular/router';
-import { environment } from '../../environments/environment';
 
-type BaseKey = 'global' | 'alt';
-
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root',
+})
 export class ApiService {
-  // ---- Base URLs ----
-  private globalApi = environment.globalApi;              // e.g. https://api.yourdomain.com
-  private altApi = environment.authBackend;          // <-- hardcode here if you want
-  // OR: private altApi = environment.altApi;
-
-  public ACCESS_TOKEN = environment.cookie_name;
-
-  public loginState = signal<{ token: string | null; user: any | null }>({
+  private globalApi: string = environment.globalApi;
+  public loginState = signal({
     token: null,
     user: null,
   });
-
-  private apiHeader = {
-    headers: new AxiosHeaders().set('Content-Type', 'application/json'),
+  public ACCESS_TOKEN = environment.cookie_name;
+  private apiHeader: any = {
+    headers: {
+      'Content-Type': 'application/json',
+    },
   };
 
-  // ---- Two axios clients ----
-  private axiosGlobal: AxiosInstance = axios.create({ baseURL: this.globalApi });
-  private axiosAlt: AxiosInstance = axios.create({ baseURL: this.altApi });
+  axiosInstance = axios.create({
+    baseURL: this.globalApi, // ✅ already sets baseURL
+  });
 
-
-
-  constructor(private cookies: CookieService, private router: Router) {
-    const token = this.cookies.get(this.ACCESS_TOKEN);
-    if (token) {
-      const userData: any = safeDecode(token);
-      this.loginState.set({ token, user: userData });
-
-      this.axiosGlobal.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      this.axiosAlt.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  constructor(private cookieService: CookieService, private router: Router) {
+    const accessToken: any = this.cookieService.get(this.ACCESS_TOKEN);
+    if (accessToken) {
+      const userData: any = jwtDecode(accessToken);
+      this.loginState.set({
+        token: accessToken,
+        user: userData,
+      });
+      this.axiosInstance.defaults.headers.common[
+        'Authorization'
+      ] = `Bearer ${accessToken}`;
     }
 
-    // Attach interceptors to BOTH instances
-    this.attachInterceptors(this.axiosGlobal);
-    this.attachInterceptors(this.axiosAlt);
-  }
-
-  private attachInterceptors(inst: AxiosInstance) {
-    // Request: fresh token
-    inst.interceptors.request.use(
+    // ✅ Request interceptor → always attach fresh token
+    this.axiosInstance.interceptors.request.use(
       (config) => {
-        const fresh = this.cookies.get(this.ACCESS_TOKEN);
-        if (fresh) {
-          config.headers = config.headers ?? {};
-          config.headers['Authorization'] = `Bearer ${fresh}`;
-        }
-        if (!config.headers?.['Content-Type']) {
-          config.headers = config.headers ?? {};
-          config.headers['Content-Type'] = 'application/json';
+        const token = this.cookieService.get(this.ACCESS_TOKEN);
+        if (token) {
+          config.headers['Authorization'] = `Bearer ${token}`;
         }
         return config;
       },
       (error) => Promise.reject(error)
     );
 
-    // Response: 401
-    inst.interceptors.response.use(
-      (res) => res,
+    // ✅ Response interceptor → handle 401 globally
+    this.axiosInstance.interceptors.response.use(
+      (response) => response,
       (error) => {
-        if (error?.response?.status === 401) {
-          console.warn('401 Unauthorized → logging out…');
-          this.logout();
+        if (error.response && error.response.status === 401) {
+          console.warn('401 Unauthorized → redirecting to login...');
+          this.logout(); // reuse your existing logout
         }
         return Promise.reject(error);
       }
     );
   }
+getUserRole(): number | null {
+  const token = this.cookieService.get(this.ACCESS_TOKEN);
+  if (!token) return null;
 
-
-  private client(base: BaseKey): AxiosInstance {
-    return base === 'alt' ? this.axiosAlt : this.axiosGlobal;
+  try {
+    const decoded: any = jwtDecode(token);
+    return decoded?.roleId || null;
+  } catch (err) {
+    console.error('Invalid token:', err);
+    return null;
   }
-
-  getUserRole(): number | null {
-    const token = this.cookies.get(this.ACCESS_TOKEN);
-    if (!token) return null;
-
-    try {
-      const decoded: any = jwtDecode(token);
-      return decoded?.roleId || null;
-    } catch (err) {
-      console.error('Invalid token:', err);
-      return null;
-    }
-  }
+}
 
   getToken(): string | null {
-    return this.cookies.get(this.ACCESS_TOKEN) || null;
+    return this.cookieService.get(this.ACCESS_TOKEN) || null;
   }
-
 
   logout = () => {
     const host = (() => {
@@ -108,7 +87,7 @@ export class ApiService {
         return environment.domain.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
       }
     })();
-    this.cookies.delete(this.ACCESS_TOKEN, '/', host, true, 'Lax'); // Explicitly delete mis_ta
+    this.cookieService.delete(this.ACCESS_TOKEN, '/', host, true, 'Lax'); // Explicitly delete mis_ta
     sessionStorage.clear();
     this.loginState.set({ token: null, user: null });
 
@@ -119,100 +98,36 @@ export class ApiService {
     window.location.href = redirectUrl;
   };
 
-  // -------------- Helpers with optional base param (default: 'global') --------------
-  GET = <T = any>(endpoint: string, params?: Record<string, any>, base: BaseKey = 'global', config?: AxiosRequestConfig) =>
-    this.client(base).get<T>(endpoint, { ...this.apiHeader, params, ...(config ?? {}) });
-
-  POST = <T = any>(endpoint: string, payload: any, base: BaseKey = 'global', config?: AxiosRequestConfig) =>
-    this.client(base).post<T>(endpoint, payload, { ...this.apiHeader, ...(config ?? {}) });
-
-  PUT = <T = any>(endpoint: string, payload?: any, base: BaseKey = 'global', config?: AxiosRequestConfig) =>
-    this.client(base).put<T>(endpoint, payload ?? {}, { ...this.apiHeader, ...(config ?? {}) });
-
-  PATCH = <T = any>(endpoint: string, payload: any, base: BaseKey = 'global', config?: AxiosRequestConfig) =>
-    this.client(base).patch<T>(endpoint, payload, { ...this.apiHeader, ...(config ?? {}) });
-
-  DELETE = <T = any>(endpoint: string, base: BaseKey = 'global', config?: AxiosRequestConfig) =>
-    this.client(base).delete<T>(endpoint, { ...this.apiHeader, ...(config ?? {}) });
-
-  PUTWITHPAYLOAD = <T = any>(endpoint: string, payload: {}, base: BaseKey = 'global', config?: AxiosRequestConfig) => {
-    return this.client(base).put<T>(endpoint, payload, { ...this.apiHeader, ...(config ?? {}) });
+  // ================= Basic HTTP Functions =================
+  GET = (endpoint: string) => {
+    return this.axiosInstance.get(endpoint, this.apiHeader);
   };
 
-  POST_FORM_DATA = <T = any>(
-    endpoint: string,
-    payload: FormData,
-    base: BaseKey = 'global',
-    config?: AxiosRequestConfig
-  ) => {
-    return this.client(base).post<T>(endpoint, payload, {
-      headers: new AxiosHeaders().set('Content-Type', 'multipart/form-data'),
-      ...(config ?? {}),
+  POST = (endpoint: string, payload: {}) => {
+    return this.axiosInstance.post(endpoint, payload, this.apiHeader);
+  };
+
+  POST_FORM_DATA = (endpoint: string, payload: FormData) => {
+    return this.axiosInstance.post(endpoint, payload, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
   };
 
-  postFormData<T>(
-    endpoint: string,
-    formData: FormData,
-    config: AxiosRequestConfig = {}
-  ): Promise<T> {
-    return this.axiosGlobal
-      .post<T>(`/${endpoint}`, formData, config)
-      .then(response => response.data)
-      .catch((error) => {
-        console.error('Error posting FormData:', error);
-        throw error;
-      });
-  }
+  PUTWITHPAYLOAD = (endpoint: string, payload: {}) => {
+    return this.axiosInstance.put(endpoint, payload, this.apiHeader);
+  };
 
-  downloadFile<T>(
-    endpoint: string,
-    payload: any,
-    config: AxiosRequestConfig = {}
-  ): Promise<Blob> {
-    return this.axiosGlobal
-      .post<T>(`/${endpoint}`, payload, {
-        responseType: 'blob',
-        ...config
-      })
-      .then((response) => response.data as Blob)
-      .catch((error) => {
-        console.error('Error downloading file:', error);
-        throw error;
-      });
-  }
+  PUT = (endpoint: string) => {
+    return this.axiosInstance.put(endpoint, {}, this.apiHeader);
+  };
 
-  sendFormData<T>(
-    method: 'POST' | 'PATCH',
-    endpoint: string,
-    formData: FormData,
-    base: BaseKey = 'global',
-    config: AxiosRequestConfig = {}
-  ): Promise<T> {
-    const axiosMethod = method === 'POST' ? this.client(base).post : this.client(base).patch;
+  PATCH = (endpoint: string, payload: {}) => {
+    return this.axiosInstance.patch(endpoint, payload, this.apiHeader);
+  };
 
-    return axiosMethod(endpoint, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      ...config,
-    })
-      .then((response) => response.data)
-      .catch((error) => {
-        console.error(`${method} request failed for ${endpoint}:`, error);
-        throw error;
-      });
-  }
-
-  patchFormData<T>(
-    endpoint: string,
-    formData: FormData,
-    base: BaseKey = 'global',
-    config: AxiosRequestConfig = {}
-  ): Promise<T> {
-    return this.sendFormData('PATCH', endpoint, formData, base, config);
-  }
-}
-
-// safe decode
-function safeDecode(token: string) {
-  try { return jwtDecode(token); } catch { return null; }
+  DELETE = (endpoint: string) => {
+    return this.axiosInstance.delete(endpoint, this.apiHeader);
+  };
 }

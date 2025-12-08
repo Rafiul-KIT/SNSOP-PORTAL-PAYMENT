@@ -33,13 +33,6 @@ interface Beneficiary {
   assigned?: boolean;
   isSelected?: boolean;
 }
-interface ApiResponse {
-  data: {
-    code: number;
-    message: string;
-    // Other properties you expect in the response
-  };
-}
 @Component({
   selector: 'app-beneficiary-remove',
   templateUrl: './beneficiary-remove.html',
@@ -93,7 +86,7 @@ export class BeneficiaryRemove implements OnInit {
     private cdr: ChangeDetectorRef,
     private router: Router,
     private apiService: ApiService
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.initBreadcrumb();
@@ -234,20 +227,20 @@ export class BeneficiaryRemove implements OnInit {
     }
   }
 
-  onExistingPageChange(event: any): void {
-    const page = event.first / event.rows;
+onExistingPageChange(event: any): void {
+  const page = event.first / event.rows;
 
-    this.existingFirst = event.first;
-    this.existingRows = event.rows;
+  this.existingFirst = event.first;
+  this.existingRows = event.rows;
 
-    // Handle "Show All"
-    const size =
-      event.rows === this.existingTotalRecords
-        ? this.existingTotalRecords
-        : event.rows;
+  // Handle "Show All"
+  const size =
+    event.rows === this.existingTotalRecords
+      ? this.existingTotalRecords
+      : event.rows;
 
-    this.loadExistingBeneficiaries(page, size);
-  }
+  this.loadExistingBeneficiaries(page, size);
+}
 
 
   getSelectedExistingIds(): number[] {
@@ -272,7 +265,8 @@ export class BeneficiaryRemove implements OnInit {
 
     const selectedIds = this.getSelectedExistingIds();
     if (selectedIds.length === 0) {
-      this.beneficiaryError = 'Please select at least one beneficiary to remove';
+      this.beneficiaryError =
+        'Please select at least one beneficiary to remove';
       await Swal.fire(
         'No Beneficiary Selected',
         this.beneficiaryError,
@@ -310,13 +304,11 @@ export class BeneficiaryRemove implements OnInit {
         formData.append('beneficiaryIds', id.toString())
       );
 
-      // Use the patchFormData method from ApiService with correct typing
-      const response: ApiResponse = await this.apiService.patchFormData(
-        'api/subproject/assign/progress/beneficiary/remove',  // API endpoint
-        formData,  // FormData to send
-        'global',  // or 'alt' based on the API endpoint you want to use
+      const response: any = await this.apiService.axiosInstance.patch(
+        'api/subproject/assign/progress/beneficiary/remove',
+        formData,
         {
-          // Optional custom headers
+          headers: { 'Content-Type': 'multipart/form-data' },
         }
       );
 
@@ -363,7 +355,6 @@ export class BeneficiaryRemove implements OnInit {
       this.cdr.detectChanges();
     }
   }
-
 
   formatDate(date: Date): string {
     if (!date) return '';
