@@ -76,8 +76,7 @@ export class Profile implements OnInit {
     private router: Router,
     private api: ApiService,
     private cdr: ChangeDetectorRef,
-    private msg: MessageService,
-     private http: HttpClient
+    private msg: MessageService
   ) { }
 
   ngOnInit(): void {
@@ -113,15 +112,10 @@ export class Profile implements OnInit {
       this.isLoading = true;
       this.cdr.detectChanges();
 
-      // URL to fetch user details directly
-      const url = `https://devgwapp.southsudansafetynet.info/mis_auth/api/users/findOne?id=${userId}`;
-      // const url = `https://gwapp.southsudansafetynet.info/mis_auth/api/users/findOne?id=${userId}`;
-
-    // Use HttpClient to make a GET request
-    const res = await this.http.get<any>(url).toPromise();
- console.log(res)
-    if (res) {
-      const user = res as {
+      const res = await this.api.GET_AUTH(`api/users/findOne?id=${userId}`);
+      console.log(res)
+      if (res.data) {
+      const user = res.data as {
         id: number;
         fullName: string;
         email: string;
@@ -154,11 +148,11 @@ export class Profile implements OnInit {
           emailReceiver: !!user.emailReceiver,
           password: '',
         };
-        console.log(res); 
+        console.log(res.data); 
         this.initialFormValue = formValue;
         this.userRegistrationForm.reset(formValue, { emitEvent: false });
         this.isFormUnchanged = true;
-        console.log(res); 
+        console.log(res.data); 
 
         // set footer status info
         this.userDetails = {
