@@ -4,6 +4,7 @@ export const environment = {
   useHash: true,
   domain: 'https://mis.southsudansafetynet.info',
   globalApi: 'https://gwapp.southsudansafetynet.info/mis_server/',
+  authApi: 'https://gwapp.southsudansafetynet.info/mis_auth/',
   portals: {
     master: 'https://mis.southsudansafetynet.info/v2/',
     masterSettings: 'https://mis.southsudansafetynet.info/v2/#/home/portals',

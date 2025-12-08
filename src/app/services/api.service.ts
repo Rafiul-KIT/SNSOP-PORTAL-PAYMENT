@@ -10,6 +10,7 @@ import { Router } from '@angular/router';
 })
 export class ApiService {
   private globalApi: string = environment.globalApi;
+  private authApi: string = environment.authApi;
   public loginState = signal({
     token: null,
     user: null,
@@ -24,6 +25,9 @@ export class ApiService {
   axiosInstance = axios.create({
     baseURL: this.globalApi, // ✅ already sets baseURL
   });
+  authAxiosInstance = axios.create({
+    baseURL: this.authApi,
+  });
 
   constructor(private cookieService: CookieService, private router: Router) {
     const accessToken: any = this.cookieService.get(this.ACCESS_TOKEN);
@@ -34,6 +38,9 @@ export class ApiService {
         user: userData,
       });
       this.axiosInstance.defaults.headers.common[
+        'Authorization'
+      ] = `Bearer ${accessToken}`;
+      this.authAxiosInstance.defaults.headers.common[
         'Authorization'
       ] = `Bearer ${accessToken}`;
     }
@@ -50,8 +57,30 @@ export class ApiService {
       (error) => Promise.reject(error)
     );
 
+    this.authAxiosInstance.interceptors.request.use(
+      (config) => {
+        const token = this.cookieService.get(this.ACCESS_TOKEN);
+        if (token) {
+          config.headers['Authorization'] = `Bearer ${token}`;
+        }
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
+
     // ✅ Response interceptor → handle 401 globally
     this.axiosInstance.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response && error.response.status === 401) {
+          console.warn('401 Unauthorized → redirecting to login...');
+          this.logout(); // reuse your existing logout
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    this.authAxiosInstance.interceptors.response.use(
       (response) => response,
       (error) => {
         if (error.response && error.response.status === 401) {
@@ -101,6 +130,10 @@ getUserRole(): number | null {
   // ================= Basic HTTP Functions =================
   GET = (endpoint: string) => {
     return this.axiosInstance.get(endpoint, this.apiHeader);
+  };
+
+  GET_AUTH = (endpoint: string) => {
+    return this.authAxiosInstance.get(endpoint, this.apiHeader);
   };
 
   POST = (endpoint: string, payload: {}) => {
