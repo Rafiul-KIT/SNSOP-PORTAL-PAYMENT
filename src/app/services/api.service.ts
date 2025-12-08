@@ -77,6 +77,7 @@ export class ApiService {
     );
   }
 
+
   private client(base: BaseKey): AxiosInstance {
     return base === 'alt' ? this.axiosAlt : this.axiosGlobal;
   }
@@ -149,6 +150,66 @@ export class ApiService {
       ...(config ?? {}),
     });
   };
+
+  postFormData<T>(
+    endpoint: string,
+    formData: FormData,
+    config: AxiosRequestConfig = {}
+  ): Promise<T> {
+    return this.axiosGlobal
+      .post<T>(`/${endpoint}`, formData, config)
+      .then(response => response.data)
+      .catch((error) => {
+        console.error('Error posting FormData:', error);
+        throw error;
+      });
+  }
+
+  downloadFile<T>(
+    endpoint: string,
+    payload: any,
+    config: AxiosRequestConfig = {}
+  ): Promise<Blob> {
+    return this.axiosGlobal
+      .post<T>(`/${endpoint}`, payload, {
+        responseType: 'blob',
+        ...config
+      })
+      .then((response) => response.data as Blob)
+      .catch((error) => {
+        console.error('Error downloading file:', error);
+        throw error;
+      });
+  }
+
+  sendFormData<T>(
+    method: 'POST' | 'PATCH',
+    endpoint: string,
+    formData: FormData,
+    base: BaseKey = 'global',
+    config: AxiosRequestConfig = {}
+  ): Promise<T> {
+    const axiosMethod = method === 'POST' ? this.client(base).post : this.client(base).patch;
+
+    return axiosMethod(endpoint, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      ...config,
+    })
+      .then((response) => response.data)
+      .catch((error) => {
+        console.error(`${method} request failed for ${endpoint}:`, error);
+        throw error;
+      });
+  }
+
+  patchFormData<T>(
+    endpoint: string,
+    formData: FormData,
+    base: BaseKey = 'global',
+    config: AxiosRequestConfig = {}
+  ): Promise<T> {
+    return this.sendFormData('PATCH', endpoint, formData, base, config);
+  }
 }
 
 // safe decode

@@ -313,7 +313,7 @@ onCanBeAssignedPageChange(event: any): void {
         formData.append('beneficiaryIds', id.toString())
       );
 
-      const response: any = await this.apiService.axiosInstance.post(
+      const response: any = await this.apiService.POST_FORM_DATA(
         'api/subproject/assign/progress/beneficiary/save',
         formData
       );
