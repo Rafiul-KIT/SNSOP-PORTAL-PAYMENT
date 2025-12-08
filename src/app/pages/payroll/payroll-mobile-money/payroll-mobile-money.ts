@@ -85,6 +85,10 @@ export class PayrollMobileMoney implements OnInit {
   totalRecords = 0;
   hasSearched = false;
 
+  isImportButtonDisabled: boolean = true;
+  isExportButtonDisabled: boolean = true;
+  selectedFile: File | null = null;
+
   breadcrumbItems: any[] = [];
   breadcrumbHome: any;
 
@@ -130,6 +134,8 @@ export class PayrollMobileMoney implements OnInit {
     this.initBreadcrumb();
     await this.loadInitialLookups();
     this.initForm();
+    this.searchForm.get('processType')?.valueChanges.subscribe(() => this.updateButtonStates());
+    this.updateButtonStates(); // Set initial state
     this.isLoading = false;
     this.cdr.markForCheck();
   }
@@ -346,12 +352,38 @@ export class PayrollMobileMoney implements OnInit {
     this.totalRecords = 0;
     this.currentPage = 0;
     this.hasSearched = false;
+    this.selectedFile = null;
     
+    this.updateButtonStates(); // Update button states after reset
     this.cdr.markForCheck();
   }
 
   get paymentCycles() {
     return this.searchForm.get('paymentCycles') as FormArray;
+  }
+
+  updateButtonStates() {
+    const processType = this.searchForm.get('processType')?.value;
+
+    switch (processType) {
+      case 'verification':
+        this.isImportButtonDisabled = false;
+        this.isExportButtonDisabled = false;
+        break;
+      case 'payrollOnly':
+        this.isImportButtonDisabled = true;
+        this.isExportButtonDisabled = false;
+        break;
+      case 'reconciliation':
+        this.isImportButtonDisabled = false;
+        this.isExportButtonDisabled = true;
+        break;
+      default:
+        this.isImportButtonDisabled = true;
+        this.isExportButtonDisabled = true;
+        break;
+    }
+    this.cdr.markForCheck();
   }
 
 
@@ -444,13 +476,34 @@ export class PayrollMobileMoney implements OnInit {
   onFileSelect(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      this.importFile(input.files[0]);
+      this.selectedFile = input.files[0];
+      this.cdr.markForCheck();
     }
   }
 
-  importFile(file: File) {
-    this.messageService.add({ severity: 'info', summary: 'File Selected', detail: file.name });
+  onImportClick() {
+    if (!this.selectedFile) return;
+
+    // Since there's no API, we'll just simulate the action.
+    this.isLoading = true;
     this.cdr.markForCheck();
-    // Implement your file upload logic here
+
+    // Simulate a delay
+    setTimeout(() => {
+      this.messageService.add({ 
+        severity: 'success', 
+        summary: 'Success', 
+        detail: 'File processed successfully (demo)' 
+      });
+
+      // Reset after "import"
+      this.selectedFile = null;
+      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = '';
+      }
+      this.isLoading = false;
+      this.cdr.markForCheck();
+    }, 1000);
   }
 }

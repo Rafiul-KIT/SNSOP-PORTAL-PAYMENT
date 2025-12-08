@@ -1052,25 +1052,19 @@ export class LookupService {
   }
 
 
-  getPaymentCycleList(): LookupItemPayroll[] {
-    return [
- { id: 1, name: 'Cycle 1' },
-  { id: 2, name: 'Cycle 2' },
-  { id: 3, name: 'Cycle 3' },
-  { id: 4, name: 'Cycle 4' },
-  { id: 5, name: 'Cycle 5' },
-  { id: 6, name: 'Cycle 6' },
-  { id: 7, name: 'Cycle 7' },
-  { id: 8, name: 'Cycle 8' },
-  { id: 9, name: 'Cycle 9' },
-  { id: 10, name: 'Cycle 10' },
-  { id: 11, name: 'Cycle 11' },
-  { id: 12, name: 'Cycle 12' },
-  { id: 13, name: 'Cycle 13' },
-  { id: 14, name: 'Cycle 14' },
-  { id: 15, name: 'Cycle 15' },
-    ];
+getPaymentCycleList(): LookupItemPayroll[] {
+  const list: LookupItemPayroll[] = [];
+
+  for (let i = 1; i <= 15; i++) {
+    list.push({
+      id: i,
+      name: `Payment Cycle ${i}`
+    });
   }
+
+  return list;
+}
+
 
   getPaymentCycleEnum = () => {
     return PaymentCycleEnum;
