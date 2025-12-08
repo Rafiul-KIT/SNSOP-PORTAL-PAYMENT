@@ -1,16 +1,15 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { CookieService } from 'ngx-cookie-service';
 import { jwtDecode } from 'jwt-decode';
 import { environment } from '../../environments/environment';
-import { firstValueFrom } from 'rxjs';
+import { ApiService } from './api.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PermissionService {
   constructor(
-    private http: HttpClient,
+    private apiService: ApiService,
     private cookieService: CookieService
   ) {}
 
@@ -29,16 +28,16 @@ export class PermissionService {
             resolve(true);
           } else {
             try {
-              const response = await firstValueFrom(
-                this.http.get<any>(
-                  `https://devgwapp.southsudansafetynet.info/mis_auth/api/menus/role/${roleId}`
-                  //  `https://gwapp.southsudansafetynet.info/mis_auth/api/menus/role/${roleId}`
-                )
+              const axiosResponse = await this.apiService.GET<any>(
+                `api/menus/role/${roleId}`,
+                {},
+                'alt'
               );
-              if (response && Array.isArray(response.data)) {
+              const responseData = axiosResponse.data;
+              if (responseData && Array.isArray(responseData.data)) {
                 sessionStorage.setItem(
                   `menus_${roleId}`,
-                  JSON.stringify(response.data)
+                  JSON.stringify(responseData.data)
                 );
               }
               resolve(true);
