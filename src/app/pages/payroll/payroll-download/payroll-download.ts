@@ -184,17 +184,26 @@ export class PayrollDownload implements OnInit {
   ) {}
 
   private async loadInitialLookups() {
-    await Promise.all([this.lookup.getOrFetchStateList()]);
+    await Promise.all([
+      this.lookup.getOrFetchStateList(),
+      this.lookup.fetchAllCountyList(),
+      this.lookup.fetchAllPayamList(),
+      this.lookup.fetchAllBomaList(),
+    ]);
 
     this.states = this.lookup.getStateList();
+    const allCounties = this.lookup.getAllCountyList();
+    const allPayams = this.lookup.getAllPayamList();
+    const allBomas = this.lookup.getAllBomaList();
 
     this.supportTypeOptions = this.lookup.getSupportTypeList();
-
     this.paymentCycleOptions = this.lookup.getPaymentCycleList();
 
     // Build lookup maps
-
     this.states.forEach((s) => this.stateMap.set(Number(s.id), s.name));
+    allCounties.forEach((c) => this.countyMap.set(Number(c.id), c.name));
+    allPayams.forEach((p) => this.payamMap.set(Number(p.id), p.name));
+    allBomas.forEach((b) => this.bomaMap.set(Number(b.id), b.name));
 
     this.paymentCycleOptions.forEach((p) =>
       this.paymentCycleMap.set(Number(p.id), p.name)
@@ -492,6 +501,8 @@ export class PayrollDownload implements OnInit {
         return 'info';
     }
   }
+
+
 
   onDownloadClick(request: PayrollGenerationRequest) {
     if (request.downloadPath && request.status === 'SUCCESS') {

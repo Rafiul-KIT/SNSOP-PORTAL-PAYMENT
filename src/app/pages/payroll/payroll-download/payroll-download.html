@@ -75,11 +75,14 @@
 </div>
 
 <div class="card">
-    <p-table [value]="requestsData" [scrollable]="true" scrollHeight="400px">
+    <p-table [value]="requestsData" [scrollable]="true" scrollHeight="60vh">
         <ng-template pTemplate="header">
             <tr>
                 <th>Request ID</th>
-                <th>Location (State/County/Payam/Boma)</th>
+                <th>State</th>
+                <th>County</th>
+                <th>Payam</th>
+                <th>Boma</th>
                 <th>Payment Cycles</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -88,12 +91,10 @@
         <ng-template pTemplate="body" let-request>
             <tr>
                 <td>{{ request.requestId }}</td>
-                <td>
-                    {{ getStateName(request.state) }} / 
-                    {{ getCountyName(request.county) }} / 
-                    {{ getPayamName(request.payam) }} / 
-                    {{ getBomaName(request.boma) }}
-                </td>
+                <td>{{ getStateName(request.state) }}</td>
+                <td>{{ getCountyName(request.county) }}</td>
+                <td>{{ getPayamName(request.payam) }}</td>
+                <td>{{ getBomaName(request.boma) }}</td>
                 <td>{{ getPaymentCycleNames(request.paymentCycles) }}</td>
                 <td>
                     <p-tag [severity]="getStatusSeverity(request.status)" [value]="request.status"></p-tag>
@@ -114,7 +115,7 @@
         </ng-template>
          <ng-template pTemplate="emptymessage">
             <tr>
-                <td colspan="5" class="text-center">No payroll requests found.</td>
+                <td colspan="8" class="text-center">No payroll requests found.</td>
             </tr>
         </ng-template>
     </p-table>
