@@ -11,6 +11,7 @@ import {
   FormsModule,
   ReactiveFormsModule,
   FormArray,
+  Validators,
 } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -130,6 +131,7 @@ export class PayrollDownload implements OnInit {
   private fullRequestsData: PayrollGenerationRequest[] = [];
 
   totalRecords = 0;
+  isSearchDisabledForCombined: boolean = false; // New property for simple button control
 
   breadcrumbItems: any[] = [];
 
