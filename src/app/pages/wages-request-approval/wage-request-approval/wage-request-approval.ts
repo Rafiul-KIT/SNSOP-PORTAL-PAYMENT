@@ -257,7 +257,7 @@ export class WageRequestApproval implements OnInit {
     }
   }
   private buildSearchBody() {
-    console.log('DEBUG: Current Role ID is:', this.roleId);
+   
     const f = this.searchForm.value;
     const body: any = {
       subprojectId: f.subprojectId || null,
