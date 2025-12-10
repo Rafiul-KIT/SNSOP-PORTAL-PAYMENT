@@ -44,7 +44,10 @@ export class Header {
       link: environment.portals.masterSettings,
       icon: 'fas fa-cog',
     },
-    { label: 'Survey CTO', icon: 'fas fa-poll' },
+    { label: 'Survey CTO', 
+      link: environment.portals.surveyCTO,
+      icon: 'fas fa-poll' 
+    },
   ];
 
   constructor(
