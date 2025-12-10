@@ -160,7 +160,7 @@ export class Header {
         ],
       },
       {
-        label: 'Apply Wage Request',
+        label: 'Wage Request',
         icon: 'fas fa-receipt',
         items: [
           {
@@ -201,6 +201,11 @@ export class Header {
         label: 'Payroll',
         icon: 'fas fa-donate',
         items: [
+              {
+            label: 'Payroll Generate',
+            icon: 'fas fa-donate',
+            routerLink: 'payroll/generate',
+          },
           {
             label: 'Payroll Download',
             icon: 'fas fa-donate',

@@ -23,372 +23,504 @@ import { TooltipModule } from 'primeng/tooltip';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { SelectModule } from 'primeng/select';
-
+import { TagModule } from 'primeng/tag';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { LookupItem, LookupItemPayroll, LookupService, ProjectNameDescription, ScreeningStatusEnum, StatusEnum, TypeOfMeetingEnum } from '../../../services/lookup.service';
+import {
+  LookupItem,
+  LookupItemPayroll,
+  LookupService,
+} from '../../../services/lookup.service';
 import { ApiService } from '../../../services/api.service';
-import { Loader } from "../../../components/loader/loader";
+import { Loader } from '../../../components/loader/loader';
 
+interface PayrollGenerationRequest {
+  state: number;
 
-interface PayrollItemDto {
-  intWagePaymentReqid: number;
-  reqFromDate: string;
-  reqToDate: string;
-  exchangerateattime: number;
-  wageRateUSD: number;
-  reqNo: string;
-  intWagesReqBenTransid: number;
-  intBenid: number;
-  enrollmentNo: string;
-  intWorkid: number;
-  workCode: string;
-  totAttendance: number;
-  wageRateUSDTotal: number;
-  dateofCreation: string;
-  status: string;
-  paymentCycle: string;
-  wageRateSSPTotal: number;
+  county: number;
+
+  payam: number;
+
+  boma: number;
+
   supportType: string;
-  houseHoldDetail: {
-    houseHoldNumber: string;
-    firstName: string;
-    middleName: string;
-    lastName: string;
-    nickName: string;
-    age: number;
-    gender: number;
-    phoneNumber: string;
-    biometric: {
-      photo: string;
-      leftSmall: string;
-      leftRing: string;
-      leftMiddle: string;
-      leftIndex: string;
-      leftThumb: string;
-      rightSmall: string;
-      rightRing: string;
-      rightMiddle: string;
-      rightIndex: string;
-      rightThumb: string;
-    };
-  };
-  alternates: {
-    id: number;
-    altIndex: number;
-    firstName: string;
-    middleName: string;
-    lastName: string;
-    nickName: string;
-    age: number;
-    gender: number;
-    phoneNumber: string;
-    nationalId: string;
-    biometric: {
-      photo: string;
-      leftSmall: string;
-      leftRing: string;
-      leftMiddle: string;
-      leftIndex: string;
-      leftThumb: string;
-      rightSmall: string;
-      rightRing: string;
-      rightMiddle: string;
-      rightIndex: string;
-      rightThumb: string;
-    };
-  }[];
+
+  paymentCycles: number[];
+
+  requestId: string;
+
+  id: number;
+
+  status: 'FAILED' | 'SUCCESS' | 'PENDING' | 'PROCESSING';
+
+  downloadPath: string;
+}
+
+interface ApiResponse {
+  data: PayrollGenerationRequest[];
+
+  operationResult: boolean;
+
+  errorMsg?: string;
 }
 
 @Component({
   selector: 'app-payroll-download',
+
   standalone: true,
+
   imports: [
     CommonModule,
+
     FormsModule,
+
     ReactiveFormsModule,
+
     TableModule,
+
     ButtonModule,
+
     ToastModule,
+
     ConfirmDialogModule,
+
     PaginatorModule,
+
     BreadcrumbModule,
+
     FloatLabelModule,
+
     InputTextModule,
+
     SelectModule,
+
     RouterModule,
+
     TooltipModule,
-    Loader
+
+    TagModule,
+
+    Loader,
   ],
+
   providers: [MessageService, ConfirmationService],
+
   changeDetection: ChangeDetectionStrategy.OnPush,
+
   templateUrl: './payroll-download.html',
-  styleUrl: './payroll-download.scss'
+
+  styleUrl: './payroll-download.scss',
 })
 export class PayrollDownload implements OnInit {
   isLoading = true;
-  lookupsLoaded = false;
+
   searchForm!: FormGroup;
 
   // geo lookup lists
+
   states: LookupItem[] = [];
+
   counties: LookupItem[] = [];
+
   payams: LookupItem[] = [];
+
   bomas: LookupItem[] = [];
 
-  payrollData: PayrollItemDto[] = [];
-  private fullPayrollData: PayrollItemDto[] = [];
+  requestsData: PayrollGenerationRequest[] = [];
+
+  private fullRequestsData: PayrollGenerationRequest[] = [];
+
   totalRecords = 0;
   isSearchDisabledForCombined: boolean = false; // New property for simple button control
 
   breadcrumbItems: any[] = [];
+
   breadcrumbHome: any;
 
-  currentPage = 0; // 0-based
+  currentPage = 0;
+
   pageSize = 10;
+
   supportTypeOptions: LookupItem[] = [];
+
   paymentCycleOptions: LookupItemPayroll[] = [];
+
+  statusOptions = [
+    { id: 'SUCCESS', name: 'Success' },
+
+    { id: 'FAILED', name: 'Failed' },
+
+    { id: 'PENDING', name: 'Pending' },
+
+    { id: 'PROCESSING', name: 'Processing' },
+  ];
+
+  // Lookup maps for display names
+
+  stateMap: Map<number, string> = new Map();
+
+  countyMap: Map<number, string> = new Map();
+
+  payamMap: Map<number, string> = new Map();
+
+  bomaMap: Map<number, string> = new Map();
+
+  paymentCycleMap: Map<number, string> = new Map();
 
   constructor(
     private fb: FormBuilder,
+
     private messageService: MessageService,
+
     private confirmationService: ConfirmationService,
+
     private router: Router,
+
     private route: ActivatedRoute,
+
     private api: ApiService,
+
     private lookup: LookupService,
+
     private cdr: ChangeDetectorRef
-  ) { }
+  ) {}
 
   private async loadInitialLookups() {
     await Promise.all([
       this.lookup.getOrFetchStateList(),
+      this.lookup.fetchAllCountyList(),
+      this.lookup.fetchAllPayamList(),
+      this.lookup.fetchAllBomaList(),
     ]);
 
     this.states = this.lookup.getStateList();
+    const allCounties = this.lookup.getAllCountyList();
+    const allPayams = this.lookup.getAllPayamList();
+    const allBomas = this.lookup.getAllBomaList();
+
     this.supportTypeOptions = this.lookup.getSupportTypeList();
     this.paymentCycleOptions = this.lookup.getPaymentCycleList();
+
+    // Build lookup maps
+    this.states.forEach((s) => this.stateMap.set(Number(s.id), s.name));
+    allCounties.forEach((c) => this.countyMap.set(Number(c.id), c.name));
+    allPayams.forEach((p) => this.payamMap.set(Number(p.id), p.name));
+    allBomas.forEach((b) => this.bomaMap.set(Number(b.id), b.name));
+
+    this.paymentCycleOptions.forEach((p) =>
+      this.paymentCycleMap.set(Number(p.id), p.name)
+    );
+
     this.cdr.markForCheck();
   }
 
   async ngOnInit() {
     this.isLoading = true;
+
     this.initBreadcrumb();
+
     await this.loadInitialLookups();
+
     this.initForm();
+
     this.isLoading = false;
-    // this.fetchPage(); //<- removed api call
+
+    await this.fetchRequests();
   }
 
   initForm() {
     this.searchForm = this.fb.group({
-      payrollType: ['single'],
-      state: [null, [Validators.required]],
-      county: [{ value: null, disabled: true }, [Validators.required]],
-      payam: [{ value: null, disabled: true }, [Validators.required]],
-      boma: [{ value: null, disabled: true }, [Validators.required]],
-      supportType: ['', [Validators.required]],
-      paymentCycle: ['', [Validators.required]],
-      paymentCycles: this.fb.array(this.paymentCycleOptions.map(c => this.fb.group({
-        id: c.id,
-        name: c.name,
-        selected: false
-      })))
-    });
+      state: [null],
 
-    this.searchForm.get('payrollType')?.valueChanges.subscribe(value => {
-      const paymentCycleControl = this.searchForm.get('paymentCycle');
-      if (value === 'single') {
-        paymentCycleControl?.setValidators([Validators.required]);
-        paymentCycleControl?.enable();
-        this.searchForm.get('paymentCycles')?.disable();
-        this.paymentCycles.controls.forEach(control => control.get('selected')?.setValue(false, { emitEvent: false }));
-        this.isSearchDisabledForCombined = false;
-        if (this.searchForm.hasError('combinedNotAvailable')) {
-          this.searchForm.setErrors(null); // Explicitly clear custom form error
-        }
-      } else { // combined
-        paymentCycleControl?.clearValidators();
-        paymentCycleControl?.disable();
-        paymentCycleControl?.reset('');
-        this.searchForm.get('paymentCycles')?.enable();
-        this.isSearchDisabledForCombined = true; // Disable search for combined
-        this.searchForm.setErrors({ 'combinedNotAvailable': true }); // Set a custom error to ensure form is invalid
-      }
-      paymentCycleControl?.updateValueAndValidity(); // Recalculate paymentCycle validity
-      this.searchForm.updateValueAndValidity(); // Recalculate form validity
-      this.cdr.markForCheck();
-    });
+      county: [{ value: null, disabled: true }],
 
-    this.searchForm.get('paymentCycles')?.disable();
+      payam: [{ value: null, disabled: true }],
+
+      boma: [{ value: null, disabled: true }],
+
+      supportType: [''],
+
+      status: [''],
+    });
   }
 
   initBreadcrumb() {
     this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
-    this.breadcrumbItems = [{ label: 'Payroll Download' }];
+
+    this.breadcrumbItems = [{ label: 'Payroll Generation Requests' }];
   }
 
-
-
   // ---------- dependent dropdowns ----------
+
   async onStateChange(state: LookupItem | null) {
     this.searchForm.get('county')?.reset({ value: null, disabled: true });
+
     this.searchForm.get('payam')?.reset({ value: null, disabled: true });
+
     this.searchForm.get('boma')?.reset({ value: null, disabled: true });
+
     this.counties = [];
+
     this.payams = [];
+
     this.bomas = [];
 
     if (state?.id) {
       this.counties = await this.lookup.getCountyListByStateId(state.id);
+
+      this.counties.forEach((c) => this.countyMap.set(Number(c.id), c.name));
+
       this.searchForm.get('county')?.enable();
     }
+
     this.cdr.markForCheck();
   }
 
   async onCountyChange(county: LookupItem | null) {
     this.searchForm.get('payam')?.reset({ value: null, disabled: true });
+
     this.searchForm.get('boma')?.reset({ value: null, disabled: true });
+
     this.payams = [];
+
     this.bomas = [];
 
     if (county?.id) {
       this.payams = await this.lookup.getPayamListByCountyId(county.id);
+
+      this.payams.forEach((p) => this.payamMap.set(Number(p.id), p.name));
+
       this.searchForm.get('payam')?.enable();
     }
+
     this.cdr.markForCheck();
   }
 
   async onPayamChange(payam: LookupItem | null) {
     this.searchForm.get('boma')?.reset({ value: null, disabled: true });
+
     this.bomas = [];
 
     if (payam?.id) {
       this.bomas = await this.lookup.getBomaListByPayamId(payam.id);
+
+      this.bomas.forEach((b) => this.bomaMap.set(Number(b.id), b.name));
+
       this.searchForm.get('boma')?.enable();
     }
+
     this.cdr.markForCheck();
   }
 
-
-
-  async fetchPage() {
+  async fetchRequests() {
     this.isLoading = true;
+
     this.cdr.markForCheck();
 
-    const formValues = this.searchForm.value;
-    const payload = {
-      state: formValues.state?.id ?? 0,
-      county: formValues.county?.id ?? 0,
-      payam: formValues.payam?.id ?? 0,
-      boma: formValues.boma?.id ?? 0,
-      supportType: formValues.supportType,
-      paymentCycle: formValues.paymentCycle
-    };
-
     try {
-      const response = await this.api.POST('api/payroll/getPayroll', payload);
-      if (response.data.operationResult) {
-        this.fullPayrollData = response.data.data.payrollData;
-        this.totalRecords = response.data.totalCount;
-        this.updateDisplayedData();
+      const response = await this.api.GET(
+        'api/payroll/getPayrollGenerationRequests'
+      );
+
+      if (Array.isArray(response.data)) {
+        this.fullRequestsData = response.data;
+
+        this.totalRecords = response.data.length;
+
+        this.applyFilters();
       } else {
         this.messageService.add({
           severity: 'error',
+
           summary: 'Error',
-          detail: response.data.errorMsg,
+
+          detail: 'Invalid response format.',
         });
-        this.fullPayrollData = [];
-        this.payrollData = [];
+
+        this.fullRequestsData = [];
+
+        this.requestsData = [];
+
         this.totalRecords = 0;
       }
-    } catch (error) {
+    } catch (error: any) {
       this.messageService.add({
         severity: 'error',
+
         summary: 'Error',
-        detail: 'An error occurred while fetching payroll data.',
+
+        detail:
+          error?.message || 'An error occurred while fetching requests data.',
       });
-      this.fullPayrollData = [];
-      this.payrollData = [];
+
+      this.fullRequestsData = [];
+
+      this.requestsData = [];
+
       this.totalRecords = 0;
     } finally {
       this.isLoading = false;
+
       this.cdr.markForCheck();
     }
   }
 
-  updateDisplayedData() {
-    const startIndex = this.currentPage * this.pageSize;
-    const endIndex = startIndex + this.pageSize;
-    this.payrollData = this.fullPayrollData.slice(startIndex, endIndex);
-    this.cdr.markForCheck();
-  }
+  applyFilters() {
+    const formValues = this.searchForm.value;
 
+    let filtered = [...this.fullRequestsData];
 
+    if (formValues.state?.id) {
+      filtered = filtered.filter(
+        (r) => r.state === Number(formValues.state.id)
+      );
+    }
 
-  onPageChange(event: any) {
-    this.currentPage = event.page;
-    this.pageSize = event.rows;
+    if (formValues.county?.id) {
+      filtered = filtered.filter(
+        (r) => r.county === Number(formValues.county.id)
+      );
+    }
+
+    if (formValues.payam?.id) {
+      filtered = filtered.filter(
+        (r) => r.payam === Number(formValues.payam.id)
+      );
+    }
+
+    if (formValues.boma?.id) {
+      filtered = filtered.filter((r) => r.boma === Number(formValues.boma.id));
+    }
+
+    if (formValues.supportType) {
+      filtered = filtered.filter(
+        (r) => r.supportType === formValues.supportType
+      );
+    }
+
+    if (formValues.status) {
+      filtered = filtered.filter((r) => r.status === formValues.status);
+    }
+
+    this.totalRecords = filtered.length;
+
+    this.currentPage = 0;
+
+    this.fullRequestsData = filtered;
+
     this.updateDisplayedData();
   }
 
+  updateDisplayedData() {
+    const startIndex = this.currentPage * this.pageSize;
 
-  searchPayroll() {
-    if (this.searchForm.get('payrollType')?.value === 'combined') {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Not Available',
-        detail: 'Combined payroll search is not yet available.',
-      });
-      return;
-    }
+    const endIndex = startIndex + this.pageSize;
 
-    if (this.searchForm.invalid) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Invalid Form',
-        detail: 'Please fill in all required fields.',
-      });
-      return;
-    }
+    this.requestsData = this.fullRequestsData.slice(startIndex, endIndex);
 
-    this.currentPage = 0;
-    this.fetchPage();
+    this.cdr.markForCheck();
+  }
+
+  onPageChange(event: any) {
+    this.currentPage = event.page;
+
+    this.pageSize = event.rows;
+
+    this.updateDisplayedData();
+  }
+
+  searchRequests() {
+    this.applyFilters();
   }
 
   resetForm() {
     this.searchForm.reset({
-      payrollType: 'single',
       state: null,
+
       county: { value: null, disabled: true },
+
       payam: { value: null, disabled: true },
+
       boma: { value: null, disabled: true },
+
       supportType: '',
-      paymentCycle: '',
+
+      status: '',
     });
 
-    this.paymentCycles.controls.forEach(control => control.get('selected')?.setValue(false));
-    this.searchForm.get('paymentCycles')?.disable();
-
-
     this.counties = [];
+
     this.payams = [];
+
     this.bomas = [];
+
     this.currentPage = 0;
-    this.fetchPage();
+
+    this.fetchRequests();
+
     this.cdr.markForCheck();
   }
 
-  get paymentCycles() {
-    return this.searchForm.get('paymentCycles') as FormArray;
+  getStateName(stateId: number): string {
+    return this.stateMap.get(stateId) || stateId.toString();
+  }
+
+  getCountyName(countyId: number): string {
+    return this.countyMap.get(countyId) || countyId.toString();
+  }
+
+  getPayamName(payamId: number): string {
+    return this.payamMap.get(payamId) || payamId.toString();
+  }
+
+  getBomaName(bomaId: number): string {
+    return this.bomaMap.get(bomaId) || bomaId.toString();
+  }
+
+  getPaymentCycleNames(cycles: number[]): string {
+    return cycles
+
+      .map((c) => this.paymentCycleMap.get(c) || c.toString())
+
+      .join(', ');
+  }
+
+  getStatusSeverity(status: string): 'success' | 'danger' | 'warning' | 'info' {
+    switch (status) {
+      case 'SUCCESS':
+        return 'success';
+
+      case 'FAILED':
+        return 'danger';
+
+      case 'PENDING':
+        return 'warning';
+
+      case 'PROCESSING':
+        return 'info';
+
+      default:
+        return 'info';
+    }
   }
 
 
-  onDownloadPDFClick() {
-    throw new Error('Method not implemented.');
-  }
-  onDownloadClick() {
-    throw new Error('Method not implemented.');
+
+  onDownloadClick(request: PayrollGenerationRequest) {
+    if (request.downloadPath && request.status === 'SUCCESS') {
+      window.open(request.downloadPath, '_blank');
+    } else {
+      this.messageService.add({
+        severity: 'warn',
+
+        summary: 'Warning',
+
+        detail: 'Download path not available or request not completed.',
+      });
+    }
   }
 
+  onRefreshClick() {
+    this.fetchRequests();
+  }
 }

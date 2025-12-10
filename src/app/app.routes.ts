@@ -29,6 +29,7 @@ import { Profile } from './pages/profile/profile';
 import { routeGuard } from './route.guard';
 import { Unauthorized } from './components/unauthorized/unauthorized';
 import { PayrollMobileMoney } from './pages/payroll/payroll-mobile-money/payroll-mobile-money';
+import { GeneratePayroll } from './pages/payroll/generate-payroll/generate-payroll';
 
 
 
@@ -201,6 +202,11 @@ export const routes: Routes = [
     path: 'payroll',
     canActivate: [routeGuard],
     children: [
+          {
+        path: 'generate',
+       component: GeneratePayroll,
+       canActivate: [routeGuard],
+      },
        {
         path: 'download',
        component: PayrollDownload,

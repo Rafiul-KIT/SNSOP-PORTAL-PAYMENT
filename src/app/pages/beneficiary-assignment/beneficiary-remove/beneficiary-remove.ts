@@ -137,7 +137,7 @@ export class BeneficiaryRemove implements OnInit {
   initializeForm(): void {
     this.projectForm = this.fb.group({
       workStartAt: ['', Validators.required],
-      inchargeName: [''],
+      inchargeName: ['', [Validators.pattern(/^[a-zA-Z\s]*$/)]],
       comments: [''],
     });
   }

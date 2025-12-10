@@ -78,6 +78,7 @@ export class WorkReview implements OnInit, OnDestroy {
   roleId!: number | null;
   approvalForm!: FormGroup;
   private attachedFile: File | null = null;
+  fileSizeError: string | null = null; // New property to track file size errors
 
   breadcrumbItems: MenuItem[] = [
     { label: 'Dashboard', routerLink: '/dashboard' },
@@ -105,8 +106,30 @@ export class WorkReview implements OnInit, OnDestroy {
   }
   onApprovalFileSelect(evt: Event) {
     const input = evt.target as HTMLInputElement;
-    this.attachedFile =
-      input?.files && input.files.length ? input.files[0] : null;
+    const file = input?.files && input.files.length ? input.files[0] : null;
+
+    const MAX_FILE_SIZE_MB = 1;
+    const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
+    if (file) {
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        this.fileSizeError = `File size exceeds ${MAX_FILE_SIZE_MB}MB. Please select a smaller file.`;
+        Swal.fire({
+          icon: 'error',
+          title: 'File Too Large',
+          text: this.fileSizeError,
+        });
+        input.value = ''; // Clear the input
+        this.attachedFile = null;
+      } else {
+        this.fileSizeError = null;
+        this.attachedFile = file;
+      }
+    } else {
+      this.fileSizeError = null;
+      this.attachedFile = null;
+    }
+    this.cdr.detectChanges();
   }
 
 async submitApproval(): Promise<void> {
@@ -154,6 +177,16 @@ async submitApproval(): Promise<void> {
     return;
   }
 
+  if (this.fileSizeError) { // Prevent submission if there's a file size error
+    Swal.fire({
+      icon: 'error',
+      title: 'File Error',
+      text: this.fileSizeError,
+    });
+    return;
+  }
+
+
   const endpointMap: Record<number, string> = {
     9: 'api/subproject/review/first',
     3: 'api/subproject/review/second',
@@ -198,6 +231,7 @@ async submitApproval(): Promise<void> {
       title: 'Success',
       text: `Status ${statusMessage} Submitted successfully!`,
     });
+    this.router.navigate(['/sub-project/approval']);
   } catch (err) {
     console.error(err);
     Swal.fire({
@@ -205,6 +239,7 @@ async submitApproval(): Promise<void> {
       title: 'Error',
       text: 'Failed to submit approval.',
     });
+    
   } finally {
     this.isLoading.set(false);
   }

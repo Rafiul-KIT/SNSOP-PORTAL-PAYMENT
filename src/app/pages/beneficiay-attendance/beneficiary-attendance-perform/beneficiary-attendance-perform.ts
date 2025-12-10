@@ -36,6 +36,7 @@ interface SubProject {
   typeOfMeeting: string;
   meetingDate: string;
   screeningStatus: string;
+  tstApprovedAt: string;
   status: string;
 }
 

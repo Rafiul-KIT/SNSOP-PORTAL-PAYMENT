@@ -104,7 +104,7 @@ export class BeneficiaryAssignment implements OnInit {
     const input = event.target as HTMLInputElement;
     const file = input.files ? input.files[0] : null;
     const MAX_FILE_SIZE_MB = 1;
-    const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024; // 3 MB
+    const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024; // 1 MB
 
     if (file) {
       if (file.size > MAX_FILE_SIZE_BYTES) {
@@ -159,7 +159,7 @@ export class BeneficiaryAssignment implements OnInit {
   initializeForm(): void {
     this.projectForm = this.fb.group({
       workStartAt: ['', Validators.required],
-      inchargeName: [''],
+      inchargeName: ['', [Validators.pattern(/^[a-zA-Z\s]*$/)]],
       comments: [''],
     });
   }
