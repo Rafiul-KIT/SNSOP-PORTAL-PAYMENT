@@ -42,9 +42,9 @@ interface PayrollGenerationRequest {
   requestId: string;
   id: number;
   status: 'FAILED' | 'SUCCESS' | 'PENDING' | 'PROCESSING';
-  downloadPath: string;
+  reportFileName?: string;
+  binFileName?: string;
 }
-
 interface PagedPayrollResponse {
   content: PayrollGenerationRequest[];
   totalElements: number;
@@ -349,13 +349,66 @@ export class PayrollDownload implements OnInit {
   }
 
   onDownloadClick(request: PayrollGenerationRequest) {
-    if (request.downloadPath && request.status === 'SUCCESS') {
-      window.open(request.downloadPath, '_blank');
+    if (request && request.reportFileName && request.status === 'SUCCESS') {
+      this.downloadFile(request.reportFileName);
     } else {
       this.messageService.add({
         severity: 'warn',
         summary: 'Warning',
-        detail: 'Download path not available or request not completed.',
+        detail: 'Download file name not available or request not completed.',
+      });
+    }
+  }
+
+  onDownloadBinClick(request: PayrollGenerationRequest) {
+    if (request && request.binFileName && request.status === 'SUCCESS') {
+      this.downloadFile(request.binFileName);
+    } else {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Warning',
+        detail: 'BIN file name not available or request not completed.',
+      });
+    }
+  }
+
+  private async downloadFile(fileName: string | undefined | null) {
+    if (!fileName) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'File name not provided.',
+      });
+      return;
+    }
+    try {
+      const axiosResponse = await this.api.GET(
+        `api/payroll/download/${fileName}`
+      );
+
+      if (axiosResponse.data) {
+        const url = window.URL.createObjectURL(axiosResponse.data);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'File downloaded successfully.',
+        });
+      } else {
+        throw new Error('No response from server');
+      }
+    } catch (error: any) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail:
+          error?.message || `An error occurred while downloading the file.`,
       });
     }
   }

@@ -79,7 +79,8 @@
         <ng-template pTemplate="caption">
             <div class="text-end">
                 <p class="fw-bold mb-2">
-                    Showing <kbd>{{ (currentPage * pageSize) + 1 }} - {{ Math.min((currentPage * pageSize) + requestsData.length, totalRecords) }}</kbd> of
+                    Showing <kbd>{{ (currentPage * pageSize) + 1 }} - {{ Math.min((currentPage * pageSize) +
+                        requestsData.length, totalRecords) }}</kbd> of
                     <kbd>{{ totalRecords }}</kbd> payroll requests
                 </p>
             </div>
@@ -109,25 +110,35 @@
                 <td>
                     <p-tag [severity]="getStatusSeverity(request.status)" [value]="request.status"></p-tag>
                 </td>
-                <td>
-<p-button
-  icon="pi pi-download"
-  (onClick)="onDownloadClick(request)"
-  [disabled]="request.status !== 'SUCCESS'"
-  pTooltip="Download Payroll"
-  tooltipPosition="top"
-  [style]="{ width: '40px', height: '40px', padding: '0' }">
-</p-button>
+                <td class="d-flex gap-1">
+                    <p-button  (onClick)="onDownloadClick(request)" [disabled]="request.status !== 'SUCCESS'"
+                        pTooltip="Download Pdf" tooltipPosition="top"
+                        [style]="{ width: 'auto', height: '30px', padding: '0 8px',cursor: 'pointer' }">
+                        <ng-template pTemplate="content">
+                            <i class="pi pi-download"></i>
+                            <span style="font-size: 10px; margin-left: 2px; ">.bin</span>
+                        </ng-template>
+                    </p-button>
+                    <p-button (onClick)="onDownloadBinClick(request)" [disabled]="request.status !== 'SUCCESS' "
+                        pTooltip="Download BIN" tooltipPosition="top" severity="success"
+                        [style]="{ width: 'auto', height: '30px', padding: '0 8px',cursor: 'pointer' }">
+                        <ng-template pTemplate="content">
+                            <i class="pi pi-download"></i>
+                            <span style="font-size: 10px; margin-left: 2px; ">.bin</span>
+                        </ng-template>
+                    </p-button>
+
                 </td>
             </tr>
         </ng-template>
-         <ng-template pTemplate="emptymessage">
+        <ng-template pTemplate="emptymessage">
             <tr>
                 <td colspan="9" class="text-center">No payroll requests found.</td>
             </tr>
         </ng-template>
     </p-table>
-     <p-paginator (onPageChange)="onPageChange($event)" [rows]="pageSize" [totalRecords]="totalRecords" [first]="currentPage * pageSize" [rowsPerPageOptions]="[10, 20, 50]"></p-paginator>
+    <p-paginator (onPageChange)="onPageChange($event)" [rows]="pageSize" [totalRecords]="totalRecords"
+        [first]="currentPage * pageSize" [rowsPerPageOptions]="[10, 20, 50]"></p-paginator>
 </div>
 }
 
