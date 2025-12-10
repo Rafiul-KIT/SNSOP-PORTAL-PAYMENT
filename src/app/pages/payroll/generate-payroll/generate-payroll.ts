@@ -231,7 +231,7 @@ export class GeneratePayroll implements OnInit {
     this.cdr.markForCheck();
 
     const formValues = this.searchForm.value;
-    const requestId = `PAYROLL_GEN_${Date.now()}`;
+   
 
     const payload = {
       state: formValues.state?.id ?? 0,
@@ -241,7 +241,7 @@ export class GeneratePayroll implements OnInit {
       supportType: formValues.supportType || 'LIPW',
       paymentCycles: selectedCycles,
       isCombined: formValues.payrollType === 'combined',
-      requestId: requestId,
+    
     };
 
     try {
