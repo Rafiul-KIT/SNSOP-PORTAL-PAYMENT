@@ -286,6 +286,7 @@ export class WageRequestDrafts implements OnInit {
     this.pageSize = event.rows;
     this.fetchPage(this.currentPage, this.pageSize);
   }
+  
 
   searchWageRequests() {
     if (this.searchForm.invalid) {
