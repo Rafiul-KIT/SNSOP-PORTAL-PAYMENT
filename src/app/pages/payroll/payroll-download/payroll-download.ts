@@ -13,7 +13,6 @@ import {
 } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
-import { ToastModule } from 'primeng/toast';
 import { PaginatorModule } from 'primeng/paginator';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { InputTextModule } from 'primeng/inputtext';
@@ -22,8 +21,9 @@ import { RouterModule } from '@angular/router';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { SelectModule } from 'primeng/select';
 import { TagModule } from 'primeng/tag';
-import { MessageService, ConfirmationService } from 'primeng/api';
+import { ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import Swal from 'sweetalert2';
 import {
   LookupItem,
   LookupItemPayroll,
@@ -65,7 +65,6 @@ interface ApiResponse {
     ReactiveFormsModule,
     TableModule,
     ButtonModule,
-    ToastModule,
     ConfirmDialogModule,
     PaginatorModule,
     BreadcrumbModule,
@@ -77,7 +76,7 @@ interface ApiResponse {
     TagModule,
     Loader,
   ],
-  providers: [MessageService, ConfirmationService],
+  providers: [ConfirmationService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './payroll-download.html',
   styleUrl: './payroll-download.scss',
@@ -119,9 +118,7 @@ export class PayrollDownload implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private messageService: MessageService,
     private confirmationService: ConfirmationService,
-  
     private api: ApiService,
     private lookup: LookupService,
     private cdr: ChangeDetectorRef
@@ -258,19 +255,19 @@ export class PayrollDownload implements OnInit {
         this.requestsData = response.data.content;
         this.totalRecords = response.data.totalElements;
       } else {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Invalid response format.',
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Invalid response format.',
         });
         this.requestsData = [];
         this.totalRecords = 0;
       }
     } catch (error: any) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail:
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text:
           error?.message || 'An error occurred while fetching requests data.',
       });
       this.requestsData = [];
@@ -352,10 +349,10 @@ export class PayrollDownload implements OnInit {
     if (request && request.reportFileName && request.status === 'SUCCESS') {
       this.downloadFile(request.reportFileName);
     } else {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Warning',
-        detail: 'Download file name not available or request not completed.',
+      Swal.fire({
+        icon: 'warning',
+        title: 'Warning',
+        text: 'Download file name not available or request not completed.',
       });
     }
   }
@@ -364,52 +361,77 @@ export class PayrollDownload implements OnInit {
     if (request && request.binFileName && request.status === 'SUCCESS') {
       this.downloadFile(request.binFileName);
     } else {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Warning',
-        detail: 'BIN file name not available or request not completed.',
+      Swal.fire({
+        icon: 'warning',
+        title: 'Warning',
+        text: 'BIN file name not available or request not completed.',
       });
     }
   }
 
   private async downloadFile(fileName: string | undefined | null) {
     if (!fileName) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'File name not provided.',
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'File name not provided.',
       });
       return;
     }
+
     try {
-      const axiosResponse = await this.api.GET(
-        `api/payroll/download/${fileName}`
+      const response = await this.api.axiosInstance.get(
+        `api/payroll/download/${fileName}`,
+        { responseType: 'blob' }
       );
 
-      if (axiosResponse.data) {
-        const url = window.URL.createObjectURL(axiosResponse.data);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'File downloaded successfully.',
+      const blob = new Blob([response.data], {
+        type: response.headers['content-type'],
+      });
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+
+      window.URL.revokeObjectURL(url);
+      a.remove();
+
+      if (fileName.toLowerCase().endsWith('.pdf')) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'Payroll PDF downloaded successfully.',
+        });
+      } else if (fileName.toLowerCase().endsWith('.bin')) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'BIN file downloaded successfully.',
         });
       } else {
-        throw new Error('No response from server');
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: 'File downloaded successfully.',
+        });
       }
     } catch (error: any) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail:
-          error?.message || `An error occurred while downloading the file.`,
-      });
+      if (error.response && error.response.status === 404) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'File not found on server.',
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Download Failed',
+          text: error?.message || 'An error occurred while downloading the file.',
+        });
+      }
     }
   }
 
