@@ -76,8 +76,17 @@
 
 <div class="card">
     <p-table [value]="requestsData" [scrollable]="true" scrollHeight="60vh">
+        <ng-template pTemplate="caption">
+            <div class="text-end">
+                <p class="fw-bold mb-2">
+                    Showing <kbd>{{ (currentPage * pageSize) + 1 }} - {{ Math.min((currentPage * pageSize) + requestsData.length, totalRecords) }}</kbd> of
+                    <kbd>{{ totalRecords }}</kbd> payroll requests
+                </p>
+            </div>
+        </ng-template>
         <ng-template pTemplate="header">
             <tr>
+                <th>Serial No</th>
                 <th>Request ID</th>
                 <th>State</th>
                 <th>County</th>
@@ -88,8 +97,9 @@
                 <th>Actions</th>
             </tr>
         </ng-template>
-        <ng-template pTemplate="body" let-request>
+        <ng-template pTemplate="body" let-request let-i="rowIndex">
             <tr>
+                <td>{{ (currentPage * pageSize) + i + 1 }}</td>
                 <td>{{ request.requestId }}</td>
                 <td>{{ getStateName(request.state) }}</td>
                 <td>{{ getCountyName(request.county) }}</td>
@@ -108,18 +118,16 @@
   tooltipPosition="top"
   [style]="{ width: '40px', height: '40px', padding: '0' }">
 </p-button>
-
-
                 </td>
             </tr>
         </ng-template>
          <ng-template pTemplate="emptymessage">
             <tr>
-                <td colspan="8" class="text-center">No payroll requests found.</td>
+                <td colspan="9" class="text-center">No payroll requests found.</td>
             </tr>
         </ng-template>
     </p-table>
-     <p-paginator (onPageChange)="onPageChange($event)" [rows]="pageSize" [totalRecords]="totalRecords" [rowsPerPageOptions]="[10, 20, 50]"></p-paginator>
+     <p-paginator (onPageChange)="onPageChange($event)" [rows]="pageSize" [totalRecords]="totalRecords" [first]="currentPage * pageSize" [rowsPerPageOptions]="[10, 20, 50]"></p-paginator>
 </div>
 }
 
