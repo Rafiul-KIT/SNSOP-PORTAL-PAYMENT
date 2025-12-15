@@ -141,7 +141,7 @@
 
     <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
         <tr>
-             <td class="text-center">{{ rowIndex + 1 }}</td>
+             <td class="text-center">{{ (currentPage * pageSize) + rowIndex + 1 }}</td>
             <td class="text-center">{{ item.workCode }}</td>
             <td class="text-center">{{ item.projectName }}</td>
             <td class="text-center">{{ item.stateName }}</td>
