@@ -136,7 +136,7 @@
 
         <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
             <tr>
-                <td class="text-center">{{  (currentPage * pageSize) + rowIndex + 1 }}</td>
+                <td class="text-center">{{ rowIndex + 1 }}</td>
                 <td class="text-center">{{ item.requestNumber || 'N/A' }}</td>
                 <td class="text-center">{{ getSubProjectName(item.subprojectId) }}</td>
                 <td class="text-center">Cycle {{ item.paymentCycle }}</td>

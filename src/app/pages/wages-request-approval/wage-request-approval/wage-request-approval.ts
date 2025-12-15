@@ -472,7 +472,7 @@ export class WageRequestApproval implements OnInit {
   getSubProjectName(id: number): string {
     const found = this.subProjects.find((sp) => sp.id === id);
     return found
-      ? `${found.workCode}`
+      ? `${found.workCode} - ${found.projectName}`
       : id
       ? id.toString()
       : '';

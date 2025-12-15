@@ -7,8 +7,7 @@ export const environment = {
   authApi: 'https://gwapp.southsudansafetynet.info/mis_auth/',
   portals: {
     master: 'https://mis.southsudansafetynet.info/v2/',
-    masterSettings: 'https://mis.southsudansafetynet.info/v2/#/user-management/users',
-    surveyCTO: 'https://mis.southsudansafetynet.info/v2/#/survey-cto',
+    masterSettings: 'https://mis.southsudansafetynet.info/v2/#/home/portals',
     beneficiary: 'https://mis.southsudansafetynet.info/v2/beneficiary/',
     payment: 'https://mis.southsudansafetynet.info/v2/payment',
     grm: 'https://mis.southsudansafetynet.info/v2/grm',

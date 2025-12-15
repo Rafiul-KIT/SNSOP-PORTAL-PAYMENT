@@ -13,13 +13,14 @@ import {
   FormArray,
 } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
+import { ToastModule } from 'primeng/toast';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { InputTextModule } from 'primeng/inputtext';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { SelectModule } from 'primeng/select';
 import { CardModule } from 'primeng/card';
-import { ConfirmationService } from 'primeng/api';
+import { MessageService, ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import {
   LookupItem,
@@ -30,7 +31,6 @@ import { ApiService } from '../../../services/api.service';
 import { Loader } from '../../../components/loader/loader';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { CheckboxModule } from 'primeng/checkbox';
-import Swal from 'sweetalert2';
 
 interface PayrollGenerationResponse {
   id: number;
@@ -52,6 +52,7 @@ interface PayrollGenerationResponse {
     FormsModule,
     ReactiveFormsModule,
     ButtonModule,
+    ToastModule,
     ConfirmDialogModule,
     BreadcrumbModule,
     FloatLabelModule,
@@ -63,7 +64,7 @@ interface PayrollGenerationResponse {
     RadioButtonModule,
     CheckboxModule,
   ],
-  providers: [ConfirmationService],
+  providers: [MessageService, ConfirmationService],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './generate-payroll.html',
   styleUrl: './generate-payroll.scss',
@@ -91,6 +92,7 @@ export class GeneratePayroll implements OnInit {
 
   constructor(
     private fb: FormBuilder,
+    private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private router: Router,
     private route: ActivatedRoute,
@@ -206,10 +208,10 @@ export class GeneratePayroll implements OnInit {
     }
 
     if (selectedCycles.length === 0) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Warning',
-        text: 'Please select at least one payment cycle.',
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Warning',
+        detail: 'Please select at least one payment cycle.',
       });
       return;
     }
@@ -231,7 +233,7 @@ export class GeneratePayroll implements OnInit {
     this.cdr.markForCheck();
 
     const formValues = this.searchForm.value;
-   
+    const requestId = `PAYROLL_GEN_${Date.now()}`;
 
     const payload = {
       state: formValues.state?.id ?? 0,
@@ -241,7 +243,7 @@ export class GeneratePayroll implements OnInit {
       supportType: formValues.supportType || 'LIPW',
       paymentCycles: selectedCycles,
       isCombined: formValues.payrollType === 'combined',
-    
+      requestId: requestId,
     };
 
     try {
@@ -253,17 +255,19 @@ export class GeneratePayroll implements OnInit {
         response.data.status === 'SUCCESS' ||
         response.data.status === 'PENDING'
       ) {
-        Swal.fire({
-          icon: 'success',
-          title: 'Success',
-          text: `Payroll generation initiated successfully. Request ID: ${response.data.requestId}`,
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: `Payroll generation initiated successfully. Request ID: ${response.data.requestId}`,
+          life: 5000,
         });
         this.generationStatus = `Payroll generation successful. Status: ${response.data.status}`;
       } else if (response.data.status === 'FAILED') {
-        Swal.fire({
-          icon: 'error',
-          title: 'Generation Failed',
-          text: response.data.errorReason || 'Payroll generation failed.',
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Generation Failed',
+          detail: response.data.errorReason || 'Payroll generation failed.',
+          life: 5000,
         });
         this.generationStatus = `Generation failed: ${
           response.data.errorReason || 'Unknown error'
@@ -272,10 +276,11 @@ export class GeneratePayroll implements OnInit {
         this.generationStatus = `Status: ${response.data.status}`;
       }
     } catch (error: any) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: error?.message || 'An error occurred while generating payroll.',
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: error?.message || 'An error occurred while generating payroll.',
+        life: 5000,
       });
       this.generationStatus = 'Error occurred during generation.';
     } finally {
