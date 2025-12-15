@@ -21,6 +21,7 @@ import { Message } from 'primeng/message';
 import { ButtonModule } from 'primeng/button';
 import { Loader } from '../../../components/loader/loader';
 import { ApiService } from '../../../services/api.service';
+import { LookupService, LookupItem } from '../../../services/lookup.service';
 import Swal from 'sweetalert2';
 
 interface WageRequest {
@@ -49,7 +50,7 @@ interface Subproject {
 interface Beneficiary {
   householdNumber: string;
   beneficiaryName: string;
-  gender: string;
+  gender: number | string;
   age: number;
   phoneNo: string;
   totalDays: number;
@@ -226,7 +227,8 @@ export class WageRequestDetails implements OnInit {
     private router: Router,
     private apiService: ApiService,
     private cdr: ChangeDetectorRef,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private lookupService: LookupService // Inject LookupService
   ) {}
 
   ngOnInit(): void {
@@ -243,6 +245,19 @@ export class WageRequestDetails implements OnInit {
     } else {
       this.apiError = 'Invalid wage request ID';
     }
+  }
+
+  getGenderName(genderId: string | number): string {
+    const gender = this.lookupService.getGenderListbyId().find(g => g.id == genderId);
+    return gender ? gender.name : 'Unknown';
+  }
+
+  showSspColumns(): boolean {
+    if (this.roleId === null) {
+      return true; // Default to showing columns if roleId is not yet available
+    }
+    const rolesToHide = [2, 11, 14];
+    return !rolesToHide.includes(this.roleId);
   }
 
   onFileSelected(event: any): void {
@@ -515,8 +530,8 @@ async onSubmitReview(): Promise<void> {
     }
   }
 
-  onBeneficiaryPageChange(event: any): void {
-    this.beneficiaryCurrentPage = event.page;
+  onBeneficiaryLazyLoad(event: any): void {
+    this.beneficiaryCurrentPage = event.first / event.rows;
     this.beneficiaryPageSize = event.rows;
     this.loadBeneficiaries(
       this.beneficiaryCurrentPage,

@@ -177,48 +177,53 @@
                     </h5>
                     <p-table [value]="beneficiaries" [loading]="isBeneficiaryLoading" responsiveLayout="scroll"
                         [paginator]="true" [rows]="beneficiaryPageSize" [totalRecords]="totalBeneficiaries"
-                        (onPageChange)="onBeneficiaryPageChange($event)" [lazy]="true"
+                        (onLazyLoad)="onBeneficiaryLazyLoad($event)" [lazy]="true"
                         [rowsPerPageOptions]="[10, 25, 50]" class="p-datatable-sm">
-                        <ng-template pTemplate="header">
-                            <tr>
-                                <th>House Hold Number</th>
-                                <th>Name</th>
-                                <th>Gender</th>
-                                <th>Age</th>
-                                <th>Phone</th>
-                                <th>Total Days</th>
-                                <th>Payment Status</th>
-                                <th>Payment Date</th>
-                                <th>Wage (USD)</th>
-                                <th>Exchange Rate</th>
-                                <th>Wage (SSP)</th>
-                                <th>Total (USD)</th>
-                                <th>Total (SSP)</th>
-                            </tr>
-                        </ng-template>
-                        <ng-template pTemplate="body" let-bene>
-                            <tr>
-                                <td>{{ bene.householdNumber }}</td>
-                                <td>{{ bene.beneficiaryName }}</td>
-                                <td>{{ bene.gender }}</td>
-                                <td>{{ bene.age }}</td>
-                                <td>{{ bene.phoneNo }}</td>
-                                <td>{{ bene.totalDays }}</td>
-                                <td>{{ bene.paymentStatus == 1 ? 'Paid' : 'Unpaid' }}</td>
-
-                                <td>{{ formatDate(bene.paymentDoneAt) }}</td>
-                                <td>{{ bene.wageRateUSD | number:'1.2-2' }}</td>
-                                <td>{{ bene.exchangeRate | number:'1.2-2' }}</td>
-                                <td>{{ bene.wageRateSSP | number:'1.2-2' }}</td>
-                                <td>{{ bene.wageUsdTotal | number:'1.2-2' }}</td>
-                                <td>{{ bene.wageSspTotal | number:'1.2-2' }}</td>
-                            </tr>
-                        </ng-template>
-                        <ng-template pTemplate="emptymessage">
-                            <tr>
-                                <td colspan="13" class="text-center">No beneficiaries found.</td>
-                            </tr>
-                        </ng-template>
+                                                <ng-template pTemplate="header">
+                                                    <tr>
+                                                        <th>House Hold Number</th>
+                                                        <th>Name</th>
+                                                        <th>Gender</th>
+                                                        <th>Age</th>
+                                                        <th>Phone</th>
+                                                        <th>Total Days</th>
+                                                        <th>Payment Status</th>
+                                                        <th>Wage (USD)</th>
+                                                        @if(showSspColumns()){
+                                                        <th>Exchange Rate</th>
+                                                        <th>Wage (SSP)</th>
+                                                        }
+                                                        <th>Total (USD)</th>
+                                                         @if(showSspColumns()){
+                                                        <th>Total (SSP)</th>
+                                                        }
+                                                    </tr>
+                                                </ng-template>
+                                                <ng-template pTemplate="body" let-bene>
+                                                    <tr>
+                                                        <td>{{ bene.householdNumber }}</td>
+                                                        <td>{{ bene.beneficiaryName }}</td>
+                                                        <td>{{ getGenderName(bene.gender) }}</td>
+                                                        <td>{{ bene.age }}</td>
+                                                        <td>{{ bene.phoneNo }}</td>
+                                                        <td>{{ bene.totalDays }}</td>
+                                                        <td>{{ bene.paymentStatus == 1 ? 'Paid' : 'Unpaid' }}</td>
+                                                        <td>{{ bene.wageRateUSD | number:'1.2-2' }}</td>
+                                                        @if(showSspColumns()){
+                                                        <td>{{ bene.exchangeRate | number:'1.2-2' }}</td>
+                                                        <td>{{ bene.wageRateSSP | number:'1.2-2' }}</td>
+                                                        }
+                                                        <td>{{ bene.wageUsdTotal | number:'1.2-2' }}</td>
+                                                        @if(showSspColumns()){
+                                                        <td>{{ bene.wageSspTotal | number:'1.2-2' }}</td>
+                                                        }
+                                                    </tr>
+                                                </ng-template>
+                                                <ng-template pTemplate="emptymessage">
+                                                    <tr>
+                                                        <td [attr.colspan]="showSspColumns() ? 12 : 9" class="text-center">No beneficiaries found.</td>
+                                                    </tr>
+                                                </ng-template>
                     </p-table>
                 </p-card>
                 }
