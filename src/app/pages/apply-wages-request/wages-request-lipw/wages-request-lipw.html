@@ -53,12 +53,12 @@
         <label>Sub-Project Code</label>
       </p-floatlabel>
     </div>
-  <div class="col-md-3">
+  <!-- <div class="col-md-3">
       <p-floatlabel variant="on" class="w-100">
         <p-select [options]="statuses" optionLabel="label" optionValue="value" formControlName="status"></p-select>
         <label>Status</label>
       </p-floatlabel>
-    </div>
+    </div> -->
 
 
 
@@ -106,9 +106,9 @@
       <th class="text-center">County</th>
       <th class="text-center">Payam</th>
       <th class="text-center">Boma</th>
-      <th class="text-center">Type of Meeting</th>
+      <!-- <th class="text-center">Type of Meeting</th>
       <th class="text-center">Meeting Date</th>
-    <th class="text-center">Screening Status</th>
+    <th class="text-center">Screening Status</th> -->
       <th class="text-center">Status</th>
       <th class="text-center" [style]="{ width: '185px' }">Action</th>
     </tr>
@@ -123,9 +123,9 @@
       <td class="text-center">{{ item.countyName }}</td>
       <td class="text-center">{{ item.payamName }}</td>
       <td class="text-center">{{ item.bomaName }}</td>
-      <td class="text-center">{{ getTypeOfMeetingLabel(item.typeOfMeeting) }}</td>
+      <!-- <td class="text-center">{{ getTypeOfMeetingLabel(item.typeOfMeeting) }}</td>
       <td class="text-center">{{ item.meetingDate | date: 'dd/MM/yyyy' }}</td>
-   <td class="text-center">{{ getScreeningStatusLabel(item.screeningStatus) }}</td>
+   <td class="text-center">{{ getScreeningStatusLabel(item.screeningStatus) }}</td> -->
       <td class="text-center">
         <span
           [class]="'badge ' + (item.status === 'Approved' ? 'bg-success' : item.status === 'Rejected' ? 'bg-danger' : 'bg-warning')">
