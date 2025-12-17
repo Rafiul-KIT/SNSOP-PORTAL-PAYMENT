@@ -89,10 +89,12 @@
             <tr>
                 <th>Serial No</th>
                 <th>Request ID</th>
+
                 <th>State</th>
                 <th>County</th>
                 <th>Payam</th>
                 <th>Boma</th>
+                <th>Support Type</th>
                 <th>Payment Cycles</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -102,16 +104,18 @@
             <tr>
                 <td>{{ (currentPage * pageSize) + i + 1 }}</td>
                 <td>{{ request.requestId }}</td>
+
                 <td>{{ getStateName(request.state) }}</td>
                 <td>{{ getCountyName(request.county) }}</td>
                 <td>{{ getPayamName(request.payam) }}</td>
                 <td>{{ getBomaName(request.boma) }}</td>
+                <td>{{ request.supportType }}</td>
                 <td>{{ getPaymentCycleNames(request.paymentCycles) }}</td>
                 <td>
                     <p-tag [severity]="getStatusSeverity(request.status)" [value]="request.status"></p-tag>
                 </td>
                 <td class="d-flex gap-1">
-                    <p-button  (onClick)="onDownloadClick(request)" [disabled]="request.status !== 'SUCCESS'"
+                    <p-button (onClick)="onDownloadClick(request)" [disabled]="request.status !== 'SUCCESS'"
                         pTooltip="Download Pdf" tooltipPosition="top"
                         [style]="{ width: 'auto', height: '30px', padding: '0 8px',cursor: 'pointer' }">
                         <ng-template pTemplate="content">
