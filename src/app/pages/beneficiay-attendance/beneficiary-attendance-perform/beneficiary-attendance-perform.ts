@@ -277,15 +277,23 @@ export class BeneficiaryAttendancePerform implements OnInit {
 
 
 
-  fetchBeneficiaries(page: number, size: number) {
+    fetchBeneficiaries(page: number, size: number) {
 
-    if (!this.subproject || !this.attendanceDate) {
 
-      return;
 
-    }
+      if (!this.subproject || !this.attendanceDate) {
 
-    this.loading = true;
+
+
+        return;
+
+
+
+      }
+
+
+
+      this.isLoading = true;
 
     // Format date to YYYY-MM-DD, avoiding timezone conversion issues from toISOString()
 
@@ -315,11 +323,11 @@ export class BeneficiaryAttendancePerform implements OnInit {
 
           this.selectedBeneficiaries = this.beneficiaries.filter(b => b.present);
 
-          this.totalRecords = data.totalElements || 0;
+                    this.totalRecords = data.totalElements || 0;
 
-          this.loading = false;
+                    this.isLoading = false;
 
-          this.cdr.markForCheck();
+                    this.cdr.markForCheck();
 
         } else {
 
@@ -335,13 +343,13 @@ export class BeneficiaryAttendancePerform implements OnInit {
 
         console.error('Error fetching beneficiaries:', err);
 
-        this.beneficiaries = [];
+                this.beneficiaries = [];
 
-        this.totalRecords = 0;
+                this.totalRecords = 0;
 
-        this.loading = false;
+                this.isLoading = false;
 
-        this.cdr.markForCheck();
+                this.cdr.markForCheck();
 
       });
 
@@ -349,15 +357,23 @@ export class BeneficiaryAttendancePerform implements OnInit {
 
 
 
-  fetchAvailableBeneficiaries(page: number, size: number) {
+    fetchAvailableBeneficiaries(page: number, size: number) {
 
-    if (!this.subproject) {
 
-      this.loading = false;
 
-      return;
+      if (!this.subproject) {
 
-    }
+
+
+        this.isLoading = false;
+
+
+
+        return;
+
+
+
+      }
 
     const subprojectId = this.subproject.id;
 
@@ -445,13 +461,13 @@ export class BeneficiaryAttendancePerform implements OnInit {
 
               })
 
-      .finally(() => {
+            .finally(() => {
 
-        this.loading = false;
+              this.isLoading = false;
 
-        this.cdr.markForCheck();
+              this.cdr.markForCheck();
 
-      });
+            });
 
   }
 
