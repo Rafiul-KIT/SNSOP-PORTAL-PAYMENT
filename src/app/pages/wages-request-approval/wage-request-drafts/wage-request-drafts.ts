@@ -170,7 +170,6 @@ export class WageRequestDrafts implements OnInit {
     ).map((status) => ({ id: Number(status.id), label: status.label }));
     this.paymentCycles = this.lookup.getPaymentCycleEnum();
     this.initBreadcrumb();
-     await this.loadInitialLookups();
     this.initForm();
     this.fetchPage(this.currentPage, this.pageSize);
   }
@@ -287,7 +286,6 @@ export class WageRequestDrafts implements OnInit {
     this.pageSize = event.rows;
     this.fetchPage(this.currentPage, this.pageSize);
   }
-  
 
   searchWageRequests() {
     if (this.searchForm.invalid) {

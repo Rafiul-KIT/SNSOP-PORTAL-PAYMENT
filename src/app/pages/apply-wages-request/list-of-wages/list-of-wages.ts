@@ -177,7 +177,6 @@ export class ListOfWages implements OnInit {
     this.paymentCycles = this.lookup.getPaymentCycleEnum();
     this.initBreadcrumb();
     this.initForm();
-     await this.loadInitialLookups();
     this.fetchPage(this.currentPage, this.pageSize);
   }
 
@@ -384,7 +383,7 @@ removeWageRequest(wageRequest: WageRequestDto) {
 
   getSubProjectName(id: number): string {
     const found = this.subProjects.find((sp) => sp.id === id);
-    return found ? `${found.workCode}` : id.toString();
+    return found ? `${found.workCode} - ${found.projectName}` : id.toString();
   }
 
   trackById = (_: number, row: WageRequestDto) => row.id;

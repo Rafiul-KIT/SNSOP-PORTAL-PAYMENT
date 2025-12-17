@@ -103,13 +103,13 @@ export class BeneficiaryAttendancePerform implements OnInit {
 
   currentPage = 0;
 
-  pageSize = 10;
+    pageSize = 10;
 
-  today: Date = new Date();
+    minAttendanceDate: Date | undefined;
 
+  
 
-
-  attendanceDate: Date | null = null;
+    attendanceDate: Date | null = null;
 
   attendanceDateTouched: boolean = false;
 
@@ -155,11 +155,11 @@ export class BeneficiaryAttendancePerform implements OnInit {
 
 
 
-  ngOnInit(): void {
+    ngOnInit(): void {
 
-    this.today.setHours(23, 59, 59, 999); // Set to end of today to include all of today
 
-    this.initBreadcrumb();
+
+      this.initBreadcrumb();
 
     const id = this.route.snapshot.paramMap.get('id');
 
@@ -191,11 +191,17 @@ export class BeneficiaryAttendancePerform implements OnInit {
 
         const data = res.data || res;
 
-        if (data && data.content && data.content.length > 0) {
+                if (data && data.content && data.content.length > 0) {
 
-          this.subproject = data.content[0];
+                            this.subproject = data.content[0];
 
-        } else {
+                            if (this.subproject && this.subproject.tstApprovedAt) {
+
+                              this.minAttendanceDate = new Date(this.subproject.tstApprovedAt);
+
+                            }
+
+                } else {
 
           console.error('Subproject not found');
 
