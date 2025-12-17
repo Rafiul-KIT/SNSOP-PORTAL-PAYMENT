@@ -369,55 +369,81 @@ export class BeneficiaryAttendancePerform implements OnInit {
 
         const data = res.data || res;
 
-        if (data && data.content) {
+                if (data && data.content) {
 
-          this.beneficiaries = data.content.map((b: any) => ({
+                  this.beneficiaries = data.content.map((b: any) => ({
 
-            beneficiaryId: b.id,
+                    beneficiaryId: b.id,
 
-            householdNumber: b.householdNumber,
+                    householdNumber: b.householdNumber,
 
-            beneficiaryName: b.beneficiaryName,
+                    beneficiaryName: b.beneficiaryName,
 
-            gender: b.gender,
+                    gender: b.gender,
 
-            age: b.age,
+                    age: b.age,
 
-            phoneNo: b.phoneNo,
+                    phoneNo: b.phoneNo,
 
-            present: null, // Default to unselected
+                    present: null, // Default to unselected
 
-            finlitAttended: null,
+                    finlitAttended: null,
 
-            ecdAttended: null,
+                    ecdAttended: null,
 
-            washAttended: null,
+                    washAttended: null,
 
-            gbvAttended: null,
+                    gbvAttended: null,
 
-          }));
+                  }));
 
-          this.totalRecords = data.totalElements || 0;
+                  this.totalRecords = data.totalElements || 0;
 
-        } else {
+                } else {
 
-          this.beneficiaries = [];
+                  this.beneficiaries = [];
 
-          this.totalRecords = 0;
+                  this.totalRecords = 0;
 
-        }
+                }
 
-      })
+        
 
-      .catch(err => {
+                if (this.totalRecords === 0) { // Show message if no beneficiaries found
 
-        console.error('Error fetching available beneficiaries:', err);
+                  Swal.fire({
 
-        this.beneficiaries = [];
+                    icon: 'info',
 
-        this.totalRecords = 0;
+                    title: 'No Beneficiaries Found',
 
-      })
+                    text: 'No beneficiaries match the selected criteria or are available for attendance.'
+
+                  });
+
+                }
+
+              })
+
+              .catch(err => {
+
+                console.error('Error fetching available beneficiaries:', err);
+
+                this.beneficiaries = [];
+
+                this.totalRecords = 0;
+
+                Swal.fire({ // Show error message
+
+                  icon: 'error',
+
+                  title: 'Error',
+
+                  text: 'Failed to fetch available beneficiaries. Please try again.'
+
+                });
+
+              })
 
       .finally(() => {
 
