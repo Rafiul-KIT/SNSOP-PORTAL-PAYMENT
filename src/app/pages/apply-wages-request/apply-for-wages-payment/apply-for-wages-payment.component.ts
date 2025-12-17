@@ -48,11 +48,9 @@ interface Beneficiary {
     SelectModule,
     Loader,
     Breadcrumb,
-    TableModule,
-    MessageModule,
-    ToastModule
+    TableModule
   ],
-  providers: [MessageService],
+  providers: [],
   templateUrl: './apply-for-wages-payment.component.html'
 })
 export class ApplyForWagesPaymentComponent implements OnInit {
@@ -84,8 +82,7 @@ export class ApplyForWagesPaymentComponent implements OnInit {
     private apiService: ApiService,
     private route: ActivatedRoute,
     private router: Router,
-    private cdr: ChangeDetectorRef,
-    private messageService: MessageService
+    private cdr: ChangeDetectorRef
   ) {
     this.initializePaymentCycles();
   }
@@ -157,10 +154,10 @@ export class ApplyForWagesPaymentComponent implements OnInit {
       console.error('Failed to load project data:', error);
       this.projectData = null;
       this.statusMsg = 'Error loading project data.';
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to load project data'
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to load project data'
       });
     } finally {
       this.isLoading = false;
@@ -192,10 +189,10 @@ export class ApplyForWagesPaymentComponent implements OnInit {
   if (!fromDate?.value || !toDate?.value || this.wagesForm.errors?.['dateRange']) {
     fromDate?.markAsTouched();
     toDate?.markAsTouched();
-    this.messageService.add({
-      severity: 'warn',
-      summary: 'Validation Error',
-      detail: 'Please select valid From Date and To Date'
+    Swal.fire({
+      icon: 'warning',
+      title: 'Validation Error',
+      text: 'Please select valid From Date and To Date'
     });
     return;
   }
@@ -227,31 +224,29 @@ export class ApplyForWagesPaymentComponent implements OnInit {
         this.selectedBeneficiaries = [];
 
         if (this.beneficiaries.length === 0) {
-          this.messageService.add({
-            severity: 'info',
-            summary: 'No Data',
-            detail: 'No beneficiaries found for the selected criteria'
-          });
-        }
+                  Swal.fire({
+                    icon: 'info',
+                    title: 'No Data',
+                    text: 'No beneficiaries found for the selected criteria'
+                  });        }
       } else {
         this.beneficiaries = [];
         this.showTable = false;
-        this.messageService.add({
-          severity: 'warn',
-          summary: 'No Data',
-          detail: response?.data?.message || 'No beneficiaries found'
+        Swal.fire({
+          icon: 'warning',
+          title: 'No Data',
+          text: response?.data?.message || 'No beneficiaries found'
         });
       }
     } catch (error) {
       console.error('Failed to load beneficiaries:', error);
       this.beneficiaries = [];
       this.showTable = false;
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to load beneficiaries. Please try again.'
-      });
-    } finally {
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to load beneficiaries. Please try again.'
+              });    } finally {
       this.tableLoading = false;
       this.cdr.detectChanges();
     }
@@ -265,20 +260,20 @@ onPageChange(event: any): void {
 
   async onSubmitWageRequest(): Promise<void> {
     if (this.selectedBeneficiaries.length === 0) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'No Selection',
-        detail: 'Please select at least one beneficiary'
+      Swal.fire({
+        icon: 'warning',
+        title: 'No Selection',
+        text: 'Please select at least one beneficiary'
       });
       return;
     }
 
     if (this.wagesForm.invalid) {
       this.markFormGroupTouched(this.wagesForm);
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Validation Error',
-        detail: 'Please fill in all required payment details.'
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation Error',
+        text: 'Please fill in all required payment details.'
       });
       return;
     }
