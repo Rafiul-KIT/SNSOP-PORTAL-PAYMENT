@@ -95,6 +95,16 @@ export const routes: Routes = [
       },
     ],
   },
+   {
+        path: 'attendance',
+        component: BeneficiaryAttendance,
+        canActivate: [routeGuard],
+      },
+         {
+        path: 'attendance/view/:id',
+        component: BeneficiaryAttendancePerform,
+        canActivate: [routeGuard],
+      },
   {
     path: 'beneficiaries',
     canActivate: [routeGuard],
@@ -119,16 +129,8 @@ export const routes: Routes = [
         component: BeneficiaryRemove,
         canActivate: [routeGuard],
       },
-      {
-        path: 'attendance',
-        component: BeneficiaryAttendance,
-        canActivate: [routeGuard],
-      },
-      {
-        path: 'attendance/view/:id',
-        component: BeneficiaryAttendancePerform,
-        canActivate: [routeGuard],
-      },
+     
+   
     ],
   },
   {

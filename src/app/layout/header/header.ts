@@ -157,20 +157,20 @@ export class Header {
             label: 'Remove Beneficiary',
             icon: 'fas fa-user-minus',
             routerLink: 'beneficiaries/assignment-remove-list',
-          },
-          {
-            label: 'Beneficiary Attendance',
-            icon: 'fas fa-user-edit',
-            routerLink: 'beneficiaries/attendance',
           }
         ],
       },
+      {
+            label: 'Beneficiary Attendance',
+            icon: 'fas fa-user-edit',
+            routerLink: 'attendance',
+          },
       {
         label: 'Wage Request',
         icon: 'fas fa-receipt',
         items: [
           {
-            label: 'List of Wages',
+            label: 'List of Wage Requests',
             icon: 'fas fa-clipboard',
             routerLink: 'wage-request/list',
           },
