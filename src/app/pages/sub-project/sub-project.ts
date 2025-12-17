@@ -245,7 +245,7 @@ export class SubProject implements OnInit {
       this.proposalForm.patchValue({
         projectName: Number(subProjectData.projectId), // Re-insert and ensure project ID is a number for dropdown selection
         typeOfMeeting: subProjectData.typeOfMeeting,
-        meetingDate: subProjectData.meetingDate ? new Date(subProjectData.meetingDate) : null,
+        meetingDate: this.parseApiDate(subProjectData.meetingDate),
         stateName: subProjectData.stateName,
         countyName: subProjectData.countyName,
         stateId: subProjectData.stateId,
@@ -294,8 +294,8 @@ export class SubProject implements OnInit {
               estimatedManpower: activity.estManPower,
               estimatedManDays: activity.estDay,
               estimatedCostOfEquipment: activity.equipmentCost,
-              workStartDate: activity.estStartAt ? new Date(activity.estStartAt) : null,
-              workEndDate: activity.estEndAt ? new Date(activity.estEndAt) : null,
+              workStartDate: this.parseApiDate(activity.estStartAt),
+              workEndDate: this.parseApiDate(activity.estEndAt),
               estimatedMaterialCost: activity.materialCost,
               estimatedSkillLabour: activity.estSkilledLabourDay,
               estimatedCost: activity.estCost,
@@ -620,7 +620,7 @@ export class SubProject implements OnInit {
         bomaId,
         bomaName: boma.name,
         typeOfMeeting: formValue.typeOfMeeting,
-        meetingDate: formValue.meetingDate,
+        meetingDate: formValue.meetingDate ? this.formatDateForApi(formValue.meetingDate) : null,
         screeningStatus: formValue.paperScreeningStatus ? parseInt(formValue.paperScreeningStatus, 10) : null,
         status: 'IP_Submitted',
       };
@@ -664,8 +664,8 @@ export class SubProject implements OnInit {
           estManPower: activityValue.estimatedManpower || 0,
           estDay: activityValue.estimatedManDays || 0,
           estSkilledLabourDay: activityValue.estimatedSkillLabour || 0,
-          estStartAt: activityValue.workStartDate,
-          estEndAt: activityValue.workEndDate,
+          estStartAt: activityValue.workStartDate ? this.formatDateForApi(activityValue.workStartDate) : null,
+          estEndAt: activityValue.workEndDate ? this.formatDateForApi(activityValue.workEndDate) : null,
           estCost: activityValue.estimatedCost || 0,
           equipmentCost: activityValue.estimatedCostOfEquipment || 0,
           materialCost: activityValue.estimatedMaterialCost || 0,
@@ -719,8 +719,8 @@ export class SubProject implements OnInit {
           estManPower: activityValue.estimatedManpower || 0,
           estDay: activityValue.estimatedManDays || 0,
           estSkilledLabourDay: activityValue.estimatedSkillLabour || 0,
-          estStartAt: activityValue.workStartDate,
-          estEndAt: activityValue.workEndDate,
+          estStartAt: activityValue.workStartDate ? this.formatDateForApi(activityValue.workStartDate) : null,
+          estEndAt: activityValue.workEndDate ? this.formatDateForApi(activityValue.workEndDate) : null,
           estCost: activityValue.estimatedCost || 0,
           equipmentCost: activityValue.estimatedCostOfEquipment || 0,
           materialCost: activityValue.estimatedMaterialCost || 0,
@@ -840,6 +840,27 @@ export class SubProject implements OnInit {
 
   trackByIndex(index: number): number {
     return index;
+  }
+
+  private formatDateForApi(date: Date): string {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  private parseApiDate(dateString: string | null): Date | null {
+    if (!dateString) {
+      return null;
+    }
+    const parts = dateString.split('T')[0].split('-');
+    if (parts.length === 3) {
+      const year = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1; // Month is 0-indexed
+      const day = parseInt(parts[2], 10);
+      return new Date(year, month, day);
+    }
+    return new Date(dateString);
   }
 
 
