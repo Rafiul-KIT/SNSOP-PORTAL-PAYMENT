@@ -138,7 +138,7 @@ export class WageRequestDrafts implements OnInit {
     try {
       // Load sub-projects for dropdown
       const subProjectRes: any = await this.api.POST(
-        'api/subproject/get?page=0&size=1000',
+        'api/subproject/get?page=0&size=10000',
         {}
       );
 
@@ -345,10 +345,19 @@ viewWageRequest(wageId: number, subprojectId: number) {
     return found ? found.label : value.toString();
   }
 
-  getSubProjectName(id: number): string {
-    const found = this.subProjects.find((sp) => sp.id === id);
-    return found ? `${found.workCode}` : id.toString();
+getSubProjectName(id: number): string {
+  if (id === 999) {
+    return 'Dis-Direct Income Support';
   }
+  const found = this.subProjects.find(sp => sp.id === id);
+
+  return found
+    ? found.workCode
+    : id
+    ? id.toString()
+    : '';
+}
+
 
   trackById = (_: number, row: WageRequestDto) => row.id;
 }

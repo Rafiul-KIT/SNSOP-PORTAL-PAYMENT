@@ -245,7 +245,7 @@
 
                        
 
-                            <!-- <div class="col-2">
+                            <div class="col-2">
                                 <label for="attachment" class="form-label fw-semibold">Attachment (Optional)</label>
                                 <input type="file" class="form-control " id="attachment"
                                     (change)="onFileSelected($event)" accept="image/*,.pdf">
@@ -255,7 +255,7 @@
                                     Selected file: {{ selectedFile.name }}
                                 </div>
                                 }
-                            </div> -->
+                            </div>
 
                             <div class="col-2">
                                 @for (msg of reviewMessage; track msg) {
@@ -266,7 +266,6 @@
 
                             <div class="col-12">
                                 <p-button type="submit" label="Submit Review" icon="pi pi-send"
-                                    [loading]="isReviewSubmitting"
                                     [disabled]="reviewForm.invalid || isReviewSubmitting">
                                 </p-button>
                             </div>
