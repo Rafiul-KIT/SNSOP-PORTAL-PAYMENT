@@ -253,6 +253,12 @@ export class BeneficiaryAssignment implements OnInit {
   }
 
 onCanBeAssignedPageChange(event: any): void {
+  // If rows per page changes, clear selection
+  if (this.canBeAssignedRows !== event.rows) {
+    this.selectedBeneficiaryIds.clear();
+    this.selectAll = false;
+  }
+  
   const page = event.first / event.rows;
   this.canBeAssignedFirst = event.first;
   this.canBeAssignedRows = event.rows;

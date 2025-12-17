@@ -228,6 +228,11 @@ export class BeneficiaryRemove implements OnInit {
   }
 
 onExistingPageChange(event: any): void {
+  // If rows per page changes, clear selection
+  if (this.existingRows !== event.rows) {
+    this.selectedBeneficiaryIds.clear();
+    this.selectAll = false;
+  }
   const page = event.first / event.rows;
 
   this.existingFirst = event.first;
