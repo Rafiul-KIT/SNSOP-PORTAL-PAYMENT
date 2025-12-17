@@ -181,7 +181,7 @@ export class WageRequestApproval implements OnInit {
     this.cdr.markForCheck();
     try {
       const subProjectRes: any = await this.api.POST(
-        'api/subproject/get?page=0&size=1000',
+        'api/subproject/get?page=0&size=10000',
         {}
       );
       if (subProjectRes.data && subProjectRes.data.content) {
@@ -469,14 +469,19 @@ export class WageRequestApproval implements OnInit {
     return found ? found.label : value ? value.toString() : '';
   }
 
-  getSubProjectName(id: number): string {
-    const found = this.subProjects.find((sp) => sp.id === id);
-    return found
-      ? `${found.workCode}`
-      : id
-      ? id.toString()
-      : '';
+getSubProjectName(id: number): string {
+  if (id === 999) {
+    return 'Dis - Direct Income Support';
   }
+  const found = this.subProjects.find(sp => sp.id === id);
+
+  return found
+    ? found.workCode
+    : id
+    ? id.toString()
+    : '';
+}
+
 
   formatDate(date: Date | string): string {
     if (!date) return '';

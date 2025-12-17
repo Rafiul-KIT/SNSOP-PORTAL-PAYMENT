@@ -97,13 +97,14 @@ export class WorkReview implements OnInit, OnDestroy {
     this.loadData();
   }
   private initApprovalForm(): void {
-    this.approvalForm = this.fb.group({
-      pdcApproveDate: [{ value: '', disabled: this.roleId !== 12 }, Validators.required],
-      attachment: [''],
-      comments: ['', Validators.required],
-      approved: ['', Validators.required],
-    });
-  }
+  this.approvalForm = this.fb.group({
+    pdcApproveDate: ['', Validators.required],
+    attachment: [''],
+    comments: ['', Validators.required],
+    approved: ['', Validators.required],
+  });
+}
+
   onApprovalFileSelect(evt: Event) {
     const input = evt.target as HTMLInputElement;
     const file = input?.files && input.files.length ? input.files[0] : null;
