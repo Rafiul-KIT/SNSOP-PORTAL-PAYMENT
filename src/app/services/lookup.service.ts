@@ -22,7 +22,7 @@ export const StatusEnum = [
 export const StatusWageEnum = [
   { id: '0', value: 'Draft', label: 'Draft' },
   { id: '1', value: 'InitialReviewer', label: 'To be Reviewed at Initial Reviewer' },
-  { id: '2', value: 'Financial                              Approver', label: 'To be Reviewed at Financial Approver' },
+  { id: '2', value: 'FinancialApprover', label: 'To be Reviewed at Financial Approver' },
   { id: '3', value: 'FinalPaymentAuthorizer', label: 'To be Reviewed at Final Payment Authorizer' },
   { id: '4', value: 'FinalApproved', label: 'Approved at Final Payment Authorizer' },
   { id: '5', value: 'PaidAPI', label: 'Paid from API' },

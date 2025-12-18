@@ -360,17 +360,39 @@ removeWageRequest(wageRequest: WageRequestDto) {
   }
 
   getStatusClass(status: number): string {
-    switch (status) {
+    const statusId = Number(status);
+    switch (statusId) {
+      // Draft
       case 0:
-        return 'bg-secondary'; // Draft
-      case 1:
-        return 'bg-info'; // Submitted
-      case 2:
-        return 'bg-success'; // Approved
-      case 3:
-        return 'bg-danger'; // Rejected
-      case 4:
-        return 'bg-primary'; // Paid
+        return 'bg-secondary';
+
+      // In Review / Submitted
+      case 1: // To be Reviewed at Initial Reviewer
+      case 2: // To be Reviewed at Financial Approver
+      case 3: // To be Reviewed at Final Payment Authorizer
+        return 'bg-info';
+
+      // Approved / Cleared
+      case 4: // Approved at Final Payment Authorizer
+      case 103: // Cleared by WB
+        return 'bg-success';
+
+      // Paid
+      case 5:
+      case 6:
+        return 'bg-primary';
+
+      // Rejected
+      case 100: // Rejected by Initial Reviewer
+      case 101: // Rejected by Financial Approver
+      case 102: // Rejected by Final Payment Authorizer
+      case 105: // Draft Rejected
+      case 1000: // Rejected after Pay
+      case 1001: // Rejected after Pay
+      case 1002: // Rejected after Pay
+      case 1003: // Rejected after Pay
+        return 'bg-danger';
+
       default:
         return 'bg-secondary';
     }
