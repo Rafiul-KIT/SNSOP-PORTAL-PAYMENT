@@ -132,7 +132,31 @@ export class WorkApproval implements OnInit {
 
   async ngOnInit() {
     this.workTypes = TypeOfMeetingEnum;
-    this.statuses = StatusEnum;
+
+    const userRole = this.api.getUserRole();
+    switch (userRole) {
+      case 9:
+        this.statuses = StatusEnum.filter(
+          (status) =>
+            status.value === 'IP_Submitted' || status.value === 'ES_Rejected'
+        );
+        break;
+      case 3:
+        this.statuses = StatusEnum.filter(
+          (status) =>
+            status.value === 'QE_Approved' || status.value === 'TST_Rejected'
+        );
+        break;
+      case 12:
+        this.statuses = StatusEnum.filter(
+          (status) => status.value === 'ES_Approved'
+        );
+        break;
+      default:
+        this.statuses = StatusEnum;
+        break;
+    }
+
     this.screeningStatuses = ScreeningStatusEnum;
     this.initBreadcrumb();
     this.initForm();
