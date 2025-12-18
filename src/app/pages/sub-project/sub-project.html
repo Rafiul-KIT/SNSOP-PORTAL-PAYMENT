@@ -19,10 +19,11 @@
     </nav>
     <!-- Main Content -->
     <div class="container-fluid py-4">
-      <div class="card  shadow-sm">
-        <div class="card-body p-4">
-          <form [formGroup]="proposalForm" (ngSubmit)="onSubmit()">
+      <form [formGroup]="proposalForm" (ngSubmit)="onSubmit()">
 
+        <!-- Card 1: Basic Information & Work Proposal Location -->
+        <div class="card shadow-sm mb-4">
+          <div class="card-body p-4">
             <!-- Basic Information -->
             <div class="mb-5">
               <h4 class="text-secondary border-bottom  border-1 pb-2 mb-4">
@@ -151,10 +152,12 @@
                 </div>
               </div>
             </div>
+          </div>
+        </div>
 
-
-
-            <!-- Activities and Timeline combined -->
+        <!-- Card 2: Proposed Public Work Activities -->
+        <div class="card shadow-sm mb-4">
+          <div class="card-body p-4">
             <div class="mb-5">
               <div class="d-flex justify-content-between align-items-center mb-4">
                 <h4 class="text-secondary border-bottom border-secondary border-1 pb-2 mb-0">
@@ -407,31 +410,31 @@
 
               </div>
             </div>
+          </div>
+        </div>
 
 
-            <!-- Actions -->
-            <div class="card bg-light">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                  <button type="button" class="btn btn-outline-danger" (click)="onClearAll()">
-                    <i class="fas fa-eraser me-2"></i>Clear All
-                  </button>
-                  <div class="d-flex gap-2 flex-wrap">
-                    <button type="button" class="btn btn-outline-secondary" (click)="onCancel()">
-                      <i class="fas fa-times me-2"></i>Cancel
-                    </button>
+        <!-- Actions -->
+        <div class="card bg-light">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+              <button type="button" class="btn btn-outline-danger" (click)="onClearAll()">
+                <i class="fas fa-eraser me-2"></i>Clear All
+              </button>
+              <div class="d-flex gap-2 flex-wrap">
+                <button type="button" class="btn btn-outline-secondary" (click)="onCancel()">
+                  <i class="fas fa-times me-2"></i>Cancel
+                </button>
 
-                    <button type="submit" class="btn btn-success">
-                      <i class="fas fa-save me-2"></i>Save
-                    </button>
-                  </div>
-                </div>
+                <button type="submit" class="btn btn-success">
+                  <i class="fas fa-save me-2"></i>Save
+                </button>
               </div>
             </div>
-
-          </form>
+          </div>
         </div>
-      </div>
+
+      </form>
     </div>
   </div>
 </div>
