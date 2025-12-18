@@ -128,8 +128,8 @@ export class PayrollMobileMoney implements OnInit {
     this.screeningStatuses = ScreeningStatusEnum;
     this.providerOptions = [
       { name: 'MOMO', id: 'MOMO' },
-      { name: 'MGURUSH', id: 'MGURUSH' },
-      { name: 'DIGICASH', id: 'DIGICASH' },
+      // { name: 'MGURUSH', id: 'MGURUSH' },
+      // { name: 'DIGICASH', id: 'DIGICASH' },
     ];
     this.initBreadcrumb();
     await this.loadInitialLookups();

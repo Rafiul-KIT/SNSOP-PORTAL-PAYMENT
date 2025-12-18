@@ -109,19 +109,28 @@ export class Header {
         label: 'Project',
         icon: 'fas fa-project-diagram',
         items: [
-          
+           {
+            label: 'Create New Project',
+            icon: 'fas fa-plus',
+            routerLink: 'project/add-new',
+          },
           {
             label: 'Project List',
             icon: 'fas fa-clipboard',
             routerLink: 'project/list',
           }
+           
         ],
       },
       {
         label: 'Sub-project',
         icon: 'fas fa-sitemap',
         items: [
-          
+            {
+            label: 'Create New Sub-project',
+            icon: 'fas fa-plus',
+            routerLink: 'sub-project/add-new',
+          },
           {
             label: 'Sub-project List',
             icon: 'fas fa-clipboard',

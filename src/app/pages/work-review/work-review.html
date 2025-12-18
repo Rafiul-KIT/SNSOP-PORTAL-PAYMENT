@@ -261,10 +261,7 @@
                           </div>
                         </div>
 
-                        <div class="col-md-6">
-                          <label class="form-label text-secondary fw-semibold">Paper Screening Status</label>
-                          <input type="text" class="form-control" formControlName="paperScreeningStatus" readonly />
-                        </div>
+              
 
                         <div class="col-md-6">
                           <label class="form-label text-secondary fw-semibold">Status</label>
@@ -379,7 +376,6 @@
 
 
               <!-- Approval Section -->
-              <!-- Approval Section -->
               <div class="card bg-light mt-3" [formGroup]="approvalForm">
                 <div class="card-body">
                   <h5 class="text-secondary border-bottom border-1 pb-2 mb-4">
@@ -387,35 +383,24 @@
                   </h5>
 
                   <div class="row g-3">
-                    <!-- PDC Approve Date (enabled only if roleId === 12) -->
-                     @if(roleId === 12) {
-                         <div class="col-md-6 col-lg-3">
-                      <label class="form-label text-secondary fw-semibold">PDC Approve Date <span class="text-danger">*</span></label>
+                    <!-- PDC Approve Date (shown only if roleId === 12) -->
+                    @if(roleId === 12) {
+                    <div class="col-md-6 col-lg-3">
+                      <label class="form-label text-secondary fw-semibold">PDC Approve Date <span
+                          class="text-danger">*</span></label>
                       <input type="date" class="form-control" formControlName="pdcApproveDate" />
-
                     </div>
-                     }
-                  
+                    }
+
 
                     <!-- Attachment -->
                     <div class="col-md-6 col-lg-3">
                       <label class="form-label text-secondary fw-semibold">Attachment</label>
                       <input type="file" class="form-control" accept=".pdf,image/*"
-                        (change)="onApprovalFileSelect($event)"
-                        [class.is-invalid]="fileSizeError" />
+                        (change)="onApprovalFileSelect($event)" [class.is-invalid]="fileSizeError" />
                       @if (fileSizeError) {
                       <div class="invalid-feedback d-block">{{ fileSizeError }}</div>
                       }
-                    </div>
-
-                    <!-- Status Dropdown -->
-                    <div class="col-md-6 col-lg-3">
-                      <label class="form-label text-secondary fw-semibold">Status</label>
-                      <select class="form-select" formControlName="approved">
-                        <option value="">-- Select Status --</option>
-                        <option value="true">Approved</option>
-                        <option value="false">Rejected</option>
-                      </select>
                     </div>
 
                     <!-- Comments -->
@@ -429,8 +414,11 @@
                   </div>
 
                   <div class="mt-4 text-end">
-                    <button type="button" class="btn btn-success me-2" (click)="submitApproval()">
-                      <i class="fas fa-check me-2"></i>Submit Approval
+                    <button type="button" class="btn btn-danger me-2" (click)="submitApproval(false)">
+                      <i class="fas fa-times me-2"></i>Reject
+                    </button>
+                    <button type="button" class="btn btn-success" (click)="submitApproval(true)">
+                      <i class="fas fa-check me-2"></i>Approve
                     </button>
                   </div>
                 </div>

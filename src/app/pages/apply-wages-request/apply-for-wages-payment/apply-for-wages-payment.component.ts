@@ -303,6 +303,8 @@ onPageChange(event: any): void {
           title: 'Success!',
           text: `Wage request submitted successfully for ${beneficiaryIds.length} beneficiaries.`,
           icon: 'success'
+        }).then(() => {
+          this.router.navigate(['/wage-request/apply-lipw']);
         });
 
        

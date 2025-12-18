@@ -94,16 +94,19 @@ export class WorkReview implements OnInit, OnDestroy {
 
     this.initializeForm();
     this.initApprovalForm();
+    if (this.roleId === 12) {
+      this.approvalForm.get('pdcApproveDate')?.setValidators(Validators.required);
+      this.approvalForm.get('pdcApproveDate')?.updateValueAndValidity();
+    }
     this.loadData();
   }
   private initApprovalForm(): void {
-  this.approvalForm = this.fb.group({
-    pdcApproveDate: ['', Validators.required],
-    attachment: [''],
-    comments: ['', Validators.required],
-    approved: ['', Validators.required],
-  });
-}
+    this.approvalForm = this.fb.group({
+      pdcApproveDate: [''],
+      attachment: [''],
+      comments: ['', Validators.required],
+    });
+  }
 
   onApprovalFileSelect(evt: Event) {
     const input = evt.target as HTMLInputElement;
@@ -133,118 +136,114 @@ export class WorkReview implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-async submitApproval(): Promise<void> {
-  if (!this.subprojectId()) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'Missing subproject ID.',
-    });
-    return;
-  }
-
-  if (!this.roleId) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'Missing user or role. Please login again.',
-    });
-    return;
-  }
-
-  if (this.approvalForm.invalid) {
-    this.approvalForm.markAllAsTouched();
-    const invalidFields = [];
-    const controls = this.approvalForm.controls;
-    const fieldNames: { [key: string]: string } = {
-      pdcApproveDate: 'PDC Approve Date',
-      comments: 'Comments',
-      approved: 'Status',
-    };
-
-    for (const name in controls) {
-      if (controls[name].invalid) {
-        invalidFields.push(fieldNames[name] || name);
-      }
+async submitApproval(isApproved: boolean): Promise<void> {
+    if (!this.subprojectId()) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Missing subproject ID.',
+      });
+      return;
     }
-    const errorText = `Please provide values for the following required fields: ${invalidFields.join(
-      ', '
-    )}`;
-    Swal.fire({
-      icon: 'warning',
-      title: 'Validation Error',
-      text: errorText,
-    });
-    return;
-  }
 
-  if (this.fileSizeError) { // Prevent submission if there's a file size error
-    Swal.fire({
-      icon: 'error',
-      title: 'File Error',
-      text: this.fileSizeError,
-    });
-    return;
-  }
+    if (!this.roleId) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Missing user or role. Please login again.',
+      });
+      return;
+    }
 
+    this.approvalForm.markAllAsTouched();
 
-  const endpointMap: Record<number, string> = {
-    9: 'api/subproject/review/first',
-    3: 'api/subproject/review/second',
-    12: 'api/subproject/review/third',
-  };
-  const endpoint = endpointMap[this.roleId];
+    if (this.approvalForm.get('comments')?.invalid) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation Error',
+        text: 'Comments are required to submit.',
+      });
+      return;
+    }
 
-  if (!endpoint) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'Your role is not allowed to approve here.',
-    });
-    return;
-  }
+    if (
+      isApproved &&
+      this.roleId === 12 &&
+      this.approvalForm.get('pdcApproveDate')?.invalid
+    ) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation Error',
+        text: 'PDC Approve Date is required for approval.',
+      });
+      return;
+    }
 
-  const fd = new FormData();
-  fd.append('subprojectId', String(this.subprojectId()));
+    if (this.fileSizeError) {
+      Swal.fire({
+        icon: 'error',
+        title: 'File Error',
+        text: this.fileSizeError,
+      });
+      return;
+    }
 
-  if (this.roleId === 12) {
-    const d = this.approvalForm.get('pdcApproveDate')?.value;
-    if (d) fd.append('pdcApproveDate', d);
-  }
+    const endpointMap: Record<number, string> = {
+      9: 'api/subproject/review/first',
+      3: 'api/subproject/review/second',
+      12: 'api/subproject/review/third',
+    };
+    const endpoint = endpointMap[this.roleId];
 
-  fd.append('comments', this.approvalForm.get('comments')?.value);
+    if (!endpoint) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Your role is not allowed to approve here.',
+      });
+      return;
+    }
 
-  const approvedStr = this.approvalForm.get('approved')?.value;
-  fd.append('approved', approvedStr === 'true' ? 'true' : 'false');
+    const fd = new FormData();
+    fd.append('subprojectId', String(this.subprojectId()));
 
-  if (this.attachedFile) {
-    fd.append('attachment', this.attachedFile);
-  }
+    if (this.roleId === 12) {
+      const d = this.approvalForm.get('pdcApproveDate')?.value;
+      if (d) fd.append('pdcApproveDate', d);
+    }
 
+    fd.append('comments', this.approvalForm.get('comments')?.value);
+    fd.append('approved', String(isApproved));
 
-  try {
-    await this.api.axiosInstance.post(`/${endpoint}`, fd, {});
+    if (this.attachedFile) {
+      fd.append('attachment', this.attachedFile);
+    }
+
+    try {
     
-    const statusMessage = approvedStr === 'true' ? 'Approved' : 'Rejected';
+      await this.api.axiosInstance.post(`/${endpoint}`, fd, {});
 
-    Swal.fire({
-      icon: 'success',
-      title: 'Success',
-      text: `Status ${statusMessage} Submitted successfully!`,
-    });
-    this.router.navigate(['/sub-project/approval']);
-  } catch (err) {
-    console.error(err);
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'Failed to submit approval.',
-    });
+      const statusMessage = isApproved ? 'Approved' : 'Rejected';
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: `Status ${statusMessage} Submitted successfully!`,
+      }).then(() => {
+          this.router.navigate(['/sub-project/approval']);
+      });
     
-  } finally {
-    this.isLoading.set(false);
+    } catch (err) {
+      console.error(err);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to submit approval.',
+      });
+    } finally {
+      this.isLoading.set(false);
+    }
   }
-}
 
   ngOnDestroy(): void {
     this.destroy$.next();
