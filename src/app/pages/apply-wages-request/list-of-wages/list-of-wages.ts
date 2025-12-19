@@ -145,7 +145,7 @@ export class ListOfWages implements OnInit {
     try {
       // Load sub-projects for dropdown
       const subProjectRes: any = await this.api.POST(
-        'api/subproject/get?page=0&size=1000',
+        'api/subproject/get?page=0&size=10000',
         {}
       );
 
@@ -175,6 +175,7 @@ export class ListOfWages implements OnInit {
   async ngOnInit() {
     this.statuses = StatusWageEnum;
     this.paymentCycles = this.lookup.getPaymentCycleEnum();
+      await this.loadInitialLookups();
     this.initBreadcrumb();
     this.initForm();
     this.fetchPage(this.currentPage, this.pageSize);
@@ -204,7 +205,7 @@ export class ListOfWages implements OnInit {
       this.isLoading = true;
       this.cdr.markForCheck();
       try {
-        await this.loadInitialLookups();
+      
         this.lookupsLoaded = true;
       } catch (err) {
         console.error('Lookups loading error:', err);
@@ -404,8 +405,11 @@ removeWageRequest(wageRequest: WageRequestDto) {
   }
 
   getSubProjectName(id: number): string {
+      if (id === 999) {
+    return 'Dis-Direct Income Support';
+  }
     const found = this.subProjects.find((sp) => sp.id === id);
-    return found ? `${found.workCode} - ${found.projectName}` : id.toString();
+    return found ? `${found.workCode}` : id.toString();
   }
 
   trackById = (_: number, row: WageRequestDto) => row.id;
