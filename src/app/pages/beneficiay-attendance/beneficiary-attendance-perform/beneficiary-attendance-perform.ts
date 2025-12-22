@@ -239,41 +239,79 @@ export class BeneficiaryAttendancePerform implements OnInit {
 
 
 
-  onAttendanceDateChange(event: Date) {
-
-    this.attendanceDate = event;
-
-    // When date changes, clear the current list and reset pagination, a new search is required.
-
-    this.beneficiaries = [];
-
-    this.totalRecords = 0;
-
-    this.currentPage = 0;
+    onAttendanceDateChange(event: Date) {
 
 
 
-  }
+      this.attendanceDate = event;
 
 
 
-  onSearch() {
+      // When date changes, clear the current list and reset pagination, a new search is required.
 
-    this.attendanceDateTouched = true; // Ensure validation message shows if needed
 
-    if (this.isAttendanceDateInvalid()) {
 
-      return; // Don't search if date is invalid
+      this.beneficiaries = [];
+
+
+
+      this.selectedBeneficiaries = [];
+
+
+
+      this.totalRecords = 0;
+
+
+
+      this.currentPage = 0;
+
+
+
+  
+
+
 
     }
 
 
 
-    this.currentPage = 0;
+    onSearch() {
 
-    this.fetchBeneficiaries(this.currentPage, this.pageSize);
 
-  }
+
+      this.attendanceDateTouched = true; // Ensure validation message shows if needed
+
+
+
+      if (this.isAttendanceDateInvalid()) {
+
+
+
+        return; // Don't search if date is invalid
+
+
+
+      }
+
+
+
+  
+
+
+
+      this.selectedBeneficiaries = [];
+
+
+
+      this.currentPage = 0;
+
+
+
+      this.fetchBeneficiaries(this.currentPage, this.pageSize);
+
+
+
+    }
 
 
 

@@ -29,7 +29,6 @@ import {
   LookupService,
   TypeOfMeetingEnum,
   StatusEnum,
-  ScreeningStatusEnum,
   ProjectNameDescription,
 } from '../../services/lookup.service';
 import { ApiService } from '../../services/api.service';
@@ -95,7 +94,6 @@ export class WorkApproval implements OnInit {
   workActivities: LookupItem[] = [];
 
   statuses: any[] = [];
-  screeningStatuses: any[] = [];
 
   subProjects: SubProjectDto[] = [];
   totalRecords = 0;
@@ -132,8 +130,31 @@ export class WorkApproval implements OnInit {
 
   async ngOnInit() {
     this.workTypes = TypeOfMeetingEnum;
-    this.statuses = StatusEnum;
-    this.screeningStatuses = ScreeningStatusEnum;
+
+    const userRole = this.api.getUserRole();
+    switch (userRole) {
+      case 9:
+        this.statuses = StatusEnum.filter(
+          (status) =>
+            status.value === 'IP_Submitted' || status.value === 'ES_Rejected'
+        );
+        break;
+      case 3:
+        this.statuses = StatusEnum.filter(
+          (status) =>
+            status.value === 'QE_Approved' || status.value === 'TST_Rejected'
+        );
+        break;
+      case 12:
+        this.statuses = StatusEnum.filter(
+          (status) => status.value === 'ES_Approved'
+        );
+        break;
+      default:
+        this.statuses = StatusEnum;
+        break;
+    }
+
     this.initBreadcrumb();
     this.initForm();
     this.fetchPage(this.currentPage, this.pageSize);
@@ -152,7 +173,6 @@ export class WorkApproval implements OnInit {
       status: [null],
       workCode: [''],
       workActivity: [null],
-      screeningStatus: [null],
     });
   }
 
@@ -242,7 +262,7 @@ export class WorkApproval implements OnInit {
       bomaName: null,
       typeOfMeeting: f.typeOfMeeting || null,
       meetingDate: null,
-      screeningStatus: f.screeningStatus || null,
+      screeningStatus: '1',
       status: f.status || null,
     };
   }
@@ -310,11 +330,7 @@ export class WorkApproval implements OnInit {
     this.fetchPage(this.currentPage, this.pageSize);
     this.cdr.markForCheck();
   }
-  getScreeningStatusLabel(value: string): string {
-    const numericValue = parseInt(value, 10);
-    const found = ScreeningStatusEnum.find(item => item.value === numericValue);
-    return found ? found.label : value;
-  }
+  
   getTypeOfMeetingLabel(value: string): string {
     const found = TypeOfMeetingEnum.find(item => item.value === value);
     return found ? found.label : value;

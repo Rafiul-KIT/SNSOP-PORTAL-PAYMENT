@@ -101,6 +101,7 @@ export class SubProjectList implements OnInit {
 
   subProjects: SubProjectDto[] = [];
   totalRecords = 0;
+  userRole: number | null = null;
 
   breadcrumbItems: any[] = [];
   breadcrumbHome: any;
@@ -138,7 +139,17 @@ export class SubProjectList implements OnInit {
 
   async ngOnInit() {
     this.workTypes = TypeOfMeetingEnum;
-    this.statuses = StatusEnum;
+
+    this.userRole = this.api.getUserRole();
+    if (this.userRole === 5) { // IP User
+      this.statuses = StatusEnum.filter(
+        (status) =>
+          status.value === 'IP_Submitted' || status.value === 'QE_Rejected'
+      );
+    } else {
+      this.statuses = StatusEnum;
+    }
+
     this.screeningStatuses = ScreeningStatusEnum;
     this.initBreadcrumb();
     this.initForm();
@@ -232,6 +243,12 @@ export class SubProjectList implements OnInit {
   // ---------- Request building ----------
   private buildSearchBody(page: number, size: number) {
     const f = this.searchForm.value;
+    let statusValue = f.status || null;
+
+    if (this.userRole === 5 && statusValue === null) {
+      statusValue = 'IP_Submitted'; // Default to 'IP_Submitted' value for IP users if no status is selected
+    }
+
     return {
       id: null,
        workCode: f.workCode ? f.workCode.trim() : null,
@@ -249,7 +266,7 @@ export class SubProjectList implements OnInit {
       typeOfMeeting: f.typeOfMeeting || null,
       meetingDate: null,
       screeningStatus: f.screeningStatus || null,
-      status: f.status || null,
+      status: statusValue,
     };
   }
 
