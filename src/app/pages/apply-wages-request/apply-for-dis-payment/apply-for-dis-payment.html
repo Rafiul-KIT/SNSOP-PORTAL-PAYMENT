@@ -139,11 +139,10 @@
           responsiveLayout="scroll">
           <ng-template pTemplate="header">
             <tr>
-              <th class="select-all-header">
-                <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+                             <th class="select-all-header">
+                <p-tableHeaderCheckbox [disabled]="submissionForm.get('totalDays')?.invalid"></p-tableHeaderCheckbox>
                 <span class="select-all-text">Select all</span>
               </th>
-
               <th>Beneficiary ID</th>
               <th>Household No.</th>
               <th>Beneficiary Name</th>
@@ -156,7 +155,7 @@
           <ng-template pTemplate="body" let-beneficiary>
             <tr>
               <td>
-                <p-tableCheckbox [value]="beneficiary"></p-tableCheckbox>
+                <p-tableCheckbox [value]="beneficiary" [disabled]="submissionForm.get('totalDays')?.invalid"></p-tableCheckbox>
               </td>
               <td>{{ beneficiary.beneficiaryId }}</td>
               <td>{{ beneficiary.householdNumber }}</td>

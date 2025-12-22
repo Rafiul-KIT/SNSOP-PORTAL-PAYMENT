@@ -175,7 +175,7 @@
               <ng-template pTemplate="header">
                 <tr>
                <th class="select-all-header">
-  <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+  <p-tableHeaderCheckbox [disabled]="wagesForm.get('paymentCycle')?.invalid"></p-tableHeaderCheckbox>
   <span class="select-all-text">Select all</span>
 </th>
 
@@ -210,7 +210,7 @@
               <ng-template pTemplate="body" let-beneficiary>
                 <tr>
                   <td>
-                    <p-tableCheckbox [value]="beneficiary"></p-tableCheckbox>
+                    <p-tableCheckbox [value]="beneficiary" [disabled]="wagesForm.get('paymentCycle')?.invalid"></p-tableCheckbox>
                   </td>
                   <td>
                     <span class="fw-semibold">{{ beneficiary.householdNumber }}</span>
