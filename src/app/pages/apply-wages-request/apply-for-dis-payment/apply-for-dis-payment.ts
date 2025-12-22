@@ -275,7 +275,7 @@ initializeForm(): void {
       return;
     }
 
-    this.isLoading = true;
+    this.loading = true;
 
     const searchFormValue = this.wagesForm.getRawValue();
     const submissionFormValue = this.submissionForm.getRawValue();
@@ -313,7 +313,7 @@ initializeForm(): void {
     } catch (error: any) {
       Swal.fire({ icon: 'error', title: 'Error', text: error.message || 'API call failed' });
     } finally {
-      this.isLoading = false;
+      this.loading = false;
       this.cdr.detectChanges();
     }
   }

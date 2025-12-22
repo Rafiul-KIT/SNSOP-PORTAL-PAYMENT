@@ -21,6 +21,7 @@ import { Loader } from '../../../components/loader/loader';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../../../services/api.service';
 import Swal from 'sweetalert2';
+import { handleFileUpload } from '../../../validators/file-validator';
 
 interface Beneficiary {
   id: number;
@@ -66,7 +67,6 @@ export class BeneficiaryAssignment implements OnInit {
   statusMsg = '';
   isLoading = false;
   isSubmitted = false;
-  selectedFile: File | null = null;
   apiError = '';
 
   // Can be assigned beneficiaries
@@ -101,32 +101,7 @@ export class BeneficiaryAssignment implements OnInit {
   }
 
   onFileSelect(event: any): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files ? input.files[0] : null;
-    const MAX_FILE_SIZE_MB = 3;
-    const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024; // 1 MB
-
-    if (file) {
-      if (file.size > MAX_FILE_SIZE_BYTES) {
-        Swal.fire({
-          icon: 'error',
-          title: 'File Too Large',
-          text: `File size exceeds the limit of ${MAX_FILE_SIZE_MB} MB. Please select a smaller file.`,
-        });
-        // Clear the input field
-        if (input) {
-          input.value = '';
-        }
-        
-        this.selectedFile = null;
-        this.cdr.detectChanges();
-        return;
-      }
-      this.selectedFile = file;
-    } else {
-      this.selectedFile = null;
-    }
-    this.cdr.detectChanges();
+    handleFileUpload(event, this.projectForm, 'attachment');
   }
 
   toggleSelectAll(event: any): void {
@@ -161,6 +136,7 @@ export class BeneficiaryAssignment implements OnInit {
       workStartAt: ['', Validators.required],
       inchargeName: ['', [Validators.pattern(/^[a-zA-Z\s]*$/)]],
       comments: [''],
+      attachment: [null, Validators.required],
     });
   }
 
@@ -286,11 +262,6 @@ onCanBeAssignedPageChange(event: any): void {
       return;
     }
 
-    if (!this.selectedFile) {
-      this.apiError = 'Please select an attachment file';
-      return;
-    }
-
     const selectedIds = this.getSelectedCanBeAssignedIds();
     if (selectedIds.length === 0) {
       this.beneficiaryError =
@@ -306,15 +277,16 @@ onCanBeAssignedPageChange(event: any): void {
     this.loading = true;
 
     try {
+      const formValue = this.projectForm.value;
       const formData = new FormData();
       formData.append('subprojectId', this.subprojectId || '');
       formData.append(
         'workStartAt',
-        this.formatDate(this.projectForm.value.workStartAt)
+        this.formatDate(formValue.workStartAt)
       );
-      formData.append('inchargeName', this.projectForm.value.inchargeName || '');
-      formData.append('comments', this.projectForm.value.comments || '');
-      formData.append('attachment', this.selectedFile, this.selectedFile.name);
+      formData.append('inchargeName', formValue.inchargeName || '');
+      formData.append('comments', formValue.comments || '');
+      formData.append('attachment', formValue.attachment, formValue.attachment.name);
       selectedIds.forEach((id) =>
         formData.append('beneficiaryIds', id.toString())
       );
@@ -342,13 +314,14 @@ onCanBeAssignedPageChange(event: any): void {
         );
 
         this.projectForm.reset();
-        this.selectedFile = null;
         this.isSubmitted = false;
 
         const fileInput = document.getElementById(
           'attachment'
         ) as HTMLInputElement;
         if (fileInput) fileInput.value = '';
+
+        this.router.navigate(['beneficiaries/assignment-asign-list']);
       } else {
         const message =
           response?.data?.message || 'Failed to assign beneficiaries';

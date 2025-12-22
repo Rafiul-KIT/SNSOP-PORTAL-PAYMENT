@@ -112,12 +112,17 @@
                                 </label>
                                 <input type="file" id="attachment" class="form-control" (change)="onFileSelect($event)"
                                     accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                                    [class.is-invalid]="!selectedFile && isSubmitted" />
-                                @if (!selectedFile && isSubmitted) {
-                                <small class="text-danger">Attachment is required</small>
+                                    [class.is-invalid]="projectForm.get('attachment')?.invalid && (projectForm.get('attachment')?.touched || isSubmitted)" />
+                                @if (projectForm.get('attachment')?.invalid && (projectForm.get('attachment')?.touched || isSubmitted)) {
+                                  @if (projectForm.get('attachment')?.hasError('required')) {
+                                    <small class="text-danger">Attachment is required</small>
+                                  }
+                                  @if (projectForm.get('attachment')?.hasError('invalidSize')) {
+                                    <small class="text-danger">File size must not exceed 3MB.</small>
+                                  }
                                 }
-                                @if (selectedFile) {
-                                <small class="text-success">Selected: {{ selectedFile.name }}</small>
+                                @if (projectForm.get('attachment')?.value) {
+                                <small class="text-success">Selected: {{ projectForm.get('attachment')?.value.name }}</small>
                                 }
                             </div>
 
@@ -131,8 +136,17 @@
                         <p-divider></p-divider>
 
                         <div class="p-4">
-                            <h5 class="mb-3">Currently Assigned Beneficiaries <span class="badge bg-danger ms-2">{{
-                                    getSelectedExistingIds().length }} selected</span></h5>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="fw-bold text-secondary mb-0">
+                                    <i class="pi pi-users me-2"></i>
+                                    Currently Assigned Beneficiaries
+                                </h5>
+                                @if (getSelectedExistingIds().length > 0) {
+                                    <span class="badge bg-danger fs-6">
+                                    {{ getSelectedExistingIds().length }} Selected
+                                    </span>
+                                }
+                            </div>
                             <p-table [value]="existingBeneficiaries" [lazy]="true" [paginator]="true"
                                 [rows]="existingRows" [totalRecords]="existingTotalRecords" [first]="existingFirst"
                                 [loading]="isLoadingExisting" (onLazyLoad)="onExistingPageChange($event)"
@@ -199,6 +213,7 @@
                                 <button pButton type="button" label="Remove Selected" icon="pi pi-user-minus"
                                     class="p-button-danger px-5"
                                     [disabled]="loading || getSelectedExistingIds().length === 0"
+                                    [loading]="loading"
                                     (click)="removeBeneficiaries()">
                                 </button>
                             </div>

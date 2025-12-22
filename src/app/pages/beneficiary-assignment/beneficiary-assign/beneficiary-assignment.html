@@ -111,12 +111,17 @@
                                 </label>
                                 <input type="file" id="attachment" class="form-control" (change)="onFileSelect($event)"
                                     accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                                    [class.is-invalid]="!selectedFile && isSubmitted" />
-                                @if (!selectedFile && isSubmitted) {
-                                <small class="text-danger">Attachment is required</small>
+                                    [class.is-invalid]="projectForm.get('attachment')?.invalid && (projectForm.get('attachment')?.touched || isSubmitted)" />
+                                @if (projectForm.get('attachment')?.invalid && (projectForm.get('attachment')?.touched || isSubmitted)) {
+                                  @if (projectForm.get('attachment')?.hasError('required')) {
+                                    <small class="text-danger">Attachment is required</small>
+                                  }
+                                  @if (projectForm.get('attachment')?.hasError('invalidSize')) {
+                                    <small class="text-danger">File size must not exceed 3MB.</small>
+                                  }
                                 }
-                                @if (selectedFile) {
-                                <small class="text-success">Selected: {{ selectedFile.name }}</small>
+                                @if (projectForm.get('attachment')?.value) {
+                                <small class="text-success">Selected: {{ projectForm.get('attachment')?.value.name }}</small>
                                 }
                             </div>
 
@@ -196,6 +201,7 @@
                                 <button pButton type="button" label="Assign Selected" icon="pi pi-user-plus"
                                     class="p-button-success px-5"
                                     [disabled]="loading || getSelectedCanBeAssignedIds().length === 0"
+                                    [loading]="loading"
                                     (click)="assignBeneficiaries()"></button>
                             </div>
                         </div>
