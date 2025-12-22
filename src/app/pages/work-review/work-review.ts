@@ -15,8 +15,10 @@ import { ApiService } from '../../services/api.service';
 import { ChangeDetectorRef } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { ToastModule } from 'primeng/toast';
+import { DatePickerModule } from 'primeng/datepicker';
 import { MessageService } from 'primeng/api';
 import Swal from 'sweetalert2';
+import { handleFileUpload } from '../../validators/file-validator';
 
 export const TypeOfMeetingEnum = [
   { id: '0', value: 'CC', label: 'Community Committee' },
@@ -57,6 +59,7 @@ interface WorkActivity {
     BreadcrumbModule,
     Loader,
     ToastModule,
+    DatePickerModule,
   ],
   templateUrl: './work-review.html',
   styleUrls: ['./work-review.scss'],
@@ -77,8 +80,6 @@ export class WorkReview implements OnInit, OnDestroy {
   proposalForm!: FormGroup;
   roleId!: number | null;
   approvalForm!: FormGroup;
-  private attachedFile: File | null = null;
-  fileSizeError: string | null = null; // New property to track file size errors
 
   breadcrumbItems: MenuItem[] = [
     { label: 'Dashboard', routerLink: '/dashboard' },
@@ -104,36 +105,12 @@ export class WorkReview implements OnInit, OnDestroy {
     this.approvalForm = this.fb.group({
       pdcApproveDate: [''],
       attachment: [''],
-      comments: ['', Validators.required],
+      comments: ['', [Validators.required, Validators.maxLength(255)]],
     });
   }
 
   onApprovalFileSelect(evt: Event) {
-    const input = evt.target as HTMLInputElement;
-    const file = input?.files && input.files.length ? input.files[0] : null;
-
-    const MAX_FILE_SIZE_MB = 1;
-    const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
-
-    if (file) {
-      if (file.size > MAX_FILE_SIZE_BYTES) {
-        this.fileSizeError = `File size exceeds ${MAX_FILE_SIZE_MB}MB. Please select a smaller file.`;
-        Swal.fire({
-          icon: 'error',
-          title: 'File Too Large',
-          text: this.fileSizeError,
-        });
-        input.value = ''; // Clear the input
-        this.attachedFile = null;
-      } else {
-        this.fileSizeError = null;
-        this.attachedFile = file;
-      }
-    } else {
-      this.fileSizeError = null;
-      this.attachedFile = null;
-    }
-    this.cdr.detectChanges();
+    handleFileUpload(evt, this.approvalForm, 'attachment'); 
   }
 
 async submitApproval(isApproved: boolean): Promise<void> {
@@ -178,14 +155,15 @@ async submitApproval(isApproved: boolean): Promise<void> {
       });
       return;
     }
-
-    if (this.fileSizeError) {
-      Swal.fire({
-        icon: 'error',
-        title: 'File Error',
-        text: this.fileSizeError,
-      });
-      return;
+    
+    // Check for file size error from the form control
+    if (this.approvalForm.get('attachment')?.hasError('invalidSize')) {
+        Swal.fire({
+            icon: 'error',
+            title: 'File Error',
+            text: 'File size exceeds the limit. Please select a smaller file.',
+        });
+        return;
     }
 
     const endpointMap: Record<number, string> = {
@@ -209,14 +187,15 @@ async submitApproval(isApproved: boolean): Promise<void> {
 
     if (this.roleId === 12) {
       const d = this.approvalForm.get('pdcApproveDate')?.value;
-      if (d) fd.append('pdcApproveDate', d);
+      if (d) fd.append('pdcApproveDate', this.formatDateForApi(d));
     }
 
     fd.append('comments', this.approvalForm.get('comments')?.value);
     fd.append('approved', String(isApproved));
 
-    if (this.attachedFile) {
-      fd.append('attachment', this.attachedFile);
+    const attachmentFile = this.approvalForm.get('attachment')?.value;
+    if (attachmentFile) {
+      fd.append('attachment', attachmentFile);
     }
 
     try {
@@ -477,6 +456,13 @@ async submitApproval(isApproved: boolean): Promise<void> {
     if (status === undefined || status === null) return '';
     if (typeof status === 'boolean') return status ? 'Active' : 'Inactive';
     return String(status);
+  }
+
+  private formatDateForApi(date: Date): string {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   getTypeOfMeetingLabel(value: string): string {

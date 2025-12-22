@@ -51,7 +51,7 @@
                       </div>
                       <div class="col-md-12">
                         <label class="form-label text-secondary fw-semibold">Meeting Date</label>
-                        <input type="date" class="form-control" formControlName="meetingDate" readonly />
+                        <p-datePicker formControlName="meetingDate" styleClass="w-100" [showIcon]="true" [readonlyInput]="true"></p-datePicker>
                       </div>
                     
                     </div>
@@ -228,13 +228,13 @@
 
                         <div class="col-md-6 col-lg-3">
                           <label class="form-label text-secondary fw-semibold">Estimated Work Start Date</label>
-                          <input type="date" class="form-control" formControlName="workStartDate" readonly />
+                          <p-datePicker formControlName="workStartDate" styleClass="w-100" [showIcon]="true" [readonlyInput]="true"></p-datePicker>
                         </div>
 
 
                         <div class="col-md-6 col-lg-3">
                           <label class="form-label text-secondary fw-semibold">Estimated Work End Date</label>
-                          <input type="date" class="form-control" formControlName="workEndDate" readonly />
+                          <p-datePicker formControlName="workEndDate" styleClass="w-100" [showIcon]="true" [readonlyInput]="true"></p-datePicker>
                         </div>
 
 
@@ -388,7 +388,7 @@
                     <div class="col-md-6 col-lg-3">
                       <label class="form-label text-secondary fw-semibold">PDC Approve Date <span
                           class="text-danger">*</span></label>
-                      <input type="date" class="form-control" formControlName="pdcApproveDate" />
+                      <p-datePicker formControlName="pdcApproveDate" styleClass="w-100" [showIcon]="true" [readonlyInput]="true"></p-datePicker>
                     </div>
                     }
 
@@ -397,9 +397,12 @@
                     <div class="col-md-6 col-lg-3">
                       <label class="form-label text-secondary fw-semibold">Attachment</label>
                       <input type="file" class="form-control" accept=".pdf,image/*"
-                        (change)="onApprovalFileSelect($event)" [class.is-invalid]="fileSizeError" />
-                      @if (fileSizeError) {
-                      <div class="invalid-feedback d-block">{{ fileSizeError }}</div>
+                        (change)="onApprovalFileSelect($event)"
+                        [class.is-invalid]="approvalForm.get('attachment')?.invalid && approvalForm.get('attachment')?.touched" />
+                      @if (approvalForm.get('attachment')?.invalid && approvalForm.get('attachment')?.touched) {
+                          @if (approvalForm.get('attachment')?.hasError('invalidSize')) {
+                              <div class="invalid-feedback d-block">File size must not exceed 3MB.</div>
+                          }
                       }
                     </div>
 
@@ -409,7 +412,16 @@
                         Comments <span class="text-danger">*</span>
                       </label>
                       <textarea class="form-control" rows="3" placeholder="Enter comments here..."
-                        formControlName="comments"></textarea>
+                        formControlName="comments"
+                        [class.is-invalid]="approvalForm.get('comments')?.invalid && approvalForm.get('comments')?.touched"></textarea>
+                      @if (approvalForm.get('comments')?.invalid && approvalForm.get('comments')?.touched) {
+                        @if (approvalForm.get('comments')?.hasError('required')) {
+                          <div class="invalid-feedback d-block">Comments are required.</div>
+                        }
+                        @if (approvalForm.get('comments')?.hasError('maxlength')) {
+                          <div class="invalid-feedback d-block">Comments cannot exceed 255 characters.</div>
+                        }
+                      }
                     </div>
                   </div>
 
