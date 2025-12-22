@@ -195,6 +195,32 @@ export class GeneratePayroll implements OnInit {
       .map((control) => control.get('id')?.value);
   }
 
+  get isGenerateDisabled(): boolean {
+    if (this.isGenerating) {
+      return true;
+    }
+    if (!this.searchForm) {
+      return true;
+    }
+
+    const values = this.searchForm.getRawValue();
+    if (!values.state || !values.county || !values.payam || !values.boma || !values.supportType) {
+      return true;
+    }
+
+    if (values.payrollType === 'single') {
+      if (!values.paymentCycle) {
+        return true;
+      }
+    } else { // combined
+      if (this.getSelectedPaymentCycles().length === 0) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   async generatePayroll() {
     const formValues = this.searchForm.value;
     let selectedCycles: number[] = [];

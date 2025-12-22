@@ -31,6 +31,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { InputTextModule } from 'primeng/inputtext';
 import { LookupService, StatusWageEnum } from '../../../services/lookup.service';
 import Swal from 'sweetalert2';
+import { validateFileSize } from '../../../validators/file-validator';
 
 interface WageRequest {
   id: number;
@@ -336,9 +337,26 @@ export class WageRequestApproval implements OnInit {
   }
 
   onFileSelect(event: any, item: WageRequest) {
-    const file = event.target.files[0];
+    const input = event.target as HTMLInputElement;
+    const file = input.files ? input.files[0] : null;
+
     if (file) {
-      item.attachment = file;
+      const validation = validateFileSize(file); 
+
+      if (validation.isValid) {
+        item.attachment = file;
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'File Too Large',
+          text: validation.message as string,
+        });
+        // Clear the input
+        input.value = '';
+        item.attachment = undefined;
+      }
+    } else {
+      item.attachment = undefined;
     }
   }
 
