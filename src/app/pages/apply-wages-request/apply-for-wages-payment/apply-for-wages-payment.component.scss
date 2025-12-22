@@ -1,0 +1,13 @@
+.select-all-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.select-all-text {
+  font-size: 0.85rem;
+  color: #6b7280; /* subtle gray */
+  font-weight: 500;
+  cursor: pointer;
+}

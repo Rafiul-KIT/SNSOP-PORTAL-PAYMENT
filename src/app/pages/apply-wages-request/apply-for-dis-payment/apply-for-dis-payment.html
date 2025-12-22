@@ -115,13 +115,14 @@
             </h5>
 
             <p-table [value]="beneficiaries" [(selection)]="selectedBeneficiaries" dataKey="beneficiaryId"
-                     [paginator]="true" [(rows)]="rows" [totalRecords]="totalRecords" [rowsPerPageOptions]="[10, 25, 50]"
-                     responsiveLayout="scroll" [lazy]="true" (onPage)="onPageChange($event)">
+                     responsiveLayout="scroll">
               <ng-template pTemplate="header">
                 <tr>
-                  <th style="width: 4rem">
-                    <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
-                  </th>
+                 <th class="select-all-header">
+  <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+  <span class="select-all-text">Select all</span>
+</th>
+
                   <th>Beneficiary ID</th>
                   <th>Household No.</th>
                   <th>Beneficiary Name</th>

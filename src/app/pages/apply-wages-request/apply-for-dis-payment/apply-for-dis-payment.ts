@@ -44,8 +44,8 @@ export class ApplyForDisPayment implements OnInit {
   selectedBeneficiaries: any[] = [];
   attachmentFile: File | null = null; // To store the selected file
   showResults = false;
-  totalRecords: number = 0;
-  rows: number = 10;
+  readonly MAX_ATTACHMENT_SIZE_MB = 3;
+
 
   // Dropdown options
   years: any[] = [];
@@ -207,7 +207,7 @@ initializeForm(): void {
   }
 
   loadPaymentCycles(): void {
-    this.paymentCycles = Array.from({ length: 11 }, (_, i) => ({
+    this.paymentCycles = Array.from({ length: 15 }, (_, i) => ({
       label: `Payment Cycle ${i + 1}`,
       value: i + 1
     }));
@@ -216,8 +216,23 @@ initializeForm(): void {
   onFileChange(event: any): void {
     const fileList: FileList = event.target.files;
     if (fileList.length > 0) {
-      this.attachmentFile = fileList[0];
-      this.submissionForm.patchValue({ attachment: this.attachmentFile?.name });
+      const file = fileList[0];
+      const fileSizeInMB = file.size / (1024 * 1024); // Convert bytes to MB
+
+      if (fileSizeInMB > this.MAX_ATTACHMENT_SIZE_MB) {
+        Swal.fire({
+          icon: 'error',
+          title: 'File Size Exceeded',
+          text: `Attachment size cannot exceed ${this.MAX_ATTACHMENT_SIZE_MB} MB.`
+        });
+        // Clear the file input
+        event.target.value = '';
+        this.attachmentFile = null;
+        this.submissionForm.patchValue({ attachment: null });
+      } else {
+        this.attachmentFile = file;
+        this.submissionForm.patchValue({ attachment: this.attachmentFile?.name });
+      }
     } else {
       this.attachmentFile = null;
       this.submissionForm.patchValue({ attachment: null });
@@ -233,20 +248,14 @@ initializeForm(): void {
 
     this.beneficiaries = [];
     this.selectedBeneficiaries = [];
-    this.totalRecords = 0;
     this.showResults = true; // Show table container immediately
 
-    await this.fetchBeneficiaries(0, this.rows);
+    await this.fetchBeneficiaries();
   }
 
-  onPageChange(event: any): void {
-    this.loading = true;
-    this.rows = event.rows;
-    const page = event.first / event.rows;
-    this.fetchBeneficiaries(page, this.rows);
-  }
 
-  private async fetchBeneficiaries(page: number, size: number): Promise<void> {
+
+  private async fetchBeneficiaries(): Promise<void> {
     this.loading = true;
 
     const formValue = this.wagesForm.getRawValue();
@@ -257,24 +266,21 @@ initializeForm(): void {
       paymentCycleId: formValue.paymentCycleId
     };
 
-    const url = `api/wage-request/dis/beneficiary/can-be-included?page=${page}&size=${size}`;
+    const url = `api/wage-request/dis/beneficiary/can-be-included?page=0&size=10000`;
 
     try {
       const response: any = await this.apiService.POST(url, requestBody);
       if ((response.data.code === 200) && response.data && response.data.content) {
         this.beneficiaries = response.data.content;
-        this.totalRecords = response.data.totalElements; // Assuming this property exists
         if (this.beneficiaries.length === 0) {
           Swal.fire({ icon: 'info', title: 'Info', text: 'No beneficiaries found for the selected criteria.' });
         }
       } else {
         this.beneficiaries = [];
-        this.totalRecords = 0;
         Swal.fire({ icon: 'error', title: 'Error', text: response.message || 'No beneficiaries found or API error' });
       }
     } catch (error: any) {
       this.beneficiaries = [];
-      this.totalRecords = 0;
       Swal.fire({ icon: 'error', title: 'Error', text: error.message || 'API call failed' });
     } finally {
       this.loading = false;

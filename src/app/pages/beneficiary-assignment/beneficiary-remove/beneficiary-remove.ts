@@ -101,8 +101,27 @@ export class BeneficiaryRemove implements OnInit {
 
   onFileSelect(event: any): void {
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.selectedFile = input.files[0];
+    const file = input.files ? input.files[0] : null;
+    const MAX_FILE_SIZE_MB = 3;
+    const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024; // 1 MB
+
+    if (file) {
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        Swal.fire({
+          icon: 'error',
+          title: 'File Too Large',
+          text: `File size exceeds the limit of ${MAX_FILE_SIZE_MB} MB. Please select a smaller file.`,
+        });
+        // Clear the input field
+        if (input) {
+          input.value = '';
+        }
+        
+        this.selectedFile = null;
+        this.cdr.detectChanges();
+        return;
+      }
+      this.selectedFile = file;
     } else {
       this.selectedFile = null;
     }

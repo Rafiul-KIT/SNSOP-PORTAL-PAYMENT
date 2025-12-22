@@ -51,7 +51,8 @@ interface Beneficiary {
     TableModule
   ],
   providers: [],
-  templateUrl: './apply-for-wages-payment.component.html'
+  templateUrl: './apply-for-wages-payment.component.html',
+  styleUrls: ['./apply-for-wages-payment.component.scss']
 })
 export class ApplyForWagesPaymentComponent implements OnInit {
   wagesForm!: FormGroup;
@@ -72,10 +73,7 @@ export class ApplyForWagesPaymentComponent implements OnInit {
   tableLoading = false;
   submitting = false;
 
-  // Pagination
-  totalRecords = 0;
-  pageNumber = 0;
-  pageSize = 10;
+
 
   constructor(
     private fb: FormBuilder,
@@ -127,6 +125,10 @@ export class ApplyForWagesPaymentComponent implements OnInit {
       { label: 'Payment Cycle 9', value: 9 },
       { label: 'Payment Cycle 10', value: 10 },
       { label: 'Payment Cycle 11', value: 11 },
+       { label: 'Payment Cycle 11', value: 12 },
+        { label: 'Payment Cycle 11', value: 13 },
+         { label: 'Payment Cycle 11', value: 14 },
+          { label: 'Payment Cycle 11', value: 15 },
     ];
   }
 
@@ -197,12 +199,11 @@ export class ApplyForWagesPaymentComponent implements OnInit {
     return;
   }
 
-  await this.loadBeneficiaries(0);
+  await this.loadBeneficiaries();
 }
 
-  async loadBeneficiaries(page: number): Promise<void> {
+  async loadBeneficiaries(): Promise<void> {
     this.tableLoading = true;
-    this.pageNumber = page;
 
     try {
       const formValue = this.wagesForm.getRawValue();
@@ -213,13 +214,12 @@ export class ApplyForWagesPaymentComponent implements OnInit {
       };
 
       const response: any = await this.apiService.POST(
-        `api/wage-request/lipw/beneficiary/can-be-included?page=${page}&size=${this.pageSize}`,
+        `api/wage-request/lipw/beneficiary/can-be-included?page=0&size=10000`,
         requestBody
       );
 
       if (response?.data?.code === 200) {
         this.beneficiaries = response.data.content || [];
-        this.totalRecords = response.data.totalElements || 0;
         this.showTable = true;
         this.selectedBeneficiaries = [];
 
@@ -252,11 +252,7 @@ export class ApplyForWagesPaymentComponent implements OnInit {
     }
   }
 
-onPageChange(event: any): void {
-  if (event && event.page !== undefined) {
-    this.loadBeneficiaries(event.page);
-  }
-}
+
 
   async onSubmitWageRequest(): Promise<void> {
     if (this.selectedBeneficiaries.length === 0) {
