@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MenuItem } from 'primeng/api';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { ApiService } from '../../services/api.service';
-import { LookupService } from '../../services/lookup.service';
+import { LookupItem, LookupService } from '../../services/lookup.service';
 import { LoadingSpinner } from "../../components/loading-spinner/loading-spinner";
 import { Loader } from "../../components/loader/loader";
 import { ReportBeneficiaryList } from "../report-list/report-beneficiary-list/report-beneficiary-list";
@@ -16,18 +16,32 @@ import { ReportCompleteHouseholdSurvey } from "../report-list/report-complete-ho
 import { ReportReconciledSummaryResult } from "../report-list/report-reconciled-summary-result/report-reconciled-summary-result";
 import { ReportReconciliationSummaryCount } from "../report-list/report-reconciliation-summary-count/report-reconciliation-summary-count";
 import { Button } from "primeng/button";
-import { ActivatedRoute, Data } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { SelectModule } from 'primeng/select';
+
 
 
 @Component({
   selector: 'app-report',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, BreadcrumbModule, LoadingSpinner, Loader, ReportBeneficiaryList, ReportStaffWiseBeneficiaryCount, ReportAgeGroupGenderWiseBeneficiaryCount, ReportMatchList, ReportLocationWiseNomineeCount, ReportCompleteHouseholdSurvey, ReportReconciledSummaryResult, ReportReconciliationSummaryCount, Button],
+  imports: [CommonModule, ReactiveFormsModule, BreadcrumbModule,
+    LoadingSpinner, Loader, ReportBeneficiaryList,
+    ReportStaffWiseBeneficiaryCount, ReportAgeGroupGenderWiseBeneficiaryCount,
+    ReportMatchList, ReportLocationWiseNomineeCount, ReportCompleteHouseholdSurvey,
+    ReportReconciledSummaryResult, ReportReconciliationSummaryCount, Button, FloatLabelModule, SelectModule],
   templateUrl: './report.html',
   styleUrls: ['./report.scss']
 })
 export class ReportComponent implements OnInit {
 
+  states: LookupItem[] = [];
+  counties: LookupItem[] = [];
+  payams: LookupItem[] = [];
+  bomas: LookupItem[] = [];
+
+  genderOptions: LookupItem[] = [];
+  registrationPhaseOptions: LookupItem[] = [];
   isLoading: boolean = true;
   isReportGenerating: boolean = false;
   items: MenuItem[] | undefined;
@@ -46,7 +60,7 @@ export class ReportComponent implements OnInit {
   reportAgeGroupGenderWiseCountResult: any = null;
   reportLocationWiseNomineeCount: any = null;
   reportHouseholdSurvery: any = null;
-  reportReconciledSummaryResult: any = null;
+  reportReconciledSummaryResultCount: any = null;
   reportReconciledSummaryTotals = {
     totalBeneficiaries: 0,
     totalPaid: 0,
@@ -59,9 +73,11 @@ export class ReportComponent implements OnInit {
   reportForm: FormGroup = new FormGroup({});
 
   constructor(
-      private route: ActivatedRoute,
-    private apiService : ApiService, 
-    public lookupService: LookupService
+    private apiService: ApiService,
+    public lookupService: LookupService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) { }
 
   showReportForm = (reportType: number, reportTitle: string): void => {
@@ -72,7 +88,7 @@ export class ReportComponent implements OnInit {
     this.reportMatchListResult = null;
     this.reportLocationWiseNomineeCount = null;
     this.reportHouseholdSurvery = null;
-    this.reportReconciledSummaryResult = null;
+    this.reportReconciledSummaryResultCount = null;
     this.reportReconciliationSummaryCount = null;
 
     switch (reportType) {
@@ -151,7 +167,7 @@ export class ReportComponent implements OnInit {
           countyId: new FormControl('', Validators.required),
           payamId: new FormControl('', Validators.required),
           bomaId: new FormControl('', Validators.required),
-          scheme: new FormControl('ALL', Validators.required),
+          criteria: new FormControl('ALL', Validators.required),
           paymentStatus: new FormControl('ALL', Validators.required),
           size: new FormControl(1000, Validators.required),
           paymentCycle: new FormControl('1', Validators.required)
@@ -182,7 +198,7 @@ export class ReportComponent implements OnInit {
       sortColumn: "ID",
       sortOrder: "DESC"
     };
-    this.apiService.POST('api/user/search', payload).then(res => {
+    this.apiService.POST_AUTH('api/users/search', payload).then(res => {
       if (res.status === 200) {
         this.userList = res.data.users;
       }
@@ -195,10 +211,10 @@ export class ReportComponent implements OnInit {
   getCountyLookupByStateId = (evt: Event): void => {
     const target = evt.target as HTMLSelectElement;
     const stateId = target.value;
-    this.apiService.POST('api/lookup/search', { 
-      lookupType: "COUNTY", 
-      parentId: (stateId !== '-1') ? stateId : "", 
-      size: -1 
+    this.apiService.POST('api/lookup/geo/search', {
+      lookupType: "COUNTY",
+      parentId: (stateId !== '-1') ? stateId : "",
+      size: -1
     }).then(res => {
       if (res.status === 200) {
         this.countyList = res.data.lookups;
@@ -219,10 +235,10 @@ export class ReportComponent implements OnInit {
   getPayamLookupByCountyId = (evt: Event): void => {
     const target = evt.target as HTMLSelectElement;
     const countyId = target.value;
-    this.apiService.POST('api/lookup/search', { 
-      lookupType: "PAYAM", 
-      parentId: (countyId !== '-1') ? countyId : "", 
-      size: -1 
+    this.apiService.POST('api/lookup/geo/search', {
+      lookupType: "PAYAM",
+      parentId: (countyId !== '-1') ? countyId : "",
+      size: -1
     }).then(res => {
       if (res.status === 200) {
         this.payamList = res.data.lookups;
@@ -241,10 +257,10 @@ export class ReportComponent implements OnInit {
   getBomaLookupByPayamId = (evt: Event): void => {
     const target = evt.target as HTMLSelectElement;
     const payamId = target.value;
-    this.apiService.POST('api/lookup/search', { 
-      lookupType: "BOMA", 
-      parentId: (payamId !== '-1') ? payamId : "", 
-      size: -1 
+    this.apiService.POST('api/lookup/geo/search', {
+      lookupType: "BOMA",
+      parentId: (payamId !== '-1') ? payamId : "",
+      size: -1
     }).then(res => {
       if (res.status === 200) {
         this.bomaList = res.data.lookups;
@@ -322,7 +338,7 @@ export class ReportComponent implements OnInit {
         this.reportHouseholdSurvery = data;
         break;
       case 9:
-        this.reportReconciledSummaryResult = data;
+        this.reportReconciledSummaryResultCount = data;
         this.reportReconciledSummaryTotals = data;
         break;
       case 10:
@@ -330,7 +346,6 @@ export class ReportComponent implements OnInit {
         break;
     }
   }
-
   generateReport = (): void => {
     this.isReportGenerating = true;
     const endpoint = this.determineEndpoint();
@@ -341,12 +356,12 @@ export class ReportComponent implements OnInit {
         county: parseInt(this.reportForm.value.countyId) || null,
         payam: parseInt(this.reportForm.value.payamId) || null,
         boma: parseInt(this.reportForm.value.bomaId) || null,
-        scheme: this.reportForm.value.scheme || null,
+        criteria: this.reportForm.value.criteria || null,
         paymentStatus: this.reportForm.value.paymentStatus || null,
         size: this.reportForm.value.size || null,
         paymentCycle: this.reportForm.value.paymentCycle ? parseInt(this.reportForm.value.paymentCycle, 10) : null
       };
-      
+
       this.reportReconciledSummaryTotals = {
         totalBeneficiaries: 0,
         totalPaid: 0,
@@ -358,38 +373,43 @@ export class ReportComponent implements OnInit {
           console.log('Full API Response Data:', res.data);
 
           if (res.status === 200 && res.data) {
-            const beneficiaries = res?.data?.data?.beneficiaries ?? [];
+            const beneficiaries = res?.data?.reportData?.beneficiaries ?? [];
 
-            this.reportReconciledSummaryResult = beneficiaries.map((beneficiary: any) => ({
+            this.reportReconciledSummaryResultCount = beneficiaries.map((beneficiary: any) => ({
               householdNumber: beneficiary.householdNumber,
-              name: `${beneficiary.firstName} ${beneficiary.lastName} ${beneficiary.surName}`.trim(),
+              name: `${beneficiary.firstName} ${beneficiary.middleName} ${beneficiary.lastName}`.trim(),
               enrolmentNumber: beneficiary.enrolmentNumber,
-              wage: beneficiary.wage,
-              supportType: beneficiary.supportType === 1 ? "DIS" : "LIPW",
-              reqNo: beneficiary.reqNo,
+              wage: beneficiary.wageSspTotal,
+              supportType: beneficiary.criteria,
+              reqNo: beneficiary.requestNumber,
               paymentCycle: beneficiary.paymentCycle,
-              paymentCenter: beneficiary.paymentCenter,
-              status: beneficiary.status,
+              paymentCenter: beneficiary.paymentCenter ?? 'N/A',
+              status: beneficiary.paymentStatus,
+              exchangeRate: beneficiary.exchangeRate,
+              paymentDate: beneficiary.paymentDate ? beneficiary.paymentDate.split(' ')[0] : 'N/A',
             }));
-            
+
             this.reportReconciledSummaryTotals = {
-              totalBeneficiaries: res?.data?.data?.totalBeneficiaries ?? 0,
-              totalPaid: res?.data?.data?.totalPaid ?? 0,
-              totalUnpaid: res?.data?.data?.totalUnpaid ?? 0,
+              totalBeneficiaries: res?.data?.reportData?.totalBeneficiaries ?? 0,
+              totalPaid: res?.data?.reportData?.totalPaid ?? 0,
+              totalUnpaid: res?.data?.reportData?.totalUnpaid ?? 0,
             };
 
-            console.log('Mapped Data:', this.reportReconciledSummaryResult);
+            console.log('Mapped Data:', this.reportReconciledSummaryResultCount);
             console.log('Summary Totals:', this.reportReconciledSummaryTotals);
           } else {
-            this.reportReconciledSummaryResult = [];
+            this.reportReconciledSummaryResultCount = [];
           }
           this.isReportGenerating = false;
+          this.cdr.markForCheck(); // Added here
         })
         .catch((err: any) => {
           console.error('Error calling reconciled-summary-report API:', err.response?.data || err.message);
-          this.reportReconciledSummaryResult = [];
+          this.reportReconciledSummaryResultCount = [];
           this.isReportGenerating = false;
+          this.cdr.markForCheck(); // Added here
         });
+
       return;
     }
 
@@ -422,11 +442,13 @@ export class ReportComponent implements OnInit {
             this.reportReconciliationSummaryCount = [];
           }
           this.isReportGenerating = false;
+          this.cdr.markForCheck(); // Added here
         })
         .catch((err: any) => {
           console.error('Error calling reconciliation-summary-count API:', err.response?.data || err.message);
           this.reportReconciliationSummaryCount = [];
           this.isReportGenerating = false;
+          this.cdr.markForCheck(); // Added here
         });
 
       return;
@@ -449,10 +471,12 @@ export class ReportComponent implements OnInit {
           this.determineReportResultRenderObject(null);
         }
         this.isReportGenerating = false;
+        this.cdr.markForCheck(); // Added here
       }).catch(err => {
         console.error(err);
         this.determineReportResultRenderObject(null);
         this.isReportGenerating = false;
+        this.cdr.markForCheck(); // Added here
       });
     } else {
       this.apiService.POST(endpoint, this.reportForm.value).then(res => {
@@ -462,13 +486,17 @@ export class ReportComponent implements OnInit {
           this.determineReportResultRenderObject(null);
         }
         this.isReportGenerating = false;
+        this.cdr.markForCheck(); // Added here
       }).catch(err => {
         console.error(err);
         this.determineReportResultRenderObject(null);
         this.isReportGenerating = false;
+        this.cdr.markForCheck(); // Added here
       });
     }
-  }
+    this.cdr.markForCheck(); // Added here
+  };
+
 
   resetForm(form: FormGroup): void {
     this.showReportForm(this.selectedReportTypeId, this.selectedReportTypeTitle);
@@ -485,26 +513,23 @@ export class ReportComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.items = [{ label: 'Report', icon: 'fas fa-chart-line me-2' }];
-  this.home = { label: '', icon: 'fas fa-home me-2', routerLink: '/' };
-  this.isLoading = false;
-
-  // If user came via /report/details or /report/summary, fire the right form
-  this.route.data.subscribe((d: Data) => {
-    const t = d['reportType'];
-    const title = d['reportTitle'];
-    if (t && title) {
-      // hide options and show targeted form
-      this.reportOptions = false;
-      this.showReportForm(t, title);
-    }
-  });
-    this.items = [{ label: 'Report', icon: 'fas fa-chart-line me-2' }];
-    this.home = { 
-      label: '', 
-      icon: 'fas fa-home me-2', 
-      routerLink: '/' 
+    this.home = {
+      label: '',
+      icon: 'fas fa-home me-2',
+      routerLink: '/'
     };
     this.isLoading = false;
+
+    this.route.data.subscribe(data => {
+      const reportType = data['reportType'];
+      const reportTitle = data['reportTitle'];
+      if (reportType && reportTitle) {
+        this.items = [{ label: reportTitle, icon: 'fas fa-chart-line me-2' }];
+        this.showReportForm(reportType, reportTitle);
+      }
+    });
+  }
+  showUnderConstruction() {
+    this.router.navigate(['under-construction']);
   }
 }

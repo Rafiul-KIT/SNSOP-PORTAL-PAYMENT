@@ -1,15 +1,15 @@
 <div class="report-container">
   <p-table
-    [value]="reportReconciliationSummaryCount()"
+    [value]="reportReconciliationSummaryCount"
     [paginator]="true"
     [rows]="10"
     [rowsPerPageOptions]="[10, 20, 50, 100]"
     [tableStyle]="{ 'width': '100%' }"
   >
-   
+
     <ng-template pTemplate="caption">
       <div class="d-flex justify-content-start align-items-center">
-        <button
+        <!-- <button
           type="button"
           class="btn btn-success btn-sm me-2"
           (click)="exportExcel()"
@@ -17,7 +17,7 @@
           tooltipPosition="bottom"
         >
           <i class="fas fa-file-excel me-2"></i>Export as XLS
-        </button>
+        </button> -->
         <button
           type="button"
           class="btn btn-warning btn-sm me-2"
@@ -50,7 +50,7 @@
       </tr>
     </ng-template>
 
-  
+
     <ng-template pTemplate="body" let-rowData let-rowIndex="rowIndex">
       <tr class="text-center data-row" [class.grey-row]="rowIndex % 2 === 0">
         <td class="bordered">{{ rowIndex + 1 }}</td>
