@@ -106,10 +106,20 @@ export class ApplyForWagesPaymentComponent implements OnInit {
         wageRate: [{ value: 2.7, disabled: true }, [Validators.required, Validators.min(0.01)]],
         fromDate: [null, Validators.required],
         toDate: [null, Validators.required],
-        paymentCycle: [null, Validators.required]
+        paymentCycle: [null, Validators.required],
+        attachment: [null]
       },
       { validators: this.dateRangeValidator }
     );
+  }
+
+  onFileSelect(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.wagesForm.patchValue({
+        attachment: input.files[0]
+      });
+    }
   }
 
   initializePaymentCycles(): void {
@@ -281,17 +291,21 @@ export class ApplyForWagesPaymentComponent implements OnInit {
       const formValue = this.wagesForm.getRawValue();
       const beneficiaryIds = this.selectedBeneficiaries.map(b => b.beneficiaryId);
 
-      const requestBody = {
-        subprojectId: Number(this.subprojectId),
-        fromDate: this.formatDate(formValue.fromDate),
-        toDate: this.formatDate(formValue.toDate),
-        paymentCycle: Number(formValue.paymentCycle),
-        beneficiaryIds: beneficiaryIds
-      };
+      const formData = new FormData();
+      formData.append('subprojectId', this.subprojectId as string);
+      formData.append('fromDate', this.formatDate(formValue.fromDate));
+      formData.append('toDate', this.formatDate(formValue.toDate));
+      formData.append('paymentCycle', formValue.paymentCycle);
+      
+      beneficiaryIds.forEach(id => formData.append('beneficiaryIds', id.toString()));
 
-      const response: any = await this.apiService.POST(
+      if (formValue.attachment) {
+        formData.append('attachment', formValue.attachment);
+      }
+      
+      const response: any = await this.apiService.POST_FORM_DATA(
         'api/wage-request/lipw/beneficiary/include',
-        requestBody
+        formData
       );
 
       if (response?.data?.code === 200) {

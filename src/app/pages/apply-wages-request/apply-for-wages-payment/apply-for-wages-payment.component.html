@@ -132,6 +132,14 @@
                   <small class="text-danger">Payment cycle is required</small>
                   }
                 </div>
+                   <!-- Attachment -->
+                <div class="col-md-3 col-lg-3 mb-3">
+                  <label for="attachment" class="form-label fw-semibold">Attachment <small class="text-muted">(Required for
+                      submission)</small></label>
+                  <input type="file" id="attachment" class="form-control" (change)="onFileSelect($event)">
+                </div>
+
+             
               </div>
             </fieldset>
 
