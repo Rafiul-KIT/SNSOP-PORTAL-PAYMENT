@@ -1,4 +1,4 @@
-import { Component, inject, input } from '@angular/core';
+import { Component, inject, Input, input, OnInit } from '@angular/core';
 
 import { saveAs } from 'file-saver';
 import { TableModule } from 'primeng/table';
@@ -15,6 +15,8 @@ interface ReconciledSummaryRow {
   wage: number;
   supportType: string;
   reqNo: string;
+  exchangeRate: string;
+  paymentDate: string;
   paymentCycle: string;
   paymentCenter: string;
   status: string;
@@ -33,103 +35,110 @@ interface SummaryTotals {
   templateUrl: './report-reconciled-summary-result.html',
   styleUrls: ['./report-reconciled-summary-result.scss'],
 })
-export class ReportReconciledSummaryResult {
-  
-  reportReconciledSummaryResult = input<ReconciledSummaryRow[]>([]);
-  reportReconciledSummaryTotals = input<SummaryTotals>({
-    totalBeneficiaries: 0,
-    totalPaid: 0,
-    totalUnpaid: 0,
-  });
+export class ReportReconciledSummaryResult implements OnInit {
 
- 
-  private lookupService = inject(LookupService);
+
+  @Input() reportReconciledSummaryResultCount: any;
+  @Input() reportReconciledSummaryTotals: {
+    totalBeneficiaries: number;
+    totalPaid: number;
+    totalUnpaid: number;
+  } = { totalBeneficiaries: 0, totalPaid: 0, totalUnpaid: 0 };
+
+  constructor(public lookupService: LookupService) {}
+
+
+  ngOnInit(): void {
+  }
 
   async exportPdf() {
-    if (!this.reportReconciledSummaryResult()?.length) {
+    if (
+      !this.reportReconciledSummaryResultCount ||
+      this.reportReconciledSummaryResultCount.length === 0
+    ) {
       console.error('No data available to export.');
       return;
     }
 
-    const jsPDF = await import('jspdf');
-    const autoTable = (await import('jspdf-autotable')).default;
-    const doc = new jsPDF.default('landscape');
-    const startX = 10;
-    let startY = 20;
-    const lineHeight = 8;
-    const padding = 5;
-    const headerFontSize = 10;
-    const bodyFontSize = 8;
+    const { default: jsPDF } = await import('jspdf');
+    const { default: autoTable } = await import('jspdf-autotable');
+
+    const doc = new jsPDF('landscape');
+
+    // Add title
+    doc.setFontSize(18);
+    doc.text('Reconciled Summary Result Report', 14, 20);
+
+    // Add summary totals
+    doc.setFontSize(10);
+    const summaryText = `Total Beneficiaries: ${
+      this.reportReconciledSummaryTotals.totalPaid +
+      this.reportReconciledSummaryTotals.totalUnpaid
+    } | Total Paid: ${
+      this.reportReconciledSummaryTotals.totalPaid
+    } | Total Unpaid: ${this.reportReconciledSummaryTotals.totalUnpaid}`;
+    doc.text(summaryText, 14, 30);
 
     const headers = [
-      'Household Number',
+      'HH Number',
       'Name',
       'Enrolment No',
       'Wage',
-      'Support Type',
-      'Request No',
-      'Payment Cycle',
-      'Payment Center',
+      'Ex Rate',
+      'Pay Date',
+      'Supp Type',
+      'Req No',
+      'Pay Cycle',
+      'Pay Center',
       'Status',
     ];
 
-    const columnWidths = [60, 25, 20, 15, 15, 30, 25, 25, 15];
+    const data = this.reportReconciledSummaryResultCount.map(
+      (row: ReconciledSummaryRow) => [
+        row.householdNumber,
+        row.name,
+        row.enrolmentNumber,
+        `SSP ${row.wage}`,
+        row.exchangeRate,
+        row.paymentDate,
+        row.supportType,
+        row.reqNo,
+        `Payment Cycle ${row.paymentCycle}`,
+        row.paymentCenter || 'N/A',
+        row.status,
+      ]
+    );
 
-   
-    doc.setFontSize(headerFontSize);
-    headers.forEach((header, i) => {
-      const xPosition = startX + columnWidths.slice(0, i).reduce((a, b) => a + b, 0) + padding * i;
-      doc.text(header, xPosition, startY);
-    });
-    startY += lineHeight;
-
-  
-    doc.setFontSize(bodyFontSize);
-    this.reportReconciledSummaryResult().forEach((row) => {
-      const rowData = [
-        row.householdNumber || '',
-        row.name || '',
-        row.enrolmentNumber || '',
-        row.wage.toString() || '',
-        row.supportType || '',
-        row.reqNo || '',
-        row.paymentCycle || '',
-        row.paymentCenter || '',
-        row.status || '',
-      ];
-
-      rowData.forEach((data, i) => {
-        const xPosition = startX + columnWidths.slice(0, i).reduce((a, b) => a + b, 0) + padding * i;
-        doc.text(data.toString(), xPosition, startY);
-      });
-
-      startY += lineHeight;
-
-     
-      if (startY > 190) {
-        doc.addPage('landscape');
-        startY = 20;
-        doc.setFontSize(headerFontSize);
-        headers.forEach((header, i) => {
-          const xPosition = startX + columnWidths.slice(0, i).reduce((a, b) => a + b, 0) + padding * i;
-          doc.text(header, xPosition, startY);
-        });
-        startY += lineHeight;
-        doc.setFontSize(bodyFontSize);
-      }
+    autoTable(doc, {
+      head: [headers],
+      body: data,
+      startY: 35,
+      theme: 'grid',
+      headStyles: {
+        fillColor: [0, 102, 204],
+        textColor: 255,
+        fontStyle: 'bold',
+      },
+      alternateRowStyles: {
+        fillColor: [240, 248, 255],
+      },
+      styles: {
+        fontSize: 8,
+        cellPadding: 2,
+      },
     });
 
     doc.save('ReconciliationDetailReport.pdf');
   }
 
   async exportExcel() {
-    if (!this.reportReconciledSummaryResult()?.length) {
+     if (!this.reportReconciledSummaryResultCount || this.reportReconciledSummaryResultCount.length === 0) {
       console.error('No data available to export.');
       return;
     }
 
     const xlsx = await import('xlsx');
-    const worksheet = xlsx.utils.json_to_sheet(this.reportReconciledSummaryResult());
+    const worksheet = xlsx.utils.json_to_sheet(this.reportReconciledSummaryResultCount);
 
     // Adjust column widths
     const columnWidths = [
@@ -137,6 +146,8 @@ export class ReportReconciledSummaryResult {
       { wch: 25 }, // Name
       { wch: 15 }, // Enrolment Number
       { wch: 10 }, // Wage
+      { wch: 10 }, //exchange rate
+      { wch: 10 }, // payment date
       { wch: 10 }, // Support Type
       { wch: 20 }, // Request Number
       { wch: 20 }, // Payment Cycle

@@ -13,9 +13,45 @@
             <h3 class="text-center">Select Report Type</h3>
             <hr>
             <div class="row g-2">
-          
-         
                 <div class="col-12 col-md-12 col-lg-12">
+                    <button class="btn btn-outline-custom btn-lg w-100"
+                        (click)="showReportForm(1, 'Boma Wise Beneficiary List Report')">
+                        Boma Wise Beneficiary List Report
+                    </button>
+                </div>
+                <div class="col-12 col-md-12 col-lg-12">
+                    <button class="btn btn-outline-custom btn-lg w-100"
+                        (click)="showReportForm(2, 'Boma & Data Entry Staff Wise Registration Report')">
+                        Boma & Data Entry Staff Wise Registration Report
+                    </button>
+
+                </div>
+                <div class="col-12 col-md-12 col-lg-12">
+                    <button class="btn btn-outline-custom btn-lg w-100"
+                        (click)="showReportForm(5, 'Boma Wise Age Group Report')">
+                        Boma Wise Age Group Report
+                    </button>
+                </div>
+
+                <div class="col-12 col-md-12 col-lg-12">
+                    <button class="btn btn-outline-custom btn-lg w-100"
+                        (click)="showReportForm(6, 'Households Interested in Component 2 Report')">
+                        Households Interested in Component 2 Report
+                    </button>
+                </div>
+                <div class="col-12 col-md-12 col-lg-12">
+                    <button class="btn btn-outline-custom btn-lg w-100"
+                        (click)="showReportForm(7, 'Report for Biometric Match List')">
+                        Biometric Match List Report
+                    </button>
+                </div>
+                <div class="col-12 col-md-12 col-lg-12">
+                    <button class="btn btn-outline-custom btn-lg w-100"
+                        (click)="showReportForm(8, 'Complete Household Survey Report')">
+                        Complete Household Survey Report
+                    </button>
+                </div>
+                <!-- <div class="col-12 col-md-12 col-lg-12">
                     <button class="btn btn-outline-custom btn-lg w-100"
                         (click)="showReportForm(9, 'Reconciliation Detail Report')">
                         Reconciliation Detail Report
@@ -26,7 +62,7 @@
                         (click)="showReportForm(10, 'Reconciliation Summary Report')">
                         Reconciliation Summary Report
                     </button>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>
@@ -35,7 +71,9 @@
         <div class="col-12 col-md-8">
             <div class="bg-light p-2 d-flex justify-content-between align-items-center w-100">
                 <h6 class="mb-0"><b>Report Type:</b> {{selectedReportTypeTitle}}</h6>
-                
+                <!-- <button class="btn btn-outline-dark btn-sm" (click)="reportOptions = true;">
+                    <i class="fas fa-arrow-left me-2"></i>Change Report Type
+                </button> -->
             </div>
             <form novalidate [formGroup]="reportForm" class="row mt-2">
                 @if (reportForm.get('staffUserName')) {
@@ -43,9 +81,9 @@
                     <div class="form-floating mb-3">
                         <select class="form-select" id="staffUserName" formControlName="staffUserName">
                             <option value="">Select Staff</option>
-                            @for (staff of userList; track staff.userName) {
-                            <option [value]="staff.userName">
-                                {{staff.firstName}} {{staff.middleName}} {{staff.lastName}}
+                            @for (staff of userList; track staff.fullName) {
+                            <option [value]="staff.username">
+                                {{staff.fullName}}
                             </option>
                             }
                         </select>
@@ -173,15 +211,15 @@
                     </div>
                 </div>
                 }
-                @if (reportForm.get('scheme')) {
+                @if (reportForm.get('criteria')) {
                 <div class="col-12 col-md-4 col-lg-3">
                     <div class="form-floating mb-3">
-                        <select class="form-select" id="scheme" formControlName="scheme">
+                        <select class="form-select" id="criteria" formControlName="criteria">
                             <option value="ALL">ALL</option>
                             <option value="LIPW">LIPW</option>
                             <option value="DIS">DIS</option>
                         </select>
-                        <label for="scheme">Scheme</label>
+                        <label for="criteria">Support Type</label>
                     </div>
                 </div>
                 }
@@ -206,6 +244,10 @@
                             <option value="3">Payment Cycle 3</option>
                             <option value="4">Payment Cycle 4</option>
                             <option value="5">Payment Cycle 5</option>
+                            <option value="6">Payment Cycle 6</option>
+                            <option value="7">Payment Cycle 7</option>
+                            <option value="8">Payment Cycle 8</option>
+                            <option value="9">Payment Cycle 9</option>
                         </select>
                         <label for="paymentCycle">Payment Cycle</label>
                     </div>
@@ -215,9 +257,9 @@
                 <div class="col-12 col-md-4 col-lg-3">
                     <div class="form-floating mb-3">
                         <select class="form-select" id="registrationPhase" formControlName="registrationPhase">
-                            <option value="">Select Registration Phase</option>
-                            <option value="AF">AF</option>
-                            <option value="PARENT">PARENT</option>
+                            <option value= "" >Select Registration Phase</option>
+                            <option value= "1" >AF</option>
+                            <option value= "0" >PARENT</option>
                         </select>
                         <label for="registrationPhase">Registration Phase</label>
                     </div>
@@ -257,8 +299,8 @@
         @if (reportHouseholdSurvery) {
         <app-report-complete-household-survey [reportResult]="reportHouseholdSurvery" />
         }
-        @if (reportReconciledSummaryResult) {
-        <app-report-reconciled-summary-result [reportReconciledSummaryResult]="reportReconciledSummaryResult"
+        @if (reportReconciledSummaryResultCount) {
+        <app-report-reconciled-summary-result [reportReconciledSummaryResultCount]="reportReconciledSummaryResultCount"
             [reportReconciledSummaryTotals]="reportReconciledSummaryTotals" />
         }
         @if (reportReconciliationSummaryCount) {

@@ -140,6 +140,10 @@ getUserRole(): number | null {
     return this.axiosInstance.post(endpoint, payload, this.apiHeader);
   };
 
+  POST_AUTH = (endpoint: string, payload: {}) => {
+    return this.authAxiosInstance.post(endpoint, payload, this.apiHeader);
+  };
+
   POST_FORM_DATA = (endpoint: string, payload: FormData) => {
     return this.axiosInstance.post(endpoint, payload, {
       headers: {

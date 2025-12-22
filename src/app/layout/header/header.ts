@@ -44,9 +44,9 @@ export class Header {
       link: environment.portals.masterSettings,
       icon: 'fas fa-cog',
     },
-    { label: 'Survey CTO', 
+    { label: 'Survey CTO',
       link: environment.portals.surveyCTO,
-      icon: 'fas fa-poll' 
+      icon: 'fas fa-poll'
     },
   ];
 
@@ -112,7 +112,7 @@ export class Header {
         label: 'Project',
         icon: 'fas fa-project-diagram',
         items: [
-          
+
           {
             label: 'Project List',
             icon: 'fas fa-clipboard',
@@ -124,7 +124,7 @@ export class Header {
         label: 'Sub-project',
         icon: 'fas fa-sitemap',
         items: [
-          
+
           {
             label: 'Sub-project List',
             icon: 'fas fa-clipboard',
@@ -141,7 +141,7 @@ export class Header {
         label: 'Beneficiary Assignment',
         icon: 'fas fa-users-viewfinder',
         items: [
-          
+
           {
             label: 'Assign Beneficiary',
             icon: 'fas fa-user-plus',
@@ -178,7 +178,7 @@ export class Header {
             icon: 'fas fa-file-invoice',
             routerLink: 'wage-request/apply-dis',
           },
-          
+
         ],
       },
       {
@@ -216,6 +216,22 @@ export class Header {
             icon: 'fas fa-donate',
             routerLink: 'payroll/mobile-money-download',
           }
+        ],
+      },
+      {
+        label: 'Payment Report',
+        icon: 'fas fa-file-alt',
+        items: [
+              {
+            label: 'Reconciliation Detail Report',
+            icon: 'fas fa-file-alt',
+            routerLink: 'report/details',
+          },
+          {
+            label: 'Reconciliation Summary Report',
+            icon: 'fas fa-file-alt',
+            routerLink: 'report/summary',
+          },
         ],
       }
     ];

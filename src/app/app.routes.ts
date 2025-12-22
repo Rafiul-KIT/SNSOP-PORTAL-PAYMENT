@@ -159,7 +159,7 @@ export const routes: Routes = [
         path: 'details/:wageId/:subprojectId',
         component: WageRequestDetails,
         canActivate: [routeGuard],
-      }   
+      }
     ],
   },
   {
@@ -185,16 +185,19 @@ export const routes: Routes = [
   },
   {
     path: 'report',
+    canActivate: [routeGuard],
     children: [
       {
         path: 'details',
         loadComponent: () => import('./pages/report/report').then(m => m.ReportComponent),
-        data: { reportType: 9, reportTitle: 'Reconciliation Detail Report' }
+        data: { reportType: 9, reportTitle: 'Reconciliation Detail Report' },
+        canActivate: [routeGuard],
       },
       {
         path: 'summary',
         loadComponent: () => import('./pages/report/report').then(m => m.ReportComponent),
-        data: { reportType: 10, reportTitle: 'Reconciliation Summary Report' }
+        data: { reportType: 10, reportTitle: 'Reconciliation Summary Report' },
+        canActivate: [routeGuard],
       }
     ]
   },
@@ -220,8 +223,8 @@ export const routes: Routes = [
     ],
   },
 
-  { path: 'unauthorized', 
-    component: Unauthorized 
+  { path: 'unauthorized',
+    component: Unauthorized
   },
 
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },

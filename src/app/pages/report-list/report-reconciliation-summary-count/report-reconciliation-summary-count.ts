@@ -1,17 +1,14 @@
-import { Component, inject, input } from '@angular/core';
-import { signal } from '@angular/core';
-
+import { Component, Input, OnInit } from '@angular/core';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { PaginatorModule } from 'primeng/paginator';
-import { saveAs } from 'file-saver';
 import { LookupService } from '../../../services/lookup.service';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 interface ReportData {
-  boma: string ;
-  totalDISApproved: number;
-  totalLIPWApproved: number;
+  boma: string;
   totalDISPaid: number;
   totalDISUnpaid: number;
   totalLIPWPaid: number;
@@ -21,26 +18,25 @@ interface ReportData {
 @Component({
   selector: 'app-report-reconciliation-summary-count',
   standalone: true,
-  imports: [TableModule, ButtonModule, TooltipModule, PaginatorModule], 
+  imports: [TableModule, ButtonModule, TooltipModule, PaginatorModule],
   templateUrl: './report-reconciliation-summary-count.html',
   styleUrls: ['./report-reconciliation-summary-count.scss'],
 })
-export class ReportReconciliationSummaryCount {
- 
-  reportReconciliationSummaryCount = input<ReportData[]>([]);
+export class ReportReconciliationSummaryCount implements OnInit {
+  @Input() reportReconciliationSummaryCount: ReportData[] = [];
 
+  constructor(public lookupService: LookupService) {}
 
-  public lookupService = inject(LookupService);
+  ngOnInit(): void {}
 
-  async exportPdf() {
-    const jsPDF = await import('jspdf');
-    const autoTable = (await import('jspdf-autotable')).default;
-    const doc = new jsPDF.default('l', 'mm', 'a4');
+  exportPdf() {
+    const doc = new jsPDF('l', 'mm', 'a4'); // Landscape mode, mm units, A4 size
 
- 
+    // Title
     doc.setFontSize(16);
     doc.text('Reconciliation Summary Report', 14, 10);
 
+    // Define headers
     const headers = [
       [
         'Serial No',
@@ -56,22 +52,23 @@ export class ReportReconciliationSummaryCount {
       ],
     ];
 
- 
-    const data = this.reportReconciliationSummaryCount().map((row, index) => [
-      index + 1,
-      this.lookupService.getBomaNameById(row.boma),
-      row.totalDISApproved,
-      row.totalLIPWApproved,
-      row.totalDISPaid,
-      row.totalDISUnpaid,
-      row.totalLIPWPaid,
-      row.totalLIPWUnpaid,
-      row.totalDISPaid + row.totalLIPWPaid,
-      row.totalDISUnpaid + row.totalLIPWUnpaid,
-    ]);
+    const data = this.reportReconciliationSummaryCount.map(
+      (row: ReportData, index: number) => [
+        index + 1,
+        this.lookupService.getBomaNameById(row.boma),
+        row.totalDISPaid + row.totalDISUnpaid, // DIS Approved
+        row.totalLIPWPaid + row.totalLIPWUnpaid, // LIPW Approved
+        row.totalDISPaid,
+        row.totalDISUnpaid,
+        row.totalLIPWPaid,
+        row.totalLIPWUnpaid,
+        row.totalDISPaid + row.totalLIPWPaid,
+        row.totalDISUnpaid + row.totalLIPWUnpaid,
+      ]
+    );
 
-   
-    (doc as any).autoTable({
+    // Add table to PDF
+    autoTable(doc, {
       head: headers,
       body: data,
       startY: 20,
@@ -81,48 +78,7 @@ export class ReportReconciliationSummaryCount {
       alternateRowStyles: { fillColor: [240, 240, 240] },
     });
 
+    // Save the PDF
     doc.save('Reconciliation_Summary.pdf');
-  }
-
-  async exportExcel() {
-    if (!this.reportReconciliationSummaryCount()?.length) {
-      console.error('No data available to export.');
-      return;
-    }
-
-    const data = this.reportReconciliationSummaryCount().map((row, index) => ({
-      'Serial No': index + 1,
-      'Name of Boma': this.lookupService.getBomaNameById(row.boma),
-      'DIS Approved': row.totalDISApproved,
-      'LIPW Approved': row.totalLIPWApproved,
-      'DIS Paid': row.totalDISPaid,
-      'DIS Unpaid': row.totalDISUnpaid,
-      'LIPW Paid': row.totalLIPWPaid,
-      'LIPW Unpaid': row.totalLIPWUnpaid,
-      'Total Paid (DIS + LIPW)': row.totalDISPaid + row.totalLIPWPaid,
-      'Total Unpaid (DIS + LIPW)': row.totalDISUnpaid + row.totalLIPWUnpaid,
-    }));
-
-    const xlsx = await import('xlsx');
-    const worksheet = xlsx.utils.json_to_sheet(data);
-    const columnWidths = [
-      { wch: 10 }, // Serial No
-      { wch: 30 }, // Name of Boma
-      { wch: 15 }, // DIS Approved
-      { wch: 15 }, // LIPW Approved
-      { wch: 15 }, // DIS Paid
-      { wch: 15 }, // DIS Unpaid
-      { wch: 15 }, // LIPW Paid
-      { wch: 15 }, // LIPW Unpaid
-      { wch: 20 }, // Total Paid
-      { wch: 20 }, // Total Unpaid
-    ];
-    worksheet['!cols'] = columnWidths;
-
-    const workbook = xlsx.utils.book_new();
-    xlsx.utils.book_append_sheet(workbook, worksheet, 'Reconciliation Summary');
-    const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
-    saveAs(blob, 'Reconciliation_Summary.xlsx');
   }
 }
