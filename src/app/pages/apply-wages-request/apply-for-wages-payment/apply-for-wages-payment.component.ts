@@ -19,7 +19,9 @@ import { MessageService } from 'primeng/api';
 import Swal from 'sweetalert2';
 
 import { ApiService } from '../../../services/api.service';
+import { PaymentCycleEnum } from '../../../services/lookup.service';
 import { Loader } from "../../../components/loader/loader";
+import { handleFileUpload } from '../../../validators/file-validator';
 
 interface Beneficiary {
   beneficiaryId: number;
@@ -82,14 +84,13 @@ export class ApplyForWagesPaymentComponent implements OnInit {
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {
-    this.initializePaymentCycles();
+    this.paymentCycles = PaymentCycleEnum;
   }
 
   ngOnInit(): void {
     this.subprojectId = this.route.snapshot.paramMap.get('id');
     this.initializeForm();
     this.initBreadcrumb();
-    
     if (this.subprojectId) {
       this.loadProjectData(this.subprojectId);
     }
@@ -113,34 +114,11 @@ export class ApplyForWagesPaymentComponent implements OnInit {
     );
   }
 
-  onFileSelect(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.wagesForm.patchValue({
-        attachment: input.files[0]
-      });
-    }
+  onFileChange(event: Event): void {
+    handleFileUpload(event, this.wagesForm, 'attachment');
   }
 
-  initializePaymentCycles(): void {
-    this.paymentCycles = [
-      { label: 'Payment Cycle 1', value: 1 },
-      { label: 'Payment Cycle 2', value: 2 },
-      { label: 'Payment Cycle 3', value: 3 },
-      { label: 'Payment Cycle 4', value: 4 },
-      { label: 'Payment Cycle 5', value: 5 },
-      { label: 'Payment Cycle 6', value: 6 },
-      { label: 'Payment Cycle 7', value: 7 },
-      { label: 'Payment Cycle 8', value: 8 },
-      { label: 'Payment Cycle 9', value: 9 },
-      { label: 'Payment Cycle 10', value: 10 },
-      { label: 'Payment Cycle 11', value: 11 },
-       { label: 'Payment Cycle 11', value: 12 },
-        { label: 'Payment Cycle 11', value: 13 },
-         { label: 'Payment Cycle 11', value: 14 },
-          { label: 'Payment Cycle 11', value: 15 },
-    ];
-  }
+
 
   async loadProjectData(id: string): Promise<void> {
     this.isLoading = true;

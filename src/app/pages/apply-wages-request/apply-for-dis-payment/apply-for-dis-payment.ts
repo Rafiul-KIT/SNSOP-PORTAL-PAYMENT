@@ -14,8 +14,9 @@ import { InputNumberModule } from 'primeng/inputnumber';
 
 import { ApiService } from '../../../services/api.service';
 import { Loader } from "../../../components/loader/loader";
-import { LookupService, LookupItem } from '../../../services/lookup.service';
+import { LookupService, LookupItem, PaymentCycleEnum } from '../../../services/lookup.service';
 import Swal from 'sweetalert2';
+import { handleFileUpload } from '../../../validators/file-validator';
 
 @Component({
   selector: 'app-apply-for-dis-payment',
@@ -207,36 +208,11 @@ initializeForm(): void {
   }
 
   loadPaymentCycles(): void {
-    this.paymentCycles = Array.from({ length: 15 }, (_, i) => ({
-      label: `Payment Cycle ${i + 1}`,
-      value: i + 1
-    }));
+    this.paymentCycles = PaymentCycleEnum;
   }
 
   onFileChange(event: any): void {
-    const fileList: FileList = event.target.files;
-    if (fileList.length > 0) {
-      const file = fileList[0];
-      const fileSizeInMB = file.size / (1024 * 1024); // Convert bytes to MB
-
-      if (fileSizeInMB > this.MAX_ATTACHMENT_SIZE_MB) {
-        Swal.fire({
-          icon: 'error',
-          title: 'File Size Exceeded',
-          text: `Attachment size cannot exceed ${this.MAX_ATTACHMENT_SIZE_MB} MB.`
-        });
-        // Clear the file input
-        event.target.value = '';
-        this.attachmentFile = null;
-        this.submissionForm.patchValue({ attachment: null });
-      } else {
-        this.attachmentFile = file;
-        this.submissionForm.patchValue({ attachment: this.attachmentFile?.name });
-      }
-    } else {
-      this.attachmentFile = null;
-      this.submissionForm.patchValue({ attachment: null });
-    }
+  handleFileUpload(event, this.wagesForm, 'attachment');
   }
 
   async onSearch(): Promise<void> {
@@ -299,7 +275,7 @@ initializeForm(): void {
       return;
     }
 
-    this.loading = true;
+    this.isLoading = true;
 
     const searchFormValue = this.wagesForm.getRawValue();
     const submissionFormValue = this.submissionForm.getRawValue();
@@ -325,19 +301,19 @@ initializeForm(): void {
     try {
       const response: any = await this.apiService.POST_FORM_DATA(url, formData);
       if (response.data && response.data.code === 200) {
-        Swal.fire({ icon: 'success', title: 'Success', text: response.data.message || 'DIS wage request submitted successfully.' });
+        Swal.fire({ icon: 'success', title: 'Success', text:  'DIS wage request submitted successfully.' });
         this.beneficiaries = [];
         this.selectedBeneficiaries = [];
         this.submissionForm.reset({ totalDays: null });
         this.attachmentFile = null;
         this.showResults = false;
       } else {
-        Swal.fire({ icon: 'error', title: 'Error', text: (response.data && response.data.message) || 'Failed to submit DIS wage request.' });
+        Swal.fire({ icon: 'error', title: 'Error', text:  'Failed to submit DIS wage request.' });
       }
     } catch (error: any) {
       Swal.fire({ icon: 'error', title: 'Error', text: error.message || 'API call failed' });
     } finally {
-      this.loading = false;
+      this.isLoading = false;
       this.cdr.detectChanges();
     }
   }

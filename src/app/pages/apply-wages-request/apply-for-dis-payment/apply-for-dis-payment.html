@@ -1,185 +1,208 @@
-
 @if (isLoading) {
-  <app-loader></app-loader>
+<app-loader></app-loader>
 } @else {
-  <div class="breadcrumb-wrapper">
-    <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
-  </div>
+<div class="breadcrumb-wrapper">
+  <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
+</div>
 
-  <div class="container-fluid py-4">
-    <div class="row justify-content-center">
-      <div class="col-12 col-xl-11">
-        <p-card class="shadow-sm border-0 mb-4">
-          <div class="d-flex justify-content-between align-items-center">
-            <h3 class="mb-0 fw-semibold text-success">
-              <i class="pi pi-wallet me-2"></i>
-              Apply for DIS Payment
-            </h3>
-          </div>
-        </p-card>
+<div class="container-fluid py-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-xl-11">
+      <p-card class="shadow-sm border-0 mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+          <h3 class="mb-0 fw-semibold text-success">
+            <i class="pi pi-wallet me-2"></i>
+            Apply for DIS Payment
+          </h3>
+        </div>
+      </p-card>
 
-        <p-card class="shadow-sm border-0">
-          <form [formGroup]="wagesForm" (ngSubmit)="onSearch()">
-            <fieldset [disabled]="loading">
-                            <div class="row mb-4">
-                              <div class="col-lg-6">
-                                <h5 class="fw-bold text-secondary mb-3">
-                                  <i class="pi pi-filter me-2"></i>
-                                  Selection Criteria
-                                </h5>
-              
-                                <div class="row">
-                                  <div class="col-md-6 col-lg-6 mb-3">
-                                    <label for="requestYear" class="form-label fw-semibold">Year <span class="text-danger">*</span></label>
-                                    <p-select id="requestYear" formControlName="requestYear" [options]="years" placeholder="Select Year" class="w-100"
-                                              [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('requestYear') }"></p-select>
-                                    @if (isFieldInvalid('requestYear')) {
-                                      <small class="text-danger">Year is required</small>
-                                    }
-                                  </div>
-              
-                                  <div class="col-md-6 col-lg-6 mb-3">
-                                    <label for="requestMonthIndex" class="form-label fw-semibold">Month <span class="text-danger">*</span></label>
-                                    <p-select id="requestMonthIndex" formControlName="requestMonthIndex" [options]="months" placeholder="Select Month" class="w-100"
-                                              [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('requestMonthIndex') }"></p-select>
-                                    @if (isFieldInvalid('requestMonthIndex')) {
-                                      <small class="text-danger">Month is required</small>
-                                    }
-                                  </div>
-              
-                                  <div class="col-md-6 col-lg-6 mb-3">
-                                    <label for="paymentCycleId" class="form-label fw-semibold">Payment Cycle <span class="text-danger">*</span></label>
-                                    <p-select id="paymentCycleId" formControlName="paymentCycleId" [options]="paymentCycles" placeholder="Select Cycle" class="w-100"
-                                              [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('paymentCycleId') }"></p-select>
-                                    @if (isFieldInvalid('paymentCycleId')) {
-                                      <small class="text-danger">Payment cycle is required</small>
-                                    }
-                                  </div>
-                                </div>
-                              </div>
-              
-                              <div class="col-lg-6">
-                                <h5 class="fw-bold text-secondary mb-3">
-                                  <i class="pi pi-map-marker me-2"></i>
-                                  Location
-                                </h5>
-                                <div class="row">
-                                  <div class="col-md-6 col-lg-6 mb-3">
-                                    <label for="stateId" class="form-label fw-semibold">State <span class="text-danger">*</span></label>
-                                    <p-select id="stateId" formControlName="stateId" [options]="states" optionLabel="name" optionValue="id" placeholder="Select State" class="w-100"
-                                              [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('stateId') }"></p-select>
-                                    @if (isFieldInvalid('stateId')) {
-                                      <small class="text-danger">State is required</small>
-                                    }
-                                  </div>
-              
-                                  <div class="col-md-6 col-lg-6 mb-3">
-                                    <label for="countyId" class="form-label fw-semibold">County <span class="text-danger">*</span></label>
-                                                          <p-select id="countyId" formControlName="countyId" [options]="counties" optionLabel="name" optionValue="id" placeholder="Select County" class="w-100"
-                                              [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('countyId') }" ></p-select>                                    @if (isFieldInvalid('countyId')) {
-                                      <small class="text-danger">County is required</small>
-                                    }
-                                  </div>
-              
-                                  <div class="col-md-6 col-lg-6 mb-3">
-                                    <label for="payamId" class="form-label fw-semibold">Payam <span class="text-danger">*</span></label>
-                                                          <p-select id="payamId" formControlName="payamId" [options]="payams" optionLabel="name" optionValue="id" placeholder="Select Payam" class="w-100"
-                                              [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('payamId') }" ></p-select>                                    @if (isFieldInvalid('payamId')) {
-                                      <small class="text-danger">Payam is required</small>
-                                    }
-                                  </div>
-              
-                                  <div class="col-md-6 col-lg-6 mb-3">
-                                    <label for="bomaId" class="form-label fw-semibold">Boma <span class="text-danger">*</span></label>
-                                                          <p-select id="bomaId" formControlName="bomaId" [options]="bomas" optionLabel="name" optionValue="id" placeholder="Select Boma" class="w-100"
-                                              [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('bomaId') }" ></p-select>                                    @if (isFieldInvalid('bomaId')) {
-                                      <small class="text-danger">Boma is required</small>
-                                    }
-                                  </div>
-                                </div>
-                              </div>
-                            </div>            </fieldset>
+      <p-card class="shadow-sm border-0">
+        <form [formGroup]="wagesForm" (ngSubmit)="onSearch()">
+          <fieldset [disabled]="loading">
+            <div class="row mb-4">
+              <div class="col-lg-6">
+                <h5 class="fw-bold text-secondary mb-3">
+                  <i class="pi pi-filter me-2"></i>
+                  Selection Criteria
+                </h5>
 
-            <div class="d-flex justify-content-center gap-3 mt-4">
-              <button pButton type="submit" label="Search" icon="pi pi-search" class="p-button-primary px-5" [loading]="loading"></button>
-              <button pButton type="button" label="Cancel" icon="pi pi-times" class="p-button-danger px-5" (click)="onCancel()" [disabled]="loading"></button>
-            </div>
-          </form>
-        </p-card>
-
-        @if (showResults) {
-          <p-card class="shadow-sm border-0 mt-4">
-            <h5 class="fw-bold text-secondary mb-3">
-              <i class="pi pi-users me-2"></i>
-              Eligible Beneficiaries
-            </h5>
-
-            <p-table [value]="beneficiaries" [(selection)]="selectedBeneficiaries" dataKey="beneficiaryId"
-                     responsiveLayout="scroll">
-              <ng-template pTemplate="header">
-                <tr>
-                 <th class="select-all-header">
-  <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
-  <span class="select-all-text">Select all</span>
-</th>
-
-                  <th>Beneficiary ID</th>
-                  <th>Household No.</th>
-                  <th>Beneficiary Name</th>
-                  <th>Gender</th>
-                  <th>Age</th>
-                  <th>Phone No.</th>
-                  <th>Legal Status</th>
-                </tr>
-              </ng-template>
-              <ng-template pTemplate="body" let-beneficiary>
-                <tr>
-                  <td>
-                    <p-tableCheckbox [value]="beneficiary"></p-tableCheckbox>
-                  </td>
-                  <td>{{ beneficiary.beneficiaryId }}</td>
-                  <td>{{ beneficiary.householdNumber }}</td>
-                  <td>{{ beneficiary.beneficiaryName }}</td>
-                  <td>{{ beneficiary.gender }}</td>
-                  <td>{{ beneficiary.age }}</td>
-                  <td>{{ beneficiary.phoneNo }}</td>
-                  <td>{{ beneficiary.legalStatus }}</td>
-                </tr>
-              </ng-template>
-              <ng-template pTemplate="emptymessage">
-                <tr>
-                  <td colspan="8" class="text-center">No beneficiaries found.</td>
-                </tr>
-              </ng-template>
-            </p-table>
-
-            @if (beneficiaries.length > 0) {
-              <form [formGroup]="submissionForm" class="mt-4">
                 <div class="row">
-                  <div class="col-md-6 col-lg-3">
-                    <label for="totalDays" class="form-label fw-semibold">Total Days <span class="text-danger">*</span></label>
-                    <p-inputNumber id="totalDays" formControlName="totalDays" placeholder="0" class="w-100"
-                                   [ngClass]="{ 'ng-invalid ng-dirty': isSubmissionFieldInvalid('totalDays') }"></p-inputNumber>
-                    @if (isSubmissionFieldInvalid('totalDays')) {
-                      <small class="text-danger">Total days is required and must be at least 1.</small>
+                  <div class="col-md-6 col-lg-6 mb-3">
+                    <label for="requestYear" class="form-label fw-semibold">Year <span
+                        class="text-danger">*</span></label>
+                    <p-select id="requestYear" formControlName="requestYear" [options]="years" placeholder="Select Year"
+                      class="w-100" [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('requestYear') }"></p-select>
+                    @if (isFieldInvalid('requestYear')) {
+                    <small class="text-danger">Year is required</small>
                     }
                   </div>
-                  <div class="col-md-6 col-lg-4">
-                    <label for="attachment" class="form-label fw-semibold">Attachment</label>
-                    <input type="file" id="attachment" (change)="onFileChange($event)" class="form-control">
+
+                  <div class="col-md-6 col-lg-6 mb-3">
+                    <label for="requestMonthIndex" class="form-label fw-semibold">Month <span
+                        class="text-danger">*</span></label>
+                    <p-select id="requestMonthIndex" formControlName="requestMonthIndex" [options]="months"
+                      placeholder="Select Month" class="w-100"
+                      [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('requestMonthIndex') }"></p-select>
+                    @if (isFieldInvalid('requestMonthIndex')) {
+                    <small class="text-danger">Month is required</small>
+                    }
+                  </div>
+
+                  <div class="col-md-6 col-lg-6 mb-3">
+                    <label for="paymentCycleId" class="form-label fw-semibold">Payment Cycle <span
+                        class="text-danger">*</span></label>
+                    <p-select id="paymentCycleId" formControlName="paymentCycleId" [options]="paymentCycles"
+                      placeholder="Select Cycle" class="w-100"
+                      [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('paymentCycleId') }"></p-select>
+                    @if (isFieldInvalid('paymentCycleId')) {
+                    <small class="text-danger">Payment cycle is required</small>
+                    }
                   </div>
                 </div>
-              </form>
-
-              <div class="d-flex justify-content-end gap-3 mt-4">
-                <button pButton type="button" label="Apply for DIS Wage" icon="pi pi-check" class="p-button-success px-5"
-                        (click)="onSubmitDisRequest()"
-                        [disabled]="selectedBeneficiaries.length === 0 || submissionForm.invalid"></button>
               </div>
-            }
-          </p-card>
+
+              <div class="col-lg-6">
+                <h5 class="fw-bold text-secondary mb-3">
+                  <i class="pi pi-map-marker me-2"></i>
+                  Location
+                </h5>
+                <div class="row">
+                  <div class="col-md-6 col-lg-6 mb-3">
+                    <label for="stateId" class="form-label fw-semibold">State <span class="text-danger">*</span></label>
+                    <p-select id="stateId" formControlName="stateId" [options]="states" optionLabel="name"
+                      optionValue="id" placeholder="Select State" class="w-100"
+                      [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('stateId') }"></p-select>
+                    @if (isFieldInvalid('stateId')) {
+                    <small class="text-danger">State is required</small>
+                    }
+                  </div>
+
+                  <div class="col-md-6 col-lg-6 mb-3">
+                    <label for="countyId" class="form-label fw-semibold">County <span
+                        class="text-danger">*</span></label>
+                    <p-select id="countyId" formControlName="countyId" [options]="counties" optionLabel="name"
+                      optionValue="id" placeholder="Select County" class="w-100"
+                      [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('countyId') }"></p-select> @if
+                    (isFieldInvalid('countyId')) {
+                    <small class="text-danger">County is required</small>
+                    }
+                  </div>
+
+                  <div class="col-md-6 col-lg-6 mb-3">
+                    <label for="payamId" class="form-label fw-semibold">Payam <span class="text-danger">*</span></label>
+                    <p-select id="payamId" formControlName="payamId" [options]="payams" optionLabel="name"
+                      optionValue="id" placeholder="Select Payam" class="w-100"
+                      [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('payamId') }"></p-select> @if
+                    (isFieldInvalid('payamId')) {
+                    <small class="text-danger">Payam is required</small>
+                    }
+                  </div>
+
+                  <div class="col-md-6 col-lg-6 mb-3">
+                    <label for="bomaId" class="form-label fw-semibold">Boma <span class="text-danger">*</span></label>
+                    <p-select id="bomaId" formControlName="bomaId" [options]="bomas" optionLabel="name" optionValue="id"
+                      placeholder="Select Boma" class="w-100"
+                      [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('bomaId') }"></p-select> @if
+                    (isFieldInvalid('bomaId')) {
+                    <small class="text-danger">Boma is required</small>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+
+          <div class="d-flex justify-content-center gap-3 mt-4">
+            <button pButton type="submit" label="Search" icon="pi pi-search" class="p-button-primary px-5"
+              [loading]="loading"></button>
+
+          </div>
+        </form>
+      </p-card>
+
+      @if (showResults) {
+      <p-card class="shadow-sm border-0 mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold text-secondary mb-0">
+            <i class="pi pi-users me-2"></i>
+            Eligible Beneficiaries
+          </h5>
+          @if (selectedBeneficiaries.length > 0) {
+          <span class="badge bg-primary fs-6">
+            {{ selectedBeneficiaries.length }} Selected
+          </span>
+          }
+        </div>
+
+        <p-table [value]="beneficiaries" [(selection)]="selectedBeneficiaries" dataKey="beneficiaryId"
+          responsiveLayout="scroll">
+          <ng-template pTemplate="header">
+            <tr>
+              <th class="select-all-header">
+                <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+                <span class="select-all-text">Select all</span>
+              </th>
+
+              <th>Beneficiary ID</th>
+              <th>Household No.</th>
+              <th>Beneficiary Name</th>
+              <th>Gender</th>
+              <th>Age</th>
+              <th>Phone No.</th>
+              <th>Legal Status</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-beneficiary>
+            <tr>
+              <td>
+                <p-tableCheckbox [value]="beneficiary"></p-tableCheckbox>
+              </td>
+              <td>{{ beneficiary.beneficiaryId }}</td>
+              <td>{{ beneficiary.householdNumber }}</td>
+              <td>{{ beneficiary.beneficiaryName }}</td>
+              <td>{{ beneficiary.gender }}</td>
+              <td>{{ beneficiary.age }}</td>
+              <td>{{ beneficiary.phoneNo }}</td>
+              <td>{{ beneficiary.legalStatus }}</td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="8" class="text-center">No beneficiaries found.</td>
+            </tr>
+          </ng-template>
+        </p-table>
+
+        @if (beneficiaries.length > 0) {
+        <form [formGroup]="submissionForm" class="mt-4">
+          <div class="row">
+            <div class="col-md-6 col-lg-3">
+              <label for="totalDays" class="form-label fw-semibold">Total Days <span
+                  class="text-danger">*</span></label>
+              <p-inputNumber id="totalDays" formControlName="totalDays" placeholder="0" class="w-100"
+                [ngClass]="{ 'ng-invalid ng-dirty': isSubmissionFieldInvalid('totalDays') }"></p-inputNumber>
+              @if (isSubmissionFieldInvalid('totalDays')) {
+              <small class="text-danger">Total days is required and must be at least 1.</small>
+              }
+            </div>
+            <div class="col-md-6 col-lg-4">
+              <label for="attachment" class="form-label fw-semibold">Attachment</label>
+              <input type="file" id="attachment" (change)="onFileChange($event)" class="form-control">
+            </div>
+          </div>
+        </form>
+
+        <div class="d-flex justify-content-end gap-3 mt-4">
+          <button pButton type="button" label="Apply for DIS Wage" icon="pi pi-check" class="p-button-success px-5"
+            (click)="onSubmitDisRequest()"
+            [disabled]="selectedBeneficiaries.length === 0 || submissionForm.invalid || loading"
+            [loading]="loading"></button>
+        </div>
         }
-      </div>
+      </p-card>
+      }
     </div>
   </div>
+</div>
 }
