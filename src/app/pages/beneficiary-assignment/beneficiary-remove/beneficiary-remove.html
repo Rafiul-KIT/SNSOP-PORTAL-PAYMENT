@@ -159,7 +159,7 @@
                                     <tr>
                                         <th style="width: 8rem ">
                                             <p-checkbox [(ngModel)]="selectAll" [ngModelOptions]="{standalone: true}"
-                                                [binary]="true" (onChange)="toggleSelectAll($event)"></p-checkbox><span
+                                                [binary]="true" (onChange)="toggleSelectAll($event)" [disabled]="projectForm.invalid"></p-checkbox><span
                                                 class="px-1">Select All</span>
                                         </th>
                                         <th>Household #</th>
@@ -177,7 +177,7 @@
                                         <td>
                                             <p-checkbox [(ngModel)]="beneficiary.isSelected"
                                                 [ngModelOptions]="{standalone: true}" [binary]="true"
-                                                (onChange)="onRowSelectionChange(beneficiary)"></p-checkbox>
+                                                (onChange)="onRowSelectionChange(beneficiary)" [disabled]="projectForm.invalid"></p-checkbox>
                                         </td>
                                         <td>{{ beneficiary.householdNumber || '—' }}</td>
                                         <td>{{ beneficiary.beneficiaryName || '—' }}</td>

@@ -19,6 +19,10 @@ export const StatusEnum = [
   { id: '7', value: 'InProgress', label: 'In Progress' },
   { id: '8', value: 'Completed', label: 'Completed' }
 ];
+export const StatusEnumAssignRemove = [
+  { id: '5', value: 'TST_Approved', label: 'TST Approved' },
+  { id: '7', value: 'InProgress', label: 'In Progress' },
+];
 export const StatusWageEnum = [
   { id: '0', value: 'Draft', label: 'Draft' },
   { id: '1', value: 'InitialReviewer', label: 'To be Reviewed at Initial Reviewer' },

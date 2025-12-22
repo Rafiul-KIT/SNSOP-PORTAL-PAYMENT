@@ -31,6 +31,7 @@ import {
   StatusEnum,
   ScreeningStatusEnum,
   ProjectNameDescription,
+  StatusEnumAssignRemove,
 } from '../../../services/lookup.service';
 import { ApiService } from '../../../services/api.service';
 import { Loader } from '../../../components/loader/loader';
@@ -131,7 +132,7 @@ export class BeneficiarySubprojectList implements OnInit {
 
   async ngOnInit() {
     this.workTypes = TypeOfMeetingEnum;
-    this.statuses = StatusEnum;
+    this.statuses = StatusEnumAssignRemove;
     this.screeningStatuses = ScreeningStatusEnum;
     this.initBreadcrumb();
     this.initForm();
@@ -299,6 +300,7 @@ export class BeneficiarySubprojectList implements OnInit {
 
   resetForm() {
     this.searchForm.reset();
+    this.searchForm.get('status')?.setValue('TST_Approved'); // Set status to TST_Approved on reset
     this.searchForm.get('county')?.disable();
     this.searchForm.get('payam')?.disable();
     this.searchForm.get('boma')?.disable();
