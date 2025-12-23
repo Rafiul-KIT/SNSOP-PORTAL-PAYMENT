@@ -229,38 +229,8 @@
         </div>
       </p-card>
     </div>
-
-    <!-- <div class="col-md-4">
-      <div class = "row g-6 mb-6">
-      <div style="background-color: #eff6ff; border:2px solid #bfdafd; color:#a3cbff ;"
-        class="info-card info-card-white">
-
-        <div class="info-content">
-          <div class="info-label">Wage Requests</div>
-          <div class="info-value">120</div>
-          <div class="info-detail">95 approved, 20 pending</div>
-        </div>
-        <div class="info-icon">
-          <i class="pi pi-file-edit"></i>
-        </div>
-      </div>
-      </div>
-    </div> -->
-
-    <!-- <div class="col-md-4">
-      <div style="background-color: #f0fdf4; border:2px solid #c3fcd4; color:#91fcb1 ;"
-        class="info-card info-card-white">
-
-        <div class="info-content">
-          <div class="info-label">Boma Reconciled</div>
-          <div class="info-value">123</div>
-        </div>
-        <div class="info-icon">
-          <i class="pi pi-map-marker"></i>
-        </div>
-      </div>
-    </div> -->
   </div>
+  
   <!-- Payment Cycle Summary -->
   <div class="row g-3  mt-2">
     <div class="col-lg-6  ">
@@ -272,47 +242,18 @@
         </ng-template>
 
 
-        <div class="payment-cycle-content">
-
-
-          <div class="mb-3">
-            <label class="form-label">Select Payment Cycle</label>
-            <select class="form-select" [(ngModel)]="selectedPaymentCycle">
-              <option [ngValue]="cycle" *ngFor="let cycle of paymentCycles">{{ cycle.paymentCycle }}</option>
-            </select>
-          </div>
-
-
-          <div class="row g-3" *ngIf="selectedPaymentCycle">
-            <div class="col-6">
-              <div class="summary-box summary-box-blue">
-                <div class="summary-label">Total Amount</div>
-                <div class="summary-value">${{ selectedPaymentCycle.totalPaymentAmount | number }}</div>
-              </div>
+        <p-card class="summary-card h-100">
+          <ng-template pTemplate="header">
+            <div class="card-header-custom">
+              <h3 class="card-title">Payment Cycle Summary</h3>
             </div>
-
-            <div class="col-6">
-              <div class="summary-box summary-box-green">
-                <div class="summary-label">Paid Amount</div>
-                <div class="summary-value">${{ selectedPaymentCycle.totalPaidAmount | number }}</div>
-              </div>
-            </div>
-
-            <div class="col-6">
-              <div class="summary-box summary-box-yellow">
-                <div class="summary-label">Unpaid Amount</div>
-                <div class="summary-value">${{ selectedPaymentCycle.totalUnpaidAmount | number }}</div>
-              </div>
-            </div>
-
-            <div class="col-6">
-              <div class="summary-box summary-box-purple">
-                <div class="summary-label">Beneficiaries</div>
-                <div class="summary-value">{{ selectedPaymentCycle.uniqueBeneficiary | number }}</div>
-              </div>
+          </ng-template>
+          <div class="payment-cycle-content">
+            <div class="chart-wrapper-bar">
+              <p-chart type="bar" [data]="paymentCycleChartData" [options]="paymentCycleChartOptions"></p-chart>
             </div>
           </div>
-        </div>
+        </p-card>       
       </p-card>
     </div>
 
@@ -343,7 +284,7 @@
             <div class="support-progress">
               <p-progressBar [value]="getPercentage(support.paid, support.total)" [showValue]="false"
                 class="support-progressbar"></p-progressBar>
-              <div class="progress-label">{{ getPercentage(support.paid, support.total) }}% paid</div>
+              <div class="progress-label">{{ getPercentage(support.paid, support.total) }}% payment</div>
             </div>
           </div>
         </div>
@@ -365,11 +306,11 @@
           <div class="gender-stats">
             <div class="gender-item gender-male">
               <div class="gender-label">Male</div>
-              <div class="gender-value">{{ maleTotal | number }}</div>
+              <div class="gender-value">{{ this.genderstats.male.paidBeneficiary| number }}</div>
             </div>
             <div class="gender-item gender-female">
               <div class="gender-label">Female</div>
-              <div class="gender-value">{{ femaleTotal | number }}</div>
+              <div class="gender-value">{{ this.genderstats.female.paidBeneficiary | number }}</div>
             </div>
           </div>
         </p-card>
@@ -377,9 +318,9 @@
 
       <!-- Bar Chart -->
       <div class="col-lg-6">
-        <p-card header="Boma Payment Comparison" class="chart-card">
+        <p-card header="State Payment Comparison" class="chart-card">
           <div class="chart-wrapper-bar">
-            <p-chart type="bar" [data]="bomaChartData" [options]="barChartOptions">
+            <p-chart type="bar" [data]="stateChartData" [options]="barChartOptions">
             </p-chart>
           </div>
         </p-card>
@@ -390,24 +331,28 @@
     <!-- Table -->
     <div class="row">
       <div class="col-12">
-        <p-card header="Boma-wise Payment Summary" class="table-card">
+        <p-card header="State-wise Payment Summary" class="table-card">
           <p-table [value]="geoStateData" [tableStyle]="{'min-width': '60rem'}" class="custom-table">
             <ng-template pTemplate="header">
               <tr>
-                <th class="table-header">BOMA NAME</th>
+                <th class="table-header">STATE NAME</th>
                 <th class="table-header text-end">TOTAL AMOUNT</th>
                 <th class="table-header text-end">PAID AMOUNT</th>
                 <th class="table-header text-end">UNPAID AMOUNT</th>
                 <th class="table-header text-end">BENEFICIARIES</th>
+                <th class="table-header text-end">PAID BENEFICIARIES</th>
+                <th class="table-header text-end">UNPAID BENEFICIARIES</th>
               </tr>
             </ng-template>
-            <ng-template pTemplate="body" let-boma>
+            <ng-template pTemplate="body" let-state>
               <tr>
-                <td class="boma-name">{{ boma.stateName }}</td>
-                <td class="text-end amount-total">{{ boma.totalPaymentAmount | currency:'$':'symbol':'1.0-0' }}</td>
-                <td class="text-end amount-paid">{{ boma.totalPaidAmount | currency:'$':'symbol':'1.0-0' }}</td>
-                <td class="text-end amount-unpaid">{{ boma.totalUnpaidAmount | currency:'$':'symbol':'1.0-0' }}</td>
-                <td class="text-end beneficiaries">{{ boma.uniqueBeneficiary | number }}</td>
+                <td class="boma-name">{{ state.stateName }}</td>
+                <td class="text-end amount-total">{{ state.totalPaymentAmount | currency:'$':'symbol':'1.0-0' }}</td>
+                <td class="text-end amount-paid">{{ state.totalPaidAmount | currency:'$':'symbol':'1.0-0' }}</td>
+                <td class="text-end amount-unpaid">{{ state.totalUnpaidAmount | currency:'$':'symbol':'1.0-0' }}</td>
+                <td class="text-end beneficiaries">{{ state.uniqueBeneficiary | number }}</td>
+                <td class="text-end beneficiaries">{{ state.uniquePaidBeneficiary | number }}</td>
+                <td class="text-end beneficiaries">{{ state.uniqueUnpaidBeneficiary | number }}</td>
               </tr>
             </ng-template>
           </p-table>

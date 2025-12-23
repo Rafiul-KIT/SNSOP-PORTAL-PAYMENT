@@ -37,6 +37,8 @@ interface WageReqData {
   totalWageReqApprovedInEveryLevel: number;
   totalReconciledWageReq: number;
   totalUniqueBeneficiary: number;
+  totalUniqueLIPWBeneficiary: number;
+  totalUniqueDISBeneficiary:number;
   totalUniquePaidBeneficiary: number;
   totalUniqueUnpaidBeneficiary: number;
   totalPaymentAmount: number;
@@ -134,16 +136,21 @@ export class Dashboard {
   };
 
   paymentCycles: CycleData[] = [];
-  selectedPaymentCycle: CycleData | null = null;
+  
+  paymentCycleChartData: any;
+  paymentCycleChartOptions: any;
+
   
   supportTypes: any[] = []; // Will be populated based on wageReqData
   geoStateData: GeoStateData[] = [];
 
-  maleTotal = 0;
-  femaleTotal = 0;
+  genderstats:any = {
+    male: { paidBeneficiary: 0, paidAmount: 0},
+    female: { paidBeneficiary: 0, paidAmount: 0},
+  }
 
   genderChartData: any;
-  bomaChartData: any;
+  stateChartData: any;
   pieChartOptions: any;
   barChartOptions: any;
   breadcrumbItems: any[] = [];
@@ -157,7 +164,7 @@ export class Dashboard {
   }
 
   getPercentage(value: number, total: number): number {
-    return total > 0 && !isNaN(value) && !isNaN(total) ? Math.round((value / total) * 100) : 0;
+    return total > 0 && !isNaN(value) && !isNaN(total) ? parseFloat(((value / total) * 100).toFixed(2)) : 0;
   }
 
   async fetchDashboardData() {
@@ -192,7 +199,7 @@ export class Dashboard {
         this.stats.totalAmount.unpaid = this.dashboardData.wageReqData.totalUnpaidAmount;
 
         // Populate wageRequestStats
-        this.wageRequestStats.approved = this.dashboardData.wageReqData.totalActiveWageRequests;
+        this.wageRequestStats.approved = this.dashboardData.wageReqData.totalWageReqApprovedInEveryLevel;
         this.wageRequestStats.rejected = this.dashboardData.wageReqData.totalRejectedWageRequests;
         this.wageRequestStats.pending = 
             this.dashboardData.wageReqData.totalWageReqPendingForIpApprover +
@@ -200,44 +207,46 @@ export class Dashboard {
             this.dashboardData.wageReqData.totalWageReqPendingForFinancialApprover +
             this.dashboardData.wageReqData.totalWageReqPendingForFinalPaymentAuthorizer;
         this.wageRequestStats.reconciled = this.dashboardData.wageReqData.totalReconciledWageReq; // Populate reconciled
-        this.wageRequestStats.total = 
-            this.wageRequestStats.approved + 
-            this.wageRequestStats.pending + 
-            this.wageRequestStats.rejected +
-            this.wageRequestStats.reconciled; // Include reconciled in total
+        this.wageRequestStats.total = this.dashboardData.wageReqData.totalWageRequests;
 
         // Populate supportTypes from wageReqData LIPW and DIS
         // Assuming totalUniqueBeneficiary is for LIPW+DIS combined, adjust if separate
         this.supportTypes = [
           {
             name: 'LIPW',
-            beneficiaries: this.dashboardData.wageReqData.totalUniqueBeneficiary,
+            beneficiaries: this.dashboardData.wageReqData.totalUniqueLIPWBeneficiary,
             total: this.dashboardData.wageReqData.lipwTotalPaymentAmount,
             paid: this.dashboardData.wageReqData.lipwTotalPaidAmount,
             unpaid: this.dashboardData.wageReqData.lipwTotalUnpaidAmount,
           },
           {
             name: 'DIS',
-            beneficiaries: this.dashboardData.wageReqData.totalUniqueBeneficiary,
+            beneficiaries: this.dashboardData.wageReqData.totalUniqueDISBeneficiary,
             total: this.dashboardData.wageReqData.disTotalPaymentAmount,
             paid: this.dashboardData.wageReqData.disTotalPaidAmount,
             unpaid: this.dashboardData.wageReqData.disTotalUnpaidAmount,
+          },
+          {
+            name: 'ALL',
+            beneficiaries: this.dashboardData.wageReqData.totalUniqueBeneficiary,
+            total: this.dashboardData.wageReqData.totalPaymentAmount,
+            paid: this.dashboardData.wageReqData.totalPaidAmount,
+            unpaid: this.dashboardData.wageReqData.totalUnpaidAmount,
           },
         ];
         
         // Populate paymentCycles
         this.paymentCycles = this.dashboardData.cycleData;
-        if (this.paymentCycles.length > 0) {
-          this.selectedPaymentCycle = this.paymentCycles[0];
-        }
 
         // Populate geoStateData (GeoStateData)
         this.geoStateData = this.dashboardData.geoStateData;
 
 
         // Gender data
-        this.maleTotal = this.dashboardData.genderData.maleUniquePaidBeneficiary;
-        this.femaleTotal = this.dashboardData.genderData.femaleUniquePaidBeneficiary;
+        this.genderstats.male.paidBeneficiary = this.dashboardData.genderData.maleUniquePaidBeneficiary;
+        this.genderstats.male.paidAmount = this.dashboardData.genderData.maleTotalPaidAmount;
+        this.genderstats.female.paidBeneficiary = this.dashboardData.genderData.femaleUniquePaidBeneficiary;
+        this.genderstats.female.paidAmount = this.dashboardData.genderData.femaleTotalPaidAmount;
 
         this.initializeCharts();
       }
@@ -253,10 +262,10 @@ export class Dashboard {
   initializeCharts() {
     // Gender Pie Chart
     this.genderChartData = {
-      labels: ['Male', 'Female'],
+      labels: ['Male Payment', 'Female Payment'],
       datasets: [
         {
-          data: [this.maleTotal, this.femaleTotal],
+          data: [this.genderstats.male.paidAmount, this.genderstats.female.paidAmount],
           backgroundColor: ['#5DA5DA', '#F06292'],
           hoverBackgroundColor: ['#4A8BC2', '#E91E63'],
         },
@@ -296,13 +305,13 @@ export class Dashboard {
       },
     };
 
-    // Boma Bar Chart
-    const bomaNames = this.geoStateData.map((b) => b.stateName);
+    // state Bar Chart
+    const stateNames = this.geoStateData.map((b) => b.stateName);
     const paidAmounts = this.geoStateData.map((b) => b.totalPaidAmount);
     const unpaidAmounts = this.geoStateData.map((b) => b.totalUnpaidAmount);
 
-    this.bomaChartData = {
-      labels: bomaNames,
+    this.stateChartData = {
+      labels: stateNames,
       datasets: [
         {
           label: 'Paid',
@@ -370,6 +379,95 @@ export class Dashboard {
         },
       },
     };
-  }
-}
 
+    // Payment Cycle Bar Chart
+    if (this.paymentCycles.length > 0) {
+      const cycleLabels = this.paymentCycles.map((cycle) => `Cycle ${cycle.paymentCycle}`);
+      const totalAmounts = this.paymentCycles.map((cycle) => cycle.totalPaymentAmount);
+      const paidAmounts = this.paymentCycles.map((cycle) => cycle.totalPaidAmount);
+      const unpaidAmounts = this.paymentCycles.map((cycle) => cycle.totalUnpaidAmount);
+
+      this.paymentCycleChartData = {
+        labels: cycleLabels,
+        datasets: [
+          {
+            label: 'Total Amount',
+            backgroundColor: '#42A5F5', // Blue
+            data: totalAmounts,
+            barPercentage: 0.95, // Increase bar width
+            categoryPercentage: 0.95, // Reduce space between categories
+          },
+          {
+            label: 'Paid Amount',
+            backgroundColor: '#66BB6A', // Green
+            data: paidAmounts,
+            barPercentage: 0.95, // Increase bar width
+            categoryPercentage: 0.95, // Reduce space between categories
+          },
+          {
+            label: 'Unpaid Amount',
+            backgroundColor: '#FF6347', // Red-orange
+            data: unpaidAmounts,
+            barPercentage: 0.95, // Increase bar width
+            categoryPercentage: 0.95, // Reduce space between categories
+          },
+        ],
+      };
+
+      this.paymentCycleChartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              padding: 15,
+              font: {
+                size: 13,
+                weight: '500',
+              },
+              usePointStyle: true,
+              pointStyle: 'rect',
+            },
+          },
+          tooltip: {
+            callbacks: {
+              label: (context: any) => {
+                const label = context.dataset.label || '';
+                const value = context.parsed.y || 0;
+                return `${label}: $${value.toLocaleString()}`;
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            grid: {
+              display: false,
+            },
+            ticks: {
+              font: {
+                size: 12,
+              },
+            },
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: '#e9ecef',
+            },
+            ticks: {
+              callback: (value: any) => {
+                return '$' + value.toLocaleString(); // Display full amount
+              },
+              font: {
+                size: 11,
+              },
+            },
+          },
+        },
+      };
+    }
+  }
+
+}
