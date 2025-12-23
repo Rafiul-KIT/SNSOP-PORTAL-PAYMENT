@@ -472,10 +472,6 @@ export class WageRequestDetails implements OnInit {
           }
         }
 
-        this.loadBeneficiaries(
-          this.beneficiaryCurrentPage,
-          this.beneficiaryPageSize
-        );
       } else {
         this.apiError = 'No wage request found with the provided ID.';
       }
