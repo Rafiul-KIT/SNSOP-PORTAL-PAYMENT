@@ -11,7 +11,7 @@
     <p-progressBar [value]="downloadProgress"></p-progressBar>
 </p-dialog>
 
-<!-- <div class="card p-3 mb-3">
+ <div class="card p-3 mb-3">
     <form [formGroup]="searchForm" class="row g-3">
       
         <div class="col-md-3">
@@ -49,22 +49,7 @@
         </div>
 
 
-        <div class="col-md-3">
-            <p-floatlabel variant="on" class="w-100">
-                <p-select [options]="supportTypeOptions" optionLabel="name" optionValue="id"
-                    formControlName="supportType"></p-select>
-                <label>Support Type</label>
-            </p-floatlabel>
-        </div>
 
-  
-        <div class="col-md-3">
-            <p-floatlabel variant="on" class="w-100">
-                <p-select [options]="statusOptions" optionLabel="name" optionValue="id"
-                    formControlName="status"></p-select>
-                <label>Status</label>
-            </p-floatlabel>
-        </div>
 
         <div class="col-12">
             <div class="d-grid d-sm-flex justify-content-end align-items-center gap-2">
@@ -78,7 +63,7 @@
             </div>
         </div>
     </form>
-</div> -->
+</div> 
 
 <div class="card">
     <p-table [value]="requestsData" [scrollable]="true" scrollHeight="60vh">
@@ -101,7 +86,7 @@
                 <th>Payam</th>
                 <th>Boma</th>
                 <th>Support Type</th>
-                <th>Payment Cycles</th>
+                <th class="payment-cycles">Payment Cycles</th>
                 <th>Status</th>
                 <th>Actions</th>
             </tr>
