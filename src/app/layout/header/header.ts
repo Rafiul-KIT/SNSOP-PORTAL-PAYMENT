@@ -15,7 +15,6 @@ import { firstValueFrom } from 'rxjs';
   styleUrls: ['./header.scss'],
 })
 export class Header {
-
   showPortalOptions = false;
   showUsermenu = false;
   menuList: any[] = [];
@@ -44,9 +43,10 @@ export class Header {
       link: environment.portals.masterSettings,
       icon: 'fas fa-cog',
     },
-    { label: 'Survey CTO',
+    {
+      label: 'Survey CTO',
       link: environment.portals.surveyCTO,
-      icon: 'fas fa-poll'
+      icon: 'fas fa-poll',
     },
   ];
 
@@ -112,7 +112,7 @@ export class Header {
         label: 'Project',
         icon: 'fas fa-project-diagram',
         items: [
-           {
+          {
             label: 'Create New Project',
             icon: 'fas fa-plus',
             routerLink: 'project/add-new',
@@ -121,15 +121,14 @@ export class Header {
             label: 'Project List',
             icon: 'fas fa-clipboard',
             routerLink: 'project/list',
-          }
-           
+          },
         ],
       },
       {
         label: 'Sub-project',
         icon: 'fas fa-sitemap',
         items: [
-            {
+          {
             label: 'Create New Sub-project',
             icon: 'fas fa-plus',
             routerLink: 'sub-project/add-new',
@@ -143,14 +142,13 @@ export class Header {
             label: 'Sub-project approval',
             icon: '	fas fa-tasks',
             routerLink: 'sub-project/approval',
-          }
+          },
         ],
       },
       {
         label: 'Beneficiary Assignment',
         icon: 'fas fa-users-viewfinder',
         items: [
-
           {
             label: 'Assign Beneficiary',
             icon: 'fas fa-user-plus',
@@ -160,14 +158,14 @@ export class Header {
             label: 'Remove Beneficiary',
             icon: 'fas fa-user-minus',
             routerLink: 'beneficiaries/assignment-remove-list',
-          }
+          },
         ],
       },
       {
-            label: 'Beneficiary Attendance',
-            icon: 'fas fa-user-edit',
-            routerLink: 'attendance',
-          },
+        label: 'Beneficiary Attendance',
+        icon: 'fas fa-user-edit',
+        routerLink: 'attendance',
+      },
       {
         label: 'Wage Request',
         icon: 'fas fa-receipt',
@@ -187,7 +185,6 @@ export class Header {
             icon: 'fas fa-file-invoice',
             routerLink: 'wage-request/apply-dis',
           },
-
         ],
       },
       {
@@ -203,14 +200,14 @@ export class Header {
             label: 'Pending Approval',
             icon: 'fas fa-repeat',
             routerLink: 'wage-request-approval/list',
-          }
+          },
         ],
       },
       {
         label: 'Payroll',
         icon: 'fas fa-donate',
         items: [
-              {
+          {
             label: 'Payroll Generate',
             icon: 'fas fa-donate',
             routerLink: 'payroll/generate',
@@ -224,14 +221,19 @@ export class Header {
             label: 'Mobile Money Download',
             icon: 'fas fa-donate',
             routerLink: 'payroll/mobile-money-download',
-          }
+          },
+          {
+            label: 'Reconciliation Monitoring',
+            icon: 'fas fa-eye',
+            routerLink: 'reconciliation-monitoring',
+          },
         ],
       },
       {
         label: 'Payment Report',
         icon: 'fas fa-file-alt',
         items: [
-              {
+          {
             label: 'Reconciliation Detail Report',
             icon: 'fas fa-file-alt',
             routerLink: 'report/details',
@@ -242,7 +244,7 @@ export class Header {
             routerLink: 'report/summary',
           },
         ],
-      }
+      },
     ];
   }
 

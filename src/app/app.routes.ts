@@ -30,8 +30,7 @@ import { routeGuard } from './route.guard';
 import { Unauthorized } from './components/unauthorized/unauthorized';
 import { PayrollMobileMoney } from './pages/payroll/payroll-mobile-money/payroll-mobile-money';
 import { GeneratePayroll } from './pages/payroll/generate-payroll/generate-payroll';
-
-
+import { ReconciliationMonitoring } from './pages/reconciliation-monitoring/reconciliation-monitoring';
 
 export const routes: Routes = [
   {
@@ -64,7 +63,7 @@ export const routes: Routes = [
       },
     ],
   },
-    {
+  {
     path: 'sub-project',
     canActivate: [routeGuard],
     children: [
@@ -95,16 +94,16 @@ export const routes: Routes = [
       },
     ],
   },
-   {
-        path: 'attendance',
-        component: BeneficiaryAttendance,
-        canActivate: [routeGuard],
-      },
-         {
-        path: 'attendance/view/:id',
-        component: BeneficiaryAttendancePerform,
-        canActivate: [routeGuard],
-      },
+  {
+    path: 'attendance',
+    component: BeneficiaryAttendance,
+    canActivate: [routeGuard],
+  },
+  {
+    path: 'attendance/view/:id',
+    component: BeneficiaryAttendancePerform,
+    canActivate: [routeGuard],
+  },
   {
     path: 'beneficiaries',
     canActivate: [routeGuard],
@@ -129,8 +128,6 @@ export const routes: Routes = [
         component: BeneficiaryRemove,
         canActivate: [routeGuard],
       },
-     
-   
     ],
   },
   {
@@ -152,7 +149,7 @@ export const routes: Routes = [
         component: ApplyForWagesPaymentComponent,
         canActivate: [routeGuard],
       },
-       {
+      {
         path: 'list',
         component: ListOfWages,
         canActivate: [routeGuard],
@@ -161,17 +158,17 @@ export const routes: Routes = [
         path: 'details/:wageId/:subprojectId',
         component: WageRequestDetails,
         canActivate: [routeGuard],
-      }
+      },
     ],
   },
   {
     path: 'wage-request-approval',
     canActivate: [routeGuard],
     children: [
-       {
+      {
         path: 'list',
-       component: WageRequestApproval,
-       canActivate: [routeGuard],
+        component: WageRequestApproval,
+        canActivate: [routeGuard],
       },
       {
         path: 'drafts',
@@ -182,7 +179,7 @@ export const routes: Routes = [
         path: 'details/:wageId/:subprojectId',
         component: WageRequestDetails,
         canActivate: [routeGuard],
-      }
+      },
     ],
   },
   {
@@ -191,31 +188,33 @@ export const routes: Routes = [
     children: [
       {
         path: 'details',
-        loadComponent: () => import('./pages/report/report').then(m => m.ReportComponent),
+        loadComponent: () =>
+          import('./pages/report/report').then((m) => m.ReportComponent),
         data: { reportType: 9, reportTitle: 'Reconciliation Detail Report' },
         canActivate: [routeGuard],
       },
       {
         path: 'summary',
-        loadComponent: () => import('./pages/report/report').then(m => m.ReportComponent),
+        loadComponent: () =>
+          import('./pages/report/report').then((m) => m.ReportComponent),
         data: { reportType: 10, reportTitle: 'Reconciliation Summary Report' },
         canActivate: [routeGuard],
-      }
-    ]
+      },
+    ],
   },
   {
     path: 'payroll',
     canActivate: [routeGuard],
     children: [
-          {
+      {
         path: 'generate',
-       component: GeneratePayroll,
-       canActivate: [routeGuard],
+        component: GeneratePayroll,
+        canActivate: [routeGuard],
       },
-       {
+      {
         path: 'download',
-       component: PayrollDownload,
-       canActivate: [routeGuard],
+        component: PayrollDownload,
+        canActivate: [routeGuard],
       },
       {
         path: 'mobile-money-download',
@@ -224,10 +223,12 @@ export const routes: Routes = [
       },
     ],
   },
-
-  { path: 'unauthorized',
-    component: Unauthorized
+  {
+    path: 'reconciliation-monitoring',
+    component: ReconciliationMonitoring,
+    canActivate: [routeGuard],
   },
+  { path: 'unauthorized', component: Unauthorized },
 
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
   {
