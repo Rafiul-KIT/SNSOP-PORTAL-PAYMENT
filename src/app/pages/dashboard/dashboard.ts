@@ -182,9 +182,21 @@ export class Dashboard {
         this.projectStats.inactive = this.dashboardData.subprojectData.totalInactiveProjects;
         this.projectStats.total = this.dashboardData.subprojectData.totalProjects;
 
+        const userRole = this.api.getUserRole();
+        let pendingCount = 0;
+        if (userRole === 9) {
+          pendingCount = this.dashboardData.subprojectData.totalSubprojectsPendingForQE;
+        } else if (userRole === 3) {
+          pendingCount = this.dashboardData.subprojectData.totalSubprojectsPendingForEnvSpec;
+        } else if (userRole === 12) {
+          pendingCount = this.dashboardData.subprojectData.totalSubprojectsPendingForTST;
+        } else {
+          pendingCount = this.dashboardData.subprojectData.totalSubprojectsInProcessOfApproval;
+        }
+
         // Populate subprojectApproval (needs to be derived)
         this.subprojectStats.approved = this.dashboardData.subprojectData.totalSubprojectsPendingForBeneficiaryAssignment;
-        this.subprojectStats.pending = this.dashboardData.subprojectData.totalSubprojectsInProcessOfApproval;
+        this.subprojectStats.pending = pendingCount;
         this.subprojectStats.rejected = this.dashboardData.subprojectData.totalSubprojectsInRejectionState;
         this.subprojectStats.total = this.dashboardData.subprojectData.totalSubprojects;
 
@@ -201,11 +213,20 @@ export class Dashboard {
         // Populate wageRequestStats
         this.wageRequestStats.approved = this.dashboardData.wageReqData.totalWageReqApprovedInEveryLevel;
         this.wageRequestStats.rejected = this.dashboardData.wageReqData.totalRejectedWageRequests;
-        this.wageRequestStats.pending = 
-            this.dashboardData.wageReqData.totalWageReqPendingForIpApprover +
-            this.dashboardData.wageReqData.totalWageReqPendingForInitialReviewer +
-            this.dashboardData.wageReqData.totalWageReqPendingForFinancialApprover +
-            this.dashboardData.wageReqData.totalWageReqPendingForFinalPaymentAuthorizer;
+        
+        let pendingWageCount = 0;
+        if (userRole === 14) {
+          pendingWageCount = this.dashboardData.wageReqData.totalWageReqPendingForIpApprover;
+        } else if (userRole === 2) {
+          pendingWageCount = this.dashboardData.wageReqData.totalWageReqPendingForInitialReviewer;
+        } else if (userRole === 11) {
+          pendingWageCount = this.dashboardData.wageReqData.totalWageReqPendingForFinancialApprover;
+        } else if (userRole === 6) {
+          pendingWageCount = this.dashboardData.wageReqData.totalWageReqPendingForFinalPaymentAuthorizer;
+        } else {
+          pendingWageCount = this.dashboardData.wageReqData.totalWageReqApprovedInEveryLevel}
+
+        this.wageRequestStats.pending = pendingWageCount;
         this.wageRequestStats.reconciled = this.dashboardData.wageReqData.totalReconciledWageReq; // Populate reconciled
         this.wageRequestStats.total = this.dashboardData.wageReqData.totalWageRequests;
 
