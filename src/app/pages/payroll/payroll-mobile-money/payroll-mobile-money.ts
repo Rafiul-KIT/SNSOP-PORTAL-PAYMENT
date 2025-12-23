@@ -22,6 +22,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { SelectModule } from 'primeng/select';
+import { DialogModule } from 'primeng/dialog';
 
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -36,6 +37,7 @@ interface PayrollItemDto {
   accountNumber: string;
   phoneNumber: string;
   amount: number;
+  isSaved?: boolean;
 }
 
 @Component({
@@ -56,7 +58,8 @@ interface PayrollItemDto {
     SelectModule,
     RouterModule,
     TooltipModule,
-    Loader
+    Loader,
+    DialogModule
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './payroll-mobile-money.html',
@@ -64,6 +67,7 @@ interface PayrollItemDto {
   styleUrl: './payroll-mobile-money.scss'
 })
 export class PayrollMobileMoney implements OnInit {
+  showUnderDevelopmentModal = false;
   isLoading = true;
   lookupsLoaded = false;
   searchForm!: FormGroup;
@@ -266,6 +270,7 @@ export class PayrollMobileMoney implements OnInit {
       
       if (response.data) {
         this.payrollData = response.data.payrollList || [];
+        this.payrollData.forEach(item => item.isSaved = false); // Initialize isSaved
         this.totalRecords = response.data.total || 0;
         
         this.messageService.add({
@@ -360,6 +365,17 @@ export class PayrollMobileMoney implements OnInit {
 
   get paymentCycles() {
     return this.searchForm.get('paymentCycles') as FormArray;
+  }
+
+  onSave(item: PayrollItemDto) {
+    item.isSaved = true;
+    this.showUnderDevelopmentModal = true;
+    this.cdr.markForCheck();
+  }
+
+  onReconciliation(item: PayrollItemDto) {
+    this.showUnderDevelopmentModal = true;
+    this.cdr.markForCheck();
   }
 
   updateButtonStates() {

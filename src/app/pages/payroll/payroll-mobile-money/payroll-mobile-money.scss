@@ -2,6 +2,7 @@
   background-color:#a0c1e9;
   border: 1px solid #c0baba; /* Add a border around the header */
   padding: 8px; /* Optional, to make the content inside the cells look nicer */
+    align-items: center;
 }
 
 /* Add a border to the table rows */
@@ -13,4 +14,34 @@
 .bordered-cell {
     border: 1px solid #ccc;
     padding: 8px;  /* Add padding for better readability */
+}
+.action-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap; // wraps nicely on small screens
+}
+.action-col {
+  width: 20%;
+  white-space: nowrap;
+  text-align: center;
+}
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem; // space between icon & text
+  white-space: nowrap;
+}
+
+/* Mobile-friendly: icon only */
+@media (max-width: 576px) {
+  .action-btn .p-button-label {
+    display: none;
+  }
+
+  .action-btn {
+    padding: 0.4rem;
+    width: 36px;
+    justify-content: center;
+  }
 }

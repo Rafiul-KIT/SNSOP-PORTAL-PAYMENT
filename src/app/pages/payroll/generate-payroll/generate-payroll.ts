@@ -85,6 +85,11 @@ export class GeneratePayroll implements OnInit {
 
   supportTypeOptions: LookupItem[] = [];
   paymentCycleOptions: LookupItemPayroll[] = [];
+  paymentTypeOptions: LookupItem[] = [
+     { id: 'cash', name: 'Cash' },
+    { id: 'mobileMoney', name: 'Mobile Money' }
+   
+  ];
 
   // Generation status
   generationStatus: string = '';
@@ -128,6 +133,7 @@ export class GeneratePayroll implements OnInit {
       supportType: [''],
       payrollType: ['single'],
       paymentCycle: [null],
+      paymentType: ['cash'],
       paymentCycles: this.fb.array(
         this.paymentCycleOptions.map((c) =>
           this.fb.group({
@@ -207,6 +213,9 @@ export class GeneratePayroll implements OnInit {
     if (!values.state || !values.county || !values.payam || !values.boma || !values.supportType) {
       return true;
     }
+    // if(!values.paymentType) {
+    //   return true;
+    // }
 
     if (values.payrollType === 'single') {
       if (!values.paymentCycle) {
@@ -324,6 +333,7 @@ export class GeneratePayroll implements OnInit {
       supportType: '',
       payrollType: 'single',
       paymentCycle: null,
+      paymentType: 'mobileMoney',
     });
 
     this.paymentCycles.controls.forEach((control) =>

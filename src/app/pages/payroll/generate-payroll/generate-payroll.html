@@ -56,6 +56,14 @@
                 <label>Payment Cycle</label>
             </p-floatlabel>
         </div>
+        <!-- New Payment Type Dropdown -->
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="paymentTypeOptions" optionLabel="name" optionValue="id"
+                    formControlName="paymentType"></p-select>
+                <label>Payment Type</label>
+            </p-floatlabel>
+        </div>
         <!-- payment cycle -->
         <div class="col-md-3">
             <div class="d-flex align-items-center h-100">
