@@ -9,7 +9,7 @@
 
   <div class="card p-3 mb-2">
         <form [formGroup]="searchForm" class="row g-3">
-            @if (advanceSearchPanelVisible) {
+        
                 <!-- Sub-Project -->
                 <div class="col-md-3">
                     <p-floatlabel variant="on" class="w-100">
@@ -53,7 +53,7 @@
                     </div>
                     }
                 </div>
-
+    @if (advanceSearchPanelVisible) {
                 <!-- Payment Cycle -->
                 <div class="col-md-3">
                     <p-floatlabel variant="on" class="w-100">

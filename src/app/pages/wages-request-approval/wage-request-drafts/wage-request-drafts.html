@@ -7,7 +7,7 @@
 
 <div class="card p-3 mb-2">
     <form [formGroup]="searchForm" class="row g-3">
-        @if (advanceSearchPanelVisible) {
+     
         
 
         <!-- Sub-Project -->
@@ -74,6 +74,7 @@
                 <label>Payment Cycle</label>
             </p-floatlabel>
         </div>
+           @if (advanceSearchPanelVisible) {
         <!-- Request Year -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">

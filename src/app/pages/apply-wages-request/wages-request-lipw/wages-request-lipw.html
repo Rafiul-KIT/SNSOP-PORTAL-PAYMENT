@@ -7,12 +7,12 @@
 
 <div class="card p-3 mb-2">
   <form [formGroup]="searchForm" class="row g-3">
-    @if (advanceSearchPanelVisible) {
+
     <!-- Implementing Partner -->
 
 
     <!-- State -->
-    <div class="col-md-4">
+    <div class="col-md-3">
       <p-floatlabel variant="on" class="w-100">
         <p-select [options]="states" optionLabel="name" formControlName="state"
           (onChange)="onStateChange($event.value)" />
@@ -21,7 +21,7 @@
     </div>
 
     <!-- County -->
-    <div class="col-md-4">
+    <div class="col-md-3">
       <p-floatlabel variant="on" class="w-100">
         <p-select [options]="counties" optionLabel="name" formControlName="county"
           (onChange)="onCountyChange($event.value)" />
@@ -31,7 +31,7 @@
 
 
     <!-- Payam -->
-    <div class="col-md-4">
+    <div class="col-md-3">
       <p-floatlabel variant="on" class="w-100">
         <p-select [options]="payams" optionLabel="name" formControlName="payam"
           (onChange)="onPayamChange($event.value)" />
@@ -40,14 +40,15 @@
     </div>
 
     <!-- Boma -->
-    <div class="col-md-4">
+    <div class="col-md-3">
       <p-floatlabel variant="on" class="w-100">
         <p-select [options]="bomas" optionLabel="name" formControlName="boma" />
         <label>Boma Name</label>
       </p-floatlabel>
     </div>
+        @if (advanceSearchPanelVisible) {
     <!-- Work Code -->
-    <div class="col-md-4">
+    <div class="col-md-3">
       <p-floatlabel variant="on" class="w-100">
         <input pInputText class="form-control" formControlName="workCode" />
         <label>Sub-Project Code</label>
