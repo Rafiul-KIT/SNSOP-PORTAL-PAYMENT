@@ -24,6 +24,8 @@ import { TagModule } from 'primeng/tag';
 import { ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import Swal from 'sweetalert2';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { DialogModule } from 'primeng/dialog';
 import {
   LookupItem,
   LookupItemPayroll,
@@ -75,6 +77,8 @@ interface ApiResponse {
     TooltipModule,
     TagModule,
     Loader,
+    ProgressBarModule,
+    DialogModule,
   ],
   providers: [ConfirmationService],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -83,6 +87,8 @@ interface ApiResponse {
 })
 export class PayrollDownload implements OnInit {
   isLoading = true;
+  showDownloadProgressModal = false;
+  downloadProgress = 0;
   searchForm!: FormGroup;
 
   // geo lookup lists
@@ -379,10 +385,24 @@ export class PayrollDownload implements OnInit {
       return;
     }
 
+    this.showDownloadProgressModal = true;
+    this.downloadProgress = 0;
+    this.cdr.markForCheck();
+
     try {
       const response = await this.api.axiosInstance.get(
         `api/payroll/download/${fileName}`,
-        { responseType: 'blob' }
+        {
+          responseType: 'blob',
+          onDownloadProgress: (progressEvent: any) => {
+            if (progressEvent.total) {
+              this.downloadProgress = Math.round(
+                (progressEvent.loaded * 100) / progressEvent.total
+              );
+              this.cdr.markForCheck();
+            }
+          },
+        }
       );
 
       const blob = new Blob([response.data], {
@@ -432,6 +452,10 @@ export class PayrollDownload implements OnInit {
           text: error?.message || 'An error occurred while downloading the file.',
         });
       }
+    } finally {
+      this.showDownloadProgressModal = false;
+      this.downloadProgress = 0;
+      this.cdr.markForCheck();
     }
   }
 

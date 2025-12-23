@@ -3,11 +3,11 @@ import { RouterModule } from '@angular/router';
 import { Header } from './layout/header/header';
 import { ApiService } from './services/api.service';
 import { LookupService } from './services/lookup.service';
-import { Loader } from './components/loader/loader';
+
 
 @Component({
   selector: 'app-root',
-  imports: [RouterModule, Header, Loader],
+  imports: [RouterModule, Header],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })

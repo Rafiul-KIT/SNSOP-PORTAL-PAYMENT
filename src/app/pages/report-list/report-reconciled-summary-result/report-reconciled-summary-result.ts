@@ -5,7 +5,7 @@ import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { PaginatorModule } from 'primeng/paginator';
-import { CurrencyPipe } from '@angular/common';
+
 import { LookupService } from '../../../services/lookup.service';
 
 interface ReconciledSummaryRow {
@@ -31,7 +31,7 @@ interface SummaryTotals {
 @Component({
   selector: 'app-report-reconciled-summary-result',
   standalone: true,
-  imports: [TableModule, ButtonModule, TooltipModule, PaginatorModule, CurrencyPipe], // Import PrimeNG modules and CurrencyPipe
+  imports: [TableModule, ButtonModule, TooltipModule, PaginatorModule], // Import PrimeNG modules and CurrencyPipe
   templateUrl: './report-reconciled-summary-result.html',
   styleUrls: ['./report-reconciled-summary-result.scss'],
 })
