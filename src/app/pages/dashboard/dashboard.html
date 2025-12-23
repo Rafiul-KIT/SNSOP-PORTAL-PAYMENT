@@ -1,4 +1,4 @@
-@if(false){
+@if(isLoading){
 <app-loader />
 }@else {
 <div class="breadcrumb-wrapper">
@@ -43,7 +43,7 @@
 
         <div class="stat-content">
           <div class="stat-label">Total Beneficiaries</div>
-          <div class="stat-value">{{ stats.totalBeneficiaries.paid + stats.totalBeneficiaries.unpaid | number }}</div>
+          <div class="stat-value">{{ stats.totalBeneficiaries.total | number }}</div>
           <div class="stat-detail">
             {{ stats.totalBeneficiaries.paid | number }} paid, {{ stats.totalBeneficiaries.unpaid | number }} unpaid
           </div>
@@ -59,7 +59,7 @@
 
         <div class="stat-content">
           <div class="stat-label">Total Amount</div>
-          <div class="stat-value">${{ (stats.totalAmount.paid + stats.totalAmount.unpaid) / 1000000 | number:'1.0-1' }}M
+          <div class="stat-value">${{ (stats.totalAmount.total) / 1000000 | number:'1.0-1' }}M
           </div>
           <div class="stat-detail">
             Paid ${{ stats.totalAmount.paid / 1000000 | number:'1.2-2' }}M, Unpaid ${{ stats.totalAmount.unpaid /
@@ -76,26 +76,24 @@
   <!-- Approval Status Section -->
   <div class="row g-3 mb-4">
     <div class="col-lg-6">
-      <p-card header="Project Approval Status" class="approval-card">
+      <p-card header="Project Status" class="approval-card">
         <div class="approval-stats">
           <div class="d-flex justify-content-between align-items-center mb-2">
             <span class="approval-label">Total</span>
-            <span class="approval-total">{{ projectApproval.approved + projectApproval.pending +
-              projectApproval.rejected }}</span>
+            <span class="approval-total">{{ projectStats.total }}</span>
           </div>
 
           <div class="approval-item">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <div class="d-flex align-items-center">
                 <i class="pi pi-check-circle text-success me-2"></i>
-                <span>Approved</span>
+                <span>Active Project</span>
               </div>
-              <span class="fw-bold text-success">{{ projectApproval.approved }} ({{
-                getPercentage(projectApproval.approved, projectApproval.approved + projectApproval.pending +
-                projectApproval.rejected) }}%)</span>
+              <span class="fw-bold text-success">{{ projectStats.active }} ({{
+                getPercentage(projectStats.active, projectStats.total) }}%)</span>
             </div>
             <p-progressBar
-              [value]="getPercentage(projectApproval.approved, projectApproval.approved + projectApproval.pending + projectApproval.rejected)"
+              [value]="getPercentage(projectStats.active, projectStats.total)"
               [showValue]="false" class="approval-progress-success"></p-progressBar>
           </div>
 
@@ -103,56 +101,37 @@
             <div class="d-flex justify-content-between align-items-center mb-2">
               <div class="d-flex align-items-center">
                 <i class="pi pi-clock text-warning me-2"></i>
-                <span>Pending</span>
+                <span>Inactive Project</span>
               </div>
-              <span class="fw-bold text-warning">{{ projectApproval.pending }} ({{
-                getPercentage(projectApproval.pending, projectApproval.approved + projectApproval.pending +
-                projectApproval.rejected) }}%)</span>
+              <span class="fw-bold text-warning">{{ projectStats.inactive }} ({{
+                getPercentage(projectStats.inactive, projectStats.total) }}%)</span>
             </div>
             <p-progressBar
-              [value]="getPercentage(projectApproval.pending, projectApproval.approved + projectApproval.pending + projectApproval.rejected)"
+              [value]="getPercentage(projectStats.inactive, projectStats.total)"
               [showValue]="false" class="approval-progress-warning"></p-progressBar>
-          </div>
-
-          <div class="approval-item">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-              <div class="d-flex align-items-center">
-                <i class="pi pi-times-circle text-danger me-2"></i>
-                <span>Rejected</span>
-              </div>
-              <span class="fw-bold text-danger">{{ projectApproval.rejected }} ({{
-                getPercentage(projectApproval.rejected, projectApproval.approved + projectApproval.pending +
-                projectApproval.rejected) }}%)</span>
-            </div>
-            <p-progressBar
-              [value]="getPercentage(projectApproval.rejected, projectApproval.approved + projectApproval.pending + projectApproval.rejected)"
-              [showValue]="false" class="approval-progress-danger"></p-progressBar>
           </div>
         </div>
       </p-card>
     </div>
 
     <div class="col-lg-6">
-      <p-card header="Subproject Approval Status" class="approval-card">
+      <p-card header="Subproject Status" class="approval-card">
         <div class="approval-stats">
           <div class="d-flex justify-content-between align-items-center mb-2">
             <span class="approval-label">Total</span>
-            <span class="approval-total">{{ subprojectApproval.approved + subprojectApproval.pending +
-              subprojectApproval.rejected }}</span>
+            <span class="approval-total">{{ subprojectStats.total}}</span>
           </div>
-
           <div class="approval-item">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <div class="d-flex align-items-center">
                 <i class="pi pi-check-circle text-success me-2"></i>
                 <span>Approved</span>
               </div>
-              <span class="fw-bold text-success">{{ subprojectApproval.approved }} ({{
-                getPercentage(subprojectApproval.approved, subprojectApproval.approved + subprojectApproval.pending +
-                subprojectApproval.rejected) }}%)</span>
+              <span class="fw-bold text-success">{{ subprojectStats.approved }} ({{
+                getPercentage(subprojectStats.approved, subprojectStats.total) }}%)</span>
             </div>
             <p-progressBar
-              [value]="getPercentage(subprojectApproval.approved, subprojectApproval.approved + subprojectApproval.pending + subprojectApproval.rejected)"
+              [value]="getPercentage(subprojectStats.approved, subprojectStats.total)"
               [showValue]="false" class="approval-progress-success"></p-progressBar>
           </div>
 
@@ -162,12 +141,11 @@
                 <i class="pi pi-clock text-warning me-2"></i>
                 <span>Pending</span>
               </div>
-              <span class="fw-bold text-warning">{{ subprojectApproval.pending }} ({{
-                getPercentage(subprojectApproval.pending, subprojectApproval.approved + subprojectApproval.pending +
-                subprojectApproval.rejected) }}%)</span>
+              <span class="fw-bold text-warning">{{ subprojectStats.pending }} ({{
+                getPercentage(subprojectStats.pending, subprojectStats.total) }}%)</span>
             </div>
             <p-progressBar
-              [value]="getPercentage(subprojectApproval.pending, subprojectApproval.approved + subprojectApproval.pending + subprojectApproval.rejected)"
+              [value]="getPercentage(subprojectStats.pending, subprojectStats.total)"
               [showValue]="false" class="approval-progress-warning"></p-progressBar>
           </div>
 
@@ -177,12 +155,11 @@
                 <i class="pi pi-times-circle text-danger me-2"></i>
                 <span>Rejected</span>
               </div>
-              <span class="fw-bold text-danger">{{ subprojectApproval.rejected }} ({{
-                getPercentage(subprojectApproval.rejected, subprojectApproval.approved + subprojectApproval.pending +
-                subprojectApproval.rejected) }}%)</span>
+              <span class="fw-bold text-danger">{{ subprojectStats.rejected }} ({{
+                getPercentage(subprojectStats.rejected, subprojectStats.total) }}%)</span>
             </div>
             <p-progressBar
-              [value]="getPercentage(subprojectApproval.rejected, subprojectApproval.approved + subprojectApproval.pending + subprojectApproval.rejected)"
+              [value]="getPercentage(subprojectStats.rejected, subprojectStats.total)"
               [showValue]="false" class="approval-progress-danger"></p-progressBar>
           </div>
         </div>
@@ -192,50 +169,68 @@
 
 
   <div class="row g-3">
-    <div class="col-md-4">
-      <div style="background-color: #eff6ff; border:2px solid #bfdafd; color:#a3cbff ;"
-        class="info-card info-card-white">
-
-        <div class="info-content">
-          <div class="info-label">Wage Requests</div>
-          <div class="info-value">120</div>
-          <div class="info-detail">95 approved, 20 pending</div>
+    <div class="col-md-12">
+      <p-card header="Wage Request Status" class="approval-card h-100">
+        <div class="approval-stats">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="approval-label">Total</span>
+            <span class="approval-total">{{ wageRequestStats.total | number }}</span>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-3">
+              <div class="approval-item">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <div class="d-flex align-items-center">
+                    <i class="pi pi-check-circle text-success me-2"></i>
+                    <span>Approved</span>
+                  </div>
+                  <span class="fw-bold text-success">{{ wageRequestStats.approved | number }} ({{ getPercentage(wageRequestStats.approved, wageRequestStats.total) }}%)</span>
+                </div>
+                <p-progressBar [value]="getPercentage(wageRequestStats.approved, wageRequestStats.total)" [showValue]="false" class="approval-progress-success"></p-progressBar>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="approval-item">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <div class="d-flex align-items-center">
+                    <i class="pi pi-clock text-warning me-2"></i>
+                    <span>Pending</span>
+                  </div>
+                  <span class="fw-bold text-warning">{{ wageRequestStats.pending | number }} ({{ getPercentage(wageRequestStats.pending, wageRequestStats.total) }}%)</span>
+                </div>
+                <p-progressBar [value]="getPercentage(wageRequestStats.pending, wageRequestStats.total)" [showValue]="false" class="approval-progress-warning"></p-progressBar>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="approval-item">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <div class="d-flex align-items-center">
+                    <i class="pi pi-times-circle text-danger me-2"></i>
+                    <span>Rejected</span>
+                  </div>
+                  <span class="fw-bold text-danger">{{ wageRequestStats.rejected | number }} ({{ getPercentage(wageRequestStats.rejected, wageRequestStats.total) }}%)</span>
+                </div>
+                <p-progressBar [value]="getPercentage(wageRequestStats.rejected, wageRequestStats.total)" [showValue]="false" class="approval-progress-danger"></p-progressBar>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="approval-item">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <div class="d-flex align-items-center">
+                    <i class="pi pi-check-square text-info me-2"></i> <!-- Changed icon for Reconciled -->
+                    <span>Reconciled</span>
+                  </div>
+                  <span class="fw-bold text-info">{{ wageRequestStats.reconciled | number }} ({{ getPercentage(wageRequestStats.reconciled, wageRequestStats.total) }}%)</span>
+                </div>
+                <p-progressBar [value]="getPercentage(wageRequestStats.reconciled, wageRequestStats.total)" [showValue]="false" class="approval-progress-info"></p-progressBar>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="info-icon">
-          <i class="pi pi-file-edit"></i>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-4">
-      <div style="background-color: #f0fdf4; border:2px solid #c3fcd4; color:#91fcb1 ;"
-        class="info-card info-card-white">
-
-        <div class="info-content">
-          <div class="info-label">Boma Reconciled</div>
-          <div class="info-value">123</div>
-        </div>
-        <div class="info-icon">
-          <i class="pi pi-map-marker"></i>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-4">
-      <div style="background-color: #faf5ff; border:2px solid #e4c9ff; color: #bd8cee;"
-        class="info-card info-card-white">
-
-        <div class="info-content">
-          <div class="info-label">Payroll Approval Status</div>
-          <div class="info-value">95</div>
-          <div class="info-detail">85 approved, 8 pending</div>
-        </div>
-        <div class="info-icon">
-          <i class="pi pi-verified"></i>
-        </div>
-      </div>
+      </p-card>
     </div>
   </div>
+  
   <!-- Payment Cycle Summary -->
   <div class="row g-3  mt-2">
     <div class="col-lg-6  ">
@@ -247,47 +242,18 @@
         </ng-template>
 
 
-        <div class="payment-cycle-content">
-
-
-          <div class="mb-3">
-            <label class="form-label">Select Payment Cycle</label>
-            <select class="form-select" [(ngModel)]="selectedPaymentCycle">
-              <option [ngValue]="cycle" *ngFor="let cycle of paymentCycles">{{ cycle.name }}</option>
-            </select>
-          </div>
-
-
-          <div class="row g-3" *ngIf="selectedPaymentCycle">
-            <div class="col-6">
-              <div class="summary-box summary-box-blue">
-                <div class="summary-label">Total Amount</div>
-                <div class="summary-value">${{ selectedPaymentCycle.totalAmount | number }}</div>
-              </div>
+        <p-card class="summary-card h-100">
+          <ng-template pTemplate="header">
+            <div class="card-header-custom">
+              <h3 class="card-title">Payment Cycle Summary</h3>
             </div>
-
-            <div class="col-6">
-              <div class="summary-box summary-box-green">
-                <div class="summary-label">Paid Amount</div>
-                <div class="summary-value">${{ selectedPaymentCycle.paidAmount | number }}</div>
-              </div>
-            </div>
-
-            <div class="col-6">
-              <div class="summary-box summary-box-yellow">
-                <div class="summary-label">Unpaid Amount</div>
-                <div class="summary-value">${{ selectedPaymentCycle.unpaidAmount | number }}</div>
-              </div>
-            </div>
-
-            <div class="col-6">
-              <div class="summary-box summary-box-purple">
-                <div class="summary-label">Beneficiaries</div>
-                <div class="summary-value">{{ selectedPaymentCycle.beneficiaries }}</div>
-              </div>
+          </ng-template>
+          <div class="payment-cycle-content">
+            <div class="chart-wrapper-bar">
+              <p-chart type="bar" [data]="paymentCycleChartData" [options]="paymentCycleChartOptions"></p-chart>
             </div>
           </div>
-        </div>
+        </p-card>       
       </p-card>
     </div>
 
@@ -318,7 +284,7 @@
             <div class="support-progress">
               <p-progressBar [value]="getPercentage(support.paid, support.total)" [showValue]="false"
                 class="support-progressbar"></p-progressBar>
-              <div class="progress-label">{{ getPercentage(support.paid, support.total) }}% paid</div>
+              <div class="progress-label">{{ getPercentage(support.paid, support.total) }}% payment</div>
             </div>
           </div>
         </div>
@@ -340,11 +306,11 @@
           <div class="gender-stats">
             <div class="gender-item gender-male">
               <div class="gender-label">Male</div>
-              <div class="gender-value">{{ maleTotal | number }}</div>
+              <div class="gender-value">{{ this.genderstats.male.paidBeneficiary| number }}</div>
             </div>
             <div class="gender-item gender-female">
               <div class="gender-label">Female</div>
-              <div class="gender-value">{{ femaleTotal | number }}</div>
+              <div class="gender-value">{{ this.genderstats.female.paidBeneficiary | number }}</div>
             </div>
           </div>
         </p-card>
@@ -352,9 +318,9 @@
 
       <!-- Bar Chart -->
       <div class="col-lg-6">
-        <p-card header="Boma Payment Comparison" class="chart-card">
+        <p-card header="State Payment Comparison" class="chart-card">
           <div class="chart-wrapper-bar">
-            <p-chart type="bar" [data]="bomaChartData" [options]="barChartOptions">
+            <p-chart type="bar" [data]="stateChartData" [options]="barChartOptions">
             </p-chart>
           </div>
         </p-card>
@@ -365,29 +331,28 @@
     <!-- Table -->
     <div class="row">
       <div class="col-12">
-        <p-card header="Boma-wise Payment Summary" class="table-card">
-          <p-table [value]="bomaPayments" [tableStyle]="{'min-width': '60rem'}" class="custom-table">
+        <p-card header="State-wise Payment Summary" class="table-card">
+          <p-table [value]="geoStateData" [tableStyle]="{'min-width': '60rem'}" class="custom-table">
             <ng-template pTemplate="header">
               <tr>
-                <th class="table-header">BOMA NAME</th>
+                <th class="table-header">STATE NAME</th>
                 <th class="table-header text-end">TOTAL AMOUNT</th>
                 <th class="table-header text-end">PAID AMOUNT</th>
                 <th class="table-header text-end">UNPAID AMOUNT</th>
                 <th class="table-header text-end">BENEFICIARIES</th>
-                <th class="table-header text-end">GENDER SPLIT</th>
+                <th class="table-header text-end">PAID BENEFICIARIES</th>
+                <th class="table-header text-end">UNPAID BENEFICIARIES</th>
               </tr>
             </ng-template>
-            <ng-template pTemplate="body" let-boma>
+            <ng-template pTemplate="body" let-state>
               <tr>
-                <td class="boma-name">{{ boma.name }}</td>
-                <td class="text-end amount-total">{{ boma.totalAmount | currency:'$':'symbol':'1.0-0' }}</td>
-                <td class="text-end amount-paid">{{ boma.paidAmount | currency:'$':'symbol':'1.0-0' }}</td>
-                <td class="text-end amount-unpaid">{{ boma.unpaidAmount | currency:'$':'symbol':'1.0-0' }}</td>
-                <td class="text-end beneficiaries">{{ boma.beneficiaries | number }}</td>
-                <td class="text-end gender-split">
-                  <span class="gender-badge male">M: {{ boma.maleCount }}</span>
-                  <span class="gender-badge female">F: {{ boma.femaleCount }}</span>
-                </td>
+                <td class="boma-name">{{ state.stateName }}</td>
+                <td class="text-end amount-total">{{ state.totalPaymentAmount | currency:'$':'symbol':'1.0-0' }}</td>
+                <td class="text-end amount-paid">{{ state.totalPaidAmount | currency:'$':'symbol':'1.0-0' }}</td>
+                <td class="text-end amount-unpaid">{{ state.totalUnpaidAmount | currency:'$':'symbol':'1.0-0' }}</td>
+                <td class="text-end beneficiaries">{{ state.uniqueBeneficiary | number }}</td>
+                <td class="text-end beneficiaries">{{ state.uniquePaidBeneficiary | number }}</td>
+                <td class="text-end beneficiaries">{{ state.uniqueUnpaidBeneficiary | number }}</td>
               </tr>
             </ng-template>
           </p-table>
