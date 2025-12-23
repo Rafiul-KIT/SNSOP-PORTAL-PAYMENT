@@ -243,8 +243,8 @@ export class BeneficiarySubprojectRemove implements OnInit {
       bomaName: null,
       typeOfMeeting: f.typeOfWork || null,
       meetingDate: null,
-      screeningStatus: f.screeningStatus || null,
-      status: f.status || "7",
+      screeningStatus: "1",
+      status: "7",
     };
   }
 

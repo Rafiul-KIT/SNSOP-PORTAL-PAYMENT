@@ -182,7 +182,7 @@ export class PayrollDownload implements OnInit {
 
   initBreadcrumb() {
     this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
-    this.breadcrumbItems = [{ label: 'Payroll Generation Requests' }];
+    this.breadcrumbItems = [{ label: 'Payroll Download' }];
   }
 
   async onStateChange(state: LookupItem | null) {

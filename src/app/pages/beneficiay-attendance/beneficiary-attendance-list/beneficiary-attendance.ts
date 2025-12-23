@@ -146,7 +146,7 @@ export class BeneficiaryAttendance implements OnInit {
       status: ['InProgress'],
       workCode: [''],
       workActivity: [null],
-      screeningStatus: [null],
+      screeningStatus: '1',
     });
   }
 
@@ -236,8 +236,8 @@ export class BeneficiaryAttendance implements OnInit {
       bomaName: null,
       typeOfMeeting: f.typeOfMeeting || null,
       meetingDate: null,
-      screeningStatus: f.screeningStatus || null,
-      status: f.status,
+      screeningStatus: "1",
+      status: "7",
     };
   }
 

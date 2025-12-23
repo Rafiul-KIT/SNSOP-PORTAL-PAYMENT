@@ -242,7 +242,7 @@ export class BeneficiarySubprojectList implements OnInit {
       bomaName: null,
       typeOfMeeting: f.typeOfWork || null,
       meetingDate: null,
-      screeningStatus: f.screeningStatus || null,
+      screeningStatus: "1",
       status: f.status || "5",
     };
   }
