@@ -37,7 +37,6 @@ interface PayrollItemDto {
   accountNumber: string;
   phoneNumber: string;
   amount: number;
-  isSaved?: boolean;
 }
 
 @Component({
@@ -68,6 +67,7 @@ interface PayrollItemDto {
 })
 export class PayrollMobileMoney implements OnInit {
   showUnderDevelopmentModal = false;
+  isPayrollSaved = false;
   isLoading = true;
   lookupsLoaded = false;
   searchForm!: FormGroup;
@@ -167,7 +167,7 @@ export class PayrollMobileMoney implements OnInit {
         name: c.name,
         selected: false
       }))),
-      processType: [null]
+      processType: ['payrollOnly']
     });
 
     this.searchForm.get('payrollType')?.valueChanges.subscribe(value => {
@@ -270,7 +270,6 @@ export class PayrollMobileMoney implements OnInit {
       
       if (response.data) {
         this.payrollData = response.data.payrollList || [];
-        this.payrollData.forEach(item => item.isSaved = false); // Initialize isSaved
         this.totalRecords = response.data.total || 0;
         
         this.messageService.add({
@@ -343,7 +342,7 @@ export class PayrollMobileMoney implements OnInit {
       supportType: '',
       paymentCycle: '',
       provider: 'MOMO',
-      processType: null
+      processType: 'payrollOnly'
     });
     
     this.paymentCycles.controls.forEach(control => {
@@ -358,6 +357,7 @@ export class PayrollMobileMoney implements OnInit {
     this.currentPage = 0;
     this.hasSearched = false;
     this.selectedFile = null;
+    this.isPayrollSaved = false;
     
     this.updateButtonStates(); // Update button states after reset
     this.cdr.markForCheck();
@@ -367,13 +367,13 @@ export class PayrollMobileMoney implements OnInit {
     return this.searchForm.get('paymentCycles') as FormArray;
   }
 
-  onSave(item: PayrollItemDto) {
-    item.isSaved = true;
+  onSave() {
+    this.isPayrollSaved = true;
     this.showUnderDevelopmentModal = true;
     this.cdr.markForCheck();
   }
 
-  onReconciliation(item: PayrollItemDto) {
+  onReconciliation() {
     this.showUnderDevelopmentModal = true;
     this.cdr.markForCheck();
   }
@@ -381,25 +381,20 @@ export class PayrollMobileMoney implements OnInit {
   updateButtonStates() {
     const processType = this.searchForm.get('processType')?.value;
 
-    switch (processType) {
-      case 'verification':
-        this.isImportButtonDisabled = false;
-        this.isExportButtonDisabled = false;
-        break;
-      case 'payrollOnly':
-        this.isImportButtonDisabled = true;
-        this.isExportButtonDisabled = false;
-        break;
-      case 'reconciliation':
-        this.isImportButtonDisabled = false;
-        this.isExportButtonDisabled = true;
-        break;
-      default:
-        this.isImportButtonDisabled = true;
-        this.isExportButtonDisabled = true;
-        break;
-    }
-    this.cdr.markForCheck();
+            switch (processType) {
+                case 'payrollOnly':
+                    this.isImportButtonDisabled = true;
+                    this.isExportButtonDisabled = false;
+                    break;
+                case 'reconciliation':
+                    this.isImportButtonDisabled = false;
+                    this.isExportButtonDisabled = true;
+                    break;
+                default:
+                    this.isImportButtonDisabled = true;
+                    this.isExportButtonDisabled = true;
+                    break;
+            }    this.cdr.markForCheck();
   }
 
 
