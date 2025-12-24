@@ -119,61 +119,7 @@
 
           </div>
         </form>
-      </p-card>
-
-      @if (showResults) {
-      <p-card class="shadow-sm border-0 mt-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="fw-bold text-secondary mb-0">
-            <i class="pi pi-users me-2"></i>
-            Eligible Beneficiaries
-          </h5>
-          @if (selectedBeneficiaries.length > 0) {
-          <span class="badge bg-primary fs-6">
-            {{ selectedBeneficiaries.length }} Selected
-          </span>
-          }
-        </div>
-
-        <p-table [value]="beneficiaries" [(selection)]="selectedBeneficiaries" dataKey="beneficiaryId"
-          responsiveLayout="scroll">
-          <ng-template pTemplate="header">
-            <tr>
-                             <th class="select-all-header">
-                <p-tableHeaderCheckbox [disabled]="submissionForm.get('totalDays')?.invalid"></p-tableHeaderCheckbox>
-                <span class="select-all-text">Select all</span>
-              </th>
-              <th>Beneficiary ID</th>
-              <th>Household No.</th>
-              <th>Beneficiary Name</th>
-              <th>Gender</th>
-              <th>Age</th>
-              <th>Phone No.</th>
-              <th>Legal Status</th>
-            </tr>
-          </ng-template>
-          <ng-template pTemplate="body" let-beneficiary>
-            <tr>
-              <td>
-                <p-tableCheckbox [value]="beneficiary" [disabled]="submissionForm.get('totalDays')?.invalid"></p-tableCheckbox>
-              </td>
-              <td>{{ beneficiary.beneficiaryId }}</td>
-              <td>{{ beneficiary.householdNumber }}</td>
-              <td>{{ beneficiary.beneficiaryName }}</td>
-              <td>{{ beneficiary.gender }}</td>
-              <td>{{ beneficiary.age }}</td>
-              <td>{{ beneficiary.phoneNo }}</td>
-              <td>{{ beneficiary.legalStatus }}</td>
-            </tr>
-          </ng-template>
-          <ng-template pTemplate="emptymessage">
-            <tr>
-              <td colspan="8" class="text-center">No beneficiaries found.</td>
-            </tr>
-          </ng-template>
-        </p-table>
-
-        @if (beneficiaries.length > 0) {
+             @if (beneficiaries.length > 0) {
         <form [formGroup]="submissionForm" class="mt-4">
           <div class="row">
             <div class="col-md-6 col-lg-3">
@@ -191,16 +137,79 @@
             </div>
           </div>
         </form>
+        }
+      </p-card>
 
-        <div class="d-flex justify-content-end gap-3 mt-4">
+      @if (showResults) {
+      <p-card class="shadow-sm border-0 mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold text-secondary mb-0">
+            <i class="pi pi-users me-2"></i>
+            Eligible Beneficiaries
+          </h5>
+          @if (selectedBeneficiaries.length > 0) {
+          <span class="badge bg-primary fs-6">
+            {{ selectedBeneficiaries.length }} Selected
+          </span>
+          }
+        </div>
+   
+
+
+
+        <p-table [value]="beneficiaries" [(selection)]="selectedBeneficiaries" dataKey="beneficiaryId"
+          responsiveLayout="scroll">
+          <ng-template pTemplate="header">
+            <tr>
+              <th class="select-all-header">
+                <p-tableHeaderCheckbox [disabled]="submissionForm.get('totalDays')?.invalid"></p-tableHeaderCheckbox>
+                <span class="select-all-text">Select all</span>
+              </th>
+              <th>Beneficiary ID</th>
+              <th>Household No.</th>
+              <th>Beneficiary Name</th>
+              <th>Gender</th>
+              <th>Age</th>
+              <th>Phone No.</th>
+              <th>Legal Status</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-beneficiary>
+            <tr>
+              <td>
+                <p-tableCheckbox [value]="beneficiary"
+                  [disabled]="submissionForm.get('totalDays')?.invalid"></p-tableCheckbox>
+              </td>
+              <td>{{ beneficiary.beneficiaryId }}</td>
+              <td>{{ beneficiary.householdNumber }}</td>
+              <td>{{ beneficiary.beneficiaryName }}</td>
+              <td>{{ beneficiary.gender }}</td>
+              <td>{{ beneficiary.age }}</td>
+              <td>{{ beneficiary.phoneNo }}</td>
+              <td>{{ beneficiary.legalStatus }}</td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="8" class="text-center">No beneficiaries found.</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      @if (beneficiaries.length > 0) {
+    <div class="d-flex justify-content-end gap-3 mt-4">
+          
           <button pButton type="button" label="Apply for DIS Wage" icon="pi pi-check" class="p-button-success px-5"
             (click)="onSubmitDisRequest()"
             [disabled]="selectedBeneficiaries.length === 0 || submissionForm.invalid || loading"
             [loading]="loading"></button>
         </div>
-        }
-      </p-card>
       }
+
+      </p-card>
+
+       
+      }
+      
     </div>
   </div>
 </div>

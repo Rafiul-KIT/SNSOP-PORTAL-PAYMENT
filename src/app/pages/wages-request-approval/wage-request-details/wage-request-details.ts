@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   FormBuilder,
@@ -228,7 +228,8 @@ export class WageRequestDetails implements OnInit {
     private apiService: ApiService,
     private cdr: ChangeDetectorRef,
     private fb: FormBuilder,
-    private lookupService: LookupService // Inject LookupService
+    private lookupService: LookupService, // Inject LookupService
+    private location: Location
   ) {}
 
   ngOnInit(): void {
@@ -246,7 +247,16 @@ export class WageRequestDetails implements OnInit {
       this.apiError = 'Invalid wage request ID';
     }
   }
-
+initBreadcrumb(): void {
+  this.breadcrumbHome = { icon: 'fas fa-home' };
+  this.breadcrumbItems = [
+    {
+      label: 'Wage Requests',
+      command: () => this.location.back()
+    },
+    { label: 'Details' },
+  ];
+}
   getGenderName(genderId: string | number): string {
     const gender = this.lookupService.getGenderListbyId().find(g => g.id == genderId);
     return gender ? gender.name : 'Unknown';
@@ -431,13 +441,7 @@ export class WageRequestDetails implements OnInit {
     }
   }
 
-  initBreadcrumb(): void {
-    this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
-    this.breadcrumbItems = [
-      { label: 'Wage Requests', routerLink: '/wage-requests' },
-      { label: 'Details' },
-    ];
-  }
+
 
   async loadWageRequestDetails(id: number): Promise<void> {
     this.isLoading = true;
