@@ -144,7 +144,7 @@ export class SubProjectList implements OnInit {
     if (this.userRole === 5) { // IP User
       this.statuses = StatusEnum.filter(
         (status) =>
-          status.value === 'IP_Submitted' || status.value === 'QE_Rejected'
+          status.value === 'QE_Rejected' || status.value === 'TST_Approved' || status.value === 'InProgress'
       );
     } else {
       this.statuses = StatusEnum;
@@ -245,9 +245,9 @@ export class SubProjectList implements OnInit {
     const f = this.searchForm.value;
     let statusValue = f.status || null;
 
-    if (this.userRole === 5 && statusValue === null) {
-      statusValue = 'IP_Submitted'; // Default to 'IP_Submitted' value for IP users if no status is selected
-    }
+    // if (this.userRole === 5 && statusValue === null) {
+    //   statusValue = 'IP_Submitted'; // Default to 'IP_Submitted' value for IP users if no status is selected
+    // }
 
     return {
       id: null,
