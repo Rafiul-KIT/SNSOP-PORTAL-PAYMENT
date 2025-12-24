@@ -396,7 +396,7 @@ async submitApproval(isApproved: boolean): Promise<void> {
         0,
       projectCost: subprojectData.projectCost || 0,
       typeOfMeeting: this.getTypeOfMeetingLabel(subprojectData.typeOfMeeting) || '',
-      meetingDate: subprojectData.meetingDate || '',
+      meetingDate: subprojectData.meetingDate ? new Date(subprojectData.meetingDate) : '',
       screeningStatus: this.formatScreeningStatus(
         subprojectData.screeningStatus
       ),
@@ -423,8 +423,8 @@ async submitApproval(isApproved: boolean): Promise<void> {
           estimatedCostOfEquipment: [activity.equipmentCost || 0],
           estimatedCost: [activity.materialCost || 0],
           totalEstimatedCost: [activity.estCost || 0],
-          workStartDate: [activity.estStartAt || ''],
-          workEndDate: [activity.estEndAt || ''],
+          workStartDate: [activity.estStartAt ? new Date(activity.estStartAt) : ''],
+          workEndDate: [activity.estEndAt ? new Date(activity.estEndAt) : ''],
           startCoordinate: [activity.startCoordinate || ''],
           endCoordinate: [activity.endCoordinate || ''],
           paperScreeningStatus: [activity.paperScreeningStatus || ''],
