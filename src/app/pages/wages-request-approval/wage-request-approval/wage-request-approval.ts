@@ -230,7 +230,7 @@ export class WageRequestApproval implements OnInit {
         statusIds = [3];
         break;
       default:
-        statusIds = [];
+        statusIds = StatusWageEnum.map(s => Number(s.id));
         break;
     }
     return StatusWageEnum
