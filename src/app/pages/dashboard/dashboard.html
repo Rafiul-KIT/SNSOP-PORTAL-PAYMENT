@@ -240,20 +240,20 @@
             <h3 class="card-title">Payment Cycle Summary</h3>
           </div>
         </ng-template>
+            <div class="chart-wrapper-bar">
+              <p-chart type="bar" [data]="paymentCycleChartData" [options]="paymentCycleChartOptions"></p-chart>
+            </div>
 
-
-        <p-card class="summary-card h-100">
+        <!-- <p-card class="summary-card h-100">
           <ng-template pTemplate="header">
             <div class="card-header-custom">
               <h3 class="card-title">Payment Cycle Summary</h3>
             </div>
           </ng-template>
           <div class="payment-cycle-content">
-            <div class="chart-wrapper-bar">
-              <p-chart type="bar" [data]="paymentCycleChartData" [options]="paymentCycleChartOptions"></p-chart>
-            </div>
+            
           </div>
-        </p-card>       
+        </p-card>        -->
       </p-card>
     </div>
 
