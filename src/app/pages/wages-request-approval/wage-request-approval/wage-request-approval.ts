@@ -365,21 +365,42 @@ export class WageRequestApproval implements OnInit {
       wageRequest.selectedStatus === null ||
       wageRequest.selectedStatus === undefined
     ) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Validation Error',
-        detail: 'Please select an approval status.',
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation Error',
+        text: 'Please select an approval status.',
       });
       return;
     }
+
     if (wageRequest.selectedStatus === false && !wageRequest.remarksText) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Validation Error',
-        detail: 'Remarks are required for rejection.',
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation Error',
+        text: 'Remarks are required for rejection.',
       });
       return;
     }
+
+    if (Number(this.roleId) === 11 && wageRequest.selectedStatus === true) {
+      if (!wageRequest.exchangeRate) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Validation Error',
+          text: 'Exchange Rate is required for approval.',
+        });
+        return;
+      }
+      if (!wageRequest.attachment) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Validation Error',
+          text: 'Attachment is required for approval.',
+        });
+        return;
+      }
+    }
+
     wageRequest.isSubmitting = true;
     this.cdr.markForCheck();
 
@@ -408,10 +429,10 @@ export class WageRequestApproval implements OnInit {
         endpoint = '/api/wage-request-review/fourth';
         break;
       default:
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Invalid user role for submission.',
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Invalid user role for submission.',
         });
         wageRequest.isSubmitting = false;
         this.cdr.markForCheck();
