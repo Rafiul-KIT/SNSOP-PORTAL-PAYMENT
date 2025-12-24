@@ -218,7 +218,7 @@ export class Header {
             routerLink: 'payroll/download',
           },
           {
-            label: 'Mobile Money Download',
+            label: 'Mobile Money',
             icon: 'fas fa-donate',
             routerLink: 'payroll/mobile-money-download',
           },

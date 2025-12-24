@@ -77,7 +77,7 @@ export class PayrollMobileMoney implements OnInit {
   counties: LookupItem[] = [];
   payams: LookupItem[] = [];
   bomas: LookupItem[] = [];
- 
+
   projects: ProjectNameDescription[] = [];
   workTypes: any[] = [];
   workActivities: LookupItem[] = [];
@@ -110,7 +110,7 @@ export class PayrollMobileMoney implements OnInit {
     private route: ActivatedRoute,
     private api: ApiService,
     private lookup: LookupService,
-    
+
     private cdr: ChangeDetectorRef
   ) { }
 
@@ -188,7 +188,7 @@ export class PayrollMobileMoney implements OnInit {
 
   initBreadcrumb() {
     this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
-    this.breadcrumbItems = [{ label: 'Payroll Download' }];
+    this.breadcrumbItems = [{ label: 'Mobile Money' }];
   }
 
 
@@ -241,9 +241,9 @@ export class PayrollMobileMoney implements OnInit {
     try {
       const formValue = this.searchForm.value;
       const payrollType = formValue.payrollType;
-      
+
       let paymentCycleArray: number[] = [];
-      
+
       if (payrollType === 'single') {
         // For single payroll, use the selected payment cycle
         if (formValue.paymentCycle) {
@@ -267,11 +267,11 @@ export class PayrollMobileMoney implements OnInit {
       };
 
       const response = await this.api.POST('/api/payroll/getMobileMoneyPayrollData', requestPayload);
-      
+
       if (response.data) {
         this.payrollData = response.data.payrollList || [];
         this.totalRecords = response.data.total || 0;
-        
+
         this.messageService.add({
           severity: 'success',
           summary: 'Success',
@@ -304,7 +304,7 @@ export class PayrollMobileMoney implements OnInit {
   searchPayroll() {
     const formValue = this.searchForm.value;
     const payrollType = formValue.payrollType;
-    
+
     // Validation
     if (payrollType === 'single' && !formValue.paymentCycle) {
       this.messageService.add({
@@ -314,7 +314,7 @@ export class PayrollMobileMoney implements OnInit {
       });
       return;
     }
-    
+
     if (payrollType === 'combined') {
       const selectedCycles = this.paymentCycles.value.filter((c: any) => c.selected);
       if (selectedCycles.length === 0) {
@@ -344,11 +344,11 @@ export class PayrollMobileMoney implements OnInit {
       provider: 'MOMO',
       processType: 'payrollOnly'
     });
-    
+
     this.paymentCycles.controls.forEach(control => {
       control.get('selected')?.setValue(false);
     });
-    
+
     this.counties = [];
     this.payams = [];
     this.bomas = [];
@@ -358,7 +358,7 @@ export class PayrollMobileMoney implements OnInit {
     this.hasSearched = false;
     this.selectedFile = null;
     this.isPayrollSaved = false;
-    
+
     this.updateButtonStates(); // Update button states after reset
     this.cdr.markForCheck();
   }
@@ -405,9 +405,9 @@ export class PayrollMobileMoney implements OnInit {
 
       const formValue = this.searchForm.value;
       const payrollType = formValue.payrollType;
-      
+
       let paymentCycleArray: number[] = [];
-      
+
       if (payrollType === 'single') {
         if (formValue.paymentCycle) {
           paymentCycleArray = [formValue.paymentCycle];
@@ -442,8 +442,8 @@ export class PayrollMobileMoney implements OnInit {
       });
 
       // Create blob and download
-      const blob = new Blob([response.data], { 
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
       });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -501,10 +501,10 @@ export class PayrollMobileMoney implements OnInit {
 
     // Simulate a delay
     setTimeout(() => {
-      this.messageService.add({ 
-        severity: 'success', 
-        summary: 'Success', 
-        detail: 'File processed successfully (demo)' 
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'File processed successfully (demo)'
       });
 
       // Reset after "import"
