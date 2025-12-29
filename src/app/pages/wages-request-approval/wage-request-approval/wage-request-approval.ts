@@ -268,26 +268,27 @@ export class WageRequestApproval implements OnInit {
       requestMonthIndex: f.requestMonthIndex || null,
       paymentCycle: f.paymentCycle || null,
       requestNumber: f.requestNumber ? f.requestNumber.trim() : null,
+      status: f.status || null,
     };
 
-    if (f.status !== null && f.status !== undefined) {
-      body.status = f.status;
-    } else {
-      switch (Number(this.roleId)) {
-        case 2:
-          body.status = 1;
-          break;
-        case 11:
-          body.status = 2;
-          break;
-        case 6:
-          body.status = 3;
-          break;
-        default:
-          body.status = null;
-          break;
-      }
-    }
+    // if (f.status !== null && f.status !== undefined) {
+    //   body.status = f.status;
+    // } else {
+    //   switch (Number(this.roleId)) {
+    //     case 2:
+    //       body.status = 1;
+    //       break;
+    //     case 11:
+    //       body.status = 2;
+    //       break;
+    //     case 6:
+    //       body.status = 3;
+    //       break;
+    //     default:
+    //       body.status = null;
+    //       break;
+    //   }
+    // }
     return body;
   }
 
