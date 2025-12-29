@@ -85,7 +85,7 @@ export class SubProjectList implements OnInit {
   isLoading = true;
   lookupsLoaded = false;
   searchForm!: FormGroup;
-
+  roleId: number | null = null;
   // geo lookup lists
   states: LookupItem[] = [];
   counties: LookupItem[] = [];
@@ -138,6 +138,7 @@ export class SubProjectList implements OnInit {
 
 
   async ngOnInit() {
+      this.roleId = this.api.getUserRole();
     this.isLoading = true;
     this.cdr.markForCheck();
     this.workTypes = TypeOfMeetingEnum;

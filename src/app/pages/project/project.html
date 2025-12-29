@@ -276,7 +276,7 @@
       <table class="table table-bordered table-striped mt-3">
         <thead>
           <tr>
-            <th>#</th>
+            <th>No / SL</th>
             <th class="text-center">State</th>
             <th class="text-center">County</th>
             <th class="text-center">Action</th>
@@ -287,6 +287,7 @@
           <tr>
             <td class="text-center">{{ $index + 1 }}</td>
             <td class="text-center">{{ t.state }}</td>
+
             <td class="text-center">{{ t.county }}</td>
             <td class="d-flex justify-content-center">
               <p-button
@@ -306,13 +307,7 @@
 
     <!-- Buttons -->
     <div class="d-flex justify-content-center gap-2 mt-4 mb-4 flex-wrap">
-      <p-button
-        label="Save"
-        icon="fas fa-save"
-        severity="primary"
-        (click)="onSave()"
-      ></p-button>
-      @if(!isEditMode) {
+         @if(!isEditMode) {
           <p-button
         label="Clear All"
         icon="fas fa-eraser"
@@ -321,6 +316,13 @@
       ></p-button>
 
       }
+      <p-button
+        label="Save"
+        icon="fas fa-save"
+        severity="primary"
+        (click)="onSave()"
+      ></p-button>
+   
     
  
     </div>
