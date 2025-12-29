@@ -124,12 +124,29 @@ export class WagesRequestLipw   implements OnInit {
   }
 
   async ngOnInit() {
-    
+    this.isLoading = true;
+    this.cdr.markForCheck();
     this.workTypes = TypeOfMeetingEnum;
     this.statuses = StatusEnum;
     this.screeningStatuses = ScreeningStatusEnum;
     this.initBreadcrumb();
     this.initForm();
+
+    try {
+      await this.loadInitialLookups();
+      this.lookupsLoaded = true;
+    } catch (err) {
+      console.error('Lookups loading error:', err);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to load lookup data.',
+      });
+      this.isLoading = false;
+      this.cdr.markForCheck();
+      return;
+    }
+
     this.fetchPage(this.currentPage, this.pageSize);
   }
 
@@ -155,26 +172,8 @@ export class WagesRequestLipw   implements OnInit {
     this.breadcrumbItems = [{ label: 'Sub-Project List' }];
   }
 
-  async toggleAdvanceSearch() {
+  toggleAdvanceSearch() {
     this.advanceSearchPanelVisible = !this.advanceSearchPanelVisible;
-    if (this.advanceSearchPanelVisible && !this.lookupsLoaded) {
-      this.isLoading = true;
-      this.cdr.markForCheck();
-      try {
-        await this.loadInitialLookups();
-        this.lookupsLoaded = true;
-      } catch (err) {
-        console.error('Lookups loading error:', err);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to load lookup data.',
-        });
-      } finally {
-        this.isLoading = false;
-        this.cdr.markForCheck();
-      }
-    }
   }
 
   // ---------- dependent dropdowns ----------
