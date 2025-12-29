@@ -226,14 +226,15 @@ export class WageRequestDrafts implements OnInit {
       requestMonthIndex: f.requestMonthIndex || null,
       paymentCycle: f.paymentCycle || null,
       requestNumber: f.requestNumber ? f.requestNumber.trim() : null,
+      status: f.status || null,
       remarks: null,
     };
 
-    if (f.status !== null && f.status !== undefined) {
-      body.status = f.status;
-    } else {
-      body.status = 0; // Default search for Draft
-    }
+    // if (f.status !== null && f.status !== undefined) {
+    //   body.status = f.status;
+    // } else {
+    //   body.status = 0; // Default search for Draft
+    // }
 
     return body;
   }

@@ -100,7 +100,7 @@ export class ListOfWages implements OnInit {
   isLoading = true;
   lookupsLoaded = false;
   searchForm!: FormGroup;
-
+  roleId: number | null = null;
   // Lookup data
   subProjects: SubProjectLookup[] = [];
   years: any[] = [];
@@ -173,7 +173,8 @@ export class ListOfWages implements OnInit {
   }
 
   async ngOnInit() {
-    this.statuses = StatusWageEnum;
+    this.roleId = this.api.getUserRole();
+    this.statuses = this.getRoleSpecificStatuses();;
     this.paymentCycles = this.lookup.getPaymentCycleEnum();
       await this.loadInitialLookups();
     this.initBreadcrumb();
@@ -354,6 +355,30 @@ removeWageRequest(wageRequest: WageRequestDto) {
   });
 }
 
+
+private getRoleSpecificStatuses(): { id: number; label: string }[] {
+    let statusIds: number[] = [];
+    switch (Number(this.roleId)) {
+      case 5:
+        statusIds = [105];
+        break;
+      case 2:
+        statusIds = [1, 101];
+        break;
+      case 11:
+        statusIds = [2, 102];
+        break;
+      case 6:
+        statusIds = [3];
+        break;
+      default:
+        statusIds = StatusWageEnum.map(s => Number(s.id));
+        break;
+    }
+    return StatusWageEnum
+      .filter(status => statusIds.includes(Number(status.id)))
+      .map(({ id, label }) => ({ id: Number(id), label }));
+  }
 
   getStatusLabel(value: number): string {
     const found = this.statuses.find((item) => item.id == value);
