@@ -26,10 +26,17 @@ import { DialogModule } from 'primeng/dialog';
 
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
-import { LookupItem, LookupItemPayroll, LookupService, ProjectNameDescription, ScreeningStatusEnum, StatusEnum, TypeOfMeetingEnum } from '../../../services/lookup.service';
+import {
+  LookupItem,
+  LookupItemPayroll,
+  LookupService,
+  ProjectNameDescription,
+  ScreeningStatusEnum,
+  StatusEnum,
+  TypeOfMeetingEnum,
+} from '../../../services/lookup.service';
 import { ApiService } from '../../../services/api.service';
-import { Loader } from "../../../components/loader/loader";
-
+import { Loader } from '../../../components/loader/loader';
 
 interface PayrollItemDto {
   txnId: string;
@@ -58,12 +65,12 @@ interface PayrollItemDto {
     RouterModule,
     TooltipModule,
     Loader,
-    DialogModule
+    DialogModule,
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './payroll-mobile-money.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styleUrl: './payroll-mobile-money.scss'
+  styleUrl: './payroll-mobile-money.scss',
 })
 export class PayrollMobileMoney implements OnInit {
   showUnderDevelopmentModal = false;
@@ -77,7 +84,7 @@ export class PayrollMobileMoney implements OnInit {
   counties: LookupItem[] = [];
   payams: LookupItem[] = [];
   bomas: LookupItem[] = [];
- 
+
   projects: ProjectNameDescription[] = [];
   workTypes: any[] = [];
   workActivities: LookupItem[] = [];
@@ -110,14 +117,12 @@ export class PayrollMobileMoney implements OnInit {
     private route: ActivatedRoute,
     private api: ApiService,
     private lookup: LookupService,
-    
+
     private cdr: ChangeDetectorRef
-  ) { }
+  ) {}
 
   private async loadInitialLookups() {
-    await Promise.all([
-      this.lookup.getOrFetchStateList(),
-    ]);
+    await Promise.all([this.lookup.getOrFetchStateList()]);
     this.states = this.lookup.getStateList();
     this.projects = this.lookup.projectNameDescriptionList;
     this.supportTypeOptions = this.lookup.getSupportTypeList();
@@ -138,12 +143,13 @@ export class PayrollMobileMoney implements OnInit {
     this.initBreadcrumb();
     await this.loadInitialLookups();
     this.initForm();
-    this.searchForm.get('processType')?.valueChanges.subscribe(() => this.updateButtonStates());
+    this.searchForm
+      .get('processType')
+      ?.valueChanges.subscribe(() => this.updateButtonStates());
     this.updateButtonStates(); // Set initial state
     this.isLoading = false;
     this.cdr.markForCheck();
   }
-
 
   initForm() {
     this.searchForm = this.fb.group({
@@ -162,20 +168,27 @@ export class PayrollMobileMoney implements OnInit {
       supportType: [''],
       paymentCycle: [''],
       provider: ['MOMO'],
-      paymentCycles: this.fb.array(this.paymentCycleOptions.map(c => this.fb.group({
-        id: c.id,
-        name: c.name,
-        selected: false
-      }))),
-      processType: ['payrollOnly']
+      paymentCycles: this.fb.array(
+        this.paymentCycleOptions.map((c) =>
+          this.fb.group({
+            id: c.id,
+            name: c.name,
+            selected: false,
+          })
+        )
+      ),
+      processType: ['payrollOnly'],
     });
 
-    this.searchForm.get('payrollType')?.valueChanges.subscribe(value => {
+    this.searchForm.get('payrollType')?.valueChanges.subscribe((value) => {
       if (value === 'single') {
         this.searchForm.get('paymentCycle')?.enable();
         this.searchForm.get('paymentCycles')?.disable();
-        this.paymentCycles.controls.forEach(control => control.get('selected')?.setValue(false, { emitEvent: false }));
-      } else { // combined
+        this.paymentCycles.controls.forEach((control) =>
+          control.get('selected')?.setValue(false, { emitEvent: false })
+        );
+      } else {
+        // combined
         this.searchForm.get('paymentCycle')?.disable();
         this.searchForm.get('paymentCycle')?.reset('');
         this.searchForm.get('paymentCycles')?.enable();
@@ -188,10 +201,8 @@ export class PayrollMobileMoney implements OnInit {
 
   initBreadcrumb() {
     this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
-    this.breadcrumbItems = [{ label: 'Payroll Download' }];
+    this.breadcrumbItems = [{ label: 'Mobile Money' }];
   }
-
-
 
   // ---------- dependent dropdowns ----------
   async onStateChange(state: LookupItem | null) {
@@ -233,7 +244,6 @@ export class PayrollMobileMoney implements OnInit {
     this.cdr.markForCheck();
   }
 
-
   async fetchPage(currentPage: number, pageSize: number) {
     this.isLoading = true;
     this.cdr.markForCheck();
@@ -241,9 +251,9 @@ export class PayrollMobileMoney implements OnInit {
     try {
       const formValue = this.searchForm.value;
       const payrollType = formValue.payrollType;
-      
+
       let paymentCycleArray: number[] = [];
-      
+
       if (payrollType === 'single') {
         // For single payroll, use the selected payment cycle
         if (formValue.paymentCycle) {
@@ -263,19 +273,22 @@ export class PayrollMobileMoney implements OnInit {
         payam: formValue.payam?.id || 0,
         boma: formValue.boma?.id || 0,
         paymentCycle: paymentCycleArray,
-        provider: formValue.provider
+        provider: formValue.provider,
       };
 
-      const response = await this.api.POST('/api/payroll/getMobileMoneyPayrollData', requestPayload);
-      
+      const response = await this.api.POST(
+        '/api/payroll/getMobileMoneyPayrollData',
+        requestPayload
+      );
+
       if (response.data) {
         this.payrollData = response.data.payrollList || [];
         this.totalRecords = response.data.total || 0;
-        
+
         this.messageService.add({
           severity: 'success',
           summary: 'Success',
-          detail: `Loaded ${this.payrollData.length} records`
+          detail: `Loaded ${this.payrollData.length} records`,
         });
       }
     } catch (error: any) {
@@ -283,7 +296,8 @@ export class PayrollMobileMoney implements OnInit {
       this.messageService.add({
         severity: 'error',
         summary: 'Error',
-        detail: error?.response?.data?.message || 'Failed to fetch payroll data'
+        detail:
+          error?.response?.data?.message || 'Failed to fetch payroll data',
       });
       this.payrollData = [];
       this.totalRecords = 0;
@@ -293,35 +307,35 @@ export class PayrollMobileMoney implements OnInit {
     }
   }
 
-
   onPageChange(event: any) {
     this.currentPage = event.page;
     this.pageSize = event.rows;
     this.fetchPage(this.currentPage, this.pageSize);
   }
 
-
   searchPayroll() {
     const formValue = this.searchForm.value;
     const payrollType = formValue.payrollType;
-    
+
     // Validation
     if (payrollType === 'single' && !formValue.paymentCycle) {
       this.messageService.add({
         severity: 'warn',
         summary: 'Validation Error',
-        detail: 'Please select a payment cycle'
+        detail: 'Please select a payment cycle',
       });
       return;
     }
-    
+
     if (payrollType === 'combined') {
-      const selectedCycles = this.paymentCycles.value.filter((c: any) => c.selected);
+      const selectedCycles = this.paymentCycles.value.filter(
+        (c: any) => c.selected
+      );
       if (selectedCycles.length === 0) {
         this.messageService.add({
           severity: 'warn',
           summary: 'Validation Error',
-          detail: 'Please select at least one payment cycle'
+          detail: 'Please select at least one payment cycle',
         });
         return;
       }
@@ -342,13 +356,13 @@ export class PayrollMobileMoney implements OnInit {
       supportType: '',
       paymentCycle: '',
       provider: 'MOMO',
-      processType: 'payrollOnly'
+      processType: 'payrollOnly',
     });
-    
-    this.paymentCycles.controls.forEach(control => {
+
+    this.paymentCycles.controls.forEach((control) => {
       control.get('selected')?.setValue(false);
     });
-    
+
     this.counties = [];
     this.payams = [];
     this.bomas = [];
@@ -358,7 +372,7 @@ export class PayrollMobileMoney implements OnInit {
     this.hasSearched = false;
     this.selectedFile = null;
     this.isPayrollSaved = false;
-    
+
     this.updateButtonStates(); // Update button states after reset
     this.cdr.markForCheck();
   }
@@ -381,22 +395,22 @@ export class PayrollMobileMoney implements OnInit {
   updateButtonStates() {
     const processType = this.searchForm.get('processType')?.value;
 
-            switch (processType) {
-                case 'payrollOnly':
-                    this.isImportButtonDisabled = true;
-                    this.isExportButtonDisabled = false;
-                    break;
-                case 'reconciliation':
-                    this.isImportButtonDisabled = false;
-                    this.isExportButtonDisabled = true;
-                    break;
-                default:
-                    this.isImportButtonDisabled = true;
-                    this.isExportButtonDisabled = true;
-                    break;
-            }    this.cdr.markForCheck();
+    switch (processType) {
+      case 'payrollOnly':
+        this.isImportButtonDisabled = true;
+        this.isExportButtonDisabled = false;
+        break;
+      case 'reconciliation':
+        this.isImportButtonDisabled = false;
+        this.isExportButtonDisabled = true;
+        break;
+      default:
+        this.isImportButtonDisabled = true;
+        this.isExportButtonDisabled = true;
+        break;
+    }
+    this.cdr.markForCheck();
   }
-
 
   async onDownloadClick() {
     try {
@@ -405,9 +419,9 @@ export class PayrollMobileMoney implements OnInit {
 
       const formValue = this.searchForm.value;
       const payrollType = formValue.payrollType;
-      
+
       let paymentCycleArray: number[] = [];
-      
+
       if (payrollType === 'single') {
         if (formValue.paymentCycle) {
           paymentCycleArray = [formValue.paymentCycle];
@@ -423,7 +437,7 @@ export class PayrollMobileMoney implements OnInit {
         this.messageService.add({
           severity: 'warn',
           summary: 'Validation Error',
-          detail: 'Please select at least one payment cycle'
+          detail: 'Please select at least one payment cycle',
         });
         return;
       }
@@ -434,21 +448,27 @@ export class PayrollMobileMoney implements OnInit {
         payam: formValue.payam?.id || 0,
         boma: formValue.boma?.id || 0,
         paymentCycle: paymentCycleArray,
-        provider: formValue.provider
+        provider: formValue.provider,
       };
 
-      const response = await this.api.axiosInstance.post('/api/payroll/export', requestPayload, {
-        responseType: 'blob'
-      });
+      const response = await this.api.axiosInstance.post(
+        '/api/payroll/export',
+        requestPayload,
+        {
+          responseType: 'blob',
+        }
+      );
 
       // Create blob and download
-      const blob = new Blob([response.data], { 
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      const blob = new Blob([response.data], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `MoMo_Payroll_${new Date().toISOString().split('T')[0]}.xlsx`;
+      link.download = `MoMo_Payroll_${
+        new Date().toISOString().split('T')[0]
+      }.xlsx`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -457,14 +477,14 @@ export class PayrollMobileMoney implements OnInit {
       this.messageService.add({
         severity: 'success',
         summary: 'Success',
-        detail: 'File downloaded successfully'
+        detail: 'File downloaded successfully',
       });
     } catch (error: any) {
       console.error('Error downloading file:', error);
       this.messageService.add({
         severity: 'error',
         summary: 'Error',
-        detail: error?.response?.data?.message || 'Failed to download file'
+        detail: error?.response?.data?.message || 'Failed to download file',
       });
     } finally {
       this.isLoading = false;
@@ -476,7 +496,7 @@ export class PayrollMobileMoney implements OnInit {
     this.messageService.add({
       severity: 'info',
       summary: 'Info',
-      detail: 'PDF download functionality coming soon'
+      detail: 'PDF download functionality coming soon',
     });
   }
 
@@ -501,20 +521,26 @@ export class PayrollMobileMoney implements OnInit {
 
     // Simulate a delay
     setTimeout(() => {
-      this.messageService.add({ 
-        severity: 'success', 
-        summary: 'Success', 
-        detail: 'File processed successfully (demo)' 
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'File processed successfully (demo)',
       });
 
       // Reset after "import"
       this.selectedFile = null;
-      const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+      const fileInput = document.querySelector(
+        'input[type="file"]'
+      ) as HTMLInputElement;
       if (fileInput) {
         fileInput.value = '';
       }
       this.isLoading = false;
       this.cdr.markForCheck();
     }, 1000);
+  }
+
+  ondetails() {
+    throw new Error('Method not implemented.');
   }
 }

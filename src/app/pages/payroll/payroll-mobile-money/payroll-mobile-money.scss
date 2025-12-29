@@ -1,18 +1,20 @@
 .light-blue-row {
-  background-color:#a0c1e9;
-  border: 1px solid #c0baba; /* Add a border around the header */
-  padding: 8px; /* Optional, to make the content inside the cells look nicer */
-    align-items: center;
+  background-color: #a0c1e9;
+  border: 1px solid #c0baba;
+  /* Add a border around the header */
+  padding: 8px;
+  /* Optional, to make the content inside the cells look nicer */
+  align-items: center;
 }
 
 /* Add a border to the table rows */
 .bordered-row {
-    border: 1px solid #ccc;
+  border: 1px solid #ccc;
 }
 
 /* Add a border to each table cell */
 .bordered-cell {
-    border: 1px solid #ccc;
-    padding: 8px;  /* Add padding for better readability */
+  border: 1px solid #ccc;
+  padding: 8px;
+  /* Add padding for better readability */
 }
-
