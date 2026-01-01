@@ -368,7 +368,7 @@ export class Dashboard {
             label: (context: any) => {
               const label = context.dataset.label || '';
               const value = context.parsed.y || 0;
-              return `${label}: $${value.toLocaleString()}`;
+              return `${label}: SSP-${value.toLocaleString()}`;
             },
           },
         },
@@ -391,7 +391,7 @@ export class Dashboard {
           },
           ticks: {
             callback: (value: any) => {
-              return '$' + value / 1000 + 'K';
+              return 'SSP-' + value / 1000 + 'K';
             },
             font: {
               size: 11,
@@ -456,7 +456,7 @@ export class Dashboard {
               label: (context: any) => {
                 const label = context.dataset.label || '';
                 const value = context.parsed.y || 0;
-                return `${label}: $${value.toLocaleString()}`;
+                return `${label}: SSP-${value.toLocaleString()}`;
               },
             },
           },
@@ -479,7 +479,7 @@ export class Dashboard {
             },
             ticks: {
               callback: (value: any) => {
-                return '$' + value.toLocaleString(); // Display full amount
+                return 'SSP-' + value.toLocaleString(); // Display full amount
               },
               font: {
                 size: 11,
