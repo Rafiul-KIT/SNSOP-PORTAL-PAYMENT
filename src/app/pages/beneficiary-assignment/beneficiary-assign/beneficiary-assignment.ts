@@ -14,7 +14,7 @@ import { ButtonModule } from 'primeng/button';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DividerModule } from 'primeng/divider';
 import { SelectModule } from 'primeng/select';
-import { Breadcrumb } from 'primeng/breadcrumb';
+import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { TableModule } from 'primeng/table';
 import { CheckboxModule } from 'primeng/checkbox';
 import { Loader } from '../../../components/loader/loader';
@@ -28,6 +28,7 @@ interface Beneficiary {
   householdNumber: string;
   beneficiaryName: string;
   gender: 'MALE' | 'FEMALE';
+  registrationPhase: 'AF' | 'PARENT';
   age: number;
   phoneNo: string;
   householdMonthlyAvgIncome: number;
@@ -51,7 +52,7 @@ interface Beneficiary {
     InputNumberModule,
     DividerModule,
     SelectModule,
-    Breadcrumb,
+    BreadcrumbModule,
     Loader,
     TableModule,
     CheckboxModule,
@@ -69,17 +70,34 @@ export class BeneficiaryAssignment implements OnInit {
   isSubmitted = false;
   apiError = '';
 
-  // Can be assigned beneficiaries
-  canBeAssignedBeneficiaries: Beneficiary[] = [];
+  // Data arrays
+  originalBeneficiaries: Beneficiary[] = []; // Holds data from API response for the current page
+  filteredBeneficiaries: Beneficiary[] = []; // Data displayed in the table after filters/sort
+
+  // Paginator state
   canBeAssignedTotalRecords = 0;
   canBeAssignedRows = 10;
   canBeAssignedFirst = 0;
   isLoadingCanBeAssigned = false;
   beneficiaryError = '';
-  selectAll = false;
 
-  // Store for selected IDs across all pages
+  // Selection state
+  selectAll = false;
   selectedBeneficiaryIds = new Set<number>();
+
+  // Client-side sort state
+  sortField: string = '';
+  sortOrder: number = 1;
+
+  // Filter properties
+  householdNumberFilter: string = '';
+  beneficiaryNameFilter: string = '';
+  registrationPhaseFilter: string = '';
+  registrationPhases: { label: string; value: string }[] = [
+    { label: 'AF', value: 'AF' },
+    { label: 'PARENT', value: 'PARENT' },
+  ];
+
 
   constructor(
     private route: ActivatedRoute,
@@ -96,7 +114,7 @@ export class BeneficiaryAssignment implements OnInit {
 
     if (this.subprojectId) {
       this.loadProjectData(this.subprojectId);
-    
+      // Initial load is handled by p-table's onLazyLoad event
     }
   }
 
@@ -106,7 +124,7 @@ export class BeneficiaryAssignment implements OnInit {
 
   toggleSelectAll(event: any): void {
     this.selectAll = event.checked;
-    this.canBeAssignedBeneficiaries.forEach((b) => {
+    this.filteredBeneficiaries.forEach((b) => {
       b.isSelected = this.selectAll;
       if (this.selectAll) {
         this.selectedBeneficiaryIds.add(b.id);
@@ -123,11 +141,9 @@ export class BeneficiaryAssignment implements OnInit {
     } else {
       this.selectedBeneficiaryIds.delete(beneficiary.id);
     }
-
-    // Keep header checkbox synced for the current page
     this.selectAll =
-      this.canBeAssignedBeneficiaries.length > 0 &&
-      this.canBeAssignedBeneficiaries.every((b) => b.isSelected);
+      this.filteredBeneficiaries.length > 0 &&
+      this.filteredBeneficiaries.every((b) => b.isSelected);
     this.cdr.detectChanges();
   }
 
@@ -152,12 +168,10 @@ export class BeneficiaryAssignment implements OnInit {
     try {
       const requestBody = { id: Number(id) };
       const queryParams = `page=0&size=1`;
-
       const response: any = await this.apiService.POST(
         `api/subproject/get?${queryParams}`,
         requestBody
       );
-
       const data = response.data;
 
       if (
@@ -195,32 +209,21 @@ export class BeneficiaryAssignment implements OnInit {
 
       if (response?.data?.code === 200) {
         const beneficiaries = response.data.content || [];
-
-        this.canBeAssignedBeneficiaries = beneficiaries.map((b: any) => ({
-          id: b.id,
-          householdNumber: b.householdNumber,
-          beneficiaryName: b.beneficiaryName,
-          gender: b.gender,
-          age: b.age,
-          phoneNo: b.phoneNo,
-          householdMonthlyAvgIncome: b.householdMonthlyAvgIncome,
-          assigned: b.assigned || false,
-          isSelected: this.selectedBeneficiaryIds.has(b.id), // Restore selection state
+        this.originalBeneficiaries = beneficiaries.map((b: any) => ({
+          ...b,
+          isSelected: this.selectedBeneficiaryIds.has(b.id),
         }));
-
         this.canBeAssignedTotalRecords = response.data.totalElements || 0;
-
-        // Update selectAll checkbox state for the current page
-        this.selectAll =
-          this.canBeAssignedBeneficiaries.length > 0 &&
-          this.canBeAssignedBeneficiaries.every((b) => b.isSelected);
+        this.onFilterChange(); // Apply filters to the newly loaded data
       } else {
-        this.canBeAssignedBeneficiaries = [];
+        this.originalBeneficiaries = [];
+        this.filteredBeneficiaries = [];
         this.canBeAssignedTotalRecords = 0;
       }
     } catch (error) {
       console.error('Failed to load can be assigned beneficiaries:', error);
-      this.canBeAssignedBeneficiaries = [];
+      this.originalBeneficiaries = [];
+      this.filteredBeneficiaries = [];
       this.canBeAssignedTotalRecords = 0;
     } finally {
       this.isLoadingCanBeAssigned = false;
@@ -228,24 +231,93 @@ export class BeneficiaryAssignment implements OnInit {
     }
   }
 
-onCanBeAssignedPageChange(event: any): void {
-  // If rows per page changes, clear selection
-  if (this.canBeAssignedRows !== event.rows) {
-    this.selectedBeneficiaryIds.clear();
-    this.selectAll = false;
+  onFilterChange(): void {
+    let tempBeneficiaries = [...this.originalBeneficiaries];
+
+    if (this.householdNumberFilter) {
+      tempBeneficiaries = tempBeneficiaries.filter((b) =>
+        b.householdNumber
+          ?.toLowerCase()
+          .includes(this.householdNumberFilter.toLowerCase())
+      );
+    }
+    if (this.beneficiaryNameFilter) {
+      tempBeneficiaries = tempBeneficiaries.filter((b) =>
+        b.beneficiaryName
+          ?.toLowerCase()
+          .includes(this.beneficiaryNameFilter.toLowerCase())
+      );
+    }
+    if (this.registrationPhaseFilter) {
+      tempBeneficiaries = tempBeneficiaries.filter(
+        (b) => b.registrationPhase === this.registrationPhaseFilter
+      );
+    }
+
+    this.filteredBeneficiaries = tempBeneficiaries;
+    this.sortOnClient(this.sortField, false); // Re-apply sort without flipping order
   }
-  
-  const page = event.first / event.rows;
-  this.canBeAssignedFirst = event.first;
-  this.canBeAssignedRows = event.rows;
-  
-  // Handle "Show All" case
-  const size = event.rows === this.canBeAssignedTotalRecords 
-    ? this.canBeAssignedTotalRecords 
-    : event.rows;
-  
-  this.loadCanBeAssignedBeneficiaries(page, size);
-}
+
+  onCanBeAssignedPageChange(event: any): void {
+    if (this.canBeAssignedRows !== event.rows) {
+      this.selectedBeneficiaryIds.clear();
+    }
+
+    // When paginating, reset client-side state
+    this.householdNumberFilter = '';
+    this.beneficiaryNameFilter = '';
+    this.registrationPhaseFilter = '';
+    this.sortField = '';
+    this.sortOrder = 1;
+
+    this.canBeAssignedFirst = event.first;
+    this.canBeAssignedRows = event.rows;
+
+    const size =
+      event.rows === this.canBeAssignedTotalRecords
+        ? this.canBeAssignedTotalRecords
+        : event.rows;
+    this.loadCanBeAssignedBeneficiaries(event.first / event.rows, size);
+  }
+
+  getSortIcon(field: string): string {
+    if (field === this.sortField) {
+      return this.sortOrder === 1 ? 'pi-sort-amount-up-alt' : 'pi-sort-amount-down';
+    }
+    return 'pi-sort-alt';
+  }
+
+  sortOnClient(field: string, flipOrder: boolean = true): void {
+    if (!field) return; // Do not sort if field is empty
+
+    if (flipOrder) {
+      if (this.sortField === field) {
+        this.sortOrder = -this.sortOrder;
+      } else {
+        this.sortField = field;
+        this.sortOrder = 1;
+      }
+    }
+
+    this.filteredBeneficiaries.sort((a: any, b: any) => {
+      const valueA = a[field];
+      const valueB = b[field];
+      let result = 0;
+      if (valueA < valueB) result = -1;
+      else if (valueA > valueB) result = 1;
+      return result * this.sortOrder;
+    });
+
+    this.filteredBeneficiaries = [...this.filteredBeneficiaries];
+    this.cdr.detectChanges();
+  }
+
+  clearFilters(): void {
+    this.householdNumberFilter = '';
+    this.beneficiaryNameFilter = '';
+    this.registrationPhaseFilter = '';
+    this.onFilterChange(); // Re-apply filters
+  }
 
   getSelectedCanBeAssignedIds(): number[] {
     return Array.from(this.selectedBeneficiaryIds);
@@ -280,10 +352,7 @@ onCanBeAssignedPageChange(event: any): void {
       const formValue = this.projectForm.value;
       const formData = new FormData();
       formData.append('subprojectId', this.subprojectId || '');
-      formData.append(
-        'workStartAt',
-        this.formatDate(formValue.workStartAt)
-      );
+      formData.append('workStartAt',this.formatDate(formValue.workStartAt));
       formData.append('inchargeName', formValue.inchargeName || '');
       formData.append('comments', formValue.comments || '');
       formData.append('attachment', formValue.attachment, formValue.attachment.name);
@@ -305,7 +374,7 @@ onCanBeAssignedPageChange(event: any): void {
           showConfirmButton: false,
         });
 
-        this.selectedBeneficiaryIds.clear(); // Clear selection
+        this.selectedBeneficiaryIds.clear();
         this.selectAll = false;
 
         await this.loadCanBeAssignedBeneficiaries(
@@ -315,10 +384,7 @@ onCanBeAssignedPageChange(event: any): void {
 
         this.projectForm.reset();
         this.isSubmitted = false;
-
-        const fileInput = document.getElementById(
-          'attachment'
-        ) as HTMLInputElement;
+        const fileInput = document.getElementById('attachment') as HTMLInputElement;
         if (fileInput) fileInput.value = '';
 
         this.router.navigate(['beneficiaries/assignment-asign-list']);

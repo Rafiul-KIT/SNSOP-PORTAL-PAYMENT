@@ -113,16 +113,18 @@
                                 <input type="file" id="attachment" class="form-control" (change)="onFileSelect($event)"
                                     accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                                     [class.is-invalid]="projectForm.get('attachment')?.invalid && (projectForm.get('attachment')?.touched || isSubmitted)" />
-                                @if (projectForm.get('attachment')?.invalid && (projectForm.get('attachment')?.touched || isSubmitted)) {
-                                  @if (projectForm.get('attachment')?.hasError('required')) {
-                                    <small class="text-danger">Attachment is required</small>
-                                  }
-                                  @if (projectForm.get('attachment')?.hasError('invalidSize')) {
-                                    <small class="text-danger">File size must not exceed 3MB.</small>
-                                  }
+                                @if (projectForm.get('attachment')?.invalid && (projectForm.get('attachment')?.touched
+                                || isSubmitted)) {
+                                @if (projectForm.get('attachment')?.hasError('required')) {
+                                <small class="text-danger">Attachment is required</small>
+                                }
+                                @if (projectForm.get('attachment')?.hasError('invalidSize')) {
+                                <small class="text-danger">File size must not exceed 3MB.</small>
+                                }
                                 }
                                 @if (projectForm.get('attachment')?.value) {
-                                <small class="text-success">Selected: {{ projectForm.get('attachment')?.value.name }}</small>
+                                <small class="text-success">Selected: {{ projectForm.get('attachment')?.value.name
+                                    }}</small>
                                 }
                             </div>
 
@@ -142,12 +144,12 @@
                                     Currently Assigned Beneficiaries
                                 </h5>
                                 @if (getSelectedExistingIds().length > 0) {
-                                    <span class="badge bg-danger fs-6">
+                                <span class="badge bg-danger fs-6">
                                     {{ getSelectedExistingIds().length }} Selected
-                                    </span>
+                                </span>
                                 }
                             </div>
-                            <p-table [value]="existingBeneficiaries" [lazy]="true" [paginator]="true"
+                            <p-table [value]="filteredExistingBeneficiaries" [lazy]="true" [paginator]="true"
                                 [rows]="existingRows" [totalRecords]="existingTotalRecords" [first]="existingFirst"
                                 [loading]="isLoadingExisting" (onLazyLoad)="onExistingPageChange($event)"
                                 [rowsPerPageOptions]="[10, 50, 100, {showAll: 'All'}]" [showCurrentPageReport]="true"
@@ -156,19 +158,93 @@
 
 
                                 <ng-template pTemplate="header">
+                                    <tr class="filter-row">
+                                        <!-- Select All placeholder -->
+                                        <th style="padding-bottom: 2rem;"></th>
+
+                                        <!-- Household Filter -->
+                                        <th style="padding-bottom: 2rem;">
+                                            <div class="flex flex-row gap-1">
+                                                <label class="text-sm font-medium">Household :&nbsp; </label>
+                                                <input pInputText type="text" [(ngModel)]="householdNumberFilter"
+                                                    [ngModelOptions]="{standalone: true}" (input)="onFilterChange()"
+                                                    placeholder="Filter Household"
+                                                    class="w-full p-2 border border-gray-300 rounded" />
+                                            </div>
+                                        </th>
+
+                                        <!-- Beneficiary Name Filter -->
+                                        <th style="padding-bottom: 2rem;">
+                                            <div class="flex flex-col gap-6">
+                                                <label class="text-sm font-medium">Beneficiary Name : &nbsp;</label>
+                                                <input pInputText type="text" [(ngModel)]="beneficiaryNameFilter"
+                                                    [ngModelOptions]="{standalone: true}" (input)="onFilterChange()"
+                                                    placeholder="Filter Name"
+                                                    class="w-full p-2 border border-gray-300 rounded" />
+                                            </div>
+                                        </th>
+
+                                        <!-- Registration Phase Filter -->
+                                        <th style="padding-bottom: 2rem;">
+                                            <div class="flex flex-col gap-1">
+                                                <label class="text-sm font-medium">Registration Phase : &nbsp;</label>
+                                                <p-select [options]="registrationPhases"
+                                                    [(ngModel)]="registrationPhaseFilter"
+                                                    [ngModelOptions]="{standalone: true}" (onChange)="onFilterChange()"
+                                                    placeholder="Select Phase" optionLabel="label" optionValue="value"
+                                                    class="w-full"></p-select>
+                                            </div>
+                                        </th>
+
+                                        <!-- Empty columns -->
+                                        <th style="padding-bottom: 1rem;"></th>
+                                        <th style="padding-bottom: 1rem;"></th>
+                                        <th style="padding-bottom: 1rem;"></th>
+
+
+                                        <!-- Clear Filters Button -->
+                                        <th style="padding-bottom: 2rem;" class="flex items-end justify-center">
+                                            <button pButton type="button" icon="pi pi-filter-slash"
+                                                (click)="clearFilters()" label="Clear"
+                                                class="p-button-outlined p-button-sm"></button>
+                                        </th>
+
+                                    </tr>
                                     <tr>
                                         <th style="width: 8rem ">
                                             <p-checkbox [(ngModel)]="selectAll" [ngModelOptions]="{standalone: true}"
-                                                [binary]="true" (onChange)="toggleSelectAll($event)" [disabled]="projectForm.invalid"></p-checkbox><span
-                                                class="px-1">Select All</span>
+                                                [binary]="true" (onChange)="toggleSelectAll($event)"
+                                                [disabled]="projectForm.invalid"></p-checkbox><span class="px-1">Select
+                                                All</span>
                                         </th>
-                                        <th>Household #</th>
-                                        <th>Beneficiary Name</th>
-                                        <th>Gender</th>
-                                        <th>Age</th>
+                                        <th>Household Number</th>
+                                        <th (click)="sortOnClient('beneficiaryName')" style="cursor: pointer;">
+                                            <div class="d-flex align-items-center">
+                                                Beneficiary Name
+                                                <i [ngClass]="getSortIcon('beneficiaryName')" class="pi ms-2"></i>
+                                            </div>
+                                        </th>
+                                        <th (click)="sortOnClient('registrationPhase')" style="cursor: pointer;">
+                                            <div class="d-flex align-items-center">
+                                                Registration Phase
+                                                <i [ngClass]="getSortIcon('registrationPhase')" class="pi ms-2"></i>
+                                            </div>
+                                        </th>
+                                        <th (click)="sortOnClient('gender')" style="cursor: pointer;">
+                                            <div class="d-flex align-items-center">
+                                                Gender
+                                                <i [ngClass]="getSortIcon('gender')" class="pi ms-2"></i>
+                                            </div>
+                                        </th>
+                                        <th (click)="sortOnClient('age')" style="cursor: pointer;">
+                                            <div class="d-flex align-items-center">
+                                                Age
+                                                <i [ngClass]="getSortIcon('age')" class="pi ms-2"></i>
+                                            </div>
+                                        </th>
                                         <th>Phone</th>
                                         <th>Monthly Income</th>
-                                        <th>Status</th>
+
                                     </tr>
                                 </ng-template>
 
@@ -177,10 +253,20 @@
                                         <td>
                                             <p-checkbox [(ngModel)]="beneficiary.isSelected"
                                                 [ngModelOptions]="{standalone: true}" [binary]="true"
-                                                (onChange)="onRowSelectionChange(beneficiary)" [disabled]="projectForm.invalid"></p-checkbox>
+                                                (onChange)="onRowSelectionChange(beneficiary)"
+                                                [disabled]="projectForm.invalid"></p-checkbox>
+
                                         </td>
                                         <td>{{ beneficiary.householdNumber || '—' }}</td>
                                         <td>{{ beneficiary.beneficiaryName || '—' }}</td>
+                                        <td>
+                                            <span [class]="'badge ' + 
+      (beneficiary.registrationPhase === 'PARENT' ? 'bg-primary' : 
+       beneficiary.registrationPhase === 'AF' ? 'bg-success' : 'bg-secondary')">
+                                                {{ beneficiary.registrationPhase || '—' }}
+                                            </span>
+                                        </td>
+
                                         <td>
                                             <span
                                                 [class]="'badge ' + (beneficiary.gender === 'MALE' ? 'bg-primary' : 'bg-success')">
@@ -190,12 +276,7 @@
                                         <td>{{ beneficiary.age || '—' }}</td>
                                         <td>{{ beneficiary.phoneNo || '—' }}</td>
                                         <td>{{ beneficiary.householdMonthlyAvgIncome | number }}</td>
-                                        <td>
-                                            <span class="badge bg-success">
-                                                <i class="pi pi-check me-1"></i>
-                                                Assigned
-                                            </span>
-                                        </td>
+
                                     </tr>
                                 </ng-template>
 
@@ -212,8 +293,7 @@
                             <div class="d-flex justify-content-center mt-4">
                                 <button pButton type="button" label="Remove Selected" icon="pi pi-user-minus"
                                     class="p-button-danger px-5"
-                                    [disabled]="loading || getSelectedExistingIds().length === 0"
-                                    [loading]="loading"
+                                    [disabled]="loading || getSelectedExistingIds().length === 0" [loading]="loading"
                                     (click)="removeBeneficiaries()">
                                 </button>
                             </div>
