@@ -44,7 +44,7 @@
                                 </h5>
 
                                 <div class="row g-3 p-4">
-                                         <div
+                                    <div
                                         class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom">
                                         <span class="text-muted">State:</span>
                                         <span class="fw-semibold text-dark">{{ projectInfo?.stateName || '—' }}</span>
@@ -67,7 +67,7 @@
                                         <span class="fw-semibold text-dark">{{ projectInfo?.bomaName || '—' }}</span>
                                     </div>
 
-                               
+
                                 </div>
                             </div>
                         </div>
@@ -101,7 +101,8 @@
                                     placeholder="Enter incharge name"
                                     [class.ng-invalid]="projectForm.get('inchargeName')?.invalid && projectForm.get('inchargeName')?.touched">
                                 @if (isSubmitted && projectForm.get('inchargeName')?.errors?.['pattern']) {
-                                <small class="text-danger">Incharge name should not contain numbers or special characters.</small>
+                                <small class="text-danger">Incharge name should not contain numbers or special
+                                    characters.</small>
                                 }
                             </div>
 
@@ -112,16 +113,18 @@
                                 <input type="file" id="attachment" class="form-control" (change)="onFileSelect($event)"
                                     accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                                     [class.is-invalid]="projectForm.get('attachment')?.invalid && (projectForm.get('attachment')?.touched || isSubmitted)" />
-                                @if (projectForm.get('attachment')?.invalid && (projectForm.get('attachment')?.touched || isSubmitted)) {
-                                  @if (projectForm.get('attachment')?.hasError('required')) {
-                                    <small class="text-danger">Attachment is required</small>
-                                  }
-                                  @if (projectForm.get('attachment')?.hasError('invalidSize')) {
-                                    <small class="text-danger">File size must not exceed 3MB.</small>
-                                  }
+                                @if (projectForm.get('attachment')?.invalid && (projectForm.get('attachment')?.touched
+                                || isSubmitted)) {
+                                @if (projectForm.get('attachment')?.hasError('required')) {
+                                <small class="text-danger">Attachment is required</small>
+                                }
+                                @if (projectForm.get('attachment')?.hasError('invalidSize')) {
+                                <small class="text-danger">File size must not exceed 3MB.</small>
+                                }
                                 }
                                 @if (projectForm.get('attachment')?.value) {
-                                <small class="text-success">Selected: {{ projectForm.get('attachment')?.value.name }}</small>
+                                <small class="text-success">Selected: {{ projectForm.get('attachment')?.value.name
+                                    }}</small>
                                 }
                             </div>
 
@@ -136,32 +139,107 @@
 
 
                         <div class="p-4">
-                            <h5 class="mb-3">Available for Assignment <span class="badge bg-primary ms-2">{{ getSelectedCanBeAssignedIds().length }} selected</span></h5>
-                            <p-table [value]="canBeAssignedBeneficiaries" [lazy]="true" [paginator]="true"
+                            <h5 class="mb-3">Available for Assignment <span class="badge bg-primary ms-2">{{
+                                    getSelectedCanBeAssignedIds().length }} selected</span></h5>
+                            <p-table [value]="filteredBeneficiaries" [lazy]="true" [paginator]="true"
                                 [rows]="canBeAssignedRows" [totalRecords]="canBeAssignedTotalRecords"
                                 [first]="canBeAssignedFirst" [loading]="isLoadingCanBeAssigned"
-                                (onLazyLoad)="onCanBeAssignedPageChange($event)" [rowsPerPageOptions]="[10, 50, 100, {showAll: 'All'}]"
-                                [showCurrentPageReport]="true"
+                                (onLazyLoad)="onCanBeAssignedPageChange($event)"
+                                [rowsPerPageOptions]="[10, 50, 100, {showAll: 'All'}]" [showCurrentPageReport]="true"
                                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} beneficiaries"
                                 class="p-datatable-sm p-datatable-striped">
 
                                 <!-- ✅ Table Header -->
                                 <ng-template pTemplate="header">
+                                    <tr class="filter-row">
+                                        <!-- Select All placeholder -->
+                                        <th style="padding-bottom: 2rem;"></th>
+
+                                        <!-- Household Filter -->
+                                        <th style="padding-bottom: 2rem;">
+                                            <div class="flex flex-col gap-1">
+                                                <label class="text-sm font-medium">Household :&nbsp; </label>
+                                                <input pInputText type="text" [(ngModel)]="householdNumberFilter"
+                                                    [ngModelOptions]="{standalone: true}" (input)="onFilterChange()"
+                                                    placeholder="Filter Household"
+                                                    class="w-full p-2 border border-gray-300 rounded" />
+                                            </div>
+                                        </th>
+
+                                        <!-- Beneficiary Name Filter -->
+                                        <th style="padding-bottom: 2rem;">
+                                            <div class="flex flex-col gap-6">
+                                                <label class="text-sm font-medium">Beneficiary Name : &nbsp;</label>
+                                                <input pInputText type="text" [(ngModel)]="beneficiaryNameFilter"
+                                                    [ngModelOptions]="{standalone: true}" (input)="onFilterChange()"
+                                                    placeholder="Filter Name"
+                                                    class="w-full p-2 border border-gray-300 rounded" />
+                                            </div>
+                                        </th>
+
+                                        <!-- Registration Phase Filter -->
+                                        <th style="padding-bottom: 2rem;">
+                                            <div class="flex flex-row items-center gap-2">
+                                                <label class="text-sm font-medium">Registration Phase : &nbsp;</label>
+                                                <p-select [options]="registrationPhases"
+                                                    [(ngModel)]="registrationPhaseFilter"
+                                                    [ngModelOptions]="{standalone: true}" (onChange)="onFilterChange()"
+                                                    placeholder="Select Phase" optionLabel="label" optionValue="value"
+                                                    class="w-full"></p-select>
+                                            </div>
+                                        </th>
+
+                                        <!-- Empty columns -->
+                                        <th style="padding-bottom: 1rem;"></th>
+                                        <th style="padding-bottom: 1rem;"></th>
+                                        <th style="padding-bottom: 1rem;"></th>
+                                        
+                                        <!-- Clear Filters Button -->
+                                        <th style="padding-bottom: 2rem;" class="flex items-end justify-center">
+                                            <button pButton type="button" icon="pi pi-filter-slash"
+                                                (click)="clearFilters()" label="Clear"
+                                                class="p-button-outlined p-button-sm"></button>
+                                        </th>
+                                    </tr>
+
                                     <tr>
                                         <th style="width: 8rem ">
                                             <!-- Select All Checkbox -->
                                             <p-checkbox [(ngModel)]="selectAll" [ngModelOptions]="{standalone: true}"
-                                                [binary]="true" (onChange)="toggleSelectAll($event)" [disabled]="projectForm.invalid"></p-checkbox><span
-                                                class="px-1">Select All</span>
+                                                [binary]="true" (onChange)="toggleSelectAll($event)"
+                                                [disabled]="projectForm.invalid"></p-checkbox><span class="px-1">Select
+                                                All</span>
 
                                         </th>
-                                        <th>Household #</th>
-                                        <th>Beneficiary Name</th>
-                                        <th>Gender</th>
-                                        <th>Age</th>
+                                        <th>Household Number</th>
+                                        <th (click)="sortOnClient('beneficiaryName')" style="cursor: pointer;">
+                                            <div class="d-flex align-items-center">
+                                                Beneficiary Name
+                                                <i [ngClass]="getSortIcon('beneficiaryName')" class="pi ms-2"></i>
+                                            </div>
+                                        </th>
+                                        <th (click)="sortOnClient('registrationPhase')" style="cursor: pointer;">
+                                            <div class="d-flex align-items-center">
+                                                Registration Phase
+                                                <i [ngClass]="getSortIcon('registrationPhase')" class="pi ms-2"></i>
+                                            </div>
+                                        </th>
+                                        <th (click)="sortOnClient('gender')" style="cursor: pointer;">
+                                            <div class="d-flex align-items-center">
+                                                Gender
+                                                <i [ngClass]="getSortIcon('gender')" class="pi ms-2"></i>
+                                            </div>
+                                        </th>
+                                        <th (click)="sortOnClient('age')" style="cursor: pointer;">
+                                            <div class="d-flex align-items-center">
+                                                Age
+                                                <i [ngClass]="getSortIcon('age')" class="pi ms-2"></i>
+                                            </div>
+                                        </th>
                                         <th>Phone</th>
                                         <th>Monthly Income</th>
                                     </tr>
+
                                 </ng-template>
 
                                 <!-- ✅ Table Body -->
@@ -170,11 +248,21 @@
                                         <td>
                                             <p-checkbox [(ngModel)]="beneficiary.isSelected"
                                                 [ngModelOptions]="{standalone: true}" [binary]="true"
-                                                (onChange)="onRowSelectionChange(beneficiary)" [disabled]="projectForm.invalid"></p-checkbox>
+                                                (onChange)="onRowSelectionChange(beneficiary)"
+                                                [disabled]="projectForm.invalid"></p-checkbox>
 
                                         </td>
                                         <td>{{ beneficiary.householdNumber || '—' }}</td>
                                         <td>{{ beneficiary.beneficiaryName || '—' }}</td>
+                                      <td>
+  <span 
+    [class]="'badge ' + 
+      (beneficiary.registrationPhase === 'PARENT' ? 'bg-primary' : 
+       beneficiary.registrationPhase === 'AF' ? 'bg-success' : 'bg-secondary')">
+    {{ beneficiary.registrationPhase || '—' }}
+  </span>
+</td>
+
                                         <td>
                                             <span
                                                 [class]="'badge ' + (beneficiary.gender === 'MALE' ? 'bg-primary' : 'bg-success')">
@@ -201,8 +289,7 @@
                                 <button pButton type="button" label="Assign Selected" icon="pi pi-user-plus"
                                     class="p-button-success px-5"
                                     [disabled]="loading || getSelectedCanBeAssignedIds().length === 0"
-                                    [loading]="loading"
-                                    (click)="assignBeneficiaries()"></button>
+                                    [loading]="loading" (click)="assignBeneficiaries()"></button>
                             </div>
                         </div>
                     </fieldset>

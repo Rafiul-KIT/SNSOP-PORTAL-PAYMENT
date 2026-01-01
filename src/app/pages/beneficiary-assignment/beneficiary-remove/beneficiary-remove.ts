@@ -13,8 +13,8 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { ButtonModule } from 'primeng/button';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DividerModule } from 'primeng/divider';
-import { SelectModule } from 'primeng/select';
-import { Breadcrumb } from 'primeng/breadcrumb';
+import { SelectModule } from 'primeng/select'; // Using SelectModule as per project convention
+import { BreadcrumbModule } from 'primeng/breadcrumb'; // Corrected module import
 import { TableModule } from 'primeng/table';
 import { CheckboxModule } from 'primeng/checkbox';
 import { Loader } from '../../../components/loader/loader';
@@ -28,6 +28,7 @@ interface Beneficiary {
   householdNumber: string;
   beneficiaryName: string;
   gender: 'MALE' | 'FEMALE';
+  registrationPhase: 'AF' | 'PARENT'; // Added registrationPhase
   age: number;
   phoneNo: string;
   householdMonthlyAvgIncome: number;
@@ -49,8 +50,8 @@ interface Beneficiary {
     ButtonModule,
     InputNumberModule,
     DividerModule,
-    SelectModule,
-    Breadcrumb,
+    SelectModule, // Use SelectModule
+    BreadcrumbModule, // Use BreadcrumbModule
     Loader,
     TableModule,
     CheckboxModule,
@@ -70,15 +71,29 @@ export class BeneficiaryRemove implements OnInit {
   beneficiaryError = '';
 
   // Existing assigned beneficiaries
-  existingBeneficiaries: Beneficiary[] = [];
+  originalExistingBeneficiaries: Beneficiary[] = []; // Holds data from API response for the current page
+  filteredExistingBeneficiaries: Beneficiary[] = []; // Data displayed in the table after filters/sort
   existingTotalRecords = 0;
   existingRows = 10;
   existingFirst = 0;
   isLoadingExisting = false;
-  selectAll = false;
 
-  // Store for selected IDs across all pages
+  // Selection state
+  selectAll = false;
   selectedBeneficiaryIds = new Set<number>();
+
+  // Client-side sort state
+  sortField: string = '';
+  sortOrder: number = 1;
+
+  // Filter properties
+  householdNumberFilter: string = '';
+  beneficiaryNameFilter: string = '';
+  registrationPhaseFilter: string = '';
+  registrationPhases: { label: string; value: string }[] = [
+    { label: 'AF', value: 'AF' },
+    { label: 'PARENT', value: 'PARENT' },
+  ];
 
   constructor(
     private route: ActivatedRoute,
@@ -105,7 +120,7 @@ export class BeneficiaryRemove implements OnInit {
 
   toggleSelectAll(event: any): void {
     this.selectAll = event.checked;
-    this.existingBeneficiaries.forEach((b) => {
+    this.filteredExistingBeneficiaries.forEach((b) => {
       b.isSelected = this.selectAll;
       if (this.selectAll) {
         this.selectedBeneficiaryIds.add(b.id);
@@ -123,8 +138,8 @@ export class BeneficiaryRemove implements OnInit {
       this.selectedBeneficiaryIds.delete(beneficiary.id);
     }
     this.selectAll =
-      this.existingBeneficiaries.length > 0 &&
-      this.existingBeneficiaries.every((b) => b.isSelected);
+      this.filteredExistingBeneficiaries.length > 0 &&
+      this.filteredExistingBeneficiaries.every((b) => b.isSelected);
     this.cdr.detectChanges();
   }
 
@@ -190,31 +205,24 @@ export class BeneficiaryRemove implements OnInit {
       if (response?.data?.code === 200) {
         const beneficiaries = response.data.content || [];
 
-        this.existingBeneficiaries = beneficiaries.map((b: any) => ({
-          id: b.id,
-          householdNumber: b.householdNumber,
-          beneficiaryName: b.beneficiaryName,
-          gender: b.gender,
-          age: b.age,
-          phoneNo: b.phoneNo,
-          householdMonthlyAvgIncome: b.householdMonthlyAvgIncome,
+        this.originalExistingBeneficiaries = beneficiaries.map((b: any) => ({
+          ...b,
           assigned: b.assigned !== undefined ? b.assigned : true,
           isSelected: this.selectedBeneficiaryIds.has(b.id), // Restore selection
+          registrationPhase: b.registrationPhase || '', // Ensure registrationPhase is mapped
         }));
 
         this.existingTotalRecords = response.data.totalElements || 0;
-
-        // Update selectAll checkbox state for the current page
-        this.selectAll =
-          this.existingBeneficiaries.length > 0 &&
-          this.existingBeneficiaries.every((b) => b.isSelected);
+        this.onFilterChange(); // Apply filters and sort to newly loaded data
       } else {
-        this.existingBeneficiaries = [];
+        this.originalExistingBeneficiaries = [];
+        this.filteredExistingBeneficiaries = [];
         this.existingTotalRecords = 0;
       }
     } catch (error) {
       console.error('Failed to load existing beneficiaries:', error);
-      this.existingBeneficiaries = [];
+      this.originalExistingBeneficiaries = [];
+      this.filteredExistingBeneficiaries = [];
       this.existingTotalRecords = 0;
     } finally {
       this.isLoadingExisting = false;
@@ -222,26 +230,94 @@ export class BeneficiaryRemove implements OnInit {
     }
   }
 
-onExistingPageChange(event: any): void {
-  // If rows per page changes, clear selection
-  if (this.existingRows !== event.rows) {
-    this.selectedBeneficiaryIds.clear();
-    this.selectAll = false;
+  onFilterChange(): void {
+    let tempBeneficiaries = [...this.originalExistingBeneficiaries];
+
+    if (this.householdNumberFilter) {
+      tempBeneficiaries = tempBeneficiaries.filter((b) =>
+        b.householdNumber
+          ?.toLowerCase()
+          .includes(this.householdNumberFilter.toLowerCase())
+      );
+    }
+    if (this.beneficiaryNameFilter) {
+      tempBeneficiaries = tempBeneficiaries.filter((b) =>
+        b.beneficiaryName
+          ?.toLowerCase()
+          .includes(this.beneficiaryNameFilter.toLowerCase())
+      );
+    }
+    if (this.registrationPhaseFilter) {
+      tempBeneficiaries = tempBeneficiaries.filter(
+        (b) => b.registrationPhase === this.registrationPhaseFilter
+      );
+    }
+
+    this.filteredExistingBeneficiaries = tempBeneficiaries;
+    this.sortOnClient(this.sortField, false); // Re-apply sort without flipping order
   }
-  const page = event.first / event.rows;
 
-  this.existingFirst = event.first;
-  this.existingRows = event.rows;
+  onExistingPageChange(event: any): void {
+    if (this.existingRows !== event.rows) {
+      this.selectedBeneficiaryIds.clear();
+      this.selectAll = false;
+    }
 
-  // Handle "Show All"
-  const size =
-    event.rows === this.existingTotalRecords
-      ? this.existingTotalRecords
-      : event.rows;
+    // When paginating, reset client-side state
+    this.householdNumberFilter = '';
+    this.beneficiaryNameFilter = '';
+    this.registrationPhaseFilter = '';
+    this.sortField = '';
+    this.sortOrder = 1;
 
-  this.loadExistingBeneficiaries(page, size);
-}
+    this.existingFirst = event.first;
+    this.existingRows = event.rows;
 
+    const size =
+      event.rows === this.existingTotalRecords
+        ? this.existingTotalRecords
+        : event.rows;
+    this.loadExistingBeneficiaries(event.first / event.rows, size);
+  }
+
+  getSortIcon(field: string): string {
+    if (field === this.sortField) {
+      return this.sortOrder === 1 ? 'pi-sort-amount-up-alt' : 'pi-sort-amount-down';
+    }
+    return 'pi-sort-alt';
+  }
+
+  sortOnClient(field: string, flipOrder: boolean = true): void {
+    if (!field) return;
+
+    if (flipOrder) {
+      if (this.sortField === field) {
+        this.sortOrder = -this.sortOrder;
+      } else {
+        this.sortField = field;
+        this.sortOrder = 1;
+      }
+    }
+
+    this.filteredExistingBeneficiaries.sort((a: any, b: any) => {
+      const valueA = a[field];
+      const valueB = b[field];
+      let result = 0;
+      if (valueA < valueB) result = -1;
+      else if (valueA > valueB) result = 1;
+      return result * this.sortOrder;
+    });
+
+    this.filteredExistingBeneficiaries = [...this.filteredExistingBeneficiaries];
+    this.cdr.detectChanges();
+  }
+
+  clearFilters(): void {
+    this.householdNumberFilter = '';
+    this.beneficiaryNameFilter = '';
+    this.registrationPhaseFilter = '';
+    this.onFilterChange(); // Re-apply filters
+  }
 
   getSelectedExistingIds(): number[] {
     return Array.from(this.selectedBeneficiaryIds);
@@ -322,7 +398,7 @@ onExistingPageChange(event: any): void {
         this.selectAll = false;
 
         // Reload the list of existing beneficiaries
-        this.loadExistingBeneficiaries(
+        await this.loadExistingBeneficiaries(
           this.existingFirst / this.existingRows,
           this.existingRows
         );
@@ -335,7 +411,7 @@ onExistingPageChange(event: any): void {
         ) as HTMLInputElement;
         if (fileInput) fileInput.value = '';
 
-        this.router.navigate(['beneficiaries/assignment-asign-list']); // Assuming this is the list route
+        this.router.navigate(['beneficiaries/assignment-remove-list']); // Assuming this is the list route
       } else {
         const message =
           response?.data?.message || 'Failed to remove beneficiaries';
