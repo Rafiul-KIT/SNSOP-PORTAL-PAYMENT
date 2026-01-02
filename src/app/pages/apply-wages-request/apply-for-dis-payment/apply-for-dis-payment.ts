@@ -11,12 +11,24 @@ import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { TableModule } from 'primeng/table';
 import { CheckboxModule } from 'primeng/checkbox';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { InputTextModule } from 'primeng/inputtext';
 
 import { ApiService } from '../../../services/api.service';
 import { Loader } from "../../../components/loader/loader";
 import { LookupService, LookupItem, PaymentCycleEnum } from '../../../services/lookup.service';
 import Swal from 'sweetalert2';
 import { handleFileUpload } from '../../../validators/file-validator';
+
+interface Beneficiary {
+  beneficiaryId: number;
+  householdNumber: string;
+  beneficiaryName: string;
+  gender: string;
+  age: number;
+  phoneNo: string;
+  legalStatus: string;
+  registrationPhase: 'AF' | 'PARENT';
+}
 
 @Component({
   selector: 'app-apply-for-dis-payment',
@@ -35,18 +47,21 @@ import { handleFileUpload } from '../../../validators/file-validator';
     TableModule,
     CheckboxModule,
     InputNumberModule,
+    InputTextModule,
   ],
   providers: []
 })
 export class ApplyForDisPayment implements OnInit {
   wagesForm!: FormGroup;
-  submissionForm!: FormGroup; // New form for submission
-  beneficiaries: any[] = [];
+  submissionForm!: FormGroup;
+  
+  originalBeneficiaries: Beneficiary[] = [];
+  filteredBeneficiaries: any[] = [];
   selectedBeneficiaries: any[] = [];
-  attachmentFile: File | null = null; // To store the selected file
+
+  attachmentFile: File | null = null;
   showResults = false;
   readonly MAX_ATTACHMENT_SIZE_MB = 3;
-
 
   // Dropdown options
   years: any[] = [];
@@ -59,7 +74,17 @@ export class ApplyForDisPayment implements OnInit {
 
   loading = false;
   isLoading = true;
-  selectAll = false;
+
+  // Client-side state
+  sortField: string = '';
+  sortOrder: number = 1;
+  householdNumberFilter: string = '';
+  beneficiaryNameFilter: string = '';
+  registrationPhaseFilter: string = '';
+  registrationPhases: { label: string; value: string }[] = [
+    { label: 'AF', value: 'AF' },
+    { label: 'PARENT', value: 'PARENT' },
+  ];
 
   breadcrumbItems: any[] = [];
   breadcrumbHome: any;
@@ -74,7 +99,7 @@ export class ApplyForDisPayment implements OnInit {
 
   ngOnInit(): void {
     this.initializeForm();
-    this.initializeSubmissionForm(); // Init new form
+    this.initializeSubmissionForm();
     this.initBreadcrumb();
     this.populateYearAndMonth();
     this.loadInitialData();
@@ -86,56 +111,56 @@ export class ApplyForDisPayment implements OnInit {
     this.breadcrumbItems = [{ label: 'Apply for DIS Payment' }];
   }
 
-initializeForm(): void {
-  this.wagesForm = this.fb.group({
-    requestYear: [new Date().getFullYear(), Validators.required],
-    requestMonthIndex: [new Date().getMonth() + 1, Validators.required],
-    stateId: [null, Validators.required],
-    countyId: [{ value: null, disabled: true }, Validators.required],
-    payamId: [{ value: null, disabled: true }, Validators.required],
-    bomaId: [{ value: null, disabled: true }, Validators.required],
-    paymentCycleId: [null, Validators.required]
-  });
+  initializeForm(): void {
+    this.wagesForm = this.fb.group({
+      requestYear: [new Date().getFullYear(), Validators.required],
+      requestMonthIndex: [new Date().getMonth() + 1, Validators.required],
+      stateId: [null, Validators.required],
+      countyId: [{ value: null, disabled: true }, Validators.required],
+      payamId: [{ value: null, disabled: true }, Validators.required],
+      bomaId: [{ value: null, disabled: true }, Validators.required],
+      paymentCycleId: [null, Validators.required]
+    });
 
-  this.wagesForm.get('stateId')?.valueChanges.subscribe(stateId => {
-    this.wagesForm.get('countyId')?.reset();
-    this.wagesForm.get('payamId')?.reset();
-    this.wagesForm.get('bomaId')?.reset();
-    this.counties = [];
-    this.payams = [];
-    this.bomas = [];
-    if (stateId) {
-      this.wagesForm.get('countyId')?.enable();
-      this.loadCounties(stateId);
-    } else {
-      this.wagesForm.get('countyId')?.disable();
-    }
-  });
+    this.wagesForm.get('stateId')?.valueChanges.subscribe(stateId => {
+      this.wagesForm.get('countyId')?.reset();
+      this.wagesForm.get('payamId')?.reset();
+      this.wagesForm.get('bomaId')?.reset();
+      this.counties = [];
+      this.payams = [];
+      this.bomas = [];
+      if (stateId) {
+        this.wagesForm.get('countyId')?.enable();
+        this.loadCounties(stateId);
+      } else {
+        this.wagesForm.get('countyId')?.disable();
+      }
+    });
 
-  this.wagesForm.get('countyId')?.valueChanges.subscribe(countyId => {
-    this.wagesForm.get('payamId')?.reset();
-    this.wagesForm.get('bomaId')?.reset();
-    this.payams = [];
-    this.bomas = [];
-    if (countyId) {
-      this.wagesForm.get('payamId')?.enable();
-      this.loadPayams(countyId);
-    } else {
-      this.wagesForm.get('payamId')?.disable();
-    }
-  });
+    this.wagesForm.get('countyId')?.valueChanges.subscribe(countyId => {
+      this.wagesForm.get('payamId')?.reset();
+      this.wagesForm.get('bomaId')?.reset();
+      this.payams = [];
+      this.bomas = [];
+      if (countyId) {
+        this.wagesForm.get('payamId')?.enable();
+        this.loadPayams(countyId);
+      } else {
+        this.wagesForm.get('payamId')?.disable();
+      }
+    });
 
-  this.wagesForm.get('payamId')?.valueChanges.subscribe(payamId => {
-    this.wagesForm.get('bomaId')?.reset();
-    this.bomas = [];
-    if (payamId) {
-      this.wagesForm.get('bomaId')?.enable();
-      this.loadBomas(payamId);
-    } else {
-      this.wagesForm.get('bomaId')?.disable();
-    }
-  });
-}
+    this.wagesForm.get('payamId')?.valueChanges.subscribe(payamId => {
+      this.wagesForm.get('bomaId')?.reset();
+      this.bomas = [];
+      if (payamId) {
+        this.wagesForm.get('bomaId')?.enable();
+        this.loadBomas(payamId);
+      } else {
+        this.wagesForm.get('bomaId')?.disable();
+      }
+    });
+  }
 
   initializeSubmissionForm(): void {
     this.submissionForm = this.fb.group({
@@ -212,7 +237,7 @@ initializeForm(): void {
   }
 
   onFileChange(event: any): void {
-  handleFileUpload(event, this.wagesForm, 'attachment');
+    handleFileUpload(event, this.submissionForm, 'attachment');
   }
 
   async onSearch(): Promise<void> {
@@ -222,14 +247,13 @@ initializeForm(): void {
       return;
     }
 
-    this.beneficiaries = [];
+    this.originalBeneficiaries = [];
+    this.filteredBeneficiaries = [];
     this.selectedBeneficiaries = [];
-    this.showResults = true; // Show table container immediately
+    this.showResults = true;
 
     await this.fetchBeneficiaries();
   }
-
-
 
   private async fetchBeneficiaries(): Promise<void> {
     this.loading = true;
@@ -247,16 +271,19 @@ initializeForm(): void {
     try {
       const response: any = await this.apiService.POST(url, requestBody);
       if ((response.data.code === 200) && response.data && response.data.content) {
-        this.beneficiaries = response.data.content;
-        if (this.beneficiaries.length === 0) {
+        this.originalBeneficiaries = response.data.content;
+        this.onFilterChange();
+        if (this.originalBeneficiaries.length === 0) {
           Swal.fire({ icon: 'info', title: 'Info', text: 'No beneficiaries found for the selected criteria.' });
         }
       } else {
-        this.beneficiaries = [];
+        this.originalBeneficiaries = [];
+        this.filteredBeneficiaries = [];
         Swal.fire({ icon: 'error', title: 'Error', text: response.message || 'No beneficiaries found or API error' });
       }
     } catch (error: any) {
-      this.beneficiaries = [];
+      this.originalBeneficiaries = [];
+      this.filteredBeneficiaries = [];
       Swal.fire({ icon: 'error', title: 'Error', text: error.message || 'API call failed' });
     } finally {
       this.loading = false;
@@ -264,6 +291,71 @@ initializeForm(): void {
     }
   }
 
+  onFilterChange(): void {
+    let tempBeneficiaries = [...this.originalBeneficiaries];
+
+    if (this.householdNumberFilter) {
+      tempBeneficiaries = tempBeneficiaries.filter((b) =>
+        b.householdNumber
+          ?.toLowerCase()
+          .includes(this.householdNumberFilter.toLowerCase())
+      );
+    }
+    if (this.beneficiaryNameFilter) {
+      tempBeneficiaries = tempBeneficiaries.filter((b) =>
+        b.beneficiaryName
+          ?.toLowerCase()
+          .includes(this.beneficiaryNameFilter.toLowerCase())
+      );
+    }
+    if (this.registrationPhaseFilter) {
+      tempBeneficiaries = tempBeneficiaries.filter(
+        (b) => b.registrationPhase === this.registrationPhaseFilter
+      );
+    }
+
+    this.filteredBeneficiaries = tempBeneficiaries;
+    this.sortOnClient(this.sortField, false);
+  }
+
+  getSortIcon(field: string): string {
+    if (field === this.sortField) {
+      return this.sortOrder === 1 ? 'pi-sort-amount-up-alt' : 'pi-sort-amount-down';
+    }
+    return 'pi-sort-alt';
+  }
+
+  sortOnClient(field: string, flipOrder: boolean = true): void {
+    if (!field) return;
+
+    if (flipOrder) {
+      if (this.sortField === field) {
+        this.sortOrder = -this.sortOrder;
+      } else {
+        this.sortField = field;
+        this.sortOrder = 1;
+      }
+    }
+
+    this.filteredBeneficiaries.sort((a: any, b: any) => {
+      const valueA = a[field];
+      const valueB = b[field];
+      let result = 0;
+      if (valueA < valueB) result = -1;
+      else if (valueA > valueB) result = 1;
+      return result * this.sortOrder;
+    });
+
+    this.filteredBeneficiaries = [...this.filteredBeneficiaries];
+  }
+
+  clearFilters(): void {
+    this.householdNumberFilter = '';
+    this.beneficiaryNameFilter = '';
+    this.registrationPhaseFilter = '';
+    this.onFilterChange();
+  }
+  
   async onSubmitDisRequest(): Promise<void> {
     if (this.submissionForm.invalid) {
       this.markFormGroupTouched(this.submissionForm);
@@ -292,8 +384,8 @@ initializeForm(): void {
       formData.append('beneficiaryIds', id);
     });
 
-    if (this.attachmentFile) {
-      formData.append('attachment', this.attachmentFile, this.attachmentFile.name);
+    if (this.submissionForm.value.attachment) {
+      formData.append('attachment', this.submissionForm.value.attachment, this.submissionForm.value.attachment.name);
     }
 
     const url = 'api/wage-request/dis/beneficiary/include';
@@ -302,10 +394,10 @@ initializeForm(): void {
       const response: any = await this.apiService.POST_FORM_DATA(url, formData);
       if (response.data && response.data.code === 200) {
         Swal.fire({ icon: 'success', title: 'Success', text:  'DIS wage request submitted successfully.' });
-        this.beneficiaries = [];
+        this.originalBeneficiaries = [];
+        this.filteredBeneficiaries = [];
         this.selectedBeneficiaries = [];
         this.submissionForm.reset({ totalDays: null });
-        this.attachmentFile = null;
         this.showResults = false;
       } else {
         Swal.fire({ icon: 'error', title: 'Error', text:  'Failed to submit DIS wage request.' });
@@ -317,8 +409,6 @@ initializeForm(): void {
       this.cdr.detectChanges();
     }
   }
-
-
 
   onCancel(): void {
     this.router.navigate(['/']);

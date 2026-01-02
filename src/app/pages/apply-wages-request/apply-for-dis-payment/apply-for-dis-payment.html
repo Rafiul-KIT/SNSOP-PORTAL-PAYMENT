@@ -119,7 +119,7 @@
 
           </div>
         </form>
-             @if (beneficiaries.length > 0) {
+             @if (showResults && originalBeneficiaries.length > 0) {
         <form [formGroup]="submissionForm" class="mt-4">
           <div class="row">
             <div class="col-md-6 col-lg-3">
@@ -154,22 +154,43 @@
           }
         </div>
    
-
-
-
-        <p-table [value]="beneficiaries" [(selection)]="selectedBeneficiaries" dataKey="beneficiaryId"
+        <p-table [value]="filteredBeneficiaries" [(selection)]="selectedBeneficiaries" dataKey="beneficiaryId"
           responsiveLayout="scroll">
           <ng-template pTemplate="header">
+             <tr class="filter-row">
+                <th style="padding-bottom: 1rem;"></th>
+                <th style="padding-bottom: 2rem;">
+                  <label class="text-sm font-medium">Household :&nbsp; </label>
+                    <input pInputText type="text" [(ngModel)]="householdNumberFilter" [ngModelOptions]="{standalone: true}" (input)="onFilterChange()" placeholder="Filter Household " class="w-full p-column-filter">
+                </th>
+                <th style="padding-bottom: 2rem;">
+                  <label class="text-sm font-medium">Name :&nbsp; </label>
+                    <input pInputText type="text" [(ngModel)]="beneficiaryNameFilter" [ngModelOptions]="{standalone: true}" (input)="onFilterChange()" placeholder="Filter Name" class="w-full p-column-filter">
+                </th>
+                <th style="padding-bottom: 2rem;">
+                  <label class="text-sm font-medium">Registration Phase :&nbsp; </label>
+                    <p-select [options]="registrationPhases" [(ngModel)]="registrationPhaseFilter" [ngModelOptions]="{standalone: true}" (onChange)="onFilterChange()" placeholder="Select" class="w-full p-column-filter" optionLabel="label" optionValue="value"></p-select>
+                </th>
+                <th style="padding-bottom: 2rem;"></th>
+                <th style="padding-bottom: 2rem;"></th>
+                <th style="padding-bottom: 2rem;"></th>
+                <th style="padding-bottom: 2rem;"></th>
+                <th style="padding-bottom: 2rem;">
+                    <button pButton type="button" icon="pi pi-filter-slash" (click)="clearFilters()" class="p-button-outlined p-button-sm">Clear</button>
+                </th>
+                <th style="padding-bottom: 2rem;"></th>
+            </tr>
             <tr>
               <th class="select-all-header">
                 <p-tableHeaderCheckbox [disabled]="submissionForm.get('totalDays')?.invalid"></p-tableHeaderCheckbox>
                 <span class="select-all-text">Select all</span>
               </th>
-              <th>Beneficiary ID</th>
-              <th>Household No.</th>
-              <th>Beneficiary Name</th>
-              <th>Gender</th>
-              <th>Age</th>
+            
+              <th (click)="sortOnClient('householdNumber')" style="cursor: pointer;">Household No. <p-sortIcon field="householdNumber"></p-sortIcon></th>
+              <th (click)="sortOnClient('beneficiaryName')" style="cursor: pointer;">Beneficiary Name <p-sortIcon field="beneficiaryName"></p-sortIcon></th>
+              <th (click)="sortOnClient('registrationPhase')" style="cursor: pointer;">Registration Phase <p-sortIcon field="registrationPhase"></p-sortIcon></th>
+              <th (click)="sortOnClient('gender')" style="cursor: pointer;">Gender <p-sortIcon field="gender"></p-sortIcon></th>
+              <th (click)="sortOnClient('age')" style="cursor: pointer;">Age <p-sortIcon field="age"></p-sortIcon></th>
               <th>Phone No.</th>
               <th>Legal Status</th>
             </tr>
@@ -180,9 +201,10 @@
                 <p-tableCheckbox [value]="beneficiary"
                   [disabled]="submissionForm.get('totalDays')?.invalid"></p-tableCheckbox>
               </td>
-              <td>{{ beneficiary.beneficiaryId }}</td>
+             
               <td>{{ beneficiary.householdNumber }}</td>
               <td>{{ beneficiary.beneficiaryName }}</td>
+              <td>{{ beneficiary.registrationPhase }}</td>
               <td>{{ beneficiary.gender }}</td>
               <td>{{ beneficiary.age }}</td>
               <td>{{ beneficiary.phoneNo }}</td>
@@ -191,11 +213,11 @@
           </ng-template>
           <ng-template pTemplate="emptymessage">
             <tr>
-              <td colspan="8" class="text-center">No beneficiaries found.</td>
+              <td colspan="9" class="text-center">No beneficiaries found.</td>
             </tr>
           </ng-template>
         </p-table>
-      @if (beneficiaries.length > 0) {
+      @if (filteredBeneficiaries.length > 0) {
     <div class="d-flex justify-content-end gap-3 mt-4">
           
           <button pButton type="button" label="Apply for DIS Wage" icon="pi pi-check" class="p-button-success px-5"

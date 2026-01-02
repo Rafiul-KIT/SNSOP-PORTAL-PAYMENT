@@ -11,7 +11,7 @@ import { ButtonModule } from 'primeng/button';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DividerModule } from 'primeng/divider';
 import { SelectModule } from 'primeng/select';
-import { Breadcrumb } from "primeng/breadcrumb";
+import { BreadcrumbModule } from "primeng/breadcrumb";
 import { TableModule } from 'primeng/table';
 import { MessageModule } from 'primeng/message';
 import { ToastModule } from 'primeng/toast';
@@ -32,6 +32,7 @@ interface Beneficiary {
   phoneNo: string;
   legalStatus: string;
   totalDays: number;
+  registrationPhase: 'AF' | 'PARENT';
 }
 
 @Component({
@@ -49,7 +50,7 @@ interface Beneficiary {
     DividerModule,
     SelectModule,
     Loader,
-    Breadcrumb,
+    BreadcrumbModule,
     TableModule
   ],
   providers: [],
@@ -69,13 +70,23 @@ export class ApplyForWagesPaymentComponent implements OnInit {
   subprojectId: string | null = null;
 
   // Table related properties
-  beneficiaries: Beneficiary[] = [];
+  originalBeneficiaries: Beneficiary[] = [];
+  filteredBeneficiaries: Beneficiary[] = [];
   selectedBeneficiaries: Beneficiary[] = [];
   showTable = false;
   tableLoading = false;
   submitting = false;
 
-
+  // Client-side state
+  sortField: string = '';
+  sortOrder: number = 1;
+  householdNumberFilter: string = '';
+  beneficiaryNameFilter: string = '';
+  registrationPhaseFilter: string = '';
+  registrationPhases: { label: string; value: string }[] = [
+    { label: 'AF', value: 'AF' },
+    { label: 'PARENT', value: 'PARENT' },
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -117,8 +128,6 @@ export class ApplyForWagesPaymentComponent implements OnInit {
   onFileChange(event: Event): void {
     handleFileUpload(event, this.wagesForm, 'attachment');
   }
-
-
 
   async loadProjectData(id: string): Promise<void> {
     this.isLoading = true;
@@ -172,23 +181,22 @@ export class ApplyForWagesPaymentComponent implements OnInit {
   }
 
   async onSearch(): Promise<void> {
-  // Remove payment cycle from validation check
-  const fromDate = this.wagesForm.get('fromDate');
-  const toDate = this.wagesForm.get('toDate');
-  
-  if (!fromDate?.value || !toDate?.value || this.wagesForm.errors?.['dateRange']) {
-    fromDate?.markAsTouched();
-    toDate?.markAsTouched();
-    Swal.fire({
-      icon: 'warning',
-      title: 'Validation Error',
-      text: 'Please select valid From Date and To Date'
-    });
-    return;
-  }
+    const fromDate = this.wagesForm.get('fromDate');
+    const toDate = this.wagesForm.get('toDate');
 
-  await this.loadBeneficiaries();
-}
+    if (!fromDate?.value || !toDate?.value || this.wagesForm.errors?.['dateRange']) {
+      fromDate?.markAsTouched();
+      toDate?.markAsTouched();
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation Error',
+        text: 'Please select valid From Date and To Date'
+      });
+      return;
+    }
+
+    await this.loadBeneficiaries();
+  }
 
   async loadBeneficiaries(): Promise<void> {
     this.tableLoading = true;
@@ -207,18 +215,21 @@ export class ApplyForWagesPaymentComponent implements OnInit {
       );
 
       if (response?.data?.code === 200) {
-        this.beneficiaries = response.data.content || [];
+        this.originalBeneficiaries = response.data.content || [];
+        this.onFilterChange();
         this.showTable = true;
         this.selectedBeneficiaries = [];
 
-        if (this.beneficiaries.length === 0) {
-                  Swal.fire({
-                    icon: 'info',
-                    title: 'No Data',
-                    text: 'No beneficiaries found for the selected criteria'
-                  });        }
+        if (this.originalBeneficiaries.length === 0) {
+          Swal.fire({
+            icon: 'info',
+            title: 'No Data',
+            text: 'No beneficiaries found for the selected criteria'
+          });
+        }
       } else {
-        this.beneficiaries = [];
+        this.originalBeneficiaries = [];
+        this.filteredBeneficiaries = [];
         this.showTable = false;
         Swal.fire({
           icon: 'warning',
@@ -228,40 +239,91 @@ export class ApplyForWagesPaymentComponent implements OnInit {
       }
     } catch (error) {
       console.error('Failed to load beneficiaries:', error);
-      this.beneficiaries = [];
+      this.originalBeneficiaries = [];
+      this.filteredBeneficiaries = [];
       this.showTable = false;
-              Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Failed to load beneficiaries. Please try again.'
-              });    } finally {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to load beneficiaries. Please try again.'
+      });
+    } finally {
       this.tableLoading = false;
       this.cdr.detectChanges();
     }
   }
 
+  onFilterChange(): void {
+    let tempBeneficiaries = [...this.originalBeneficiaries];
 
+    if (this.householdNumberFilter) {
+      tempBeneficiaries = tempBeneficiaries.filter((b) =>
+        b.householdNumber?.toLowerCase().includes(this.householdNumberFilter.toLowerCase())
+      );
+    }
+    if (this.beneficiaryNameFilter) {
+      tempBeneficiaries = tempBeneficiaries.filter((b) =>
+        b.beneficiaryName?.toLowerCase().includes(this.beneficiaryNameFilter.toLowerCase())
+      );
+    }
+    if (this.registrationPhaseFilter) {
+      tempBeneficiaries = tempBeneficiaries.filter(
+        (b) => b.registrationPhase === this.registrationPhaseFilter
+      );
+    }
+    
+    this.filteredBeneficiaries = tempBeneficiaries;
+    this.sortOnClient(this.sortField, false);
+  }
+
+  getSortIcon(field: string): string {
+    if (field === this.sortField) {
+      return this.sortOrder === 1 ? 'pi-sort-amount-up-alt' : 'pi-sort-amount-down';
+    }
+    return 'pi-sort-alt';
+  }
+
+  sortOnClient(field: string, flipOrder: boolean = true): void {
+    if (!field) return;
+
+    if (flipOrder) {
+      if (this.sortField === field) {
+        this.sortOrder = -this.sortOrder;
+      } else {
+        this.sortField = field;
+        this.sortOrder = 1;
+      }
+    }
+
+    this.filteredBeneficiaries.sort((a: any, b: any) => {
+      const valueA = a[field];
+      const valueB = b[field];
+      let result = 0;
+      if (valueA < valueB) result = -1;
+      else if (valueA > valueB) result = 1;
+      return result * this.sortOrder;
+    });
+
+    this.filteredBeneficiaries = [...this.filteredBeneficiaries];
+  }
+
+  clearFilters(): void {
+    this.householdNumberFilter = '';
+    this.beneficiaryNameFilter = '';
+    this.registrationPhaseFilter = '';
+    this.onFilterChange();
+  }
 
   async onSubmitWageRequest(): Promise<void> {
     if (this.selectedBeneficiaries.length === 0) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'No Selection',
-        text: 'Please select at least one beneficiary'
-      });
+      Swal.fire({ icon: 'warning', title: 'No Selection', text: 'Please select at least one beneficiary' });
       return;
     }
-
     if (this.wagesForm.invalid) {
       this.markFormGroupTouched(this.wagesForm);
-      Swal.fire({
-        icon: 'warning',
-        title: 'Validation Error',
-        text: 'Please fill in all required payment details.'
-      });
+      Swal.fire({ icon: 'warning', title: 'Validation Error', text: 'Please fill in all required payment details.' });
       return;
     }
-
 
     this.submitting = true;
 
@@ -294,9 +356,6 @@ export class ApplyForWagesPaymentComponent implements OnInit {
         }).then(() => {
           this.router.navigate(['/wage-request/apply-lipw']);
         });
-
-       
-       
       } else {
         await Swal.fire({
           title: 'Error!',
@@ -318,16 +377,16 @@ export class ApplyForWagesPaymentComponent implements OnInit {
   }
 
   resetForm(): void {
-    this.wagesForm.reset({
-      wageRate: 2.7
-    });
-    this.beneficiaries = [];
+    this.wagesForm.reset({ wageRate: 2.7 });
+    this.originalBeneficiaries = [];
+    this.filteredBeneficiaries = [];
     this.selectedBeneficiaries = [];
     this.showTable = false;
     this.minDate = new Date();
+    this.clearFilters();
+    this.sortField = '';
+    this.sortOrder = 1;
   }
-
-
 
   formatDate(date: Date): string {
     if (!date) return '';
