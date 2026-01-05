@@ -63,23 +63,23 @@ export class ReconciliationMonitoringDetails implements OnInit {
     this.home = {
       label: 'Reconciliation Monitoring',
       icon: 'fas fa-chart-line',
-      routerLink: '/reconciliation-monitoring',
+      routerLink: '/reconciliation-monitoring/list',
     };
-    this.items = [{ label: 'Details' }];
+    this.items = [{ label: 'details' }];
 
-    const navigation = this.router.getCurrentNavigation();
-    if (navigation?.extras.state) {
-      this.filterCriteria = navigation.extras.state;
-      this.loadReconciliationData();
-    } else {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'No filter criteria found for details.',
-      });
-      // Optionally navigate back if no state is found
-      this.location.back();
-    }
+  const state = history.state;
+  if (state && Object.keys(state).length > 1) {
+    this.filterCriteria = state;
+    this.loadReconciliationData();
+  } else {
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'No filter criteria found for details.',
+    });
+
+    this.location.back();
+  }
   }
 
   loadReconciliationData(): void {
@@ -115,7 +115,5 @@ export class ReconciliationMonitoringDetails implements OnInit {
       });
   }
 
-  goBack(): void {
-    this.location.back();
-  }
+
 }

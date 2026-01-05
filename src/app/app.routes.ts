@@ -230,12 +230,14 @@ export const routes: Routes = [
     canActivate: [routeGuard],
     children: [
       {
-        path: '',
+        path: 'list',
         component: ReconciliationMonitoring,
+        canActivate: [routeGuard],
       },
       {
         path: 'details',
         component: ReconciliationMonitoringDetails,
+        canActivate: [routeGuard],
       },
     ],
   },

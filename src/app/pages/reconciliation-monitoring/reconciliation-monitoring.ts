@@ -76,7 +76,7 @@ export class ReconciliationMonitoring implements OnInit {
     this.home = {
       label: 'Dashboard',
       icon: 'fas fa-home me-2',
-      routerLink: '/admin/dashboard',
+      routerLink: '/dashboard',
     };
     this.items = [
       { label: 'Reconciliation Monitoring', icon: 'fas fa-chart-line' },
@@ -182,8 +182,8 @@ export class ReconciliationMonitoring implements OnInit {
     this.apiService
       .POST('api/payroll/recon/monitoring/geo', payload)
       .then((res: any) => {
-        if (res.statusCode === 0 && res.data) {
-          this.records = res.data;
+       if (res.status===200 ) {
+          this.records = res.data.data;     
         } else {
           this.records = [];
         }
