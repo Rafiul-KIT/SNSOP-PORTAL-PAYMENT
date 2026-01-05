@@ -1,0 +1,27 @@
+.stat-box {
+  padding: 10px;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+}
+
+.stat-value {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.card-header {
+  background-color: #f1f5f9;
+}
+
+.shadow-sm {
+  transition: box-shadow 0.3s ease-in-out;
+  &:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+  }
+}

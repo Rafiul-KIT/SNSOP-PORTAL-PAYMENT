@@ -1,0 +1,85 @@
+<div class="breadcrumb-wrapper">
+  <p-breadcrumb class="max-w-full" [model]="items" [home]="home"></p-breadcrumb>
+</div>
+
+@if (isLoading) {
+<app-loader></app-loader>
+} @else {
+<div class="wrapper-scroller">
+  <div class="row justify-content-center mt-4">
+    <div class="col-12 col-md-15">
+      <div class="card p-3 mb-4">
+        <h5>Filter Criteria</h5>
+        <div class="row">
+          <div class="col-md-6">
+            <strong>State:</strong> {{ filterCriteria?.state }}
+          </div>
+          <div class="col-md-6">
+            <strong>County:</strong> {{ filterCriteria?.county }}
+          </div>
+          <div class="col-md-6">
+            <strong>Payam:</strong> {{ filterCriteria?.payam }}
+          </div>
+          <div class="col-md-6">
+            <strong>Boma:</strong> {{ filterCriteria?.boma }}
+          </div>
+          <div class="col-md-6">
+            <strong>Payment Cycles:</strong> {{ filterCriteria?.paymentCycles?.join(', ') }}
+          </div>
+        </div>
+      </div>
+
+      @if (records) {
+      <p-table [value]="records" [responsiveLayout]="'scroll'" class="mt-4">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Serial</th>
+            <th>State</th>
+            <th>County</th>
+            <th>Payam</th>
+            <th>Boma</th>
+            <th>Payment Cycle</th>
+            <th>LIPW Paid Count</th>
+            <th>LIPW Unpaid Count</th>
+            <th>DIS Paid Count</th>
+            <th>DIS Unpaid Count</th>
+            <th>Total Beneficiaries</th>
+            <th>Total Unpaid</th>
+            <th>Reconciliation Date</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-record let-index="rowIndex">
+          <tr>
+            <td>{{ index + 1 }}</td>
+            <td>{{ record.state }}</td>
+            <td>{{ record.county }}</td>
+            <td>{{ record.payam }}</td>
+            <td>{{ record.boma }}</td>
+            <td>{{ record.paymentCycle }}</td>
+            <td>{{ record.lipwPaidCount }}</td>
+            <td>{{ record.lipwUnpaidCount }}</td>
+            <td>{{ record.disPaidCount }}</td>
+            <td>{{ record.disUnpaidCount }}</td>
+            <td>{{ record.totalBeneficiaries }}</td>
+            <td>{{ record.totalUnpaid }}</td>
+            <td>{{ record.reconciliationDate | date:'medium' }}</td>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="13" class="text-center">No data found</td>
+          </tr>
+        </ng-template>
+      </p-table>
+      }
+
+      <div class="col-12 text-end mt-4">
+        <button class="btn btn-secondary" (click)="goBack()">
+          <i class="fas fa-arrow-left me-2"></i>Back
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+}

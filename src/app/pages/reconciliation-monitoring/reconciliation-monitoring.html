@@ -7,90 +7,87 @@
 } @else {
 <div class="wrapper-scroller">
   <div class="row justify-content-center mt-4">
-    <div class="col-12 col-md-15">
+    <div class="card p-3 mb-3">
       <form [formGroup]="reconciliationForm" novalidate class="row g-2">
-        <div class="col-12 col-md-4 col-lg-3">
-          <div class="form-floating mb-2">
-            <select class="form-select" id="stateId" formControlName="stateId"
-              (change)="getCountyLookupByStateId($event)">
-              <option value="">Select State</option>
-              @for (state of lookupService.getStateList(); track state.id) {
-              <option [value]="state.id">{{ state.name }}</option>
-              }
-            </select>
-            <label for="stateId">State</label>
+        <div class="col-md-3">
+          <p-floatlabel variant="on" class="w-100">
+            <p-select [options]="states" optionLabel="name" formControlName="state"
+              (onChange)="onStateChange($event.value)" />
+            <label>State Name</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="col-md-3">
+          <p-floatlabel variant="on" class="w-100">
+            <p-select [options]="countyList" optionLabel="name" formControlName="county"
+              (onChange)="onCountyChange($event.value)" />
+            <label>County Name</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="col-md-3">
+          <p-floatlabel variant="on" class="w-100">
+            <p-select [options]="payamList" optionLabel="name" formControlName="payam"
+              (onChange)="onPayamChange($event.value)" />
+            <label>Payam Name</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="col-md-3">
+          <p-floatlabel variant="on" class="w-100">
+            <p-select [options]="bomaList" optionLabel="name" formControlName="boma" />
+            <label>Boma Name</label>
+          </p-floatlabel>
+        </div>
+        <div class="col-md-3">
+          <div class="d-flex flex-column mb-2">
+            <label class="mb-2">Payment Cycle Type</label>
+            <div class="d-flex">
+              <div class="form-check me-3">
+                <input class="form-check-input" type="radio" id="singleCycle" value="single"
+                  formControlName="paymentCycleType" (change)="onPaymentCycleTypeChange('single')">
+                <label class="form-check-label" for="singleCycle">
+                  Single
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" id="multipleCycles" value="multiple"
+                  formControlName="paymentCycleType" (change)="onPaymentCycleTypeChange('multiple')">
+                <label class="form-check-label" for="multipleCycles">
+                  Multiple
+                </label>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="col-12 col-md-4 col-lg-3">
-          <div class="form-floating mb-2">
-            <select class="form-select" id="countyId" formControlName="countyId"
-              (change)="getPayamLookupByCountyId($event)">
-              <option value="">Select County</option>
-              @for (county of countyList; track county.id) {
-              <option [value]="county.id">{{ county.name }}</option>
-              }
-            </select>
-            <label for="countyId">County</label>
+        @if (reconciliationForm.get('paymentCycleType')?.value === 'single') {
+        <div class="col-md-3">
+          <p-floatlabel variant="on" class="w-100">
+            <p-select [options]="paymentCycleOptions" optionLabel="label" formControlName="paymentCycle" />
+            <label>Payment Cycle</label>
+          </p-floatlabel>
+        </div>
+        } @else if (reconciliationForm.get('paymentCycleType')?.value === 'multiple') {
+        <div class="col-12">
+          <label class="mb-2">Select Payment Cycles</label>
+          <div class="row">
+            @for (cycle of paymentCycleOptions; track cycle.value) {
+            <div class="col-md-2 col-sm-4 col-6 mb-2">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" [value]="cycle.value"
+                  (change)="onMultiplePaymentCycleChange(cycle.value, $event.target)">
+                <label class="form-check-label" for="cycle_{{cycle.value}}">
+                  {{ cycle.label }}
+                </label>
+              </div>
+            </div>
+            }
           </div>
         </div>
+        }
 
-        <div class="col-12 col-md-4 col-lg-3">
-          <div class="form-floating mb-2">
-            <select class="form-select" id="payamId" formControlName="payamId"
-              (change)="getBomaLookupByPayamId($event)">
-              <option value="">Select Payam</option>
-              @for (payam of payamList; track payam.id) {
-              <option [value]="payam.id">{{ payam.name }}</option>
-              }
-            </select>
-            <label for="payamId">Payam</label>
-          </div>
-        </div>
 
-        <div class="col-12 col-md-4 col-lg-3">
-          <div class="form-floating mb-2">
-            <select class="form-select" id="bomaId" formControlName="bomaId">
-              <option value="">Select Boma</option>
-              @for (boma of bomaList; track boma.id) {
-              <option [value]="boma.id">{{ boma.name }}</option>
-              }
-            </select>
-            <label for="bomaId">Boma</label>
-          </div>
-        </div>
-        <div class="col-12 col-md-4 col-lg-3">
-          <div class="form-floating mb-2">
-            <select class="form-select" id="paymentCycle" formControlName="paymentCycle">
-              <option value="">Select Payment Cycle</option>
-              <option value="1">Payment Cycle 1</option>
-              <option value="2">Payment Cycle 2</option>
-              <option value="3">Payment Cycle 3</option>
-              <option value="4">Payment Cycle 4</option>
-              <option value="5">Payment Cycle 5</option>
-              <option value="6">Payment Cycle 6</option>
-              <option value="7">Payment Cycle 7</option>
-              <option value="8">Payment Cycle 8</option>
-              <option value="9">Payment Cycle 9</option>
-              <option value="10">Payment Cycle 10</option>
-            </select>
-            <label for="paymentCycle">Payment Cycle</label>
-          </div>
-        </div>
-
-        <div class="col-12 col-md-4 col-lg-3">
-          <div class="form-floating mb-2">
-            <input type="date" class="form-control" id="fromDate" formControlName="fromDate">
-            <label for="fromDate">From Date</label>
-          </div>
-        </div>
-
-        <div class="col-12 col-md-4 col-lg-3">
-          <div class="form-floating mb-2">
-            <input type="date" class="form-control" id="toDate" formControlName="toDate">
-            <label for="toDate">To Date</label>
-          </div>
-        </div>
 
         <div class="col-12 text-end">
           <button class="btn btn-success" (click)="loadReconciliationData()">
@@ -99,7 +96,8 @@
         </div>
       </form>
       <br>
-
+    </div>
+    <div class="card p-3 mb-3">
       @if (records) {
       <p-table [value]="records" [responsiveLayout]="'scroll'" class="mt-4">
         <ng-template pTemplate="header">
@@ -117,8 +115,8 @@
             <th>Total Beneficiary</th>
             <th>Total Unpaid</th>
             <th>Reconciliation Date & Time</th>
-            <th>Delete Unmatched Data</th>
-            <th>Checked & Authorized</th>
+           
+            <th>Action</th>
           </tr>
         </ng-template>
 
@@ -130,36 +128,17 @@
             <td>{{ record.payam }}</td>
             <td>{{ record.boma }}</td>
             <td>{{ record.paymentCycle }}</td>
-            <td>{{ record.lipwPaid }}</td>
-            <td>{{ record.lipwUnpaid }}</td>
-            <td>{{ record.disPaid }}</td>
-            <td>{{ record.disUnpaid }}</td>
-            <td>{{ record.lipwPaid + record.lipwUnpaid + record.disPaid + record.disUnpaid}}</td>
+            <td>{{ record.lipwPaidCount }}</td>
+            <td>{{ record.lipwUnpaidCount }}</td>
+            <td>{{ record.disPaidCount }}</td>
+            <td>{{ record.disUnpaidCount }}</td>
+            <td>{{ record.totalBeneficiaries }}</td>
             <td>{{ record.totalUnpaid }}</td>
-            <td>{{ record.reconDateTime || '—' }}</td>
+            <td>{{ record.reconciliationDate | date:'medium' }}</td>
             <td>
-              @if (!record.isAuthorized) {
-              <button class="btn btn-danger btn-sm " [disabled]="!record.completionStatus"
-                (click)="deleteUnMatched(record)">
-                <i class="pi pi-check me-1"></i>Delete
+              <button class="btn btn-info btn-sm" (click)="viewDetails(record)">
+                <i class="fas fa-eye"></i>
               </button>
-              } @else {
-              <span class="text-danger">
-                <i class="pi pi-check-circle me-1"></i>Delete
-              </span>
-              }
-            </td>
-
-            <td>
-              @if (!record.isAuthorized) {
-              <button class="btn btn-success btn-sm" [disabled]="!record.completionStatus" (click)="authorize(record)">
-                <i class="pi pi-check me-1"></i>Approve
-              </button>
-              } @else {
-              <span class="text-success">
-                <i class="pi pi-check-circle me-1"></i>Approved
-              </span>
-              }
             </td>
           </tr>
         </ng-template>
@@ -170,9 +149,7 @@
         </ng-template>
       </p-table>
       }
-      <p-paginator [rows]="10" [first]="currentPage * 10" [totalRecords]="totalRecords"
-        [rowsPerPageOptions]="[10, 20, 50]" (onPageChange)="onPageChange($event)">
-      </p-paginator>
+
     </div>
   </div>
 </div>
