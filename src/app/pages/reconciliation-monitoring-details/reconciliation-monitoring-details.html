@@ -6,79 +6,269 @@
 <app-loader></app-loader>
 } @else {
 <div class="wrapper-scroller">
- 
-
   @if (records && records.length > 0) {
-  <div class="row">
-    @for (record of records; track record.beneficiaryId) {
-    <div class="col-12 col-md-6 col-lg-4 mb-4">
-      <div class="card h-100 shadow-sm">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <h6 class="mb-0">
-            <i class="fas fa-user me-2"></i>
-            <strong>{{ record.beneficiaryName }}</strong>
-          </h6>
-          <span class="badge"
-            [ngClass]="{'bg-success': record.paymentStatus === 'PAID', 'bg-danger': record.paymentStatus === 'UNPAID'}">
-            {{ record.paymentStatus }}
-          </span>
+  
+  <!-- Summary Cards -->
+  <div class="row mb-4">
+   <div class="col-12">
+  <div class="summary-stats-container">
+    <div class="summary-stats d-flex gap-4 flex-wrap">
+      <div class="stat-card stat-card-primary">
+        <div class="stat-icon-wrapper">
+          <i class="fas fa-users"></i>
         </div>
-        <div class="card-body">
-          <p class="card-text"><strong>Beneficiary ID:</strong> {{ record.beneficiaryId }}</p>
-
-          <div class="row">
-            <div class="col-6">
-              <p class="mb-2"><small><strong>Support Type:</strong></small></p>
-              <p>{{ record.supportType }}</p>
-            </div>
-            <div class="col-6">
-              <p class="mb-2"><small><strong>Payment Cycle:</strong></small></p>
-              <p>{{ record.paymentCycle }}</p>
-            </div>
+        <div class="stat-info">
+          <span class="stat-number">{{ filteredRecords.length }}</span>
+          <span class="stat-label">Total Beneficiaries</span>
+        </div>
+        <div class="stat-indicator">
+          <i class="fas fa-arrow-up text-success"></i>
+          <span class="text-success">Active</span>
+        </div>
+      </div>
+      
+      <div class="stat-card stat-card-success">
+        <div class="stat-icon-wrapper">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-number">{{ getPaidCount() }}</span>
+          <span class="stat-label">Paid</span>
+        </div>
+        <div class="stat-indicator">
+          <span class="percentage">{{ getPaidPercentage() }}%</span>
+          <div class="progress-bar">
+            <div class="progress-fill progress-success" [style.width.%]="getPaidPercentage()"></div>
           </div>
-
-          <hr>
-
-          <p class="card-text"><small><strong>Alternates:</strong></small></p>
-          <ul class="list-unstyled">
-            <li><strong>Alt 1:</strong> {{ record.alternate1Name || 'N/A' }}</li>
-            <li><strong>Alt 2:</strong> {{ record.alternate2Name || 'N/A' }}</li>
-          </ul>
-
-          <hr>
-
-          <p class="card-text"><small><strong>Wage Details:</strong></small></p>
-          <div class="row text-center">
-            <div class="col-4">
-              <div class="stat-box">
-                <div class="stat-value">{{ record.totalAttendance }}</div>
-                <div class="stat-label">Attendance</div>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="stat-box">
-                <div class="stat-value">{{ record.wageTotal | currency:'USD' }}</div>
-                <div class="stat-label">Wage (USD)</div>
-              </div>
-            </div>
-            <div class="col-4">
-              <div class="stat-box">
-                <div class="stat-value">{{ record.wageRateSspTotal | currency:'SSP' }}</div>
-                <div class="stat-label">Wage (SSP)</div>
-              </div>
-            </div>
+        </div>
+      </div>
+      
+      <div class="stat-card stat-card-danger">
+        <div class="stat-icon-wrapper">
+          <i class="fas fa-times-circle"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-number">{{ getUnpaidCount() }}</span>
+          <span class="stat-label">Unpaid</span>
+        </div>
+        <div class="stat-indicator">
+          <span class="percentage">{{ getUnpaidPercentage() }}%</span>
+          <div class="progress-bar">
+            <div class="progress-fill progress-danger" [style.width.%]="getUnpaidPercentage()"></div>
           </div>
-          <p class="text-center mt-2"><small>(Exchange Rate: {{ record.exchangeRateAtTime | number:'1.2-2' }})</small></p>
         </div>
       </div>
     </div>
-    }
+    
+    
   </div>
+</div>
+  </div>
+
+  <!-- Data Table -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-white py-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+          <i class="fas fa-table me-2 text-primary"></i>
+          Beneficiary Payment Details
+        </h5>
+         <button pButton type="button" icon="pi pi-filter"
+                                                (click)="clearFilters()" label="Clear"
+                                                class="p-button-outlined p-button-sm">Clear Filter </button>
+      </div>
+    </div>
+    <div class="card-body p-0">
+      <p-table 
+        [value]="filteredRecords" 
+        
+        [rows]="rows" 
+        [rowsPerPageOptions]="rowsPerPageOptions"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} beneficiaries"
+        [globalFilterFields]="['beneficiaryName', 'beneficiaryId', 'supportType', 'paymentCycle', 'paymentStatus']"
+        class="p-datatable-sm p-datatable-striped">
+        
+        <!-- Table Header with Filters -->
+        <ng-template pTemplate="header">
+               <!-- Filter Row -->
+          <tr class="filter-row">
+            <th>
+              <input pInputText type="text" [(ngModel)]="filters['beneficiaryName']" 
+                [ngModelOptions]="{standalone: true}" (input)="applyFilters()" 
+                placeholder="Filter by name" class="w-full p-2 border border-gray-300 rounded" />
+            </th>
+            <th>
+              
+              <p-select [options]="supportTypeOptions" [(ngModel)]="filters['supportType']" 
+                [ngModelOptions]="{standalone: true}" (onChange)="applyFilters()" 
+                placeholder="All Types" optionLabel="label" optionValue="value" 
+                class="w-full"></p-select>
+            </th>
+            <th>
+              
+            </th>
+            <th>
+              
+            </th>
+            <th>
+             
+            </th>
+            <th>
+             
+            </th>
+            <th>
+              <input pInputText type="text" [(ngModel)]="filters['alternate1Name']" 
+                [ngModelOptions]="{standalone: true}" (input)="applyFilters()" 
+                placeholder="Filter by alternate" class="w-full p-2 border border-gray-300 rounded" />
+            </th>
+            <th>
+              <p-select [options]="statusOptions" [(ngModel)]="filters['paymentStatus']" 
+                [ngModelOptions]="{standalone: true}" (onChange)="applyFilters()" 
+                placeholder="All Status" optionLabel="label" optionValue="value" 
+                class="w-full"></p-select>
+            </th>
+          
+          </tr>
+          <tr>
+            <th (click)="sortOnClient('beneficiaryName')" style="cursor: pointer;">
+              <div class="text-center">
+                Beneficiary
+                <i [ngClass]="getSortIcon('beneficiaryName')" class="pi ms-2"></i>
+              </div>
+            </th>
+            <th (click)="sortOnClient('supportType')" style="cursor: pointer;">
+              <div class="text-center">
+                Support Type
+                <i [ngClass]="getSortIcon('supportType')" class="pi ms-2"></i>
+              </div>
+            </th>
+            <th (click)="sortOnClient('paymentCycle')" style="cursor: pointer;">
+              <div class="text-center">
+                Payment Cycle
+                <i [ngClass]="getSortIcon('paymentCycle')" class="pi ms-2"></i>
+              </div>
+            </th>
+            <th (click)="sortOnClient('totalAttendance')" style="cursor: pointer;">
+              <div class="text-center">
+                Attendance
+                <i [ngClass]="getSortIcon('totalAttendance')" class="pi ms-2"></i>
+              </div>
+            </th>
+            <th (click)="sortOnClient('wageTotal')" style="cursor: pointer;">
+              <div class="text-center">
+                Wage (USD)
+                <i [ngClass]="getSortIcon('wageTotal')" class="pi ms-2"></i>
+              </div>
+            </th>
+            <th (click)="sortOnClient('wageRateSspTotal')" style="cursor: pointer;">
+              <div class="text-center">
+                Wage (SSP)
+                <i [ngClass]="getSortIcon('wageRateSspTotal')" class="pi ms-2"></i>
+              </div>
+            </th>
+            <th>Alternates</th>
+            <th (click)="sortOnClient('paymentStatus')" style="cursor: pointer;">
+              <div class="text-center  ">
+                Status
+                <i [ngClass]="getSortIcon('paymentStatus')" class="pi ms-2"></i>
+              </div>
+            </th>
+          </tr>
+          
+     
+        </ng-template>
+        
+        <!-- Table Body -->
+        <ng-template pTemplate="body" let-record>
+          <tr class="beneficiary-row">
+            <td class="ps-4">
+              <div class="d-flex align-items-center">
+                <div>
+                  <div class="fw-semibold">{{ record.beneficiaryName }}</div>
+                  <small class="text-muted">ID: {{ record.beneficiaryId }}</small>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="badge bg-light text-dark border">
+                {{ record.supportType }}
+              </span>
+            </td>
+            <td>
+              <span class="text-muted">{{ record.paymentCycle }}</span>
+            </td>
+            <td class="text-center">
+              <span class="badge bg-info text-dark">
+                {{ record.totalAttendance }} days
+              </span>
+            </td>
+            <td class="text-end">
+              <strong class="text-success">{{ record.wageTotal | currency:'USD':'symbol':'1.2-2' }}</strong>
+            </td>
+            <td class="text-end">
+              <strong>{{ record.wageRateSspTotal | currency:'SSP':'symbol':'1.2-2' }}</strong>
+              <br>
+              <small class="text-muted">Rate: {{ record.exchangeRateAtTime | number:'1.2-2' }}</small>
+            </td>
+            <td>
+              <div class="alternates-cell">
+                @if (record.alternate1Name || record.alternate2Name) {
+                <div class="alternates-info">
+                  @if (record.alternate1Name) {
+                  <div class="alternate-item">
+                    <small class="text-muted">Alt 1:</small>
+                    <span class="ms-1">{{ record.alternate1Name }}</span>
+                  </div>
+                  }
+                  @if (record.alternate2Name) {
+                  <div class="alternate-item">
+                    <small class="text-muted">Alt 2:</small>
+                    <span class="ms-1">{{ record.alternate2Name }}</span>
+                  </div>
+                  }
+                </div>
+                } @else {
+                <span class="text-muted">—</span>
+                }
+              </div>
+            </td>
+            <td class="text-center">
+              <span class="status-badge"
+                [ngClass]="{
+                  'status-paid': record.paymentStatus === 'PAID', 
+                  'status-unpaid': record.paymentStatus === 'UNPAID'
+                }">
+                <i [class]="record.paymentStatus === 'PAID' ? 'fas fa-check-circle' : 'fas fa-clock'"></i>
+                {{ record.paymentStatus }}
+              </span>
+            </td>
+          </tr>
+        </ng-template>
+        
+        <!-- Empty Message -->
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="8" class="text-center py-4">
+              <i class="pi pi-info-circle me-2"></i>
+              No beneficiaries found matching your criteria
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+  
   } @else {
-  <div class="text-center mt-5">
-    <i class="fas fa-info-circle fa-3x text-primary"></i>
-    <h4 class="mt-3">No Details Found</h4>
-    <p>No beneficiary details were found for the selected criteria.</p>
+  <div class="empty-state text-center py-5">
+    <div class="empty-icon mb-3">
+      <i class="fas fa-inbox fa-4x text-muted"></i>
+    </div>
+    <h4 class="text-muted mb-2">No Details Found</h4>
+    <p class="text-muted">No beneficiary details were found for the selected criteria.</p>
+    <button class="btn btn-primary mt-3" (click)="loadReconciliationData()">
+      <i class="fas fa-refresh me-2"></i> Refresh
+    </button>
   </div>
   }
 </div>

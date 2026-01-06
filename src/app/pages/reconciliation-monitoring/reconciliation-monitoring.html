@@ -103,55 +103,55 @@
 
     <div class="card p-3 mb-3">
       @if (records) {
-      <p-table [value]="records" [responsiveLayout]="'scroll'"  class="mt-4">
-        <ng-template pTemplate="header">
-          <tr>
-            <th>Serial</th>
-            <th>State</th>
-            <th>County</th>
-            <th>Payam</th>
-            <th>Boma</th>
-            <th>Payment Cycle</th>
-            <th>LIPW Paid</th>
-            <th>LIPW Unpaid</th>
-            <th>DIS Paid</th>
-            <th>DIS Unpaid</th>
-            <th>Total Beneficiary</th>
-            <th>Total Unpaid</th>
-            <th>Reconciliation Date & Time</th>
-           
-            <th>Action</th>
-          </tr>
-        </ng-template>
+    <p-table [value]="records" [responsiveLayout]="'scroll'" class="mt-4 custom-table">
+  <ng-template pTemplate="header">
+    <tr>
+      <th>Serial</th>
+      <th>State</th>
+      <th>County</th>
+      <th>Payam</th>
+      <th>Boma</th>
+      <th>Payment Cycle</th>
+      <th>LIPW Paid</th>
+      <th>LIPW Unpaid</th>
+      <th>DIS Paid</th>
+      <th>DIS Unpaid</th>
+      <th>Total Beneficiary</th>
+      <th>Total Unpaid</th>
+      <th>Reconciliation Date & Time</th>
+      <th>Action</th>
+    </tr>
+  </ng-template>
 
-        <ng-template pTemplate="body" let-record let-index="rowIndex">
-          <tr>
-            <td>{{ index + 1 }}</td>
-            <td>{{ record.state }}</td>
-            <td>{{ record.county }}</td>
-            <td>{{ record.payam }}</td>
-            <td>{{ record.boma }}</td>
-            <td>{{ record.paymentCycle }}</td>
-            <td>{{ record.lipwPaidCount }}</td>
-            <td>{{ record.lipwUnpaidCount }}</td>
-            <td>{{ record.disPaidCount }}</td>
-            <td>{{ record.disUnpaidCount }}</td>
-            <td>{{ record.totalBeneficiaries }}</td>
-            <td>{{ record.totalUnpaid }}</td>
-            <td>{{ record.reconciliationDate || "-" }}</td>
-            <td>
-              <button class="btn btn-info btn-sm" (click)="viewDetails(record)">
-                <i class="fas fa-eye"></i>
-              </button>
-            </td>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="emptymessage">
-          <tr>
-            <td colspan="15" class="text-center">No data found</td>
-          </tr>
-        </ng-template>
-      </p-table>
+  <ng-template pTemplate="body" let-record let-index="rowIndex">
+    <tr>
+      <td>{{ index + 1 }}</td>
+      <td>{{ record.state }}</td>
+      <td>{{ record.county }}</td>
+      <td>{{ record.payam }}</td>
+      <td>{{ record.boma }}</td>
+      <td>{{ record.paymentCycle }}</td>
+      <td>{{ record.lipwPaidCount }}</td>
+      <td>{{ record.lipwUnpaidCount }}</td>
+      <td>{{ record.disPaidCount }}</td>
+      <td>{{ record.disUnpaidCount }}</td>
+      <td>{{ record.totalBeneficiaries }}</td>
+      <td>{{ record.totalUnpaid }}</td>
+      <td>{{ record.reconciliationDate || "-" }}</td>
+      <td>
+        <button class="btn btn-info btn-sm" (click)="viewDetails(record)">
+          <i class="fas fa-eye"></i>
+        </button>
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="emptymessage">
+    <tr>
+      <td colspan="14" class="text-center no-data-message">No data found</td>
+    </tr>
+  </ng-template>
+</p-table>
       }
 
     </div>  }

@@ -363,7 +363,7 @@ export class ReconciliationMonitoring implements OnInit {
       this.apiService
         .POST('api/payroll/recon/monitoring/geo', payload)
         .then((res: any) => {
-          if (res.status === 200) {
+          if (res.data.statusCode === 200) {
             this.records = res.data.data;
           } else {
             this.records = [];
@@ -477,4 +477,5 @@ export class ReconciliationMonitoring implements OnInit {
   getBomaName(bomaId: number): string {
     return this.bomaMap.get(bomaId) || bomaId.toString();
   }
+  
 }
