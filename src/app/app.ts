@@ -18,15 +18,15 @@ export class App implements OnInit {
 
   ngOnInit() {
     // Preload all lookup lists first
-    Promise.all([
-      this.lookup.getOrFetchStateList(),
-      this.lookup.fetchAllCountyList(),
-      this.lookup.fetchAllPayamList(),
-      this.lookup.fetchAllBomaList(),
-    ]).then(() => {
-      console.log('loaded');
-      this.isLoading = false;
-      this.cdr.markForCheck();
-    });
+    // Promise.all([
+    //   this.lookup.getOrFetchStateList(),
+    //   this.lookup.fetchAllCountyList(),
+    //   this.lookup.fetchAllPayamList(),
+    //   this.lookup.fetchAllBomaList(),
+    // ]).then(() => {
+    //   console.log('loaded');
+    //   this.isLoading = false;
+    //   this.cdr.markForCheck();
+    // });
   }
 }

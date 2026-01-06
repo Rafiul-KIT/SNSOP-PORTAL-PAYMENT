@@ -97,9 +97,13 @@
       </form>
       <br>
     </div>
+    @if(isDataLoading){
+      <app-loader></app-loader>
+    }@else {
+
     <div class="card p-3 mb-3">
       @if (records) {
-      <p-table [value]="records" [responsiveLayout]="'scroll'" class="mt-4">
+      <p-table [value]="records" [responsiveLayout]="'scroll'"  class="mt-4">
         <ng-template pTemplate="header">
           <tr>
             <th>Serial</th>
@@ -150,7 +154,7 @@
       </p-table>
       }
 
-    </div>
+    </div>  }
   </div>
 </div>
 }

@@ -513,6 +513,16 @@ export class ReportComponent implements OnInit {
   }
 
   ngOnInit(): void {
+        Promise.all([
+      this.lookupService.getOrFetchStateList(),
+      this.lookupService.fetchAllCountyList(),
+      this.lookupService.fetchAllPayamList(),
+      this.lookupService.fetchAllBomaList(),
+    ]).then(() => {
+     
+      this.isLoading = false;
+      this.cdr.markForCheck();
+    });
     this.home = {
       label: '',
       icon: 'fas fa-home me-2',

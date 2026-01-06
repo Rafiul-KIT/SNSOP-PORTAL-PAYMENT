@@ -261,10 +261,18 @@ export class ReconciliationMonitoring implements OnInit {
     this.bomaList = [];
 
     if (state?.id) {
-      // Filter from already loaded data
+      // Try filtering first (if data has parent IDs)
       this.countyList = this.allCounties.filter(
         (c: any) => Number(c.stateId) === Number(state.id)
       );
+      
+      // If filtering returns empty, fetch from API
+      if (this.countyList.length === 0) {
+        this.countyList = await this.lookupService.getCountyListByStateId(
+          String(state.id)
+        );
+      }
+      
       this.reconciliationForm.get('county')?.enable();
     }
     this.cdr.markForCheck();
@@ -279,10 +287,18 @@ export class ReconciliationMonitoring implements OnInit {
     this.bomaList = [];
 
     if (county?.id) {
-      // Filter from already loaded data
+      // Try filtering first (if data has parent IDs)
       this.payamList = this.allPayams.filter(
         (p: any) => Number(p.countyId) === Number(county.id)
       );
+      
+      // If filtering returns empty, fetch from API
+      if (this.payamList.length === 0) {
+        this.payamList = await this.lookupService.getPayamListByCountyId(
+          String(county.id)
+        );
+      }
+      
       this.reconciliationForm.get('payam')?.enable();
     }
     this.cdr.markForCheck();
@@ -293,10 +309,18 @@ export class ReconciliationMonitoring implements OnInit {
     this.bomaList = [];
 
     if (payam?.id) {
-      // Filter from already loaded data
+      // Try filtering first (if data has parent IDs)
       this.bomaList = this.allBomas.filter(
         (b: any) => Number(b.payamId) === Number(payam.id)
       );
+      
+      // If filtering returns empty, fetch from API
+      if (this.bomaList.length === 0) {
+        this.bomaList = await this.lookupService.getBomaListByPayamId(
+          String(payam.id)
+        );
+      }
+      
       this.reconciliationForm.get('boma')?.enable();
     }
     this.cdr.markForCheck();
@@ -312,7 +336,7 @@ export class ReconciliationMonitoring implements OnInit {
       return Promise.resolve();
     }
 
-    this.isLoading = true;
+    this.isDataLoading = true;
     this.cdr.markForCheck();
 
     const formValues = this.reconciliationForm.value;
@@ -344,7 +368,7 @@ export class ReconciliationMonitoring implements OnInit {
           } else {
             this.records = [];
           }
-          this.isLoading = false;
+          this.isDataLoading = false;
           this.cdr.markForCheck();
           resolve();
         })
@@ -354,7 +378,7 @@ export class ReconciliationMonitoring implements OnInit {
             err.response?.data || err.message
           );
           this.records = [];
-          this.isLoading = false;
+          this.isDataLoading = false;
           this.cdr.markForCheck();
           reject(err);
         });
