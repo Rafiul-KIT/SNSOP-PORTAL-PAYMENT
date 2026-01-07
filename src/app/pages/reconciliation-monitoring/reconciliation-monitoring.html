@@ -39,6 +39,7 @@
             <label>Boma Name</label>
           </p-floatlabel>
         </div>
+
         <div class="col-md-3">
           <div class="d-flex flex-column mb-2">
             <label class="mb-2">Payment Cycle Type</label>
@@ -75,9 +76,9 @@
             @for (cycle of paymentCycleOptions; track cycle.value) {
             <div class="col-md-2 col-sm-4 col-6 mb-2">
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" [value]="cycle.value"
+                <input class="form-check-input" type="checkbox" [value]="cycle.value" [id]="'cycle_' + cycle.value"
                   (change)="onMultiplePaymentCycleChange(cycle.value, $event.target)">
-                <label class="form-check-label" for="cycle_{{cycle.value}}">
+                <label class="form-check-label" [for]="'cycle_' + cycle.value">
                   {{ cycle.label }}
                 </label>
               </div>
@@ -87,74 +88,88 @@
         </div>
         }
 
-
-
         <div class="col-12 text-end">
-          <button class="btn btn-success" (click)="loadReconciliationData()">
+          <button class="btn btn-success" (click)="loadReconciliationData(0)">
             <i class="fas fa-search me-2"></i>Search
           </button>
         </div>
       </form>
       <br>
     </div>
+
     @if(isDataLoading){
-      <app-loader></app-loader>
+    <app-loader></app-loader>
     }@else {
-
     <div class="card p-3 mb-3">
-      @if (records) {
-    <p-table [value]="records" [responsiveLayout]="'scroll'" class="mt-4 custom-table">
-  <ng-template pTemplate="header">
-    <tr>
-      <th>Serial</th>
-      <th>State</th>
-      <th>County</th>
-      <th>Payam</th>
-      <th>Boma</th>
-      <th>Payment Cycle</th>
-      <th>LIPW Paid</th>
-      <th>LIPW Unpaid</th>
-      <th>DIS Paid</th>
-      <th>DIS Unpaid</th>
-      <th>Total Beneficiary</th>
-      <th>Total Unpaid</th>
-      <th>Reconciliation Date & Time</th>
-      <th>Action</th>
-    </tr>
-  </ng-template>
+      @if (records && records.length > 0) {
+      <p-table [value]="records" [lazy]="true"  [rows]="pageSize" [totalRecords]="totalRecords"
+        [loading]="isDataLoading" (onLazyLoad)="onPageChange($event)" [responsiveLayout]="'scroll'"
+        class="mt-4 custom-table">
+        <ng-template pTemplate="header">
+          <tr>
+            <th colspan="14" class="text-end">
+              <p class="fw-bold mb-2">
+                Showing <kbd>{{ records.length }}</kbd> of
+                <kbd>{{ totalRecords }}</kbd> sub-projects
+              </p>
+            </th>
+          </tr>
+          <tr>
+            <th>Serial</th>
+            <th>State</th>
+            <th>County</th>
+            <th>Payam</th>
+            <th>Boma</th>
+            <th>Payment Cycle</th>
+            <th>LIPW Paid</th>
+            <th>LIPW Unpaid</th>
+            <th>DIS Paid</th>
+            <th>DIS Unpaid</th>
+            <th>Total Beneficiary</th>
+            <th>Total Unpaid</th>
+            <th>Reconciliation Date & Time</th>
+            <th>Action</th>
+          </tr>
+        </ng-template>
 
-  <ng-template pTemplate="body" let-record let-index="rowIndex">
-    <tr>
-      <td>{{ index + 1 }}</td>
-      <td>{{ record.state }}</td>
-      <td>{{ record.county }}</td>
-      <td>{{ record.payam }}</td>
-      <td>{{ record.boma }}</td>
-      <td>{{ record.paymentCycle }}</td>
-      <td>{{ record.lipwPaidCount }}</td>
-      <td>{{ record.lipwUnpaidCount }}</td>
-      <td>{{ record.disPaidCount }}</td>
-      <td>{{ record.disUnpaidCount }}</td>
-      <td>{{ record.totalBeneficiaries }}</td>
-      <td>{{ record.totalUnpaid }}</td>
-      <td>{{ record.reconciliationDate || "-" }}</td>
-      <td>
-        <button pTooltip="View" class="btn btn-info btn-sm" (click)="viewDetails(record)">
-          <i class="fas fa-eye"></i>
-        </button>
-      </td>
-    </tr>
-  </ng-template>
+        <ng-template pTemplate="body" let-record let-index="rowIndex">
+          <tr>
+            <td>{{ (currentPage * pageSize) + index + 1 }}</td>
+            <td>{{ record.state }}</td>
+            <td>{{ record.county }}</td>
+            <td>{{ record.payam }}</td>
+            <td>{{ record.boma }}</td>
+            <td>{{ record.paymentCycle }}</td>
+            <td>{{ record.lipwPaidCount }}</td>
+            <td>{{ record.lipwUnpaidCount }}</td>
+            <td>{{ record.disPaidCount }}</td>
+            <td>{{ record.disUnpaidCount }}</td>
+            <td>{{ record.totalBeneficiaries }}</td>
+            <td>{{ record.totalUnpaid }}</td>
+            <td>{{ record.reconciliationDate || "-" }}</td>
+            <td>
+              <button pTooltip="View" class="btn btn-info btn-sm" (click)="viewDetails(record)">
+                <i class="fas fa-eye"></i>
+              </button>
+            </td>
+          </tr>
+        </ng-template>
 
-  <ng-template pTemplate="emptymessage">
-    <tr>
-      <td colspan="14" class="text-center no-data-message">No data found</td>
-    </tr>
-  </ng-template>
-</p-table>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="14" class="text-center no-data-message">No data found</td>
+          </tr>
+        </ng-template>
+      </p-table>
+      <p-paginator class="paginator-sticky" [rows]="pageSize" [totalRecords]="totalRecords"
+  [rowsPerPageOptions]="[10, 25, 50]" (onPageChange)="onPageChange($event)" [first]="(currentPage) * pageSize"
+  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
+</p-paginator>
+      } @else {
+      <p class="text-center">No data found</p>
       }
-
-    </div>  }
+    </div>
+    }
   </div>
 </div>
 }

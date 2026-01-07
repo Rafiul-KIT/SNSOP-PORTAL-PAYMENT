@@ -27,6 +27,7 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { Router } from '@angular/router';
 import { ApiService } from '../../services/api.service';
 import { Tooltip } from "primeng/tooltip";
+import { Paginator } from "primeng/paginator";
 
 @Component({
   selector: 'app-reconciliation-monitoring',
@@ -39,7 +40,8 @@ import { Tooltip } from "primeng/tooltip";
     TableModule,
     SelectModule,
     FloatLabelModule,
-    Tooltip
+    Tooltip,
+    Paginator
 ],
   templateUrl: './reconciliation-monitoring.html',
   styleUrl: './reconciliation-monitoring.scss',
@@ -55,6 +57,9 @@ export class ReconciliationMonitoring implements OnInit {
 
   reconciliationForm!: FormGroup;
   records: any[] = [];
+  totalRecords = 0;
+  currentPage = 0;
+  pageSize = 10;
 
   // All lookup data loaded upfront
   states: LookupItem[] = [];
@@ -88,17 +93,19 @@ export class ReconciliationMonitoring implements OnInit {
   async ngOnInit(): Promise<void> {
     this.isLoading = true;
 
-    // Load ALL lookup data upfront
-    await this.loadInitialLookups();
+    // Load states first
+    await this.loadStates();
 
     this.initBreadcrumb();
     this.initForm();
 
     // Check for navigation state and restore if available
-    await this.checkAndRestoreState();
+    const hasNavigationState = await this.checkAndRestoreState();
 
-    // Load reconciliation data
-    await this.loadReconciliationData(true);
+    // If no navigation state, load data with empty payload
+    if (!hasNavigationState) {
+      await this.loadReconciliationData(0, true);
+    }
 
     this.isLoading = false;
     this.cdr.markForCheck();
@@ -118,7 +125,7 @@ export class ReconciliationMonitoring implements OnInit {
   private initForm(): void {
     this.reconciliationForm = this.fb.group({
       paymentCycleType: ['single'], // 'single' or 'multiple'
-      paymentCycle: [null, Validators.required],
+      paymentCycle: [null],
       state: [null],
       county: [{ value: null, disabled: true }],
       payam: [{ value: null, disabled: true }],
@@ -126,40 +133,25 @@ export class ReconciliationMonitoring implements OnInit {
     });
   }
 
-  // Load all lookup data upfront
-  private async loadInitialLookups(): Promise<void> {
+  // Load only states initially
+  private async loadStates(): Promise<void> {
     try {
-      await Promise.all([
-        this.lookupService.getOrFetchStateList(),
-        this.lookupService.fetchAllCountyList(),
-        this.lookupService.fetchAllPayamList(),
-        this.lookupService.fetchAllBomaList(),
-      ]);
-
+      await this.lookupService.getOrFetchStateList();
       this.states = this.lookupService.getStateList();
-      this.allCounties = this.lookupService.getAllCountyList();
-      this.allPayams = this.lookupService.getAllPayamList();
-      this.allBomas = this.lookupService.getAllBomaList();
-
-      // Build lookup maps for reverse lookup (ID to name)
       this.states.forEach((s) => this.stateMap.set(Number(s.id), s.name));
-      this.allCounties.forEach((c) => this.countyMap.set(Number(c.id), c.name));
-      this.allPayams.forEach((p) => this.payamMap.set(Number(p.id), p.name));
-      this.allBomas.forEach((b) => this.bomaMap.set(Number(b.id), b.name));
-
       this.cdr.markForCheck();
     } catch (error) {
-      console.error('Error loading initial lookups:', error);
+      console.error('Error loading states:', error);
       this.messageService.add({
         severity: 'error',
         summary: 'Error',
-        detail: 'Failed to load lookup data.',
+        detail: 'Failed to load states.',
       });
     }
   }
 
   // Check for navigation state and restore form
-  private async checkAndRestoreState(): Promise<void> {
+  private async checkAndRestoreState(): Promise<boolean> {
     const navigation = this.router.getCurrentNavigation();
     const navigationState = navigation?.extras?.state || history.state;
 
@@ -170,7 +162,9 @@ export class ReconciliationMonitoring implements OnInit {
       navigationState.state !== undefined
     ) {
       await this.restoreFormFromState(navigationState);
+      return true;
     }
+    return false;
   }
 
   // Restore form from navigation state
@@ -181,11 +175,7 @@ export class ReconciliationMonitoring implements OnInit {
         const stateObj = this.states.find((s) => Number(s.id) === state.state);
         if (stateObj) {
           this.reconciliationForm.patchValue({ state: stateObj });
-          // Load counties for this state
-          this.countyList = this.allCounties.filter(
-            (c: any) => Number(c.stateId) === Number(stateObj.id)
-          );
-          this.reconciliationForm.get('county')?.enable();
+          await this.onStateChange(stateObj);
         }
       }
 
@@ -196,11 +186,7 @@ export class ReconciliationMonitoring implements OnInit {
         );
         if (countyObj) {
           this.reconciliationForm.patchValue({ county: countyObj });
-          // Load payams for this county
-          this.payamList = this.allPayams.filter(
-            (p: any) => Number(p.countyId) === Number(countyObj.id)
-          );
-          this.reconciliationForm.get('payam')?.enable();
+          await this.onCountyChange(countyObj);
         }
       }
 
@@ -209,11 +195,7 @@ export class ReconciliationMonitoring implements OnInit {
         const payamObj = this.payamList.find((p) => Number(p.id) === state.payam);
         if (payamObj) {
           this.reconciliationForm.patchValue({ payam: payamObj });
-          // Load bomas for this payam
-          this.bomaList = this.allBomas.filter(
-            (b: any) => Number(b.payamId) === Number(payamObj.id)
-          );
-          this.reconciliationForm.get('boma')?.enable();
+          await this.onPayamChange(payamObj);
         }
       }
 
@@ -243,13 +225,16 @@ export class ReconciliationMonitoring implements OnInit {
         }
       }
 
+      // Load data after restoring form
+      await this.loadReconciliationData();
+
       this.cdr.markForCheck();
     } catch (error) {
       console.error('Error restoring form state:', error);
     }
   }
 
-  // Simplified change handlers - filter from already loaded data
+  // Load counties when state is selected
   async onStateChange(state: any): Promise<void> {
     this.reconciliationForm
       .get('county')
@@ -263,18 +248,10 @@ export class ReconciliationMonitoring implements OnInit {
     this.bomaList = [];
 
     if (state?.id) {
-      // Try filtering first (if data has parent IDs)
-      this.countyList = this.allCounties.filter(
-        (c: any) => Number(c.stateId) === Number(state.id)
+      this.countyList = await this.lookupService.getCountyListByStateId(
+        String(state.id)
       );
-      
-      // If filtering returns empty, fetch from API
-      if (this.countyList.length === 0) {
-        this.countyList = await this.lookupService.getCountyListByStateId(
-          String(state.id)
-        );
-      }
-      
+      this.countyList.forEach((c) => this.countyMap.set(Number(c.id), c.name));
       this.reconciliationForm.get('county')?.enable();
     }
     this.cdr.markForCheck();
@@ -289,18 +266,10 @@ export class ReconciliationMonitoring implements OnInit {
     this.bomaList = [];
 
     if (county?.id) {
-      // Try filtering first (if data has parent IDs)
-      this.payamList = this.allPayams.filter(
-        (p: any) => Number(p.countyId) === Number(county.id)
+      this.payamList = await this.lookupService.getPayamListByCountyId(
+        String(county.id)
       );
-      
-      // If filtering returns empty, fetch from API
-      if (this.payamList.length === 0) {
-        this.payamList = await this.lookupService.getPayamListByCountyId(
-          String(county.id)
-        );
-      }
-      
+      this.payamList.forEach((p) => this.payamMap.set(Number(p.id), p.name));
       this.reconciliationForm.get('payam')?.enable();
     }
     this.cdr.markForCheck();
@@ -311,117 +280,117 @@ export class ReconciliationMonitoring implements OnInit {
     this.bomaList = [];
 
     if (payam?.id) {
-      // Try filtering first (if data has parent IDs)
-      this.bomaList = this.allBomas.filter(
-        (b: any) => Number(b.payamId) === Number(payam.id)
+      this.bomaList = await this.lookupService.getBomaListByPayamId(
+        String(payam.id)
       );
-      
-      // If filtering returns empty, fetch from API
-      if (this.bomaList.length === 0) {
-        this.bomaList = await this.lookupService.getBomaListByPayamId(
-          String(payam.id)
-        );
-      }
-      
+      this.bomaList.forEach((b) => this.bomaMap.set(Number(b.id), b.name));
       this.reconciliationForm.get('boma')?.enable();
     }
     this.cdr.markForCheck();
   }
 
-  loadReconciliationData(isInitialLoad: boolean = false): Promise<void> {
-    if (!isInitialLoad && this.reconciliationForm.invalid) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Validation',
-        detail: 'Please fill in all required fields.',
-      });
-      return Promise.resolve();
-    }
-
-    this.isDataLoading = true;
-    this.cdr.markForCheck();
-
-    const formValues = this.reconciliationForm.value;
-    const paymentCycleType = formValues.paymentCycleType;
-    let paymentCycles: number[] = [];
-
-    if (paymentCycleType === 'single') {
-      if (formValues.paymentCycle) {
-        paymentCycles.push(formValues.paymentCycle.value);
-      }
-    } else {
-      paymentCycles = this.selectedPaymentCycles;
-    }
-
-    const payload = {
-      state: formValues.state ? Number(formValues.state.id) : 0,
-      county: formValues.county ? Number(formValues.county.id) : 0,
-      payam: formValues.payam ? Number(formValues.payam.id) : 0,
-      boma: formValues.boma ? Number(formValues.boma.id) : 0,
-      paymentCycles: paymentCycles,
-    };
-
-    return new Promise((resolve, reject) => {
-      this.apiService
-        .POST('api/payroll/recon/monitoring/geo', payload)
-        .then((res: any) => {
-          if (res.data.statusCode === 200) {
-            this.records = res.data.data;
-          } else {
-            this.records = [];
+      loadReconciliationData(page: number = 0, isInitialLoad: boolean = false): Promise<void> {
+        const formValues = this.reconciliationForm.value;
+    
+        // Check if at least state is selected (skip validation for initial load)
+        if (!isInitialLoad && !formValues.state) {
+          this.messageService.add({
+            severity: 'warn',
+            summary: 'Validation',
+            detail: 'Please select at least a state.',
+          });
+          return Promise.resolve();
+        }
+    
+        this.isDataLoading = true;
+        this.currentPage = page;
+        this.cdr.markForCheck();
+    
+        const paymentCycleType = formValues.paymentCycleType;
+        let paymentCycles: number[] = [];
+    
+        if (paymentCycleType === 'single' && formValues.paymentCycle) {
+          paymentCycles.push(formValues.paymentCycle.value);
+        } else if (paymentCycleType === 'multiple') {
+          paymentCycles = this.selectedPaymentCycles;
+        }
+    
+        // Build payload with only selected values
+        const payload: any = {};
+    
+        // Only add filters if not initial load
+        if (!isInitialLoad) {
+          if (formValues.state) {
+            payload.state = Number(formValues.state.id);
           }
-          this.isDataLoading = false;
-          this.cdr.markForCheck();
-          resolve();
-        })
-        .catch((err) => {
-          console.error(
-            'Error loading reconciliation data:',
-            err.response?.data || err.message
-          );
-          this.records = [];
-          this.isDataLoading = false;
-          this.cdr.markForCheck();
-          reject(err);
+          if (formValues.county) {
+            payload.county = Number(formValues.county.id);
+          }
+          if (formValues.payam) {
+            payload.payam = Number(formValues.payam.id);
+          }
+          if (formValues.boma) {
+            payload.boma = Number(formValues.boma.id);
+          }
+          if (paymentCycles.length > 0) {
+            payload.paymentCycles = paymentCycles;
+          }
+        }
+    
+        return new Promise((resolve, reject) => {
+          this.apiService
+            .POST(
+              `api/payroll/recon/monitoring/geo?page=${page}&size=${this.pageSize}`,
+              payload
+            )
+            .then((res: any) => {
+              if (res.data.statusCode === 200) {
+                this.records = res.data.data || [];
+                this.totalRecords = res.data.metadata.totalElements || this.records.length;
+              } else {
+                this.records = [];
+                this.totalRecords = 0;
+              }
+              this.isDataLoading = false;
+              this.cdr.markForCheck();
+              resolve();
+            })
+            .catch((err) => {
+              console.error(
+                'Error loading reconciliation data:',
+                err.response?.data || err.message
+              );
+              this.records = [];
+              this.totalRecords = 0;
+              this.isDataLoading = false;
+              this.cdr.markForCheck();
+              reject(err);
+            });
         });
-    });
-  }
-
-  // Simplified - now uses data already in memory
-  private getGeoIds(record: any): {
-    stateId: number;
-    countyId: number;
-    payamId: number;
-    bomaId: number;
-  } {
-    const stateId =
-      Number(this.states.find((s) => s.name === record.state)?.id) || 0;
-    const countyId =
-      Number(this.allCounties.find((c) => c.name === record.county)?.id) || 0;
-    const payamId =
-      Number(this.allPayams.find((p) => p.name === record.payam)?.id) || 0;
-    const bomaId =
-      Number(this.allBomas.find((b) => b.name === record.boma)?.id) || 0;
-
-    return { stateId, countyId, payamId, bomaId };
+      }  onPageChange(event: any): void {
+      this.currentPage = event.page;
+    this.pageSize = event.rows;
+    this.loadReconciliationData(event.page);
   }
 
   async viewDetails(record: any): Promise<void> {
     this.isLoading = true;
     this.cdr.markForCheck();
     try {
-      const { stateId, countyId, payamId, bomaId } = this.getGeoIds(record);
+      // Use IDs directly from the response
       const payload = {
-        state: stateId,
-        county: countyId,
-        payam: payamId,
-        boma: bomaId,
+        state: record.stateId || 0,
+        county: record.countyId || 0,
+        payam: record.payamId || 0,
+        boma: record.bomaId || 0,
         paymentCycles: [record.paymentCycle],
       };
+      
       const navResult = await this.router.navigate(
         ['/reconciliation-monitoring/details'],
         { state: payload }
       );
+      
       if (!navResult) {
         this.isLoading = false;
         this.cdr.markForCheck();
@@ -441,14 +410,6 @@ export class ReconciliationMonitoring implements OnInit {
   onPaymentCycleTypeChange(type: string): void {
     this.selectedPaymentCycles = [];
     this.reconciliationForm.get('paymentCycle')?.reset(null);
-    if (type === 'single') {
-      this.reconciliationForm
-        .get('paymentCycle')
-        ?.setValidators(Validators.required);
-    } else {
-      this.reconciliationForm.get('paymentCycle')?.clearValidators();
-    }
-    this.reconciliationForm.get('paymentCycle')?.updateValueAndValidity();
     this.cdr.markForCheck();
   }
 
@@ -479,5 +440,4 @@ export class ReconciliationMonitoring implements OnInit {
   getBomaName(bomaId: number): string {
     return this.bomaMap.get(bomaId) || bomaId.toString();
   }
-  
 }
