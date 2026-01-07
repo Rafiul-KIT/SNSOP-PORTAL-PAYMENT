@@ -1,10 +1,10 @@
+@if (isLoading) {
+<app-loader></app-loader>
+} @else {
 <div class="breadcrumb-wrapper">
   <p-breadcrumb class="max-w-full" [model]="items" [home]="home"></p-breadcrumb>
 </div>
 
-@if (isLoading) {
-<app-loader></app-loader>
-} @else {
 <div class="wrapper-scroller">
   <div class="row justify-content-center mt-4">
     <div class="card p-3 mb-3">
@@ -89,7 +89,7 @@
         }
 
         <div class="col-12 text-end">
-          <button class="btn btn-success" (click)="loadReconciliationData(0)">
+          <button class="btn btn-success" (click)="searchReconciliation()">
             <i class="fas fa-search me-2"></i>Search
           </button>
         </div>
@@ -97,79 +97,77 @@
       <br>
     </div>
 
-    @if(isDataLoading){
-    <app-loader></app-loader>
-    }@else {
-    <div class="card p-3 mb-3">
-      @if (records && records.length > 0) {
-      <p-table [value]="records" [lazy]="true"  [rows]="pageSize" [totalRecords]="totalRecords"
-        [loading]="isDataLoading" (onLazyLoad)="onPageChange($event)" [responsiveLayout]="'scroll'"
-        class="mt-4 custom-table">
-        <ng-template pTemplate="header">
-          <tr>
-            <th colspan="14" class="text-end">
-              <p class="fw-bold mb-2">
-                Showing <kbd>{{ records.length }}</kbd> of
-                <kbd>{{ totalRecords }}</kbd> sub-projects
-              </p>
-            </th>
-          </tr>
-          <tr>
-            <th>Serial</th>
-            <th>State</th>
-            <th>County</th>
-            <th>Payam</th>
-            <th>Boma</th>
-            <th>Payment Cycle</th>
-            <th>LIPW Paid</th>
-            <th>LIPW Unpaid</th>
-            <th>DIS Paid</th>
-            <th>DIS Unpaid</th>
-            <th>Total Beneficiary</th>
-            <th>Total Unpaid</th>
-            <th>Reconciliation Date & Time</th>
-            <th>Action</th>
-          </tr>
-        </ng-template>
+    <p-table [value]="records" [scrollable]="true" [scrollHeight]="'64vh'"
+      [tableStyle]="{ 'min-width': '100%', 'margin-bottom': '5px' }" dataKey="stateId" [rowTrackBy]="trackById"
+      size="small">
 
-        <ng-template pTemplate="body" let-record let-index="rowIndex">
-          <tr>
-            <td>{{ (currentPage * pageSize) + index + 1 }}</td>
-            <td>{{ record.state }}</td>
-            <td>{{ record.county }}</td>
-            <td>{{ record.payam }}</td>
-            <td>{{ record.boma }}</td>
-            <td>{{ record.paymentCycle }}</td>
-            <td>{{ record.lipwPaidCount }}</td>
-            <td>{{ record.lipwUnpaidCount }}</td>
-            <td>{{ record.disPaidCount }}</td>
-            <td>{{ record.disUnpaidCount }}</td>
-            <td>{{ record.totalBeneficiaries }}</td>
-            <td>{{ record.totalUnpaid }}</td>
-            <td>{{ record.reconciliationDate || "-" }}</td>
-            <td>
-              <button pTooltip="View" class="btn btn-info btn-sm" (click)="viewDetails(record)">
-                <i class="fas fa-eye"></i>
-              </button>
-            </td>
-          </tr>
-        </ng-template>
+      <ng-template pTemplate="header">
+        <tr>
+          <th colspan="14" class="text-end">
+            <p class="fw-bold mb-2">
+              Showing <kbd>{{ records.length }}</kbd> of
+              <kbd>{{ totalRecords }}</kbd> records
+            </p>
+          </th>
+        </tr>
+        <tr>
+          <th class="text-center">Serial</th>
+          <th class="text-center">State</th>
+          <th class="text-center">County</th>
+          <th class="text-center">Payam</th>
+          <th class="text-center">Boma</th>
+          <th class="text-center">Payment Cycle</th>
+          <th class="text-center">LIPW Paid</th>
+          <th class="text-center">LIPW Unpaid</th>
+          <th class="text-center">DIS Paid</th>
+          <th class="text-center">DIS Unpaid</th>
+          <th class="text-center">Total Beneficiary</th>
+          <th class="text-center">Total Unpaid</th>
+          <th class="text-center">Reconciliation Date & Time</th>
+          <th class="text-center" [style]="{ width: '100px' }">Action</th>
+        </tr>
+      </ng-template>
 
-        <ng-template pTemplate="emptymessage">
-          <tr>
-            <td colspan="14" class="text-center no-data-message">No data found</td>
-          </tr>
-        </ng-template>
-      </p-table>
-      <p-paginator class="paginator-sticky" [rows]="pageSize" [totalRecords]="totalRecords"
-  [rowsPerPageOptions]="[10, 25, 50]" (onPageChange)="onPageChange($event)" [first]="(currentPage) * pageSize"
-  currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
-</p-paginator>
-      } @else {
-      <p class="text-center">No data found</p>
-      }
-    </div>
-    }
+      <ng-template pTemplate="body" let-record let-rowIndex="rowIndex">
+        <tr>
+          <td class="text-center">{{ (currentPage * pageSize) + rowIndex + 1 }}</td>
+          <td class="text-center">{{ record.state || '-' }}</td>
+          <td class="text-center">{{ record.county || '-' }}</td>
+          <td class="text-center">{{ record.payam || '-' }}</td>
+          <td class="text-center">{{ record.boma || '-' }}</td>
+          <td class="text-center">{{ record.paymentCycle }}</td>
+          <td class="text-center">{{ record.lipwPaidCount }}</td>
+          <td class="text-center">{{ record.lipwUnpaidCount }}</td>
+          <td class="text-center">{{ record.disPaidCount }}</td>
+          <td class="text-center">{{ record.disUnpaidCount }}</td>
+          <td class="text-center">{{ record.totalBeneficiaries }}</td>
+          <td class="text-center">{{ record.totalUnpaid }}</td>
+          <td class="text-center">{{ record.reconciliationDate || "-" }}</td>
+          <td class="text-center">
+            <button pTooltip="View" tooltipPosition="top" appendTo="body" class="btn btn-info btn-sm"
+              (click)="viewDetails(record)">
+              <i class="fas fa-eye"></i>
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="14" class="text-center text-danger">
+            <b>No data found!</b>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <p-paginator class="paginator-sticky" [rows]="pageSize" [totalRecords]="totalRecords"
+      [rowsPerPageOptions]="[10, 25, 50]" (onPageChange)="onPageChange($event)" [first]="currentPage * pageSize"
+      [currentPageReportTemplate]="'Showing {first} to {last} of {totalRecords} entries'">
+    </p-paginator>
+
   </div>
 </div>
 }
+
+<p-toast position="bottom-right"></p-toast>

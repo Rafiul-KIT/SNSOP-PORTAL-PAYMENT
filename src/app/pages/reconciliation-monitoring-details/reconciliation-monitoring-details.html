@@ -168,6 +168,7 @@
               </div>
             </th>
             <th class="text-center ">Alternates</th>
+            <th>Paid To</th>
             <th (click)="sortOnClient('paymentStatus')" style="cursor: pointer;">
               <div class="text-center  ">
                 Status
@@ -233,7 +234,7 @@
                 }
               </div>
             </td>
-           
+           <td>{{record.paidTo}}</td>
             <td class="text-center">
               <span class="status-badge"
                 [ngClass]="{
