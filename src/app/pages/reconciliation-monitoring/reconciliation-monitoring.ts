@@ -26,6 +26,7 @@ import { SelectModule } from 'primeng/select';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { Router } from '@angular/router';
 import { ApiService } from '../../services/api.service';
+import { Tooltip } from "primeng/tooltip";
 
 @Component({
   selector: 'app-reconciliation-monitoring',
@@ -38,7 +39,8 @@ import { ApiService } from '../../services/api.service';
     TableModule,
     SelectModule,
     FloatLabelModule,
-  ],
+    Tooltip
+],
   templateUrl: './reconciliation-monitoring.html',
   styleUrl: './reconciliation-monitoring.scss',
   providers: [MessageService],

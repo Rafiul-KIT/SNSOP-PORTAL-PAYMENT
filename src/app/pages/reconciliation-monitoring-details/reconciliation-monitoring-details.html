@@ -93,12 +93,12 @@
         <ng-template pTemplate="header">
                <!-- Filter Row -->
           <tr class="filter-row">
-            <th>
+            <th class="text-center ">
               <input pInputText type="text" [(ngModel)]="filters['beneficiaryName']" 
                 [ngModelOptions]="{standalone: true}" (input)="applyFilters()" 
                 placeholder="Filter by name" class="w-full p-2 border border-gray-300 rounded" />
             </th>
-            <th>
+            <th class="text-center ">
               
               <p-select [options]="supportTypeOptions" [(ngModel)]="filters['supportType']" 
                 [ngModelOptions]="{standalone: true}" (onChange)="applyFilters()" 
@@ -117,12 +117,12 @@
             <th>
              
             </th>
-            <th>
+            <th class="text-center ">
               <input pInputText type="text" [(ngModel)]="filters['alternate1Name']" 
                 [ngModelOptions]="{standalone: true}" (input)="applyFilters()" 
                 placeholder="Filter by alternate" class="w-full p-2 border border-gray-300 rounded" />
             </th>
-            <th>
+            <th class="text-center ">
               <p-select [options]="statusOptions" [(ngModel)]="filters['paymentStatus']" 
                 [ngModelOptions]="{standalone: true}" (onChange)="applyFilters()" 
                 placeholder="All Status" optionLabel="label" optionValue="value" 
@@ -132,42 +132,42 @@
           </tr>
           <tr>
             <th (click)="sortOnClient('beneficiaryName')" style="cursor: pointer;">
-              <div class="text-center">
+              <div class="text-center ">
                 Beneficiary
                 <i [ngClass]="getSortIcon('beneficiaryName')" class="pi ms-2"></i>
               </div>
             </th>
             <th (click)="sortOnClient('supportType')" style="cursor: pointer;">
-              <div class="text-center">
+              <div class="text-center ">
                 Support Type
                 <i [ngClass]="getSortIcon('supportType')" class="pi ms-2"></i>
               </div>
             </th>
             <th (click)="sortOnClient('paymentCycle')" style="cursor: pointer;">
-              <div class="text-center">
+              <div class="text-center ">
                 Payment Cycle
                 <i [ngClass]="getSortIcon('paymentCycle')" class="pi ms-2"></i>
               </div>
             </th>
             <th (click)="sortOnClient('totalAttendance')" style="cursor: pointer;">
-              <div class="text-center">
+              <div class="text-center ">
                 Attendance
                 <i [ngClass]="getSortIcon('totalAttendance')" class="pi ms-2"></i>
               </div>
             </th>
             <th (click)="sortOnClient('wageTotal')" style="cursor: pointer;">
-              <div class="text-center">
+              <div class="text-center ">
                 Wage (USD)
                 <i [ngClass]="getSortIcon('wageTotal')" class="pi ms-2"></i>
               </div>
             </th>
             <th (click)="sortOnClient('wageRateSspTotal')" style="cursor: pointer;">
-              <div class="text-center">
+              <div class="text-center ">
                 Wage (SSP)
                 <i [ngClass]="getSortIcon('wageRateSspTotal')" class="pi ms-2"></i>
               </div>
             </th>
-            <th>Alternates</th>
+            <th class="text-center ">Alternates</th>
             <th (click)="sortOnClient('paymentStatus')" style="cursor: pointer;">
               <div class="text-center  ">
                 Status
@@ -182,20 +182,20 @@
         <!-- Table Body -->
         <ng-template pTemplate="body" let-record>
           <tr class="beneficiary-row">
-            <td class="ps-4">
-              <div class="d-flex align-items-center">
+            <td class="ps-4 text-center ">
+              <div class=" ">
                 <div>
                   <div class="fw-semibold">{{ record.beneficiaryName }}</div>
                   <small class="text-muted">ID: {{ record.beneficiaryId }}</small>
                 </div>
               </div>
             </td>
-            <td>
+            <td class="text-center ">
               <span class="badge bg-light text-dark border">
                 {{ record.supportType }}
               </span>
             </td>
-            <td>
+            <td class="text-center ">
               <span class="text-muted">{{ record.paymentCycle }}</span>
             </td>
             <td class="text-center">
@@ -203,15 +203,15 @@
                 {{ record.totalAttendance }} days
               </span>
             </td>
-            <td class="text-end">
+            <td class="text-center ">
               <strong class="text-success">{{ record.wageTotal | currency:'USD':'symbol':'1.2-2' }}</strong>
             </td>
-            <td class="text-end">
+            <td class="text-center ">
               <strong>{{ record.wageRateSspTotal | currency:'SSP':'symbol':'1.2-2' }}</strong>
               <br>
               <small class="text-muted">Rate: {{ record.exchangeRateAtTime | number:'1.2-2' }}</small>
             </td>
-            <td>
+            <td class="text-center">
               <div class="alternates-cell">
                 @if (record.alternate1Name || record.alternate2Name) {
                 <div class="alternates-info">
