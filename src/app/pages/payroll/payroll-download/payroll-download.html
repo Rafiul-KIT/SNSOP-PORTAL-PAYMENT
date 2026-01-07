@@ -86,6 +86,7 @@
                 <th>Payam</th>
                 <th>Boma</th>
                 <th>Support Type</th>
+                <th>Payroll Type</th>
                 <th class="payment-cycles">Payment Cycles</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -101,6 +102,7 @@
                 <td>{{ getPayamName(request.payam) }}</td>
                 <td>{{ getBomaName(request.boma) }}</td>
                 <td>{{ request.supportType }}</td>
+                <td>{{ request.payrollType }}</td>
                 <td>{{ getPaymentCycleNames(request.paymentCycles) }}</td>
                 <td>
                     <p-tag [severity]="getStatusSeverity(request.status)" [value]="request.status"></p-tag>
