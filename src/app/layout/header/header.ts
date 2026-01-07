@@ -225,7 +225,7 @@ export class Header {
           {
             label: 'Reconciliation Monitoring',
             icon: 'fas fa-eye',
-            routerLink: 'reconciliation-monitoring',
+            routerLink: 'reconciliation-monitoring/list',
           },
         ],
       },

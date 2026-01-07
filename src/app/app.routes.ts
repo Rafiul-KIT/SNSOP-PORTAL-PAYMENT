@@ -31,6 +31,8 @@ import { Unauthorized } from './components/unauthorized/unauthorized';
 import { PayrollMobileMoney } from './pages/payroll/payroll-mobile-money/payroll-mobile-money';
 import { GeneratePayroll } from './pages/payroll/generate-payroll/generate-payroll';
 import { ReconciliationMonitoring } from './pages/reconciliation-monitoring/reconciliation-monitoring';
+import { ReconciliationMonitoringDetails } from './pages/reconciliation-monitoring-details/reconciliation-monitoring-details';
+
 
 export const routes: Routes = [
   {
@@ -225,8 +227,19 @@ export const routes: Routes = [
   },
   {
     path: 'reconciliation-monitoring',
-    component: ReconciliationMonitoring,
     canActivate: [routeGuard],
+    children: [
+      {
+        path: 'list',
+        component: ReconciliationMonitoring,
+        canActivate: [routeGuard],
+      },
+      {
+        path: 'details',
+        component: ReconciliationMonitoringDetails,
+        canActivate: [routeGuard],
+      },
+    ],
   },
   { path: 'unauthorized', component: Unauthorized },
 

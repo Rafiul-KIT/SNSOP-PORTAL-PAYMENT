@@ -85,11 +85,10 @@ export class GeneratePayroll implements OnInit {
 
   supportTypeOptions: LookupItem[] = [];
   paymentCycleOptions: LookupItemPayroll[] = [];
-  paymentTypeOptions: LookupItem[] = [
-     { id: 'cash', name: 'Cash' },
-    { id: 'mobileMoney', name: 'Mobile Money' }
-   
-  ];
+    paymentTypeOptions: LookupItem[] = [
+       { id: 'CASH_PAYMENT', name: 'Cash' },
+      { id: 'MOBILE_PAYMENT', name: 'Mobile Money' }
+    ];
 
   // Generation status
   generationStatus: string = '';
@@ -278,6 +277,7 @@ export class GeneratePayroll implements OnInit {
       supportType: formValues.supportType || 'LIPW',
       paymentCycles: selectedCycles,
       isCombined: formValues.payrollType === 'combined',
+      payrollType: formValues.paymentType,
       requestId: requestId,
     };
 
@@ -333,7 +333,7 @@ export class GeneratePayroll implements OnInit {
       supportType: '',
       payrollType: 'single',
       paymentCycle: null,
-      paymentType: 'mobileMoney',
+      paymentType: 'CASH_PAYMENT',
     });
 
     this.paymentCycles.controls.forEach((control) =>

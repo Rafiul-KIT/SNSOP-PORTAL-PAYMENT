@@ -186,11 +186,11 @@
                 <span class="select-all-text">Select all</span>
               </th>
             
-              <th (click)="sortOnClient('householdNumber')" style="cursor: pointer;">Household No. <p-sortIcon field="householdNumber"></p-sortIcon></th>
-              <th (click)="sortOnClient('beneficiaryName')" style="cursor: pointer;">Beneficiary Name <p-sortIcon field="beneficiaryName"></p-sortIcon></th>
-              <th (click)="sortOnClient('registrationPhase')" style="cursor: pointer;">Registration Phase <p-sortIcon field="registrationPhase"></p-sortIcon></th>
-              <th (click)="sortOnClient('gender')" style="cursor: pointer;">Gender <p-sortIcon field="gender"></p-sortIcon></th>
-              <th (click)="sortOnClient('age')" style="cursor: pointer;">Age <p-sortIcon field="age"></p-sortIcon></th>
+              <th >Household Number </th>
+              <th (click)="sortOnClient('beneficiaryName')" style="cursor: pointer;">Beneficiary Name <i [ngClass]="getSortIcon('beneficiaryName')" class="pi ms-2"></i></th>
+              <th (click)="sortOnClient('registrationPhase')" style="cursor: pointer;">Registration Phase <i [ngClass]="getSortIcon('registrationPhase')" class="pi ms-2"></i></th>
+              <th (click)="sortOnClient('gender')" style="cursor: pointer;">Gender <i [ngClass]="getSortIcon('gender')" class="pi ms-2"></i></th>
+              <th (click)="sortOnClient('age')" style="cursor: pointer;">Age <i [ngClass]="getSortIcon('age')" class="pi ms-2"></i></th>
               <th>Phone No.</th>
               <th>Legal Status</th>
             </tr>
@@ -204,7 +204,14 @@
              
               <td>{{ beneficiary.householdNumber }}</td>
               <td>{{ beneficiary.beneficiaryName }}</td>
-              <td>{{ beneficiary.registrationPhase }}</td>
+                                         <td>
+  <span 
+    [class]="'badge ' + 
+      (beneficiary.registrationPhase === 'PARENT' ? 'bg-primary' : 
+       beneficiary.registrationPhase === 'AF' ? 'bg-success' : 'bg-secondary')">
+    {{ beneficiary.registrationPhase || '—' }}
+  </span>
+</td>
               <td>{{ beneficiary.gender }}</td>
               <td>{{ beneficiary.age }}</td>
               <td>{{ beneficiary.phoneNo }}</td>
