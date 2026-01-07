@@ -1,0 +1,88 @@
+@if (isLoading) {
+<app-loader></app-loader>
+} @else {
+<div class="breadcrumb-wrapper">
+  <p-breadcrumb
+    [model]="breadcrumbItems"
+    [home]="breadcrumbHome"
+    class="w-100"
+  ></p-breadcrumb>
+</div>
+
+<div class="card">
+  <p-table
+    #dt
+    [value]="beneficiaries"
+    [(selection)]="selectedBeneficiaries"
+    dataKey="id"
+    [rows]="10"
+    [paginator]="true"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    [scrollable]="true"
+    scrollHeight="60vh"
+    (onRowSelect)="onRowSelect($event)"
+    (onRowUnselect)="onRowUnselect($event)"
+  >
+    <ng-template pTemplate="caption">
+      <div class="d-flex justify-content-between align-items-center">
+        <p-button
+          label="Initiate Payment for Selected"
+          icon="pi pi-check"
+          (onClick)="initiatePayment()"
+          [disabled]="!selectedBeneficiaries || selectedBeneficiaries.length === 0"
+        ></p-button>
+        <div class="text-end">
+          <p class="fw-bold mb-0">
+            Total Beneficiaries: <kbd>{{ beneficiaries.length }}</kbd>
+          </p>
+        </div>
+      </div>
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width: 4rem">
+          <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+        </th>
+        <th>Beneficiary ID</th>
+        <th>Beneficiary Name</th>
+        <th>Phone Number</th>
+        <th>Amount</th>
+        <th>Status</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-beneficiary>
+      <tr>
+        <td>
+          <p-tableCheckbox [value]="beneficiary"></p-tableCheckbox>
+        </td>
+        <td>{{ beneficiary.beneficiaryId }}</td>
+        <td>{{ beneficiary.beneficiaryName }}</td>
+        <td>{{ beneficiary.phoneNo }}</td>
+        <td>{{ beneficiary.amount | number: '1.2-2' }}</td>
+        <td>
+          <span
+            class="badge"
+            [ngClass]="{
+              'bg-success': beneficiary.status === 'PAID',
+              'bg-warning': beneficiary.status === 'PENDING',
+              'bg-danger': beneficiary.status === 'FAILED'
+            }"
+            >{{ beneficiary.status }}</span
+          >
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="6" class="text-center">No beneficiary data found.</td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+}
+
+<p-toast></p-toast>
+<p-confirmDialog
+  [style]="{ width: '450px' }"
+  key="confirm"
+></p-confirmDialog>

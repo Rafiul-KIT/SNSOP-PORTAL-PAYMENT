@@ -24,6 +24,7 @@ import { WageDashboardDis } from './pages/wages-request-approval/wage-dashboard-
 import { WageRequestDetails } from './pages/wages-request-approval/wage-request-details/wage-request-details';
 import { WageRequestApproval } from './pages/wages-request-approval/wage-request-approval/wage-request-approval';
 import { PayrollDownload } from './pages/payroll/payroll-download/payroll-download';
+import { MobileMoneyDetails } from './pages/payroll/mobile-money-details/mobile-money-details';
 import { ListOfWages } from './pages/apply-wages-request/list-of-wages/list-of-wages';
 import { Profile } from './pages/profile/profile';
 import { routeGuard } from './route.guard';
@@ -221,6 +222,11 @@ export const routes: Routes = [
       {
         path: 'mobile-money-download',
         component: PayrollMobileMoney,
+        canActivate: [routeGuard],
+      },
+      {
+        path: 'mobile-money-details/:requestId',
+        component: MobileMoneyDetails,
         canActivate: [routeGuard],
       },
     ],

@@ -17,7 +17,7 @@ import { PaginatorModule } from 'primeng/paginator';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { InputTextModule } from 'primeng/inputtext';
 import { TooltipModule } from 'primeng/tooltip';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { SelectModule } from 'primeng/select';
 import { TagModule } from 'primeng/tag';
@@ -127,7 +127,8 @@ export class PayrollDownload implements OnInit {
     private confirmationService: ConfirmationService,
     private api: ApiService,
     private lookup: LookupService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
 
   public Math = Math;
@@ -461,5 +462,63 @@ export class PayrollDownload implements OnInit {
 
   onRefreshClick() {
     this.fetchRequests();
+  }
+
+  onViewClick(request: PayrollGenerationRequest) {
+    this.router.navigate([
+      '/payroll/mobile-money-details',
+      request.requestId,
+    ]);
+  }
+
+  onProceedClick(request: PayrollGenerationRequest) {
+    this.confirmationService.confirm({
+      message: 'Are you sure that you want to proceed with this payment?',
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      accept: async () => {
+        this.isLoading = true;
+        this.cdr.markForCheck();
+        try {
+          const payload = { requestId: request.requestId };
+          const response = await this.api.POST(
+            'api/momo/initiatePayment',
+            payload
+          );
+
+          if (response.data && response.data.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Success',
+              text: response.data.message || 'Payment initiated successfully!',
+            });
+            await this.fetchRequests(); // Refresh the list
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Payment Failed',
+              text:
+                response.data.message ||
+                'An error occurred while initiating the payment.',
+            });
+          }
+        } catch (error: any) {
+          Swal.fire({
+            icon: 'error',
+            title: 'API Error',
+            text:
+              error?.response?.data?.message ||
+              error.message ||
+              'An unknown error occurred.',
+          });
+        } finally {
+          this.isLoading = false;
+          this.cdr.markForCheck();
+        }
+      },
+      reject: () => {
+        // Optional: handle rejection
+      },
+    });
   }
 }
