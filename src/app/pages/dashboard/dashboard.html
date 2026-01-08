@@ -11,9 +11,9 @@
   </div>
 
   <!-- Stats Cards -->
-  <div class="row g-3 mb-4">
+  <div class="row g-3 mb-4 text-center">
     <div class="col-md-2 col-sm-6">
-      <div style="background-color: #eff6ff; border:2px solid #d5e7ff;" class="stat-card  stat-card-white">
+      <div style="background-color: #bdd8fc; border:2px solid #d5e7ff;" class="stat-card  stat-card-white">
 
         <div class="stat-content">
           <div class="stat-label">Total Projects</div>
@@ -26,7 +26,7 @@
     </div>
 
     <div class="col-md-2 col-sm-6">
-      <div style="background-color: #f0fdf4; border:2px solid #d1fadd;" class="stat-card  stat-card-white">
+      <div style="background-color: #bdf8cf; border:2px solid #d1fadd;" class="stat-card  stat-card-white">
 
         <div class="stat-content">
           <div class="stat-label">Total Subprojects</div>
@@ -39,7 +39,7 @@
     </div>
 
     <div class="col-md-2 col-sm-6">
-      <div style="background-color: #faf5ff; border:2px solid #eedcff;" class="stat-card stat-card-white">
+      <div style="background-color: #eedcff; border:2px solid #eedcff;" class="stat-card stat-card-white">
 
         <div class="stat-content">
           <div class="stat-label">Total Beneficiaries</div>
@@ -55,14 +55,14 @@
     </div>
 
     <div class="col-md-2 col-sm-6">
-      <div style="background-color: #fefce8; border:2px solid #fcf5b0; " class="stat-card stat-card-white">
+      <div style="background-color: #fcf5b0; border:2px solid #fcf5b0; " class="stat-card stat-card-white">
 
         <div class="stat-content">
           <div class="stat-label">Total Amount</div>
-          <div class="stat-value">${{ (stats.totalAmount.total) / 1000000 | number:'1.0-1' }}M
+          <div class="stat-value">SSP {{ (stats.totalAmount.total) / 1000000 | number:'1.0-1' }}M
           </div>
           <div class="stat-detail">
-            Paid ${{ stats.totalAmount.paid / 1000000 | number:'1.2-2' }}M, Unpaid ${{ stats.totalAmount.unpaid /
+            Paid SSP {{ stats.totalAmount.paid / 1000000 | number:'1.2-2' }}M, Unpaid SSP {{ stats.totalAmount.unpaid /
             1000000 | number:'1.2-2' }}M
           </div>
         </div>
@@ -72,7 +72,7 @@
       </div>
     </div>
     <div class="col-md-2">
-      <div style="background-color: #e0f2f1; border:2px solid #b2dfdb;" class="stat-card stat-card-white">
+      <div style="background-color: #b2dfdb; border:2px solid #b2dfdb;" class="stat-card stat-card-white">
         <div class="stat-content">
           <div class="stat-label">Subprojects Ready for Assignment</div>
           <div class="stat-value">{{ stats.subprojectsReadyForAssignment | number }}</div>
@@ -83,7 +83,7 @@
       </div>
     </div>
     <div class="col-md-2">
-      <div style="background-color: #fbe9e7; border:2px solid #ffccbc;" class="stat-card stat-card-white">
+      <div style="background-color: #ffccbc; border:2px solid #ffccbc;" class="stat-card stat-card-white">
         <div class="stat-content">
           <div class="stat-label">Completed Subprojects</div>
           <div class="stat-value">{{ stats.completedSubprojects | number }}</div>
@@ -135,15 +135,15 @@
             <div class="support-amounts">
               <div class="amount-item">
                 <span class="amount-label">Total</span>
-                <span class="amount-value">${{ support.total | number }}</span>
+                <span class="amount-value">SSP {{ support.total | number }}</span>
               </div>
               <div class="amount-item">
                 <span class="amount-label">Paid</span>
-                <span class="amount-value text-success">${{ support.paid | number }}</span>
+                <span class="amount-value text-success">SSP {{ support.paid | number }}</span>
               </div>
               <div class="amount-item">
                 <span class="amount-label">Unpaid</span>
-                <span class="amount-value text-danger">${{ support.unpaid | number }}</span>
+                <span class="amount-value text-danger">SSP {{ support.unpaid | number }}</span>
               </div>
             </div>
 
@@ -376,9 +376,9 @@
             <ng-template pTemplate="body" let-state>
               <tr>
                 <td class="boma-name">{{ state.stateName }}</td>
-                <td class="text-end amount-total">{{ state.totalPaymentAmount | currency:'$':'symbol':'1.0-0' }}</td>
-                <td class="text-end amount-paid">{{ state.totalPaidAmount | currency:'$':'symbol':'1.0-0' }}</td>
-                <td class="text-end amount-unpaid">{{ state.totalUnpaidAmount | currency:'$':'symbol':'1.0-0' }}</td>
+                <td class="text-end amount-total">{{ state.totalPaymentAmount | currency:'SSP ':'symbol':'1.0-0' }}</td>
+                <td class="text-end amount-paid">{{ state.totalPaidAmount | currency:'SSP ':'symbol':'1.0-0' }}</td>
+                <td class="text-end amount-unpaid">{{ state.totalUnpaidAmount | currency:'SSP ':'symbol':'1.0-0' }}</td>
                 <td class="text-end beneficiaries">{{ state.uniqueBeneficiary | number }}</td>
                 <td class="text-end beneficiaries">{{ state.uniquePaidBeneficiary | number }}</td>
                 <td class="text-end beneficiaries">{{ state.uniqueUnpaidBeneficiary | number }}</td>
