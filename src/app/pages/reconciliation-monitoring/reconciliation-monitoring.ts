@@ -28,6 +28,8 @@ import { ApiService } from '../../services/api.service';
 import { Tooltip } from "primeng/tooltip";
 import { PaginatorModule } from 'primeng/paginator';
 import { ToastModule } from 'primeng/toast';
+import { Tag } from "primeng/tag";
+import { Badge } from "primeng/badge";
 
 @Component({
   selector: 'app-reconciliation-monitoring',
@@ -42,8 +44,9 @@ import { ToastModule } from 'primeng/toast';
     FloatLabelModule,
     Tooltip,
     PaginatorModule,
-    ToastModule
-  ],
+    ToastModule,
+    Tag
+],
   templateUrl: './reconciliation-monitoring.html',
   styleUrl: './reconciliation-monitoring.scss',
   providers: [MessageService],
@@ -417,7 +420,26 @@ export class ReconciliationMonitoring implements OnInit {
       this.cdr.markForCheck();
     }
   }
+ formatDateTime(dateString: string | null): string {
 
+  if (!dateString) {
+    return "-";
+  }
+
+  const date = new Date(dateString);
+
+
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'short', 
+    day: 'numeric', 
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  };
+
+  return new Intl.DateTimeFormat(undefined, options).format(date);
+}
   onPaymentCycleTypeChange(type: string): void {
     this.selectedPaymentCycles = [];
     this.reconciliationForm.get('paymentCycle')?.reset(null);
@@ -438,4 +460,5 @@ export class ReconciliationMonitoring implements OnInit {
   // Helper method for tracking rows
   trackById = (_: number, record: any) => 
     `${record.stateId}_${record.countyId}_${record.payamId}_${record.bomaId}_${record.paymentCycle}`;
+  
 }
