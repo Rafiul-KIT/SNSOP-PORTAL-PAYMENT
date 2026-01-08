@@ -51,6 +51,7 @@ import { ToastModule } from 'primeng/toast';
 })
 export class ReconciliationMonitoring implements OnInit {
   isLoading = false;
+  isShow = false;
 
   items: MenuItem[] | undefined;
   home: MenuItem | undefined;
@@ -88,7 +89,6 @@ export class ReconciliationMonitoring implements OnInit {
 
     // Load only states initially
     await this.loadStates();
-
     this.initBreadcrumb();
     this.initForm();
 
@@ -316,7 +316,7 @@ export class ReconciliationMonitoring implements OnInit {
 
   // Fetch data from API
   fetchPage(page: number, size: number, isInitialLoad: boolean = false): Promise<void> {
-    this.isLoading = true;
+    this.isShow = false;
     this.cdr.markForCheck();
 
     const body = isInitialLoad
@@ -367,7 +367,7 @@ export class ReconciliationMonitoring implements OnInit {
           reject(err);
         })
         .finally(() => {
-          this.isLoading = false;
+          this.isShow = true;
           this.cdr.detectChanges();
         });
     });

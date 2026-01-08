@@ -96,7 +96,7 @@
       </form>
       <br>
     </div>
-
+@if(isShow){
     <p-table [value]="records" [scrollable]="true" [scrollHeight]="'64vh'"
       [tableStyle]="{ 'min-width': '100%', 'margin-bottom': '5px' }" dataKey="stateId" [rowTrackBy]="trackById"
       size="small">
@@ -165,6 +165,10 @@
       [rowsPerPageOptions]="[10, 25, 50]" (onPageChange)="onPageChange($event)" [first]="currentPage * pageSize"
       [currentPageReportTemplate]="'Showing {first} to {last} of {totalRecords} entries'">
     </p-paginator>
+}@else {
+  <app-loader></app-loader>
+}
+
 
   </div>
 </div>
