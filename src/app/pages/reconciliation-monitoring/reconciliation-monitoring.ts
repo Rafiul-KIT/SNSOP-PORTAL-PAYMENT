@@ -309,10 +309,10 @@ export class ReconciliationMonitoring implements OnInit {
     }
 
     return {
-      state: formValues.state ? Number(formValues.state.id) : 0,
-      county: formValues.county ? Number(formValues.county.id) : 0,
-      payam: formValues.payam ? Number(formValues.payam.id) : 0,
-      boma: formValues.boma ? Number(formValues.boma.id) : 0,
+      state: formValues.state ? Number(formValues.state.id) : null,
+      county: formValues.county ? Number(formValues.county.id) : null,
+      payam: formValues.payam ? Number(formValues.payam.id) : null,
+      boma: formValues.boma ? Number(formValues.boma.id) : null,
       paymentCycles: paymentCycles.length > 0 ? paymentCycles : [],
     };
   }
@@ -324,10 +324,10 @@ export class ReconciliationMonitoring implements OnInit {
 
     const body = isInitialLoad
       ? {
-          state: 0,
-          county: 0,
-          payam: 0,
-          boma: 0,
+          state: null,
+          county: null,
+          payam: null,
+          boma: null,
           paymentCycles: [],
         }
       : this.buildRequestBody();

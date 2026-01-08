@@ -112,6 +112,8 @@ export class Dashboard {
     totalSubprojects: 0,
     totalBeneficiaries: { total: 0, paid: 0, unpaid: 0 },
     totalAmount: { total: 0, paid: 0, unpaid: 0 },
+    subprojectsReadyForAssignment: 0,
+    completedSubprojects: 0,
   };
 
   projectStats: any = { // Will be populated from dashboardData.subprojectData
@@ -139,7 +141,12 @@ export class Dashboard {
   
   paymentCycleChartData: any;
   paymentCycleChartOptions: any;
-
+projectStatusChartData: any;
+projectStatusChartOptions: any;
+wageRequestChartData: any;
+wageRequestChartOptions: any;
+subprojectStatusChartData: any;
+subprojectStatusChartOptions: any;
   
   supportTypes: any[] = []; // Will be populated based on wageReqData
   geoStateData: GeoStateData[] = [];
@@ -177,6 +184,8 @@ export class Dashboard {
         // Map SubprojectData to existing stats and projectApproval
         this.stats.totalProjects = this.dashboardData.subprojectData.totalProjects;
         this.stats.totalSubprojects = this.dashboardData.subprojectData.totalSubprojects;
+        this.stats.completedSubprojects = this.dashboardData.subprojectData.totalCompletedSubprojects;
+        this.stats.subprojectsReadyForAssignment = this.dashboardData.subprojectData.totalSubprojectsPendingForBeneficiaryAssignment;
 
         this.projectStats.active = this.dashboardData.subprojectData.totalActiveProjects;
         this.projectStats.inactive = this.dashboardData.subprojectData.totalInactiveProjects;
@@ -440,7 +449,7 @@ export class Dashboard {
         maintainAspectRatio: false,
         plugins: {
           legend: {
-            position: 'bottom',
+            position: 'top',
             labels: {
               padding: 15,
               font: {
@@ -464,7 +473,7 @@ export class Dashboard {
         scales: {
           x: {
             grid: {
-              display: false,
+              display: true,
             },
             ticks: {
               font: {
@@ -489,6 +498,151 @@ export class Dashboard {
         },
       };
     }
+    this.initializeProjectStatusChart();
+    this.initializeWageRequestChart();
+    this.initializeSubprojectStatusChart();
+  }
+  initializeProjectStatusChart() {
+  this.projectStatusChartData = {
+    labels: ['Active Projects', 'Inactive Projects'],
+    datasets: [
+      {
+        data: [this.projectStats.active, this.projectStats.inactive],
+        backgroundColor: ['#10b981', '#fbbf24'], // Green for active, Yellow for inactive
+        hoverBackgroundColor: ['#059669', '#f59e0b'],
+        borderWidth: 2,
+        borderColor: '#ffffff'
+      },
+    ],
+  };
+
+  this.projectStatusChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          padding: 15,
+          font: {
+            size: 13,
+            weight: '500',
+          },
+          usePointStyle: true,
+          pointStyle: 'circle',
+        },
+      },
+      tooltip: {
+        callbacks: {
+          label: (context: any) => {
+            const label = context.label || '';
+            const value = context.parsed || 0;
+            const total = this.projectStats.total;
+            const percentage = ((value / total) * 100).toFixed(1);
+            return `${label}: ${value} (${percentage}%)`;
+          },
+        },
+      },
+    },
+  };
+}
+
+  initializeSubprojectStatusChart() {
+    this.subprojectStatusChartData = {
+      labels: ['Approved', 'Pending', 'Rejected'],
+      datasets: [
+        {
+          data: [
+            this.subprojectStats.approved,
+            this.subprojectStats.pending,
+            this.subprojectStats.rejected,
+          ],
+          backgroundColor: ['#4caf50', '#ffc107', '#f44336'], // Green, Yellow, Red
+          hoverBackgroundColor: ['#43a047', '#ffb300', '#e53935'],
+          borderWidth: 2,
+          borderColor: '#ffffff'
+        },
+      ],
+    };
+
+    this.subprojectStatusChartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 15,
+            font: {
+              size: 13,
+              weight: '500',
+            },
+            usePointStyle: true,
+            pointStyle: 'circle',
+          },
+        },
+        tooltip: {
+          callbacks: {
+            label: (context: any) => {
+              const label = context.label || '';
+              const value = context.parsed || 0;
+              const total = this.subprojectStats.total;
+              const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
+              return `${label}: ${value.toLocaleString()} (${percentage}%)`;
+            },
+          },
+        },
+      },
+    };
   }
 
+  initializeWageRequestChart() {
+    this.wageRequestChartData = {
+      labels: ['Approved', 'Pending', 'Rejected', 'Reconciled'],
+      datasets: [
+        {
+          data: [
+            this.wageRequestStats.approved,
+            this.wageRequestStats.pending,
+            this.wageRequestStats.rejected,
+            this.wageRequestStats.reconciled,
+          ],
+          backgroundColor: ['#4caf50', '#ffc107', '#f44336', '#0dcaf0'],
+          hoverBackgroundColor: ['#43a047', '#ffb300', '#e53935', '#0baccc'],
+          borderWidth: 2,
+          borderColor: '#ffffff',
+        },
+      ],
+    };
+
+    this.wageRequestChartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 15,
+            font: {
+              size: 13,
+              weight: '500',
+            },
+            usePointStyle: true,
+            pointStyle: 'circle',
+          },
+        },
+        tooltip: {
+          callbacks: {
+            label: (context: any) => {
+              const label = context.label || '';
+              const value = context.parsed || 0;
+              const total = this.wageRequestStats.total;
+              const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0.0';
+              return `${label}: ${value.toLocaleString()} (${percentage}%)`;
+            },
+          },
+        },
+      },
+    };
+  }
 }
