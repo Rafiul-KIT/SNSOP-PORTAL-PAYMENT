@@ -14,7 +14,7 @@
     #dt
     [value]="beneficiaries"
     [(selection)]="selectedBeneficiaries"
-    dataKey="id"
+    dataKey="transactionId"
     [rows]="10"
     [paginator]="true"
     [rowsPerPageOptions]="[10, 25, 50]"
@@ -46,8 +46,7 @@
         <th>Beneficiary ID</th>
         <th>Beneficiary Name</th>
         <th>Phone Number</th>
-        <th>Amount</th>
-        <th>Status</th>
+        <th>Amount (SSP)</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-beneficiary>
@@ -57,24 +56,13 @@
         </td>
         <td>{{ beneficiary.beneficiaryId }}</td>
         <td>{{ beneficiary.beneficiaryName }}</td>
-        <td>{{ beneficiary.phoneNo }}</td>
-        <td>{{ beneficiary.amount | number: '1.2-2' }}</td>
-        <td>
-          <span
-            class="badge"
-            [ngClass]="{
-              'bg-success': beneficiary.status === 'PAID',
-              'bg-warning': beneficiary.status === 'PENDING',
-              'bg-danger': beneficiary.status === 'FAILED'
-            }"
-            >{{ beneficiary.status }}</span
-          >
-        </td>
+        <td>{{ beneficiary.mobileWalletNumber }}</td>
+        <td>{{ beneficiary.wageRateSspTotal | number: '1.2-2' }}</td>
       </tr>
     </ng-template>
     <ng-template pTemplate="emptymessage">
       <tr>
-        <td colspan="6" class="text-center">No beneficiary data found.</td>
+        <td colspan="5" class="text-center">No beneficiary data found.</td>
       </tr>
     </ng-template>
   </p-table>

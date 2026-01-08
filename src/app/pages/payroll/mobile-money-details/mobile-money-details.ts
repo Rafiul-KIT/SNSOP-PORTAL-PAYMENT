@@ -20,13 +20,19 @@ import { ApiService } from '../../../services/api.service';
 import { Loader } from '../../../components/loader/loader';
 
 interface MobileMoneyBeneficiary {
-  id: number;
-  transactionId: number;
+  beneficiaryId: number;
   beneficiaryName: string;
-  beneficiaryId: string;
-  phoneNo: string;
-  amount: number;
-  status: string;
+  alternate1Name: string;
+  alternate2Name: string;
+  mobileWalletNumber: string;
+  paymentCycle: number;
+  supportType: string;
+  totalAttendance: number;
+  wageRateUsd: number;
+  wageTotal: number;
+  exchangeRateAtTime: number;
+  wageRateSspTotal: number;
+  transactionId: number;
 }
 
 @Component({
@@ -97,11 +103,12 @@ export class MobileMoneyDetails implements OnInit {
     this.cdr.markForCheck();
     try {
       // TODO: Replace with the actual API endpoint
-      const response = await this.api.GET(
-        `api/momo/getPaymentDetails/${requestId}`
+      const response = await this.api.POST(
+        `/api/momo/getGeneratedMoMoPayrollData`,
+        { requestId }
       );
       if (response.data && response.data.success) {
-        this.beneficiaries = response.data.beneficiaries; // Assuming this structure
+        this.beneficiaries = response.data.data; // Assuming this structure
       } else {
         this.beneficiaries = [];
         Swal.fire({
