@@ -150,7 +150,7 @@
             </div>
         </div>
         
-        <div class="col-md-6">
+        <!-- <div class="col-md-6">
             <div class="status-item">
                 <strong>Request Date:</strong>
                 <span class="ms-2">{{ lastGenerationResult.requestDate | date:'medium' }}</span>
@@ -160,9 +160,9 @@
         <div class="col-md-6">
             <div class="status-item">
                 <strong>Operation Type:</strong>
-                <span class="ms-2 badge bg-primary">{{ lastGenerationResult.operationType }}</span>
+                <span class="ms-2 badge bg-primary">{{ lastGenerationResult.payrollType }}</span>
             </div>
-        </div>
+        </div> -->
         
         @if (lastGenerationResult.errorReason) {
         <div class="col-12">
