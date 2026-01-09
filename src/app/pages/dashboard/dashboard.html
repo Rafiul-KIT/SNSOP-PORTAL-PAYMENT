@@ -5,13 +5,13 @@
   <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
 </div>
 <div class="dashboard-container ">
-  <div class="header mb-4">
+  <div class="header mb-2">
     <h2 class="title">SNSOP MIS Payment Dashboard</h2>
     <p class="subtitle">Social Safety Net Cash Payment and Beneficiary Management</p>
   </div>
 
   <!-- Stats Cards -->
-  <div class="row g-3 mb-4 text-center">
+  <div class="row g-3 mb-3 text-center">
     <div class="col-md-2 col-sm-6">
       <div style="background-color: #bdd8fc; border:2px solid #d5e7ff;" class="stat-card  stat-card-white">
 
@@ -97,7 +97,7 @@
 
 
 
-  <div class="col-lg-12  mb-4 ">
+  <div class="col-lg-12  mb-3 ">
     <p-card class="summary-card h-100">
       <ng-template pTemplate="header">
         <div class="card-header-custom">
@@ -149,7 +149,7 @@
 
             <div class="support-progress">
               <p-progressBar [value]="getPercentage(support.paid, support.total)" [showValue]="false"
-                class="support-progressbar"></p-progressBar>
+                class="support-progressbar" ></p-progressBar>
               <div class="progress-label">{{ getPercentage(support.paid, support.total) }}% payment</div>
             </div>
           </div>
@@ -171,16 +171,16 @@
             </h6>
 
             <!-- Chart -->
-            <div style="height: 350px; padding: 10px; margin-bottom: 15px;">
+            <div style=" padding: 0px; margin-bottom: 15px;">
               <p-chart type="doughnut" [data]="wageRequestChartData" [options]="wageRequestChartOptions" class="w-100">
               </p-chart>
             </div>
 
             <!-- Total Requests -->
             <div
-              style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 12px; background-color: #f8f9fa; border-radius: 6px;">
-              <span style="font-size: 1.1rem; font-weight: 500;">Total Requests</span>
-              <span style="font-size: 1.3rem; font-weight: bold; color: #495057;">{{ wageRequestStats.total | number
+              style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 6px; background-color: #f8f9fa; border-radius: 6px;">
+              <span style="font-size: 1rem; font-weight: 500;">Total Requests</span>
+              <span style="font-size: 1rem; font-weight: bold; color: #495057;">{{ wageRequestStats.total | number
                 }}</span>
             </div>
 
@@ -238,21 +238,21 @@
 
             <!-- Chart -->
             <div
-              style="height: 350px; display: flex; justify-content: center; align-items: center; margin-bottom: 15px;">
+              style="display: flex; justify-content: center; align-items: center; margin-bottom: 15px;">
               <p-chart type="doughnut" [data]="genderChartData" [options]="pieChartOptions"></p-chart>
             </div>
 
             <!-- Stats -->
             <div style="display: flex; justify-content: space-around; gap: 10px;">
-              <div style="text-align: center; padding: 15px; background-color: #f8f9fa; border-radius: 6px; flex: 1;">
-                <div style="color: #6c757d; font-size: 0.9rem; margin-bottom: 8px;">Male</div>
-                <div style="font-size: 1.5rem; font-weight: bold; color: #0d6efd;">
+              <div style="text-align: center; padding: 5px; background-color: #f8f9fa; border-radius: 6px; flex: 1;">
+                <div style="color: #6c757d; font-size: 0.9rem; ">Male</div>
+                <div style="font-size: 1rem; font-weight: bold; color: #0d6efd;">
                   {{ this.genderstats.male.paidBeneficiary | number }}
                 </div>
               </div>
-              <div style="text-align: center; padding: 15px; background-color: #f8f9fa; border-radius: 6px; flex: 1;">
-                <div style="color: #6c757d; font-size: 0.9rem; margin-bottom: 8px;">Female</div>
-                <div style="font-size: 1.5rem; font-weight: bold; color: #d63384;">
+              <div style="text-align: center; padding: 5px; background-color: #f8f9fa; border-radius: 6px; flex: 1;">
+                <div style="color: #6c757d; font-size: 0.9rem; ">Female</div>
+                <div style="font-size: 1rem; font-weight: bold; color: #d63384;">
                   {{ this.genderstats.female.paidBeneficiary | number }}
                 </div>
               </div>
@@ -271,16 +271,16 @@
             <h6 style="margin-bottom: 15px; color: #495057; font-weight: 600; text-align: center;">Project Status</h6>
 
             <!-- Chart -->
-            <div style="height: 350px; padding: 10px; margin-bottom: 15px;">
+            <div style=" padding: 0px; margin-bottom: 15px;">
               <p-chart type="pie" [data]="projectStatusChartData" [options]="projectStatusChartOptions" class="w-100">
               </p-chart>
             </div>
 
             <!-- Total Projects -->
             <div
-              style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 12px; background-color: #f8f9fa; border-radius: 6px;">
-              <span style="font-size: 1.1rem; font-weight: 500;">Total Projects</span>
-              <span style="font-size: 1.3rem; font-weight: bold; color: #495057;">{{ projectStats.total }}</span>
+              style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 8px; background-color: #f8f9fa; border-radius: 6px;">
+              <span style="font-size: 1rem; font-weight: 500;">Total Projects</span>
+              <span style="font-size: 1rem; font-weight: bold; color: #495057;">{{ projectStats.total }}</span>
             </div>
 
             <!-- Stats -->
@@ -288,7 +288,7 @@
               <div class="row">
                 <div class="col-6 mb-2">
                   <div
-                    style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background-color: #f8f9fa; border-radius: 4px;">
+                    style="display: flex; justify-content: space-between; align-items: center; padding: 4px; background-color: #f8f9fa; border-radius: 4px;">
                     <div>
                       <i class="pi pi-check-circle text-success" style="margin-right: 6px;"></i>
                       <span style="font-size: 0.9rem;">Active</span>
@@ -298,7 +298,7 @@
                 </div>
                 <div class="col-6 mb-2">
                   <div
-                    style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background-color: #f8f9fa; border-radius: 4px;">
+                    style="display: flex; justify-content: space-between; align-items: center; padding: 4px; background-color: #f8f9fa; border-radius: 4px;">
                     <div>
                       <i class="pi pi-times-circle text-warning" style="margin-right: 6px;"></i>
                       <span style="font-size: 0.9rem;">Inactive</span>
@@ -318,7 +318,7 @@
 
             <!-- Chart -->
             <div
-              style="height: 350px; display: flex; justify-content: center; align-items: center; margin-bottom: 15px;">
+              style=" display: flex; justify-content: center; align-items: center; margin-bottom: 15px;">
               <p-chart type="pie" [data]="subprojectStatusChartData" [options]="subprojectStatusChartOptions"
                 class="w-full">
               </p-chart>
@@ -326,21 +326,21 @@
 
             <!-- Stats -->
             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-              <div style="text-align: center; padding: 12px; background-color: #f8f9fa; border-radius: 6px;">
+              <div style="text-align: center; padding: 6px; background-color: #f8f9fa; border-radius: 6px;">
                 <div style="color: #6c757d; font-size: 0.9rem; margin-bottom: 8px;">Approved</div>
-                <div style="font-weight: bold; font-size: 1.3rem; color: #198754;">{{ subprojectStats.approved }}</div>
+                <div style="font-weight: bold; font-size: 1rem; color: #198754;">{{ subprojectStats.approved }}</div>
               </div>
-              <div style="text-align: center; padding: 12px; background-color: #f8f9fa; border-radius: 6px;">
+              <div style="text-align: center; padding: 6px; background-color: #f8f9fa; border-radius: 6px;">
                 <div style="color: #6c757d; font-size: 0.9rem; margin-bottom: 8px;">Pending</div>
-                <div style="font-weight: bold; font-size: 1.3rem; color: #ffc107;">{{ subprojectStats.pending }}</div>
+                <div style="font-weight: bold; font-size: 1rem; color: #ffc107;">{{ subprojectStats.pending }}</div>
               </div>
-              <div style="text-align: center; padding: 12px; background-color: #f8f9fa; border-radius: 6px;">
+              <div style="text-align: center; padding: 6px; background-color: #f8f9fa; border-radius: 6px;">
                 <div style="color: #6c757d; font-size: 0.9rem; margin-bottom: 8px;">Rejected</div>
-                <div style="font-weight: bold; font-size: 1.3rem; color: #dc3545;">{{ subprojectStats.rejected }}</div>
+                <div style="font-weight: bold; font-size: 1rem; color: #dc3545;">{{ subprojectStats.rejected }}</div>
               </div>
-              <div style="text-align: center; padding: 12px; background-color: #f8f9fa; border-radius: 6px;">
+              <div style="text-align: center; padding: 6px; background-color: #f8f9fa; border-radius: 6px;">
                 <div style="color: #6c757d; font-size: 0.9rem; margin-bottom: 8px;">Total</div>
-                <div style="font-weight: bold; font-size: 1.3rem; color: #212529;">{{ subprojectStats.total }}</div>
+                <div style="font-weight: bold; font-size: 1rem; color: #212529;">{{ subprojectStats.total }}</div>
               </div>
             </div>
           </div>

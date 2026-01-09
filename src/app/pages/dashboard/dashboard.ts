@@ -424,22 +424,22 @@ subprojectStatusChartOptions: any;
             label: 'Total Amount',
             backgroundColor: '#42A5F5', // Blue
             data: totalAmounts,
-            barPercentage: 0.95, // Increase bar width
-            categoryPercentage: 0.95, // Reduce space between categories
+            barPercentage: 0.9, // Increase bar width
+            categoryPercentage: 0.9, // Reduce space between categories
           },
           {
             label: 'Paid Amount',
             backgroundColor: '#66BB6A', // Green
             data: paidAmounts,
-            barPercentage: 0.95, // Increase bar width
-            categoryPercentage: 0.95, // Reduce space between categories
+            barPercentage: 0.9, // Increase bar width
+            categoryPercentage: 0.9, // Reduce space between categories
           },
           {
             label: 'Unpaid Amount',
             backgroundColor: '#FF6347', // Red-orange
             data: unpaidAmounts,
-            barPercentage: 0.95, // Increase bar width
-            categoryPercentage: 0.95, // Reduce space between categories
+            barPercentage: 0.9, // Increase bar width
+            categoryPercentage: 0.9, // Reduce space between categories
           },
         ],
       };
