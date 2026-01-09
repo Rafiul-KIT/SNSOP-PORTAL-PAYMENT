@@ -132,7 +132,7 @@ export class GeneratePayroll implements OnInit {
       supportType: [''],
       payrollType: ['single'],
       paymentCycle: [null],
-      paymentType: ['cash'],
+      paymentType: [''],
       paymentCycles: this.fb.array(
         this.paymentCycleOptions.map((c) =>
           this.fb.group({
