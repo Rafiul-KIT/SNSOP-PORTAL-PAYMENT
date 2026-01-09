@@ -11,89 +11,85 @@
   </div>
 
   <!-- Stats Cards -->
-  <div class="row g-3 mb-3 text-center">
-    <div class="col-md-2 col-sm-6">
-      <div style="background-color: #bdd8fc; border:2px solid #d5e7ff;" class="stat-card  stat-card-white">
-
-        <div class="stat-content">
-          <div class="stat-label">Total Projects</div>
-          <div class="stat-value">{{ stats.totalProjects }}</div>
-        </div>
-        <div class="stat-icon">
-          <i class="pi pi-folder"></i>
-        </div>
+<div class="row g-3 mb-3">
+  <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+    <div style="background-color: #bdd8fc; border:2px solid #d5e7ff;" class="stat-card stat-card-white">
+      <div class="stat-content">
+        <div class="stat-label">Total Projects</div>
+        <div class="stat-value">{{ stats.totalProjects }}</div>
       </div>
-    </div>
-
-    <div class="col-md-2 col-sm-6">
-      <div style="background-color: #bdf8cf; border:2px solid #d1fadd;" class="stat-card  stat-card-white">
-
-        <div class="stat-content">
-          <div class="stat-label">Total Subprojects</div>
-          <div class="stat-value">{{ stats.totalSubprojects }}</div>
-        </div>
-        <div style=" color: #77fa9e;" class="stat-icon">
-          <i class="pi pi-file"></i>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-2 col-sm-6">
-      <div style="background-color: #eedcff; border:2px solid #eedcff;" class="stat-card stat-card-white">
-
-        <div class="stat-content">
-          <div class="stat-label">Total Beneficiaries</div>
-          <div class="stat-value">{{ stats.totalBeneficiaries.total | number }}</div>
-          <div class="stat-detail">
-            {{ stats.totalBeneficiaries.paid | number }} paid, {{ stats.totalBeneficiaries.unpaid | number }} unpaid
-          </div>
-        </div>
-        <div style="color: #d8afff;" class="stat-icon">
-          <i class="pi pi-users"></i>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-2 col-sm-6">
-      <div style="background-color: #fcf5b0; border:2px solid #fcf5b0; " class="stat-card stat-card-white">
-
-        <div class="stat-content">
-          <div class="stat-label">Total Amount</div>
-          <div class="stat-value">SSP {{ (stats.totalAmount.total) / 1000000 | number:'1.0-1' }}M
-          </div>
-          <div class="stat-detail">
-            Paid SSP {{ stats.totalAmount.paid / 1000000 | number:'1.2-2' }}M, Unpaid SSP {{ stats.totalAmount.unpaid /
-            1000000 | number:'1.2-2' }}M
-          </div>
-        </div>
-        <div style="color: #866f06;" class="stat-icon">
-          <i class="pi pi-dollar"></i>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-2">
-      <div style="background-color: #b2dfdb; border:2px solid #b2dfdb;" class="stat-card stat-card-white">
-        <div class="stat-content">
-          <div class="stat-label">Subprojects Ready for Assignment</div>
-          <div class="stat-value">{{ stats.subprojectsReadyForAssignment | number }}</div>
-        </div>
-        <div style="color: #00796b;" class="stat-icon">
-          <i class="pi pi-user-plus"></i>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-2">
-      <div style="background-color: #ffccbc; border:2px solid #ffccbc;" class="stat-card stat-card-white">
-        <div class="stat-content">
-          <div class="stat-label">Completed Subprojects</div>
-          <div class="stat-value">{{ stats.completedSubprojects | number }}</div>
-        </div>
-        <div style="color: #d84315;" class="stat-icon">
-          <i class="pi pi-verified"></i>
-        </div>
+      <div class="stat-icon">
+        <i class="pi pi-folder"></i>
       </div>
     </div>
   </div>
+
+  <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+    <div style="background-color: #bdf8cf; border:2px solid #d1fadd;" class="stat-card stat-card-white">
+      <div class="stat-content">
+        <div class="stat-label">Total Subprojects</div>
+        <div class="stat-value">{{ stats.totalSubprojects }}</div>
+      </div>
+      <div style="color: #77fa9e;" class="stat-icon">
+        <i class="pi pi-file"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+    <div style="background-color: #eedcff; border:2px solid #eedcff;" class="stat-card stat-card-white">
+      <div class="stat-content">
+        <div class="stat-label">Total Beneficiaries</div>
+        <div class="stat-value">{{ stats.totalBeneficiaries.total | number }}</div>
+        <div class="stat-detail">
+          {{ stats.totalBeneficiaries.paid | number }} paid, {{ stats.totalBeneficiaries.unpaid | number }} unpaid
+        </div>
+      </div>
+      <div style="color: #d8afff;" class="stat-icon">
+        <i class="pi pi-users"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+    <div style="background-color: #fcf5b0; border:2px solid #fcf5b0;" class="stat-card stat-card-white">
+      <div class="stat-content">
+        <div class="stat-label">Total Amount</div>
+        <div class="stat-value">SSP {{ (stats.totalAmount.total) / 1000000 | number:'1.0-1' }}M</div>
+        <div class="stat-detail">
+          Paid SSP {{ stats.totalAmount.paid / 1000000 | number:'1.2-2' }}M, Unpaid SSP {{ stats.totalAmount.unpaid / 1000000 | number:'1.2-2' }}M
+        </div>
+      </div>
+      <div style="color: #866f06;" class="stat-icon">
+        <i class="pi pi-dollar"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+    <div style="background-color: #b2dfdb; border:2px solid #b2dfdb;" class="stat-card stat-card-white">
+      <div class="stat-content">
+        <div class="stat-label">Subprojects Ready for Assignment</div>
+        <div class="stat-value">{{ stats.subprojectsReadyForAssignment | number }}</div>
+      </div>
+      <div style="color: #00796b;" class="stat-icon">
+        <i class="pi pi-user-plus"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+    <div style="background-color: #ffccbc; border:2px solid #ffccbc;" class="stat-card stat-card-white">
+      <div class="stat-content">
+        <div class="stat-label">Completed Subprojects</div>
+        <div class="stat-value">{{ stats.completedSubprojects | number }}</div>
+      </div>
+      <div style="color: #d84315;" class="stat-icon">
+        <i class="pi pi-verified"></i>
+      </div>
+    </div>
+  </div>
+</div>
 
 
 
