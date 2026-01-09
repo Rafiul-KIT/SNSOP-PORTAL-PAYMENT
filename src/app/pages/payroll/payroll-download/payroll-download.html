@@ -108,24 +108,25 @@
                 <td>
                     <p-tag [severity]="getStatusSeverity(request.status)" [value]="request.status"></p-tag>
                 </td>
-                <td class="d-flex gap-1">
-                    <p-button (onClick)="onDownloadClick(request)" [disabled]="request.status !== 'SUCCESS'"
-                        pTooltip="Download Pdf" tooltipPosition="top"
-                        [style]="{ width: 'auto', height: '30px', padding: '0 8px',cursor: 'pointer' }">
-                        <ng-template pTemplate="content">
-                            <i class="pi pi-download"></i>
-                            <span style="font-size: 10px; margin-left: 2px; ">.pdf</span>
-                        </ng-template>
-                    </p-button>
-                    <p-button (onClick)="onDownloadBinClick(request)" [disabled]="request.status !== 'SUCCESS' "
-                        pTooltip="Download BIN" tooltipPosition="top" severity="success"
-                        [style]="{ width: 'auto', height: '30px', padding: '0 8px',cursor: 'pointer' }">
-                        <ng-template pTemplate="content">
-                            <i class="pi pi-download"></i>
-                            <span style="font-size: 10px; margin-left: 2px; ">.bin</span>
-                        </ng-template>
-                    </p-button>
-
+                <td>
+                    <div class="d-flex gap-1">
+                        <p-button (onClick)="onDownloadClick(request)" [disabled]="request.status !== 'SUCCESS'"
+                            pTooltip="Download Pdf" tooltipPosition="top"
+                            [style]="{ width: 'auto', height: '30px', padding: '0 8px',cursor: 'pointer' }">
+                            <ng-template pTemplate="content">
+                                <i class="pi pi-download"></i>
+                                <span style="font-size: 10px; margin-left: 2px; ">.pdf</span>
+                            </ng-template>
+                        </p-button>
+                        <p-button (onClick)="onDownloadBinClick(request)" [disabled]="request.status !== 'SUCCESS' "
+                            pTooltip="Download BIN" tooltipPosition="top" severity="success"
+                            [style]="{ width: 'auto', height: '30px', padding: '0 8px',cursor: 'pointer' }">
+                            <ng-template pTemplate="content">
+                                <i class="pi pi-download"></i>
+                                <span style="font-size: 10px; margin-left: 2px; ">.bin</span>
+                            </ng-template>
+                        </p-button>
+                    </div>
                 </td>
             </tr>
         </ng-template>
@@ -139,5 +140,3 @@
         [first]="currentPage * pageSize" [rowsPerPageOptions]="[10, 20, 50]"></p-paginator>
 </div>
 }
-
-<p-confirmDialog></p-confirmDialog>

@@ -17,12 +17,10 @@ import { PaginatorModule } from 'primeng/paginator';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { InputTextModule } from 'primeng/inputtext';
 import { TooltipModule } from 'primeng/tooltip';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { SelectModule } from 'primeng/select';
 import { TagModule } from 'primeng/tag';
-import { ConfirmationService } from 'primeng/api';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import Swal from 'sweetalert2';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { DialogModule } from 'primeng/dialog';
@@ -67,7 +65,6 @@ interface ApiResponse {
     ReactiveFormsModule,
     TableModule,
     ButtonModule,
-    ConfirmDialogModule,
     PaginatorModule,
     BreadcrumbModule,
     FloatLabelModule,
@@ -80,7 +77,7 @@ interface ApiResponse {
     ProgressBarModule,
     DialogModule,
   ],
-  providers: [ConfirmationService],
+  providers: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './payroll-download.html',
   styleUrl: './payroll-download.scss',
@@ -124,10 +121,10 @@ export class PayrollDownload implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private confirmationService: ConfirmationService,
     private api: ApiService,
     private lookup: LookupService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
 
   public Math = Math;
@@ -251,6 +248,8 @@ export class PayrollDownload implements OnInit {
     if (formValues.status) {
       params.set('status', formValues.status);
     }
+
+    params.set('payrollType', 'CASH_PAYMENT');
 
     try {
       const response = await this.api.GET(
