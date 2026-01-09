@@ -2,35 +2,17 @@
 <app-loader></app-loader>
 } @else {
 <div class="breadcrumb-wrapper">
-  <p-breadcrumb
-    [model]="breadcrumbItems"
-    [home]="breadcrumbHome"
-    class="w-100"
-  ></p-breadcrumb>
+  <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
 </div>
 
 <div class="card">
-  <p-table
-    #dt
-    [value]="beneficiaries"
-    [(selection)]="selectedBeneficiaries"
-    dataKey="transactionId"
-    [rows]="10"
-    [paginator]="true"
-    [rowsPerPageOptions]="[10, 25, 50]"
-    [scrollable]="true"
-    scrollHeight="60vh"
-    (onRowSelect)="onRowSelect($event)"
-    (onRowUnselect)="onRowUnselect($event)"
-  >
+  <p-table #dt [value]="beneficiaries" [(selection)]="selectedBeneficiaries" dataKey="transactionId" [rows]="10"
+    [paginator]="true" [rowsPerPageOptions]="[10, 25, 50]" [scrollable]="true" scrollHeight="60vh"
+    (onRowSelect)="onRowSelect($event)" (onRowUnselect)="onRowUnselect($event)">
     <ng-template pTemplate="caption">
       <div class="d-flex justify-content-between align-items-center">
-        <p-button
-          label="Initiate Payment for Selected"
-          icon="pi pi-check"
-          (onClick)="initiatePayment()"
-          [disabled]="!selectedBeneficiaries || selectedBeneficiaries.length === 0"
-        ></p-button>
+        <p-button label="Initiate Payment for Selected" icon="pi pi-check" (onClick)="initiatePayment()"
+          [disabled]="!selectedBeneficiaries || selectedBeneficiaries.length === 0"></p-button>
         <div class="text-end">
           <p class="fw-bold mb-0">
             Total Beneficiaries: <kbd>{{ beneficiaries.length }}</kbd>
@@ -41,7 +23,7 @@
     <ng-template pTemplate="header">
       <tr>
         <th style="width: 4rem">
-          <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+          All<p-tableHeaderCheckbox></p-tableHeaderCheckbox>
         </th>
         <th>Transaction ID</th>
         <th>Beneficiary Name</th>
@@ -53,7 +35,8 @@
     <ng-template pTemplate="body" let-beneficiary>
       <tr>
         <td>
-          <p-tableCheckbox [value]="beneficiary" [disabled]="beneficiary.status !== 'PAYROLL_GENERATED'"></p-tableCheckbox>
+          <p-tableCheckbox [value]="beneficiary"
+            [disabled]="beneficiary.status !== 'PAYROLL_GENERATED'"></p-tableCheckbox>
         </td>
         <td>{{ beneficiary.transactionId }}</td>
         <td>{{ beneficiary.recipientFullName }}</td>
@@ -70,9 +53,4 @@
   </p-table>
 </div>
 }
-
-<p-toast></p-toast>
-<p-confirmDialog
-  [style]="{ width: '450px' }"
-  key="confirm"
-></p-confirmDialog>
+<p-confirmDialog [style]="{ width: '450px' }" key="confirm"></p-confirmDialog>

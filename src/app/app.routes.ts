@@ -227,7 +227,7 @@ export const routes: Routes = [
       {
         path: 'mobile-money-details/:requestId',
         component: MobileMoneyDetails,
-        canActivate: [routeGuard],
+        // canActivate: [routeGuard],
       },
     ],
   },

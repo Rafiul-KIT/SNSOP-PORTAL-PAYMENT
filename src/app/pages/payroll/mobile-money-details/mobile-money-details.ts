@@ -86,7 +86,7 @@ export class MobileMoneyDetails implements OnInit {
   initBreadcrumb() {
     this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
     this.breadcrumbItems = [
-      { label: 'Payroll Download', routerLink: '/payroll-download' }, // Assuming this is the path
+      { label: 'Payroll Download', routerLink: '/payroll/mobile-money-download' }, // Assuming this is the path
       { label: 'Mobile Money Details' },
     ];
   }
@@ -100,7 +100,7 @@ export class MobileMoneyDetails implements OnInit {
         {}
       );
       if (response.data.success) {
-        this.beneficiaries = response.data;
+        this.beneficiaries = response.data.data;
       } else {
         this.beneficiaries = [];
         Swal.fire({
