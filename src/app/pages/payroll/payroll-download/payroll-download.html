@@ -5,15 +5,15 @@
     <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
 </div>
 
-<p-dialog [(visible)]="showDownloadProgressModal" [modal]="true" [closable]="false" [draggable]="false" [resizable]="false"
-    [style]="{ width: '30vw' }" header="Downloading">
+<p-dialog [(visible)]="showDownloadProgressModal" [modal]="true" [closable]="false" [draggable]="false"
+    [resizable]="false" [style]="{ width: '30vw' }" header="Downloading">
     <h5 class="mb-2">Downloading...</h5>
     <p-progressBar [value]="downloadProgress"></p-progressBar>
 </p-dialog>
 
- <div class="card p-3 mb-3">
+<div class="card p-3 mb-3">
     <form [formGroup]="searchForm" class="row g-3">
-      
+
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
                 <p-select [options]="states" optionLabel="name" formControlName="state"
@@ -22,7 +22,7 @@
             </p-floatlabel>
         </div>
 
-  
+
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
                 <p-select [options]="counties" optionLabel="name" formControlName="county"
@@ -31,7 +31,7 @@
             </p-floatlabel>
         </div>
 
-   
+
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
                 <p-select [options]="payams" optionLabel="name" formControlName="payam"
@@ -40,7 +40,7 @@
             </p-floatlabel>
         </div>
 
-    
+
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
                 <p-select [options]="bomas" optionLabel="name" formControlName="boma" />
@@ -63,7 +63,7 @@
             </div>
         </div>
     </form>
-</div> 
+</div>
 
 <div class="card">
     <p-table [value]="requestsData" [scrollable]="true" scrollHeight="60vh">
@@ -88,7 +88,8 @@
                 <th>Support Type</th>
                 <th>Payroll Type</th>
                 <th class="payment-cycles">Payment Cycles</th>
-                <th>Status</th>
+                <th>Status <i class="fas fa-refresh" style="cursor: pointer" (click)="resetForm()">
+                    </i></th>
                 <th>Actions</th>
             </tr>
         </ng-template>

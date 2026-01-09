@@ -1,10 +1,10 @@
+@if (isLoading) {
+<app-loader></app-loader>
+} @else {
 <div class="breadcrumb-wrapper">
   <p-breadcrumb class="max-w-full" [model]="items" [home]="home"></p-breadcrumb>
 </div>
 
-@if (isLoading) {
-<app-loader></app-loader>
-} @else {
 <div class="wrapper-scroller">
   <div class="row justify-content-center mt-4">
     <div class="card p-3 mb-3">
@@ -39,6 +39,7 @@
             <label>Boma Name</label>
           </p-floatlabel>
         </div>
+
         <div class="col-md-3">
           <div class="d-flex flex-column mb-2">
             <label class="mb-2">Payment Cycle Type</label>
@@ -75,9 +76,9 @@
             @for (cycle of paymentCycleOptions; track cycle.value) {
             <div class="col-md-2 col-sm-4 col-6 mb-2">
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" [value]="cycle.value"
+                <input class="form-check-input" type="checkbox" [value]="cycle.value" [id]="'cycle_' + cycle.value"
                   (change)="onMultiplePaymentCycleChange(cycle.value, $event.target)">
-                <label class="form-check-label" for="cycle_{{cycle.value}}">
+                <label class="form-check-label" [for]="'cycle_' + cycle.value">
                   {{ cycle.label }}
                 </label>
               </div>
@@ -87,74 +88,150 @@
         </div>
         }
 
-
-
         <div class="col-12 text-end">
-          <button class="btn btn-success" (click)="loadReconciliationData()">
+          <button class="btn btn-success" (click)="searchReconciliation()">
             <i class="fas fa-search me-2"></i>Search
           </button>
         </div>
       </form>
       <br>
     </div>
-    @if(isDataLoading){
-      <app-loader></app-loader>
+    @if(isShow){
+    <p-table [value]="records" [scrollable]="true" scrollHeight="64vh" size="small" dataKey="stateId"
+      class="p-datatable custom-table -sm p-datatable-striped p-datatable-gridlines" [tableStyle]="{ 'min-width': '100%' }">
+
+      <!-- HEADER -->
+      <ng-template pTemplate="header">
+        <tr>
+          <th colspan="12" class="text-end">
+            <p class="fw-bold mb-2">
+              Showing <kbd>{{ records.length }}</kbd> of
+              <kbd>{{ totalRecords }}</kbd> records
+            </p>
+          </th>
+        </tr>
+
+        <tr>
+          <th class="text-center">Serial</th>
+          <th class="text-center">State</th>
+          <th class="text-center">County</th>
+          <th class="text-center">Payam</th>
+          <th class="text-center">Boma</th>
+          <th class="text-center">Payment Cycle</th>
+          <th class="text-center">Total Beneficiary</th>
+          <th class="text-center">Total Unpaid</th>
+          <th class="text-center"  style="width: 160px; min-width: 160px;">
+            LIPW <br />
+            <small class="text-muted">(Paid | Unpaid)</small>
+          </th>
+          <th class="text-center"  style="width: 160px; min-width: 160px;">
+            DIS <br />
+            <small class="text-muted" >(Paid | Unpaid)</small>
+          </th>
+
+          <th class="text-center">Reconciliation Date</th>
+          <th class="text-center" style="width: 90px">Action</th>
+        </tr>
+      </ng-template>
+
+      <!-- BODY -->
+      <ng-template pTemplate="body" let-record let-rowIndex="rowIndex">
+        <tr>
+          <td class="text-center">
+            {{ (currentPage * pageSize) + rowIndex + 1 }}
+          </td>
+          <td class="text-center">{{ record.state || '-' }}</td>
+          <td class="text-center">{{ record.county || '-' }}</td>
+          <td class="text-center">{{ record.payam || '-' }}</td>
+          <td class="text-center">{{ record.boma || '-' }}</td>
+          <td class="text-center  fw-semibold">
+            <span class="badge bg-secondary rounded-pill bg-opacity-10  text-dark fw-medium">
+              {{ record.paymentCycle }}
+            </span>
+          </td>
+
+          <!-- TOTAL -->
+          <td class="text-center">
+            <span class="badge bg-info rounded-pill bg-opacity-10 fw-medium text-dark">
+              {{ record.totalBeneficiaries }}
+            </span>
+          </td>
+
+          <td class="text-center">
+            <span class="badge bg-warning rounded-pill text-dark bg-opacity-10 fw-medium">
+              {{ record.totalUnpaid }}
+            </span>
+          </td>
+          <!-- LIPW -->
+          <td class="text-center align-middle">
+            <div class="d-flex justify-content-between small">
+              <span class="px-3 badge py-1 rounded-pill bg-success bg-opacity-10 text-dark fw-medium">
+                Paid : {{ record.lipwPaidCount }}
+              </span>
+              <span class="px-3 badge py-1 rounded-pill bg-danger bg-opacity-10 text-dark fw-medium">
+                Unpaid : {{ record.lipwUnpaidCount }}
+              </span>
+            </div>
+          </td>
+
+
+          <!-- DIS -->
+          <td class="text-center align-middle">
+            <div class="d-flex  justify-content-between small">
+              <span class="px-3 badge py-1 rounded-pill bg-success bg-opacity-10 text-dark fw-medium">
+                Paid : {{ record.disPaidCount }}
+              </span>
+              <span class="px-3 py-1 badge rounded-pill bg-danger bg-opacity-10 text-dark fw-medium">
+                Unpaid : {{ record.disUnpaidCount }}
+              </span>
+            </div>
+          </td>
+
+
+
+
+          <!-- DATE -->
+          <td class="text-center">
+            <p-tag *ngIf="record.reconciliationDate; else noDate" [value]="formatDateTime(record.reconciliationDate)"
+              severity="info" [rounded]="true"></p-tag>
+            <ng-template #noDate>
+              <span class="text-muted">—</span>
+            </ng-template>
+          </td>
+
+          <!-- ACTION -->
+          <td class="text-center">
+            <button class="btn btn-outline-info btn-sm" pTooltip="View Details" tooltipPosition="top"
+              (click)="viewDetails(record)">
+              <i class="fas fa-eye"></i>
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+
+      <!-- EMPTY -->
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="12" class="text-center text-danger fw-semibold">
+            No data found!
+          </td>
+        </tr>
+      </ng-template>
+
+    </p-table>
+
+
+    <p-paginator class="paginator-sticky" [rows]="pageSize" [totalRecords]="totalRecords"
+      [rowsPerPageOptions]="[10, 25, 50]" (onPageChange)="onPageChange($event)" [first]="currentPage * pageSize"
+      [currentPageReportTemplate]="'Showing {first} to {last} of {totalRecords} entries'">
+    </p-paginator>
     }@else {
+    <app-loader></app-loader>
+    }
 
-    <div class="card p-3 mb-3">
-      @if (records) {
-    <p-table [value]="records" [responsiveLayout]="'scroll'" class="mt-4 custom-table">
-  <ng-template pTemplate="header">
-    <tr>
-      <th>Serial</th>
-      <th>State</th>
-      <th>County</th>
-      <th>Payam</th>
-      <th>Boma</th>
-      <th>Payment Cycle</th>
-      <th>LIPW Paid</th>
-      <th>LIPW Unpaid</th>
-      <th>DIS Paid</th>
-      <th>DIS Unpaid</th>
-      <th>Total Beneficiary</th>
-      <th>Total Unpaid</th>
-      <th>Reconciliation Date & Time</th>
-      <th>Action</th>
-    </tr>
-  </ng-template>
 
-  <ng-template pTemplate="body" let-record let-index="rowIndex">
-    <tr>
-      <td>{{ index + 1 }}</td>
-      <td>{{ record.state }}</td>
-      <td>{{ record.county }}</td>
-      <td>{{ record.payam }}</td>
-      <td>{{ record.boma }}</td>
-      <td>{{ record.paymentCycle }}</td>
-      <td>{{ record.lipwPaidCount }}</td>
-      <td>{{ record.lipwUnpaidCount }}</td>
-      <td>{{ record.disPaidCount }}</td>
-      <td>{{ record.disUnpaidCount }}</td>
-      <td>{{ record.totalBeneficiaries }}</td>
-      <td>{{ record.totalUnpaid }}</td>
-      <td>{{ record.reconciliationDate || "-" }}</td>
-      <td>
-        <button pTooltip="View" class="btn btn-info btn-sm" (click)="viewDetails(record)">
-          <i class="fas fa-eye"></i>
-        </button>
-      </td>
-    </tr>
-  </ng-template>
-
-  <ng-template pTemplate="emptymessage">
-    <tr>
-      <td colspan="14" class="text-center no-data-message">No data found</td>
-    </tr>
-  </ng-template>
-</p-table>
-      }
-
-    </div>  }
   </div>
 </div>
 }
+
+<p-toast position="bottom-right"></p-toast>

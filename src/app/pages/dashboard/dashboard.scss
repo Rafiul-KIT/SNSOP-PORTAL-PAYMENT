@@ -1,5 +1,5 @@
 .dashboard-container {
-  padding: 2rem 2rem;
+  padding: 0.5rem 2rem;
 
   background: #f8f9fa;
   min-height: 100vh;
@@ -10,21 +10,21 @@
 }
 
 .title {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #2c3e50;
   margin-bottom: 0.5rem;
 }
 
 .subtitle {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: #6c757d;
   margin: 0;
 }
 
 .stat-card {
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 0.8rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
@@ -39,8 +39,8 @@
 }
 
 .stat-icon {
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -99,7 +99,7 @@
 }
 
 ::ng-deep .approval-card .p-card-body {
-  padding: 1.5rem;
+  padding: 1rem;
 }
 
 .approval-stats {
@@ -228,12 +228,12 @@
 ::ng-deep .summary-card .p-card-header {
   background: white;
   border-bottom: 1px solid #e9ecef;
-  padding: 1.25rem 1.5rem;
+  padding: 1rem 1rem;
   border-radius: 15px;
 }
 
 ::ng-deep .summary-card .p-card-body {
-  padding: 1.5rem;
+  padding: 1rem;
 }
 
 .card-header-custom {
@@ -316,11 +316,11 @@
 .support-type-content {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 0.5rem;
 }
 
 .support-type-item {
-  padding: 1rem;
+  padding: 0.2rem;
   background: #f8f9fa;
   border-radius: 8px;
 }
@@ -329,11 +329,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
 .support-name {
-  font-size: 1rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: #2c3e50;
 }
@@ -377,9 +377,9 @@
 }
 
 ::ng-deep .support-progressbar {
-  height: 10px;
+  height: 8px !important;
   background: #e9ecef;
-  border-radius: 5px;
+  border-radius: 2px;
 }
 
 .progress-label {
@@ -393,7 +393,7 @@
 .analytics-container {
   padding-top: 2rem;
   background: #f8f9fa;
-  min-height: 100vh;
+  // min-height: 100vh;
 }
 
 ::ng-deep .chart-card .p-card,
@@ -415,7 +415,7 @@
 
 ::ng-deep .chart-card .p-card-body,
 ::ng-deep .table-card .p-card-body {
-  padding: 1.5rem;
+  padding: 1rem;
 }
 
 .chart-wrapper {
@@ -430,9 +430,9 @@
 
   display: flex;
 
-  min-height: 410px;
+  min-height: 400px;
 
-  padding: 1rem;
+  // padding: 0.5rem;
 
   background-color: #fff;
 
@@ -593,4 +593,12 @@ p-chart {
     font-size: 0.75rem;
     padding: 0.2rem 0.5rem;
   }
+}
+.approval-card {
+  border-radius: 14px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
+}
+
+.approval-stats span {
+  font-size: 0.95rem;
 }
