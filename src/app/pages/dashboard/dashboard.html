@@ -186,48 +186,64 @@
 
             <!-- Stats -->
             <div class="approval-stats">
-              <div class="row">
-                <div class="col-6 mb-2">
-                  <div
-                    style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background-color: #f8f9fa; border-radius: 4px;">
-                    <div>
-                      <i class="pi pi-check-circle text-success" style="margin-right: 6px;"></i>
-                      <span style="font-size: 0.9rem;">Approved</span>
-                    </div>
-                    <span class="fw-bold text-success">{{ wageRequestStats.approved | number }}</span>
-                  </div>
-                </div>
-                <div class="col-6 mb-2">
-                  <div
-                    style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background-color: #f8f9fa; border-radius: 4px;">
-                    <div>
-                      <i class="pi pi-clock text-warning" style="margin-right: 6px;"></i>
-                      <span style="font-size: 0.9rem;">Pending</span>
-                    </div>
-                    <span class="fw-bold text-warning">{{ wageRequestStats.pending | number }}</span>
-                  </div>
-                </div>
-                <div class="col-6 mb-2">
-                  <div
-                    style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background-color: #f8f9fa; border-radius: 4px;">
-                    <div>
-                      <i class="pi pi-times-circle text-danger" style="margin-right: 6px;"></i>
-                      <span style="font-size: 0.9rem;">Rejected</span>
-                    </div>
-                    <span class="fw-bold text-danger">{{ wageRequestStats.rejected | number }}</span>
-                  </div>
-                </div>
-                <div class="col-6 mb-2">
-                  <div
-                    style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background-color: #f8f9fa; border-radius: 4px;">
-                    <div>
-                      <i class="pi pi-check-square text-info" style="margin-right: 6px;"></i>
-                      <span style="font-size: 0.9rem;">Reconciled</span>
-                    </div>
-                    <span class="fw-bold text-info">{{ wageRequestStats.reconciled | number }}</span>
-                  </div>
-                </div>
-              </div>
+           <div class="row g-2">
+  <!-- Approved -->
+  <div class="col-12 col-sm-6">
+    <div
+      class="d-flex justify-content-between align-items-center p-2 bg-light rounded flex-wrap">
+      <div class="d-flex align-items-center">
+        <i class="pi pi-check-circle text-success me-2"></i>
+        <span class="small">Approved</span>
+      </div>
+      <span class="fw-bold text-success">
+        {{ wageRequestStats.approved | number }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Pending -->
+  <div class="col-12 col-sm-6">
+    <div
+      class="d-flex justify-content-between align-items-center p-2 bg-light rounded flex-wrap">
+      <div class="d-flex align-items-center">
+        <i class="pi pi-clock text-warning me-2"></i>
+        <span class="small">Pending</span>
+      </div>
+      <span class="fw-bold text-warning">
+        {{ wageRequestStats.pending | number }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Rejected -->
+  <div class="col-12 col-sm-6">
+    <div
+      class="d-flex justify-content-between align-items-center p-2 bg-light rounded flex-wrap">
+      <div class="d-flex align-items-center">
+        <i class="pi pi-times-circle text-danger me-2"></i>
+        <span class="small">Rejected</span>
+      </div>
+      <span class="fw-bold text-danger">
+        {{ wageRequestStats.rejected | number }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Reconciled -->
+  <div class="col-12 col-sm-6">
+    <div
+      class="d-flex justify-content-between align-items-center p-2 bg-light rounded flex-wrap">
+      <div class="d-flex align-items-center">
+        <i class="pi pi-check-square text-info me-2"></i>
+        <span class="small">Reconciled</span>
+      </div>
+      <span class="fw-bold text-info">
+        {{ wageRequestStats.reconciled | number }}
+      </span>
+    </div>
+  </div>
+</div>
+
             </div>
           </div>
 
