@@ -21,8 +21,6 @@ import { Router, RouterModule } from '@angular/router';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { SelectModule } from 'primeng/select';
 import { TagModule } from 'primeng/tag';
-import { ConfirmationService } from 'primeng/api';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import Swal from 'sweetalert2';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { DialogModule } from 'primeng/dialog';
@@ -67,7 +65,6 @@ interface ApiResponse {
     ReactiveFormsModule,
     TableModule,
     ButtonModule,
-    ConfirmDialogModule,
     PaginatorModule,
     BreadcrumbModule,
     FloatLabelModule,
@@ -80,7 +77,7 @@ interface ApiResponse {
     ProgressBarModule,
     DialogModule,
   ],
-  providers: [ConfirmationService],
+  providers: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './payroll-download.html',
   styleUrl: './payroll-download.scss',
@@ -124,7 +121,6 @@ export class PayrollDownload implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private confirmationService: ConfirmationService,
     private api: ApiService,
     private lookup: LookupService,
     private cdr: ChangeDetectorRef,
@@ -252,6 +248,8 @@ export class PayrollDownload implements OnInit {
     if (formValues.status) {
       params.set('status', formValues.status);
     }
+
+    params.set('payrollType', 'CASH_PAYMENT');
 
     try {
       const response = await this.api.GET(
@@ -462,63 +460,5 @@ export class PayrollDownload implements OnInit {
 
   onRefreshClick() {
     this.fetchRequests();
-  }
-
-  onViewClick(request: PayrollGenerationRequest) {
-    this.router.navigate([
-      '/payroll/mobile-money-details',
-      request.requestId,
-    ]);
-  }
-
-  onProceedClick(request: PayrollGenerationRequest) {
-    this.confirmationService.confirm({
-      message: 'Are you sure that you want to proceed with this payment?',
-      header: 'Confirmation',
-      icon: 'pi pi-exclamation-triangle',
-      accept: async () => {
-        this.isLoading = true;
-        this.cdr.markForCheck();
-        try {
-          const payload = { requestId: request.requestId };
-          const response = await this.api.POST(
-            'api/momo/initiatePayment',
-            payload
-          );
-
-          if (response.data && response.data.success) {
-            Swal.fire({
-              icon: 'success',
-              title: 'Success',
-              text: response.data.message || 'Payment initiated successfully!',
-            });
-            await this.fetchRequests(); // Refresh the list
-          } else {
-            Swal.fire({
-              icon: 'error',
-              title: 'Payment Failed',
-              text:
-                response.data.message ||
-                'An error occurred while initiating the payment.',
-            });
-          }
-        } catch (error: any) {
-          Swal.fire({
-            icon: 'error',
-            title: 'API Error',
-            text:
-              error?.response?.data?.message ||
-              error.message ||
-              'An unknown error occurred.',
-          });
-        } finally {
-          this.isLoading = false;
-          this.cdr.markForCheck();
-        }
-      },
-      reject: () => {
-        // Optional: handle rejection
-      },
-    });
   }
 }

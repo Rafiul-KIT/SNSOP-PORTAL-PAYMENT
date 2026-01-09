@@ -10,44 +10,56 @@ import {
   FormGroup,
   FormsModule,
   ReactiveFormsModule,
-  FormArray,
 } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
-import { ToastModule } from 'primeng/toast';
 import { PaginatorModule } from 'primeng/paginator';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { InputTextModule } from 'primeng/inputtext';
 import { TooltipModule } from 'primeng/tooltip';
-import { Router, ActivatedRoute, RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { SelectModule } from 'primeng/select';
-import { DialogModule } from 'primeng/dialog';
-
-import { MessageService, ConfirmationService } from 'primeng/api';
+import { TagModule } from 'primeng/tag';
+import { ConfirmationService } from 'primeng/api';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import Swal from 'sweetalert2';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { DialogModule } from 'primeng/dialog';
 import {
   LookupItem,
   LookupItemPayroll,
   LookupService,
-  ProjectNameDescription,
-  ScreeningStatusEnum,
-  StatusEnum,
-  TypeOfMeetingEnum,
 } from '../../../services/lookup.service';
 import { ApiService } from '../../../services/api.service';
 import { Loader } from '../../../components/loader/loader';
 
-interface PayrollItemDto {
-  txnId: string;
-  recipientFullName: string;
-  accountNumber: string;
-  phoneNumber: string;
-  amount: number;
+interface PayrollGenerationRequest {
+  state: number;
+  county: number;
+  payam: number;
+  boma: number;
+  supportType: string;
+  paymentCycles: number[];
+  requestId: string;
+  id: number;
+  status: 'FAILED' | 'SUCCESS' | 'PENDING' | 'PROCESSING';
+  reportFileName?: string;
+  binFileName?: string;
+}
+interface PagedPayrollResponse {
+  content: PayrollGenerationRequest[];
+  totalElements: number;
+}
+
+interface ApiResponse {
+  data: PagedPayrollResponse;
+  operationResult: boolean;
+  errorMsg?: string;
 }
 
 @Component({
-  selector: 'app-payroll-mobile-money',
+  selector: 'app-payroll-download',
   standalone: true,
   imports: [
     CommonModule,
@@ -55,7 +67,6 @@ interface PayrollItemDto {
     ReactiveFormsModule,
     TableModule,
     ButtonModule,
-    ToastModule,
     ConfirmDialogModule,
     PaginatorModule,
     BreadcrumbModule,
@@ -64,19 +75,16 @@ interface PayrollItemDto {
     SelectModule,
     RouterModule,
     TooltipModule,
+    TagModule,
     Loader,
-    DialogModule,
   ],
-  providers: [MessageService, ConfirmationService],
-  templateUrl: './payroll-mobile-money.html',
+  providers: [ConfirmationService],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  templateUrl: './payroll-mobile-money.html',
   styleUrl: './payroll-mobile-money.scss',
 })
 export class PayrollMobileMoney implements OnInit {
-  showUnderDevelopmentModal = false;
-  isPayrollSaved = false;
   isLoading = true;
-  lookupsLoaded = false;
   searchForm!: FormGroup;
 
   // geo lookup lists
@@ -85,126 +93,95 @@ export class PayrollMobileMoney implements OnInit {
   payams: LookupItem[] = [];
   bomas: LookupItem[] = [];
 
-  projects: ProjectNameDescription[] = [];
-  workTypes: any[] = [];
-  workActivities: LookupItem[] = [];
-
-  statuses: any[] = [];
-  screeningStatuses: any[] = [];
-
-  payrollData: PayrollItemDto[] = [];
+  requestsData: PayrollGenerationRequest[] = [];
   totalRecords = 0;
-  hasSearched = false;
-
-  isImportButtonDisabled: boolean = true;
-  isExportButtonDisabled: boolean = true;
-  selectedFile: File | null = null;
 
   breadcrumbItems: any[] = [];
   breadcrumbHome: any;
 
-  currentPage = 0; // 0-based
+  currentPage = 0;
   pageSize = 10;
+
   supportTypeOptions: LookupItem[] = [];
   paymentCycleOptions: LookupItemPayroll[] = [];
-  providerOptions: any[] = [];
+  statusOptions = [
+    { id: 'SUCCESS', name: 'Success' },
+    { id: 'FAILED', name: 'Failed' },
+    { id: 'PENDING', name: 'Pending' },
+    { id: 'PROCESSING', name: 'Processing' },
+  ];
+
+  // Lookup maps for display names
+  stateMap: Map<number, string> = new Map();
+  countyMap: Map<number, string> = new Map();
+  payamMap: Map<number, string> = new Map();
+  bomaMap: Map<number, string> = new Map();
+  paymentCycleMap: Map<number, string> = new Map();
 
   constructor(
     private fb: FormBuilder,
-    private messageService: MessageService,
     private confirmationService: ConfirmationService,
-    private router: Router,
-    private route: ActivatedRoute,
     private api: ApiService,
     private lookup: LookupService,
-
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
 
+  public Math = Math;
+
   private async loadInitialLookups() {
-    await Promise.all([this.lookup.getOrFetchStateList()]);
+    await Promise.all([
+      this.lookup.getOrFetchStateList(),
+      this.lookup.fetchAllCountyList(),
+      this.lookup.fetchAllPayamList(),
+      this.lookup.fetchAllBomaList(),
+    ]);
+
     this.states = this.lookup.getStateList();
-    this.projects = this.lookup.projectNameDescriptionList;
+    const allCounties = this.lookup.getAllCountyList();
+    const allPayams = this.lookup.getAllPayamList();
+    const allBomas = this.lookup.getAllBomaList();
+
     this.supportTypeOptions = this.lookup.getSupportTypeList();
     this.paymentCycleOptions = this.lookup.getPaymentCycleList();
+
+    // Build lookup maps
+    this.states.forEach(s => this.stateMap.set(Number(s.id), s.name));
+    allCounties.forEach(c => this.countyMap.set(Number(c.id), c.name));
+    allPayams.forEach(p => this.payamMap.set(Number(p.id), p.name));
+    allBomas.forEach(b => this.bomaMap.set(Number(b.id), b.name));
+    this.paymentCycleOptions.forEach(p =>
+      this.paymentCycleMap.set(Number(p.id), p.name)
+    );
+
     this.cdr.markForCheck();
   }
 
   async ngOnInit() {
     this.isLoading = true;
-    this.workTypes = TypeOfMeetingEnum;
-    this.statuses = StatusEnum;
-    this.screeningStatuses = ScreeningStatusEnum;
-    this.providerOptions = [
-      { name: 'MOMO', id: 'MOMO' },
-      // { name: 'MGURUSH', id: 'MGURUSH' },
-      // { name: 'DIGICASH', id: 'DIGICASH' },
-    ];
     this.initBreadcrumb();
     await this.loadInitialLookups();
     this.initForm();
-    this.searchForm
-      .get('processType')
-      ?.valueChanges.subscribe(() => this.updateButtonStates());
-    this.updateButtonStates(); // Set initial state
+    await this.fetchRequests();
     this.isLoading = false;
-    this.cdr.markForCheck();
   }
 
   initForm() {
     this.searchForm = this.fb.group({
-      payrollType: ['single'],
-      projectId: [null],
       state: [null],
       county: [{ value: null, disabled: true }],
-      projectName: [null],
-      typeOfMeeting: [null],
       payam: [{ value: null, disabled: true }],
       boma: [{ value: null, disabled: true }],
-      status: [''],
-      workCode: [''],
-      workActivity: [null],
-      screeningStatus: [null],
       supportType: [''],
-      paymentCycle: [''],
-      provider: ['MOMO'],
-      paymentCycles: this.fb.array(
-        this.paymentCycleOptions.map((c) =>
-          this.fb.group({
-            id: c.id,
-            name: c.name,
-            selected: false,
-          })
-        )
-      ),
-      processType: ['payrollOnly'],
+      status: [''],
     });
-
-    this.searchForm.get('payrollType')?.valueChanges.subscribe((value) => {
-      if (value === 'single') {
-        this.searchForm.get('paymentCycle')?.enable();
-        this.searchForm.get('paymentCycles')?.disable();
-        this.paymentCycles.controls.forEach((control) =>
-          control.get('selected')?.setValue(false, { emitEvent: false })
-        );
-      } else {
-        // combined
-        this.searchForm.get('paymentCycle')?.disable();
-        this.searchForm.get('paymentCycle')?.reset('');
-        this.searchForm.get('paymentCycles')?.enable();
-      }
-      this.cdr.markForCheck();
-    });
-
-    this.searchForm.get('paymentCycles')?.disable();
   }
 
   initBreadcrumb() {
     this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
-    this.breadcrumbItems = [{ label: 'Mobile Money' }];
+    this.breadcrumbItems = [{ label: 'Payroll Download' }];
   }
 
-  // ---------- dependent dropdowns ----------
   async onStateChange(state: LookupItem | null) {
     this.searchForm.get('county')?.reset({ value: null, disabled: true });
     this.searchForm.get('payam')?.reset({ value: null, disabled: true });
@@ -212,9 +189,9 @@ export class PayrollMobileMoney implements OnInit {
     this.counties = [];
     this.payams = [];
     this.bomas = [];
-
     if (state?.id) {
       this.counties = await this.lookup.getCountyListByStateId(state.id);
+      this.counties.forEach(c => this.countyMap.set(Number(c.id), c.name));
       this.searchForm.get('county')?.enable();
     }
     this.cdr.markForCheck();
@@ -225,9 +202,9 @@ export class PayrollMobileMoney implements OnInit {
     this.searchForm.get('boma')?.reset({ value: null, disabled: true });
     this.payams = [];
     this.bomas = [];
-
     if (county?.id) {
       this.payams = await this.lookup.getPayamListByCountyId(county.id);
+      this.payams.forEach(p => this.payamMap.set(Number(p.id), p.name));
       this.searchForm.get('payam')?.enable();
     }
     this.cdr.markForCheck();
@@ -236,70 +213,69 @@ export class PayrollMobileMoney implements OnInit {
   async onPayamChange(payam: LookupItem | null) {
     this.searchForm.get('boma')?.reset({ value: null, disabled: true });
     this.bomas = [];
-
     if (payam?.id) {
       this.bomas = await this.lookup.getBomaListByPayamId(payam.id);
+      this.bomas.forEach(b => this.bomaMap.set(Number(b.id), b.name));
       this.searchForm.get('boma')?.enable();
     }
     this.cdr.markForCheck();
   }
 
-  async fetchPage(currentPage: number, pageSize: number) {
+  async fetchRequests() {
     this.isLoading = true;
     this.cdr.markForCheck();
 
+    const formValues = this.searchForm.value;
+    const params = new URLSearchParams();
+    params.set('page', this.currentPage.toString());
+    params.set('size', this.pageSize.toString());
+
+    if (formValues.state?.id) {
+      params.set('state', formValues.state.id);
+    }
+    if (formValues.county?.id) {
+      params.set('county', formValues.county.id);
+    }
+    if (formValues.payam?.id) {
+      params.set('payam', formValues.payam.id);
+    }
+    if (formValues.boma?.id) {
+      params.set('boma', formValues.boma.id);
+    }
+    if (formValues.supportType) {
+      params.set('supportType', formValues.supportType);
+    }
+    if (formValues.status) {
+      params.set('status', formValues.status);
+    }
+
+    params.set('payrollType', 'MOBILE_PAYMENT');
+
     try {
-      const formValue = this.searchForm.value;
-      const payrollType = formValue.payrollType;
-
-      let paymentCycleArray: number[] = [];
-
-      if (payrollType === 'single') {
-        // For single payroll, use the selected payment cycle
-        if (formValue.paymentCycle) {
-          paymentCycleArray = [formValue.paymentCycle];
-        }
-      } else {
-        // For combined payroll, collect all selected cycles
-        const cyclesFormArray = this.paymentCycles.value;
-        paymentCycleArray = cyclesFormArray
-          .filter((cycle: any) => cycle.selected)
-          .map((cycle: any) => cycle.id);
-      }
-
-      const requestPayload = {
-        state: formValue.state?.id || 0,
-        county: formValue.county?.id || 0,
-        payam: formValue.payam?.id || 0,
-        boma: formValue.boma?.id || 0,
-        paymentCycle: paymentCycleArray,
-        provider: formValue.provider,
-      };
-
-      const response = await this.api.POST(
-        '/api/payroll/getMobileMoneyPayrollData',
-        requestPayload
+      const response = await this.api.GET(
+        `api/payroll/getPayrollGenerationRequests?${params.toString()}`
       );
 
-      if (response.data) {
-        this.payrollData = response.data.payrollList || [];
-        this.totalRecords = response.data.total || 0;
-
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: `Loaded ${this.payrollData.length} records`,
+      if (response && response.data && response.data.content) {
+        this.requestsData = response.data.content;
+        this.totalRecords = response.data.totalElements;
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Invalid response format.',
         });
+        this.requestsData = [];
+        this.totalRecords = 0;
       }
     } catch (error: any) {
-      console.error('Error fetching payroll data:', error);
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail:
-          error?.response?.data?.message || 'Failed to fetch payroll data',
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text:
+          error?.message || 'An error occurred while fetching requests data.',
       });
-      this.payrollData = [];
+      this.requestsData = [];
       this.totalRecords = 0;
     } finally {
       this.isLoading = false;
@@ -310,237 +286,129 @@ export class PayrollMobileMoney implements OnInit {
   onPageChange(event: any) {
     this.currentPage = event.page;
     this.pageSize = event.rows;
-    this.fetchPage(this.currentPage, this.pageSize);
+    this.fetchRequests();
   }
 
-  searchPayroll() {
-    const formValue = this.searchForm.value;
-    const payrollType = formValue.payrollType;
-
-    // Validation
-    if (payrollType === 'single' && !formValue.paymentCycle) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Validation Error',
-        detail: 'Please select a payment cycle',
-      });
-      return;
-    }
-
-    if (payrollType === 'combined') {
-      const selectedCycles = this.paymentCycles.value.filter(
-        (c: any) => c.selected
-      );
-      if (selectedCycles.length === 0) {
-        this.messageService.add({
-          severity: 'warn',
-          summary: 'Validation Error',
-          detail: 'Please select at least one payment cycle',
-        });
-        return;
-      }
-    }
-
-    this.hasSearched = true;
+  searchRequests() {
     this.currentPage = 0;
-    this.fetchPage(this.currentPage, this.pageSize);
+    this.fetchRequests();
   }
 
   resetForm() {
     this.searchForm.reset({
-      payrollType: 'single',
       state: null,
       county: { value: null, disabled: true },
       payam: { value: null, disabled: true },
       boma: { value: null, disabled: true },
       supportType: '',
-      paymentCycle: '',
-      provider: 'MOMO',
-      processType: 'payrollOnly',
-    });
-
-    this.paymentCycles.controls.forEach((control) => {
-      control.get('selected')?.setValue(false);
+      status: '',
     });
 
     this.counties = [];
     this.payams = [];
     this.bomas = [];
-    this.payrollData = [];
-    this.totalRecords = 0;
     this.currentPage = 0;
-    this.hasSearched = false;
-    this.selectedFile = null;
-    this.isPayrollSaved = false;
-
-    this.updateButtonStates(); // Update button states after reset
+    this.fetchRequests();
     this.cdr.markForCheck();
   }
 
-  get paymentCycles() {
-    return this.searchForm.get('paymentCycles') as FormArray;
+  getStateName(stateId: number): string {
+    return this.stateMap.get(stateId) || stateId.toString();
   }
 
-  onSave() {
-    this.isPayrollSaved = true;
-    this.showUnderDevelopmentModal = true;
-    this.cdr.markForCheck();
+  getCountyName(countyId: number): string {
+    return this.countyMap.get(countyId) || countyId.toString();
   }
 
-  onReconciliation() {
-    this.showUnderDevelopmentModal = true;
-    this.cdr.markForCheck();
+  getPayamName(payamId: number): string {
+    return this.payamMap.get(payamId) || payamId.toString();
   }
 
-  updateButtonStates() {
-    const processType = this.searchForm.get('processType')?.value;
+  getBomaName(bomaId: number): string {
+    return this.bomaMap.get(bomaId) || bomaId.toString();
+  }
 
-    switch (processType) {
-      case 'payrollOnly':
-        this.isImportButtonDisabled = true;
-        this.isExportButtonDisabled = false;
-        break;
-      case 'reconciliation':
-        this.isImportButtonDisabled = false;
-        this.isExportButtonDisabled = true;
-        break;
+  getPaymentCycleNames(cycles: number[]): string {
+    if (!Array.isArray(cycles)) return '';
+    return cycles
+      .map(c => this.paymentCycleMap.get(c) || c.toString())
+      .join(', ');
+  }
+
+  getStatusSeverity(status: string): 'success' | 'danger' | 'warning' | 'info' {
+    switch (status) {
+      case 'SUCCESS':
+        return 'success';
+      case 'FAILED':
+        return 'danger';
+      case 'PENDING':
+        return 'warning';
+      case 'PROCESSING':
+        return 'info';
       default:
-        this.isImportButtonDisabled = true;
-        this.isExportButtonDisabled = true;
-        break;
-    }
-    this.cdr.markForCheck();
-  }
-
-  async onDownloadClick() {
-    try {
-      this.isLoading = true;
-      this.cdr.markForCheck();
-
-      const formValue = this.searchForm.value;
-      const payrollType = formValue.payrollType;
-
-      let paymentCycleArray: number[] = [];
-
-      if (payrollType === 'single') {
-        if (formValue.paymentCycle) {
-          paymentCycleArray = [formValue.paymentCycle];
-        }
-      } else {
-        const cyclesFormArray = this.paymentCycles.value;
-        paymentCycleArray = cyclesFormArray
-          .filter((cycle: any) => cycle.selected)
-          .map((cycle: any) => cycle.id);
-      }
-
-      if (paymentCycleArray.length === 0) {
-        this.messageService.add({
-          severity: 'warn',
-          summary: 'Validation Error',
-          detail: 'Please select at least one payment cycle',
-        });
-        return;
-      }
-
-      const requestPayload = {
-        state: formValue.state?.id || 0,
-        county: formValue.county?.id || 0,
-        payam: formValue.payam?.id || 0,
-        boma: formValue.boma?.id || 0,
-        paymentCycle: paymentCycleArray,
-        provider: formValue.provider,
-      };
-
-      const response = await this.api.axiosInstance.post(
-        '/api/payroll/export',
-        requestPayload,
-        {
-          responseType: 'blob',
-        }
-      );
-
-      // Create blob and download
-      const blob = new Blob([response.data], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `MoMo_Payroll_${
-        new Date().toISOString().split('T')[0]
-      }.xlsx`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'File downloaded successfully',
-      });
-    } catch (error: any) {
-      console.error('Error downloading file:', error);
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: error?.response?.data?.message || 'Failed to download file',
-      });
-    } finally {
-      this.isLoading = false;
-      this.cdr.markForCheck();
+        return 'info';
     }
   }
 
-  onDownloadPDFClick() {
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Info',
-      detail: 'PDF download functionality coming soon',
+  onRefreshClick() {
+    this.fetchRequests();
+  }
+
+  onViewClick(request: PayrollGenerationRequest) {
+    this.router.navigate([
+      '/payroll/mobile-money-details',
+      request.requestId,
+    ]);
+  }
+
+  onProceedClick(request: PayrollGenerationRequest) {
+    this.confirmationService.confirm({
+      message: 'Are you sure that you want to proceed with this payment?',
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      accept: async () => {
+        this.isLoading = true;
+        this.cdr.markForCheck();
+        try {
+          const payload = { requestId: request.requestId };
+          const response = await this.api.POST(
+            'api/momo/initiatePayment',
+            payload
+          );
+
+          if (response.data && response.data.success) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Success',
+              text: response.data.message || 'Payment initiated successfully!',
+            });
+            await this.fetchRequests(); // Refresh the list
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Payment Failed',
+              text:
+                response.data.message ||
+                'An error occurred while initiating the payment.',
+            });
+          }
+        } catch (error: any) {
+          Swal.fire({
+            icon: 'error',
+            title: 'API Error',
+            text:
+              error?.response?.data?.message ||
+              error.message ||
+              'An unknown error occurred.',
+          });
+        } finally {
+          this.isLoading = false;
+          this.cdr.markForCheck();
+        }
+      },
+      reject: () => {
+        // Optional: handle rejection
+      },
     });
-  }
-
-  exportFile() {
-    this.onDownloadClick();
-  }
-
-  onFileSelect(event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.selectedFile = input.files[0];
-      this.cdr.markForCheck();
-    }
-  }
-
-  onImportClick() {
-    if (!this.selectedFile) return;
-
-    // Since there's no API, we'll just simulate the action.
-    this.isLoading = true;
-    this.cdr.markForCheck();
-
-    // Simulate a delay
-    setTimeout(() => {
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'File processed successfully (demo)',
-      });
-
-      // Reset after "import"
-      this.selectedFile = null;
-      const fileInput = document.querySelector(
-        'input[type="file"]'
-      ) as HTMLInputElement;
-      if (fileInput) {
-        fileInput.value = '';
-      }
-      this.isLoading = false;
-      this.cdr.markForCheck();
-    }, 1000);
-  }
-
-  ondetails() {
-    throw new Error('Method not implemented.');
   }
 }

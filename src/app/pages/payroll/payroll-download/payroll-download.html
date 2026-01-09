@@ -107,8 +107,8 @@
                 <td>
                     <p-tag [severity]="getStatusSeverity(request.status)" [value]="request.status"></p-tag>
                 </td>
-                <td class="d-flex gap-1">
-                    @if (request.payrollType !== 'MOBILE_PAYMENT') {
+                <td>
+                    <div class="d-flex gap-1">
                         <p-button (onClick)="onDownloadClick(request)" [disabled]="request.status !== 'SUCCESS'"
                             pTooltip="Download Pdf" tooltipPosition="top"
                             [style]="{ width: 'auto', height: '30px', padding: '0 8px',cursor: 'pointer' }">
@@ -125,24 +125,7 @@
                                 <span style="font-size: 10px; margin-left: 2px; ">.bin</span>
                             </ng-template>
                         </p-button>
-                    } @else {
-                        <p-button (onClick)="onViewClick(request)" [disabled]="request.status !== 'SUCCESS'"
-                            pTooltip="View Mobile Payment Details" tooltipPosition="top" severity="info"
-                            [style]="{ width: 'auto', height: '30px', padding: '0 8px',cursor: 'pointer' }">
-                            <ng-template pTemplate="content">
-                                <i class="pi pi-eye"></i>
-                                <span style="font-size: 10px; margin-left: 2px; ">View</span>
-                            </ng-template>
-                        </p-button>
-                        <p-button (onClick)="onProceedClick(request)" [disabled]="request.status !== 'SUCCESS'"
-                            pTooltip="Proceed Mobile Payment" tooltipPosition="top" severity="success"
-                            [style]="{ width: 'auto', height: '30px', padding: '0 8px',cursor: 'pointer' }">
-                            <ng-template pTemplate="content">
-                                <i class="pi pi-check"></i>
-                                <span style="font-size: 10px; margin-left: 2px; ">Proceed</span>
-                            </ng-template>
-                        </p-button>
-                    }
+                    </div>
                 </td>
             </tr>
         </ng-template>
@@ -156,5 +139,3 @@
         [first]="currentPage * pageSize" [rowsPerPageOptions]="[10, 20, 50]"></p-paginator>
 </div>
 }
-
-<p-confirmDialog></p-confirmDialog>

@@ -43,26 +43,28 @@
         <th style="width: 4rem">
           <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
         </th>
-        <th>Beneficiary ID</th>
+        <th>Transaction ID</th>
         <th>Beneficiary Name</th>
         <th>Phone Number</th>
         <th>Amount (SSP)</th>
+        <th>Status</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-beneficiary>
       <tr>
         <td>
-          <p-tableCheckbox [value]="beneficiary"></p-tableCheckbox>
+          <p-tableCheckbox [value]="beneficiary" [disabled]="beneficiary.status !== 'PAYROLL_GENERATED'"></p-tableCheckbox>
         </td>
-        <td>{{ beneficiary.beneficiaryId }}</td>
-        <td>{{ beneficiary.beneficiaryName }}</td>
-        <td>{{ beneficiary.mobileWalletNumber }}</td>
-        <td>{{ beneficiary.wageRateSspTotal | number: '1.2-2' }}</td>
+        <td>{{ beneficiary.transactionId }}</td>
+        <td>{{ beneficiary.recipientFullName }}</td>
+        <td>{{ beneficiary.walletNumber }}</td>
+        <td>{{ beneficiary.amount | number: '1.2-2' }}</td>
+        <td>{{ beneficiary.status }}</td>
       </tr>
     </ng-template>
     <ng-template pTemplate="emptymessage">
       <tr>
-        <td colspan="5" class="text-center">No beneficiary data found.</td>
+        <td colspan="6" class="text-center">No beneficiary data found.</td>
       </tr>
     </ng-template>
   </p-table>

@@ -20,19 +20,12 @@ import { ApiService } from '../../../services/api.service';
 import { Loader } from '../../../components/loader/loader';
 
 interface MobileMoneyBeneficiary {
-  beneficiaryId: number;
-  beneficiaryName: string;
-  alternate1Name: string;
-  alternate2Name: string;
-  mobileWalletNumber: string;
-  paymentCycle: number;
-  supportType: string;
-  totalAttendance: number;
-  wageRateUsd: number;
-  wageTotal: number;
-  exchangeRateAtTime: number;
-  wageRateSspTotal: number;
   transactionId: number;
+  recipientFullName: string;
+  walletNumber: string;
+  amount: number;
+  paymentCycle: number;
+  status: string;
 }
 
 @Component({
@@ -102,19 +95,18 @@ export class MobileMoneyDetails implements OnInit {
     this.isLoading = true;
     this.cdr.markForCheck();
     try {
-      // TODO: Replace with the actual API endpoint
       const response = await this.api.POST(
-        `/api/momo/getGeneratedMoMoPayrollData`,
-        { requestId }
+        `/api/momo/status?requestId=${requestId}`,
+        {}
       );
-      if (response.data && response.data.success) {
-        this.beneficiaries = response.data.data; // Assuming this structure
+      if (response.data.success) {
+        this.beneficiaries = response.data;
       } else {
         this.beneficiaries = [];
         Swal.fire({
           icon: 'error',
           title: 'Failed to fetch data',
-          text: response.data?.message || 'Could not retrieve beneficiary details.',
+          text: response.data.message || 'Could not retrieve beneficiary details.',
         });
       }
     } catch (error: any) {
@@ -143,6 +135,7 @@ export class MobileMoneyDetails implements OnInit {
     }
 
     this.confirmationService.confirm({
+      key: 'confirm',
       message: `Are you sure you want to initiate payment for ${this.selectedBeneficiaries.length} selected beneficiaries?`,
       header: 'Confirm Payment Initiation',
       icon: 'pi pi-exclamation-triangle',
@@ -198,7 +191,7 @@ export class MobileMoneyDetails implements OnInit {
     this.messageService.add({
       severity: 'info',
       summary: 'Beneficiary Selected',
-      detail: `Name: ${event.data.beneficiaryName}`,
+      detail: `Name: ${event.data.recipientFullName}`,
     });
   }
 
@@ -206,7 +199,7 @@ export class MobileMoneyDetails implements OnInit {
     this.messageService.add({
       severity: 'info',
       summary: 'Beneficiary Unselected',
-      detail: `Name: ${event.data.beneficiaryName}`,
+      detail: `Name: ${event.data.recipientFullName}`,
     });
   }
 }
