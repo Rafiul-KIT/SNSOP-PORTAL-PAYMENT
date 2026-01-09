@@ -34,6 +34,7 @@ import { CheckboxModule } from 'primeng/checkbox';
 
 interface PayrollGenerationResponse {
   id: number;
+  payrollType:String;
   applicationId: string;
   requestId: string;
   requestDate: string;
@@ -279,6 +280,7 @@ export class GeneratePayroll implements OnInit {
       isCombined: formValues.payrollType === 'combined',
       payrollType: formValues.paymentType,
       requestId: requestId,
+     
     };
 
     try {
