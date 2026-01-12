@@ -35,7 +35,7 @@
         <!-- Boma -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
-                <p-select [options]="bomas" optionLabel="name" formControlName="boma" />
+                <p-select [options]="bomas" optionLabel="name" formControlName="boma" (onChange)="onBomaChange($event.value)" />
                 <label>Boma Name</label>
             </p-floatlabel>
         </div>

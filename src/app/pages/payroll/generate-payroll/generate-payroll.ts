@@ -111,7 +111,6 @@ export class GeneratePayroll implements OnInit {
 
     this.states = this.lookup.getStateList();
     this.supportTypeOptions = this.lookup.getSupportTypeList();
-    this.paymentCycleOptions = this.lookup.getPaymentCycleList();
     this.cdr.markForCheck();
   }
 
@@ -134,15 +133,7 @@ export class GeneratePayroll implements OnInit {
       payrollType: ['single'],
       paymentCycle: [null],
       paymentType: [''],
-      paymentCycles: this.fb.array(
-        this.paymentCycleOptions.map((c) =>
-          this.fb.group({
-            id: c.id,
-            name: c.name,
-            selected: false,
-          })
-        )
-      ),
+      paymentCycles: this.fb.array([]),
     });
   }
 
@@ -159,6 +150,9 @@ export class GeneratePayroll implements OnInit {
     this.counties = [];
     this.payams = [];
     this.bomas = [];
+    this.paymentCycleOptions = [];
+    this.paymentCycles.clear();
+    this.searchForm.get('paymentCycle')?.reset({ value: null });
 
     if (state?.id) {
       this.counties = await this.lookup.getCountyListByStateId(state.id);
@@ -172,6 +166,9 @@ export class GeneratePayroll implements OnInit {
     this.searchForm.get('boma')?.reset({ value: null, disabled: true });
     this.payams = [];
     this.bomas = [];
+    this.paymentCycleOptions = [];
+    this.paymentCycles.clear();
+    this.searchForm.get('paymentCycle')?.reset({ value: null });
 
     if (county?.id) {
       this.payams = await this.lookup.getPayamListByCountyId(county.id);
@@ -183,10 +180,69 @@ export class GeneratePayroll implements OnInit {
   async onPayamChange(payam: LookupItem | null) {
     this.searchForm.get('boma')?.reset({ value: null, disabled: true });
     this.bomas = [];
+    this.paymentCycleOptions = [];
+    this.paymentCycles.clear();
+    this.searchForm.get('paymentCycle')?.reset({ value: null });
 
     if (payam?.id) {
       this.bomas = await this.lookup.getBomaListByPayamId(payam.id);
       this.searchForm.get('boma')?.enable();
+    }
+    this.cdr.markForCheck();
+  }
+
+  async onBomaChange(boma: LookupItem | null) {
+    this.paymentCycleOptions = [];
+    this.paymentCycles.clear();
+    this.searchForm.get('paymentCycle')?.reset();
+
+    if (boma?.id) {
+      const formValues = this.searchForm.getRawValue();
+      const params = {
+        stateId: formValues.state?.id,
+        countyId: formValues.county?.id,
+        payamId: formValues.payam?.id,
+        bomaId: boma.id,
+      };
+
+      if (params.stateId && params.countyId && params.payamId && params.bomaId) {
+        try {
+          const response: any = await this.api.GET(
+            '/api/payroll/payment-cycles',
+            params
+          );
+
+          if (response && Array.isArray(response.data)) {
+            this.paymentCycleOptions = response.data.map((cycle: number) => ({
+              id: cycle,
+              name: `Cycle ${cycle}`,
+            }));
+
+            this.paymentCycles.clear(); // remove old controls
+            this.paymentCycleOptions.forEach((c) => {
+              this.paymentCycles.push(
+                this.fb.group({
+                  id: c.id,
+                  name: c.name,
+                  selected: false,
+                })
+              );
+            });
+          } else {
+            this.paymentCycleOptions = [];
+            this.paymentCycles.clear();
+          }
+        } catch (error) {
+          console.error('Failed to fetch payment cycles', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to fetch payment cycles.',
+          });
+          this.paymentCycleOptions = [];
+          this.paymentCycles.clear();
+        }
+      }
     }
     this.cdr.markForCheck();
   }
