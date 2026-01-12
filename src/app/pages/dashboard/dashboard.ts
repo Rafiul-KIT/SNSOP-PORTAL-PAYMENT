@@ -98,7 +98,7 @@ interface DashboardApiResponse {
     FormsModule,
     TableModule,
     UIChart,
-    Breadcrumb
+    Breadcrumb,
 ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
