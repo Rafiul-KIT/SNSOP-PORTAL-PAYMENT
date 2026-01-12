@@ -118,14 +118,14 @@
     <h5 class="mb-3">
         <i class="fas fa-info-circle me-2"></i>Generation Status
     </h5>
-    
+
     @if (isGenerating) {
     <div class="d-flex align-items-center mb-3">
         <i class="pi pi-spin pi-spinner me-3" style="font-size: 1.5rem;"></i>
         <span class="text-muted">{{ generationStatus }}</span>
     </div>
     }
-    
+
     @if (lastGenerationResult && !isGenerating) {
     <div class="row g-3">
         <div class="col-md-6">
@@ -134,11 +134,11 @@
                 <span class="ms-2 badge bg-secondary">{{ lastGenerationResult.requestId }}</span>
             </div>
         </div>
-        
+
         <div class="col-md-6">
             <div class="status-item">
                 <strong>Status:</strong>
-                <span class="ms-2 badge" 
+                <span class="ms-2 badge"
                       [ngClass]="{
                         'bg-success': lastGenerationResult.status === 'SUCCESS',
                         'bg-danger': lastGenerationResult.status === 'FAILED',
@@ -149,21 +149,21 @@
                 </span>
             </div>
         </div>
-        
+
         <!-- <div class="col-md-6">
             <div class="status-item">
                 <strong>Request Date:</strong>
                 <span class="ms-2">{{ lastGenerationResult.requestDate | date:'medium' }}</span>
             </div>
         </div>
-        
+
         <div class="col-md-6">
             <div class="status-item">
                 <strong>Operation Type:</strong>
                 <span class="ms-2 badge bg-primary">{{ lastGenerationResult.payrollType }}</span>
             </div>
         </div> -->
-        
+
         @if (lastGenerationResult.errorReason) {
         <div class="col-12">
             <div class="alert alert-danger mb-0">
@@ -171,7 +171,7 @@
             </div>
         </div>
         }
-        
+
         @if (lastGenerationResult.status === 'SUCCESS') {
         <div class="col-12">
             <div class="alert alert-success mb-0">

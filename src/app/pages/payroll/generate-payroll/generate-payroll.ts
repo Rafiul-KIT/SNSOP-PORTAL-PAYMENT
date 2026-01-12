@@ -88,7 +88,7 @@ export class GeneratePayroll implements OnInit {
   paymentCycleOptions: LookupItemPayroll[] = [];
     paymentTypeOptions: LookupItem[] = [
        { id: 'CASH_PAYMENT', name: 'Cash' },
-      // { id: 'MOBILE_PAYMENT', name: 'Mobile Money' }
+      { id: 'MOBILE_PAYMENT', name: 'Mobile Money' }
     ];
 
   // Generation status
@@ -280,7 +280,7 @@ export class GeneratePayroll implements OnInit {
       isCombined: formValues.payrollType === 'combined',
       payrollType: formValues.paymentType,
       requestId: requestId,
-     
+
     };
 
     try {
