@@ -1,3 +1,4 @@
+import { ReportTotalBeneficiaryPaymentDetails } from './../report-list/report-total-beneficiary-payment-details/report-total-beneficiary-payment-details';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -22,6 +23,7 @@ import { SelectModule } from 'primeng/select';
 
 
 
+
 @Component({
   selector: 'app-report',
   standalone: true,
@@ -29,7 +31,7 @@ import { SelectModule } from 'primeng/select';
     LoadingSpinner, Loader, ReportBeneficiaryList,
     ReportStaffWiseBeneficiaryCount, ReportAgeGroupGenderWiseBeneficiaryCount,
     ReportMatchList, ReportLocationWiseNomineeCount, ReportCompleteHouseholdSurvey,
-    ReportReconciledSummaryResult, ReportReconciliationSummaryCount, Button, FloatLabelModule, SelectModule],
+    ReportReconciledSummaryResult, ReportReconciliationSummaryCount, Button, FloatLabelModule, SelectModule, ReportTotalBeneficiaryPaymentDetails],
   templateUrl: './report.html',
   styleUrls: ['./report.scss']
 })
@@ -68,6 +70,12 @@ export class ReportComponent implements OnInit {
   };
   reportReconciliationSummaryCount: any = null;
   reportMatchListResult: any = null;
+  reportTotalBeneficiaryPaymentDetails: any = null;
+  reportTotalBeneficiaryPaymentDetailsTotals = {
+    totalBeneficiaries: 0,
+    totalPaid: 0,
+    totalUnpaid: 0
+  };
 
   date: Date[] | undefined;
   reportForm: FormGroup = new FormGroup({});
@@ -90,6 +98,7 @@ export class ReportComponent implements OnInit {
     this.reportHouseholdSurvery = null;
     this.reportReconciledSummaryResultCount = null;
     this.reportReconciliationSummaryCount = null;
+    this.reportTotalBeneficiaryPaymentDetails = null;
 
     switch (reportType) {
       case 1:
@@ -179,6 +188,18 @@ export class ReportComponent implements OnInit {
           countyId: new FormControl('', Validators.required),
           payamId: new FormControl('', Validators.required),
           bomaId: new FormControl(''),
+          paymentCycle: new FormControl('1', Validators.required)
+        });
+        break;
+        case 11:
+        this.reportForm = new FormGroup({
+          stateId: new FormControl('', Validators.required),
+          countyId: new FormControl('', Validators.required),
+          payamId: new FormControl('', Validators.required),
+          bomaId: new FormControl('', Validators.required),
+          criteria: new FormControl('ALL', Validators.required),
+          paymentStatus: new FormControl('ALL', Validators.required),
+          size: new FormControl(1000, Validators.required),
           paymentCycle: new FormControl('1', Validators.required)
         });
         break;
@@ -307,6 +328,9 @@ export class ReportComponent implements OnInit {
       case 10:
         endpoint = 'api/report/reconciliation-summary-count-report';
         break;
+        case 11:
+        endpoint = 'api/payroll/recon/monitoring/geo/details';
+        break;
     }
     return endpoint;
   }
@@ -343,6 +367,10 @@ export class ReportComponent implements OnInit {
         break;
       case 10:
         this.reportReconciliationSummaryCount = data;
+        break;
+        case 11:
+        this.reportTotalBeneficiaryPaymentDetails = data;
+        this.reportTotalBeneficiaryPaymentDetailsTotals = data;
         break;
     }
   }
@@ -405,6 +433,68 @@ export class ReportComponent implements OnInit {
         .catch((err: any) => {
           console.error('Error calling reconciled-summary-report API:', err.response?.data || err.message);
           this.reportReconciledSummaryResultCount = [];
+          this.isReportGenerating = false;
+          this.cdr.markForCheck(); // Added here
+        });
+
+      return;
+    }
+
+    if (this.selectedReportTypeId === 11) {
+      const payloadForReport = {
+        state: parseInt(this.reportForm.value.stateId) || null,
+        county: parseInt(this.reportForm.value.countyId) || null,
+        payam: parseInt(this.reportForm.value.payamId) || null,
+        boma: parseInt(this.reportForm.value.bomaId) || null,
+        criteria: this.reportForm.value.criteria || null,
+        paymentStatus: this.reportForm.value.paymentStatus || null,
+        size: this.reportForm.value.size || null,
+        paymentCycle: this.reportForm.value.paymentCycle ? parseInt(this.reportForm.value.paymentCycle, 10) : null
+      };
+
+      this.reportTotalBeneficiaryPaymentDetailsTotals = {
+        totalBeneficiaries: 0,
+        totalPaid: 0,
+        totalUnpaid: 0,
+      };
+
+      this.apiService.POST(endpoint, payloadForReport)
+        .then((res: any) => {
+          console.log('Full API Response Data:', res.data);
+
+          if (res.status === 200 && res.data) {
+            const beneficiaries = res?.data?.reportData?.beneficiaries ?? [];
+
+            this.reportTotalBeneficiaryPaymentDetails = beneficiaries.map((beneficiary: any) => ({
+              householdNumber: beneficiary.householdNumber,
+              name: `${beneficiary.firstName} ${beneficiary.middleName} ${beneficiary.lastName}`.trim(),
+              wage: beneficiary.wageSspTotal,
+              supportType: beneficiary.criteria,
+              reqNo: beneficiary.requestNumber,
+              paymentCycle: beneficiary.paymentCycle,
+              paymentCenter: beneficiary.paymentCenter ?? 'N/A',
+              status: beneficiary.paymentStatus,
+              exchangeRate: beneficiary.exchangeRate,
+              paymentDate: beneficiary.paymentDate ? beneficiary.paymentDate.split(' ')[0] : 'N/A',
+            }));
+
+            this.reportTotalBeneficiaryPaymentDetailsTotals = {
+              totalBeneficiaries: res?.data?.reportData?.totalBeneficiaries ?? 0,
+              totalPaid: res?.data?.reportData?.totalPaid ?? 0,
+              totalUnpaid: res?.data?.reportData?.totalUnpaid ?? 0,
+            };
+
+            console.log('Mapped Data:', this.reportTotalBeneficiaryPaymentDetails);
+            console.log('Summary Totals:', this.reportTotalBeneficiaryPaymentDetailsTotals);
+          } else {
+            this.reportTotalBeneficiaryPaymentDetails = [];
+          }
+          this.isReportGenerating = false;
+          this.cdr.markForCheck(); // Added here
+        })
+        .catch((err: any) => {
+          console.error('Error calling reconciled-summary-report API:', err.response?.data || err.message);
+          this.reportTotalBeneficiaryPaymentDetails = [];
           this.isReportGenerating = false;
           this.cdr.markForCheck(); // Added here
         });

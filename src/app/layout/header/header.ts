@@ -243,6 +243,11 @@ export class Header {
             icon: 'fas fa-file-alt',
             routerLink: 'report/summary',
           },
+          {
+            label: 'Total Beneficiary Payment Details',
+            icon: 'fas fa-file-alt',
+            routerLink: 'report/payment-details',
+          },
         ],
       },
     ];

@@ -307,6 +307,11 @@
         <app-report-reconciliation-summary-count
             [reportReconciliationSummaryCount]="reportReconciliationSummaryCount" />
         }
+        @if (reportTotalBeneficiaryPaymentDetails) {
+        <app-report-total-beneficiary-payment-details
+            [reportTotalBeneficiaryPaymentDetails]="reportTotalBeneficiaryPaymentDetails"
+            [reportTotalBeneficiaryPaymentDetailsTotals]="reportTotalBeneficiaryPaymentDetailsTotals" />
+        }
         }
     </div>
     } @else {

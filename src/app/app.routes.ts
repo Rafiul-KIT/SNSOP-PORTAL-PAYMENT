@@ -203,6 +203,13 @@ export const routes: Routes = [
         data: { reportType: 10, reportTitle: 'Reconciliation Summary Report' },
         canActivate: [routeGuard],
       },
+      {
+        path: 'payment-details',
+        loadComponent: () =>
+          import('./pages/report/report').then((m) => m.ReportComponent),
+        data: { reportType: 11, reportTitle: 'Total Beneficiary Payment Details' },
+        canActivate: [routeGuard],
+      },
     ],
   },
   {
