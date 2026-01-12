@@ -213,9 +213,9 @@ export class GeneratePayroll implements OnInit {
     if (!values.state || !values.county || !values.payam || !values.boma || !values.supportType) {
       return true;
     }
-    // if(!values.paymentType) {
-    //   return true;
-    // }
+    if(!values.paymentType) {
+      return true;
+    }
 
     if (values.payrollType === 'single') {
       if (!values.paymentCycle) {

@@ -91,13 +91,17 @@
 }
 
 ::ng-deep .approval-card .p-card-header {
+  
   background: white;
   border-bottom: 1px solid #e9ecef;
   padding: 1.25rem 1.5rem;
   font-weight: 600;
   color: #2c3e50;
+ 
 }
-
+::ng-deep .approval-card .p-card-title {
+  text-align: center;
+}
 ::ng-deep .approval-card .p-card-body {
   padding: 1rem;
 }
