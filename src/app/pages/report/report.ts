@@ -378,7 +378,6 @@ export class ReportComponent implements OnInit {
             this.reportReconciledSummaryResultCount = beneficiaries.map((beneficiary: any) => ({
               householdNumber: beneficiary.householdNumber,
               name: `${beneficiary.firstName} ${beneficiary.middleName} ${beneficiary.lastName}`.trim(),
-              enrolmentNumber: beneficiary.enrolmentNumber,
               wage: beneficiary.wageSspTotal,
               supportType: beneficiary.criteria,
               reqNo: beneficiary.requestNumber,
@@ -519,7 +518,7 @@ export class ReportComponent implements OnInit {
       this.lookupService.fetchAllPayamList(),
       this.lookupService.fetchAllBomaList(),
     ]).then(() => {
-     
+
       this.isLoading = false;
       this.cdr.markForCheck();
     });

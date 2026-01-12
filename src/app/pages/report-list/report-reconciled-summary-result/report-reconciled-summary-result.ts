@@ -82,7 +82,6 @@ export class ReportReconciledSummaryResult implements OnInit {
     const headers = [
       'HH Number',
       'Name',
-      'Enrolment No',
       'Wage',
       'Ex Rate',
       'Pay Date',
@@ -97,7 +96,6 @@ export class ReportReconciledSummaryResult implements OnInit {
       (row: ReconciledSummaryRow) => [
         row.householdNumber,
         row.name,
-        row.enrolmentNumber,
         `SSP ${row.wage}`,
         row.exchangeRate,
         row.paymentDate,
@@ -144,7 +142,6 @@ export class ReportReconciledSummaryResult implements OnInit {
     const columnWidths = [
       { wch: 45 }, // Household Number
       { wch: 25 }, // Name
-      { wch: 15 }, // Enrolment Number
       { wch: 10 }, // Wage
       { wch: 10 }, //exchange rate
       { wch: 10 }, // payment date
