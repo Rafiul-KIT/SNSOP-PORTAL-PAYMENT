@@ -3,10 +3,12 @@ import { CanActivateFn, Router, ActivatedRouteSnapshot, RouterStateSnapshot } fr
 import { CookieService } from 'ngx-cookie-service';
 import { jwtDecode } from 'jwt-decode';
 import { environment } from '../environments/environment';
+import { ApiService } from './services/api.service';
 
 export const routeGuard: CanActivateFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
   const cookieService = inject(CookieService);
   const router = inject(Router);
+  const apiService = inject(ApiService);
 
   const ACCESS_TOKEN = environment.cookie_name;
   const token = cookieService.get(ACCESS_TOKEN);
@@ -23,13 +25,13 @@ export const routeGuard: CanActivateFn = (route: ActivatedRouteSnapshot, state: 
   try {
     decoded = jwtDecode(token);
   } catch {
-    router.navigateByUrl('/landing');
+    apiService.logout();
     return false;
   }
 
   // Check if the token is expired
   if (decoded.exp && Date.now() >= decoded.exp * 1000) {
-    router.navigateByUrl('/landing');
+    apiService.logout();
     return false;
   }
 
