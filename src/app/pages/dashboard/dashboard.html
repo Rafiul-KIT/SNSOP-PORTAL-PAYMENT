@@ -6,37 +6,14 @@
 </div>
 <div class="dashboard-container ">
   <div class="header mb-2">
-    <h2 class="title">SNSOP MIS Payment Dashboard</h2>
-    <p class="subtitle">Social Safety Net Cash Payment and Beneficiary Management</p>
+    <h2 class="title">Payment Dashboard</h2>
+    <!-- <p class="subtitle">Social Safety Net Cash Payment and Beneficiary Management</p> -->
   </div>
 
   <!-- Stats Cards -->
 <div class="row g-3 mb-3">
-  <div class="col-12 col-sm-6 col-md-4 col-lg-2">
-    <div style="background-color: #bdd8fc; border:2px solid #d5e7ff;" class="stat-card stat-card-white">
-      <div class="stat-content">
-        <div class="stat-label">Total Projects</div>
-        <div class="stat-value">{{ stats.totalProjects }}</div>
-      </div>
-      <div class="stat-icon">
-        <i class="pi pi-folder"></i>
-      </div>
-    </div>
-  </div>
 
-  <div class="col-12 col-sm-6 col-md-4 col-lg-2">
-    <div style="background-color: #bdf8cf; border:2px solid #d1fadd;" class="stat-card stat-card-white">
-      <div class="stat-content">
-        <div class="stat-label">Total Subprojects</div>
-        <div class="stat-value">{{ stats.totalSubprojects }}</div>
-      </div>
-      <div style="color: #77fa9e;" class="stat-icon">
-        <i class="pi pi-file"></i>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+    <div class="col-12 col-sm-6 col-md-4 col-lg-2">
     <div style="background-color: #eedcff; border:2px solid #eedcff;" class="stat-card stat-card-white">
       <div class="stat-content">
         <div class="stat-label">Total Beneficiaries</div>
@@ -65,6 +42,31 @@
       </div>
     </div>
   </div>
+  <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+    <div style="background-color: #bdd8fc; border:2px solid #d5e7ff;" class="stat-card stat-card-white">
+      <div class="stat-content">
+        <div class="stat-label">Total Projects</div>
+        <div class="stat-value">{{ stats.totalProjects }}</div>
+      </div>
+      <div class="stat-icon">
+        <i class="pi pi-folder"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-sm-6 col-md-4 col-lg-2">
+    <div style="background-color: #bdf8cf; border:2px solid #d1fadd;" class="stat-card stat-card-white">
+      <div class="stat-content">
+        <div class="stat-label">Total Subprojects</div>
+        <div class="stat-value">{{ stats.totalSubprojects }}</div>
+      </div>
+      <div style="color: #77fa9e;" class="stat-icon">
+        <i class="pi pi-file"></i>
+      </div>
+    </div>
+  </div>
+
+
 
   <div class="col-12 col-sm-6 col-md-4 col-lg-2">
     <div style="background-color: #b2dfdb; border:2px solid #b2dfdb;" class="stat-card stat-card-white">
@@ -159,8 +161,8 @@
   <div class="row g-3 mt-2">
     <!-- First Card: Wage Request Status and Project Status -->
     <div class="col-lg-6">
-      <p-card header="Wage & Summary by Gender" class="approval-card h-100 d-flex">
-        <div class="row">
+      <p-card header="Wage Requests Summary" class="approval-card   h-100 d-flex">
+        <div class="row mt-2">
           <!-- Wage Request Status Section -->
           <div class="col-md-6" style="padding-right: 15px; border-right: 2px solid #e9ecef;">
             <h6 style="margin-bottom: 15px; color: #495057; font-weight: 600; text-align: center;">Wage Request Status
@@ -277,7 +279,7 @@
     <!-- Second Card: Payment Summary by Gender and Subproject Status -->
     <div class="col-lg-6">
       <p-card header="Project & Subproject Overview" class="approval-card h-100">
-        <div class="row">
+        <div class="row mt-2">
           <!-- Payment Summary by Gender Section -->
           <div class="col-md-6" style="padding-left: 15px; border-right: 2px solid #e9ecef; ">
             <h6 style="margin-bottom: 15px; color: #495057; font-weight: 600; text-align: center;">Project Status</h6>

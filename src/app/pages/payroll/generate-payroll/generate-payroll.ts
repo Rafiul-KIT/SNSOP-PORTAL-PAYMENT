@@ -34,6 +34,7 @@ import { CheckboxModule } from 'primeng/checkbox';
 
 interface PayrollGenerationResponse {
   id: number;
+  payrollType:String;
   applicationId: string;
   requestId: string;
   requestDate: string;
@@ -87,7 +88,7 @@ export class GeneratePayroll implements OnInit {
   paymentCycleOptions: LookupItemPayroll[] = [];
     paymentTypeOptions: LookupItem[] = [
        { id: 'CASH_PAYMENT', name: 'Cash' },
-      { id: 'MOBILE_PAYMENT', name: 'Mobile Money' }
+      // { id: 'MOBILE_PAYMENT', name: 'Mobile Money' }
     ];
 
   // Generation status
@@ -212,9 +213,9 @@ export class GeneratePayroll implements OnInit {
     if (!values.state || !values.county || !values.payam || !values.boma || !values.supportType) {
       return true;
     }
-    // if(!values.paymentType) {
-    //   return true;
-    // }
+    if(!values.paymentType) {
+      return true;
+    }
 
     if (values.payrollType === 'single') {
       if (!values.paymentCycle) {
@@ -279,6 +280,7 @@ export class GeneratePayroll implements OnInit {
       isCombined: formValues.payrollType === 'combined',
       payrollType: formValues.paymentType,
       requestId: requestId,
+     
     };
 
     try {
