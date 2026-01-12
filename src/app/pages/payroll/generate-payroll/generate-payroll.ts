@@ -88,7 +88,7 @@ export class GeneratePayroll implements OnInit {
   paymentCycleOptions: LookupItemPayroll[] = [];
     paymentTypeOptions: LookupItem[] = [
        { id: 'CASH_PAYMENT', name: 'Cash' },
-      { id: 'MOBILE_PAYMENT', name: 'Mobile Money' }
+      // { id: 'MOBILE_PAYMENT', name: 'Mobile Money' }
     ];
 
   // Generation status
@@ -213,9 +213,9 @@ export class GeneratePayroll implements OnInit {
     if (!values.state || !values.county || !values.payam || !values.boma || !values.supportType) {
       return true;
     }
-    // if(!values.paymentType) {
-    //   return true;
-    // }
+    if(!values.paymentType) {
+      return true;
+    }
 
     if (values.payrollType === 'single') {
       if (!values.paymentCycle) {
