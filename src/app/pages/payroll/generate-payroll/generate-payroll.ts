@@ -131,7 +131,7 @@ export class GeneratePayroll implements OnInit {
       boma: [{ value: null, disabled: true }],
       supportType: [''],
       payrollType: ['single'],
-      paymentCycle: [null],
+      paymentCycle: [{ value: null, disabled: true }],
       paymentType: [''],
       paymentCycles: this.fb.array([]),
     });
@@ -152,7 +152,7 @@ export class GeneratePayroll implements OnInit {
     this.bomas = [];
     this.paymentCycleOptions = [];
     this.paymentCycles.clear();
-    this.searchForm.get('paymentCycle')?.reset({ value: null });
+    this.searchForm.get('paymentCycle')?.reset({ value: null, disabled: true });
 
     if (state?.id) {
       this.counties = await this.lookup.getCountyListByStateId(state.id);
@@ -168,7 +168,7 @@ export class GeneratePayroll implements OnInit {
     this.bomas = [];
     this.paymentCycleOptions = [];
     this.paymentCycles.clear();
-    this.searchForm.get('paymentCycle')?.reset({ value: null });
+    this.searchForm.get('paymentCycle')?.reset({ value: null, disabled: true });
 
     if (county?.id) {
       this.payams = await this.lookup.getPayamListByCountyId(county.id);
@@ -182,7 +182,7 @@ export class GeneratePayroll implements OnInit {
     this.bomas = [];
     this.paymentCycleOptions = [];
     this.paymentCycles.clear();
-    this.searchForm.get('paymentCycle')?.reset({ value: null });
+    this.searchForm.get('paymentCycle')?.reset({ value: null, disabled: true });
 
     if (payam?.id) {
       this.bomas = await this.lookup.getBomaListByPayamId(payam.id);
@@ -194,7 +194,7 @@ export class GeneratePayroll implements OnInit {
   async onBomaChange(boma: LookupItem | null) {
     this.paymentCycleOptions = [];
     this.paymentCycles.clear();
-    this.searchForm.get('paymentCycle')?.reset();
+    this.searchForm.get('paymentCycle')?.reset({ value: null, disabled: true });
 
     if (boma?.id) {
       const formValues = this.searchForm.getRawValue();
@@ -212,11 +212,12 @@ export class GeneratePayroll implements OnInit {
             params
           );
 
-          if (response && Array.isArray(response.data)) {
+          if (response && Array.isArray(response.data) && response.data.length > 0) {
             this.paymentCycleOptions = response.data.map((cycle: number) => ({
               id: cycle,
               name: `Cycle ${cycle}`,
             }));
+            this.searchForm.get('paymentCycle')?.enable();
 
             this.paymentCycles.clear(); // remove old controls
             this.paymentCycleOptions.forEach((c) => {

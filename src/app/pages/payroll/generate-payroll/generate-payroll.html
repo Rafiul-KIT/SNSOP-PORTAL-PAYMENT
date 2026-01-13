@@ -39,7 +39,14 @@
                 <label>Boma Name</label>
             </p-floatlabel>
         </div>
-
+      <!-- payment cycle dropdown -->
+        <div class="col-md-3" *ngIf="searchForm.get('payrollType')?.value === 'single'">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="paymentCycleOptions" optionLabel="name" optionValue="id"
+                    formControlName="paymentCycle"></p-select>
+                <label>Payment Cycle</label>
+            </p-floatlabel>
+        </div>
         <!-- Support type -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
@@ -48,14 +55,7 @@
                 <label>Support Type</label>
             </p-floatlabel>
         </div>
-        <!-- payment cycle dropdown -->
-        <div class="col-md-3" *ngIf="searchForm.get('payrollType')?.value === 'single'">
-            <p-floatlabel variant="on" class="w-100">
-                <p-select [options]="paymentCycleOptions" optionLabel="name" optionValue="id"
-                    formControlName="paymentCycle"></p-select>
-                <label>Payment Cycle</label>
-            </p-floatlabel>
-        </div>
+  
         <!-- New Payment Type Dropdown -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
@@ -81,10 +81,9 @@
         </div>
 
 
-
         <!-- payment cycles checkboxes -->
         <div class="col-md-12" *ngIf="searchForm.get('payrollType')?.value === 'combined'">
-            <label class="mb-2">Payment Cycles</label>
+            <label class="mb-2"> Available Payment Cycles</label>
             <div formArrayName="paymentCycles" class="d-flex flex-wrap gap-3">
                 <div *ngFor="let cycle of paymentCycles.controls; let i = index" [formGroupName]="i"
                     class="d-flex align-items-center">
