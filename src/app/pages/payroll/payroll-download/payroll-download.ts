@@ -335,14 +335,15 @@ export class PayrollDownload implements OnInit {
       .join(', ');
   }
 
-  getStatusSeverity(status: string): 'success' | 'danger' | 'warn' | 'info' {
+
+  getStatusSeverity(status: string): 'success' | 'danger' | 'secondary' | 'info' {
     switch (status) {
       case 'SUCCESS':
         return 'success';
       case 'FAILED':
         return 'danger';
       case 'PENDING':
-        return 'warn';
+        return 'secondary';
       case 'PROCESSING':
         return 'info';
       default:
