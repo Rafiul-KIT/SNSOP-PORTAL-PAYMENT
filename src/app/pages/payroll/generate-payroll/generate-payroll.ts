@@ -317,15 +317,35 @@ export class GeneratePayroll implements OnInit {
       } else {
         this.generationStatus = `Status: ${response.data.status}`;
       }
-    } catch (error: any) {
-           Swal.fire({
-            icon: 'info',
-            title: 'No Beneficiary Found',
-            text: 'Payroll generation failed: No beneficiary found for the selected payment cycle. Please adjust your search filters.',
-            confirmButtonText: 'Ok'
-          });
-          // this.generationStatus = `Generation failed: No beneficiary found.`;
-    } finally {
+    }catch (error: any) {
+
+  const status =
+    error?.response?.status ??   
+    error?.status;               
+
+  if (status === 404) {
+    Swal.fire({
+      icon: 'info',
+      title: 'No Beneficiary Found',
+      text: 'Payroll generation failed: No beneficiary found for the selected payment cycle. Please adjust your search filters.',
+      confirmButtonText: 'Ok'
+    });
+
+    this.generationStatus = 'No beneficiary found.';
+    return;
+  }
+
+  
+  Swal.fire({
+    icon: 'error',
+    title: 'Error',
+    text: error?.message || 'An error occurred while generating payroll.',
+    confirmButtonText: 'Ok'
+  });
+
+  this.generationStatus = 'Error occurred during generation.';
+}
+ finally {
       this.isGenerating = false;
       this.cdr.markForCheck();
     }

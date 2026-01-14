@@ -43,12 +43,13 @@ export class ReconciliationMonitoringDetails implements OnInit {
   home: MenuItem | undefined;
 
   filterCriteria: any;
-  records: any[] = [];
-  filteredRecords: any[] = [];
+  records: any[] = []; // All records from server
+  filteredRecords: any[] = []; // Filtered records
   totalBeneficiaries: number = 0;
+  
   // Pagination properties
   rows: number = 10;
-  rowsPerPageOptions: any[] = [10, 20, 50, { label: 'All', value: 0 }];
+  rowsPerPageOptions: any[] = [10, 20, 50, 100, { showAll: 'All' }];
 
   // Sorting properties
   sortField: string = '';
@@ -58,24 +59,24 @@ export class ReconciliationMonitoringDetails implements OnInit {
   filters: any = {
     beneficiaryName: '',
     beneficiaryId: '',
-    supportType: '',
+    supportType: null, // Use null for dropdown
     paymentCycle: '',
     totalAttendance: '',
     wageTotal: '',
     wageRateSspTotal: '',
     alternate1Name: '',
-    paymentStatus: ''
+    paymentStatus: null // Use null for dropdown
   };
 
   // Status options for dropdown
   statusOptions = [
-    { label: 'All Status', value: '' },
+    { label: 'All Status', value: null },
     { label: 'PAID', value: 'PAID' },
     { label: 'UNPAID', value: 'UNPAID' }
   ];
 
   // Support type options for dropdown
-  supportTypeOptions: any[] = [];
+  supportTypeOptions: any[] = [{ label: 'All Types', value: null }];
 
   states: LookupItem[] = [];
   countyList: any[] = [];
@@ -123,6 +124,16 @@ export class ReconciliationMonitoringDetails implements OnInit {
     return this.filteredRecords?.filter(record => record.paymentStatus === 'UNPAID').length || 0;
   }
 
+  getPaidPercentage(): number {
+    if (this.filteredRecords.length === 0) return 0;
+    return Math.round((this.getPaidCount() / this.filteredRecords.length) * 100);
+  }
+
+  getUnpaidPercentage(): number {
+    if (this.filteredRecords.length === 0) return 0;
+    return Math.round((this.getUnpaidCount() / this.filteredRecords.length) * 100);
+  }
+
   loadReconciliationData(): void {
     this.isLoading = true;
 
@@ -137,8 +148,8 @@ export class ReconciliationMonitoringDetails implements OnInit {
     this.apiService
       .POST('api/payroll/recon/monitoring/geo/details', payload)
       .then((res: any) => {
-        if (res.data.statusCode === 200) {
-            this.totalBeneficiaries=res.data.metadata.totalElements;
+        if (res.data.statusCode === 200 && res.data.data) {
+          this.totalBeneficiaries = res.data.metadata?.totalElements || res.data.data.length;
           this.records = res.data.data;
           this.filteredRecords = [...this.records];
       
@@ -146,7 +157,8 @@ export class ReconciliationMonitoringDetails implements OnInit {
         } else {
           this.records = [];
           this.filteredRecords = [];
-          this.supportTypeOptions = [{ label: 'All Types', value: '' }];
+          this.totalBeneficiaries = 0;
+          this.supportTypeOptions = [{ label: 'All Types', value: null }];
         }
         this.isLoading = false;
         this.cdr.markForCheck();
@@ -158,7 +170,8 @@ export class ReconciliationMonitoringDetails implements OnInit {
         );
         this.records = [];
         this.filteredRecords = [];
-        this.supportTypeOptions = [{ label: 'All Types', value: '' }];
+        this.totalBeneficiaries = 0;
+        this.supportTypeOptions = [{ label: 'All Types', value: null }];
         this.isLoading = false;
         this.cdr.markForCheck();
       });
@@ -176,9 +189,9 @@ export class ReconciliationMonitoringDetails implements OnInit {
     // Convert to array and sort
     const typesArray = Array.from(uniqueTypes).sort();
     
-    // Create options array with "All Types" as first option
+    // Create options array with "All Types" as first option using null
     this.supportTypeOptions = [
-      { label: 'All Types', value: '' },
+      { label: 'All Types', value: null },
       ...typesArray.map(type => ({ label: type, value: type }))
     ];
   }
@@ -202,15 +215,7 @@ export class ReconciliationMonitoringDetails implements OnInit {
     }
     return this.sortOrder === 1 ? 'pi-sort-amount-up-alt' : 'pi-sort-amount-down';
   }
-getPaidPercentage(): number {
-  if (this.filteredRecords.length === 0) return 0;
-  return Math.round((this.getPaidCount() / this.filteredRecords.length) * 100);
-}
 
-getUnpaidPercentage(): number {
-  if (this.filteredRecords.length === 0) return 0;
-  return Math.round((this.getUnpaidCount() / this.filteredRecords.length) * 100);
-}
   applySorting(): void {
     if (!this.sortField) return;
 
@@ -218,10 +223,14 @@ getUnpaidPercentage(): number {
       let valueA = a[this.sortField];
       let valueB = b[this.sortField];
 
+      // Handle null/undefined values
+      if (valueA === null || valueA === undefined) return 1;
+      if (valueB === null || valueB === undefined) return -1;
+
       // Handle string comparison
       if (typeof valueA === 'string') {
         valueA = valueA.toLowerCase();
-        valueB = valueB.toLowerCase();
+        valueB = valueB?.toLowerCase() || '';
       }
 
       // Handle numeric comparison
@@ -247,37 +256,48 @@ getUnpaidPercentage(): number {
     this.filteredRecords = this.records.filter(record => {
       // Check each filter field
       for (const key in this.filters) {
-        if (this.filters[key] && this.filters[key] !== '') {
-          // Special handling for alternate names
-          if (key === 'alternate1Name') {
-            const alt1Match = record.alternate1Name && 
-              record.alternate1Name.toLowerCase().includes(this.filters[key].toLowerCase());
-            const alt2Match = record.alternate2Name && 
-              record.alternate2Name.toLowerCase().includes(this.filters[key].toLowerCase());
-            
-            if (!alt1Match && !alt2Match) {
-              return false;
-            }
-          } 
-          // Special handling for numeric fields
-          else if (key === 'totalAttendance' || key === 'wageTotal' || key === 'wageRateSspTotal') {
-            const recordValue = record[key];
-            if (recordValue === null || recordValue === undefined) {
-              return false;
-            }
-            
-            // Convert to string for comparison
-            if (!recordValue.toString().includes(this.filters[key])) {
-              return false;
-            }
-          } 
-          // Default string comparison
-          else {
-            const recordValue = record[key];
-            if (!recordValue || 
-                !recordValue.toString().toLowerCase().includes(this.filters[key].toLowerCase())) {
-              return false;
-            }
+        const filterValue = this.filters[key];
+        
+        // Skip if filter is null, undefined, or empty string
+        if (filterValue === null || filterValue === undefined || filterValue === '') {
+          continue;
+        }
+        
+        // Special handling for alternate names
+        if (key === 'alternate1Name') {
+          const alt1Match = record.alternate1Name && 
+            record.alternate1Name.toLowerCase().includes(filterValue.toLowerCase());
+          const alt2Match = record.alternate2Name && 
+            record.alternate2Name.toLowerCase().includes(filterValue.toLowerCase());
+          
+          if (!alt1Match && !alt2Match) {
+            return false;
+          }
+        } 
+        // Special handling for numeric fields
+        else if (key === 'totalAttendance' || key === 'wageTotal' || key === 'wageRateSspTotal') {
+          const recordValue = record[key];
+          if (recordValue === null || recordValue === undefined) {
+            return false;
+          }
+          
+          // Convert to string for comparison
+          if (!recordValue.toString().includes(filterValue.toString())) {
+            return false;
+          }
+        } 
+        // Default string comparison
+        else {
+          const recordValue = record[key];
+          if (!recordValue) {
+            return false;
+          }
+          
+          const recordValueStr = recordValue.toString().toLowerCase();
+          const filterValueStr = filterValue.toString().toLowerCase();
+          
+          if (!recordValueStr.includes(filterValueStr)) {
+            return false;
           }
         }
       }
@@ -293,10 +313,18 @@ getUnpaidPercentage(): number {
   }
 
   clearFilters(): void {
-    // Reset all filters
-    for (const key in this.filters) {
-      this.filters[key] = '';
-    }
+    // Reset all filters to null for dropdowns, empty string for inputs
+    this.filters = {
+      beneficiaryName: '',
+      beneficiaryId: '',
+      supportType: null,
+      paymentCycle: '',
+      totalAttendance: '',
+      wageTotal: '',
+      wageRateSspTotal: '',
+      alternate1Name: '',
+      paymentStatus: null
+    };
     
     // Reset to original data
     this.filteredRecords = [...this.records];

@@ -81,7 +81,7 @@
     <div class="card-body p-0">
       <p-table 
         [value]="filteredRecords" 
-        
+        [paginator]="true"
         [rows]="rows" 
         [rowsPerPageOptions]="rowsPerPageOptions"
         [showCurrentPageReport]="true"
@@ -103,6 +103,7 @@
               <p-select [options]="supportTypeOptions" [(ngModel)]="filters['supportType']" 
                 [ngModelOptions]="{standalone: true}" (onChange)="applyFilters()" 
                 placeholder="All Types" optionLabel="label" optionValue="value" 
+                [showClear]="false"
                 class="w-full"></p-select>
             </th>
             <th>
@@ -129,6 +130,7 @@
               <p-select [options]="statusOptions" [(ngModel)]="filters['paymentStatus']" 
                 [ngModelOptions]="{standalone: true}" (onChange)="applyFilters()" 
                 placeholder="All Status" optionLabel="label" optionValue="value" 
+                [showClear]="false"
                 class="w-full"></p-select>
             </th>
           
@@ -254,7 +256,7 @@
         <!-- Empty Message -->
         <ng-template pTemplate="emptymessage">
           <tr>
-            <td colspan="8" class="text-center py-4">
+            <td colspan="9" class="text-center py-4">
               <i class="pi pi-info-circle me-2"></i>
               No beneficiaries found matching your criteria
             </td>
