@@ -31,6 +31,7 @@ import { ApiService } from '../../../services/api.service';
 import { Loader } from '../../../components/loader/loader';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { CheckboxModule } from 'primeng/checkbox';
+import Swal from 'sweetalert2';
 
 interface PayrollGenerationResponse {
   id: number;
@@ -111,6 +112,7 @@ export class GeneratePayroll implements OnInit {
 
     this.states = this.lookup.getStateList();
     this.supportTypeOptions = this.lookup.getSupportTypeList();
+     this.paymentCycleOptions = this.lookup.getPaymentCycleList();
     this.cdr.markForCheck();
   }
 
@@ -131,9 +133,17 @@ export class GeneratePayroll implements OnInit {
       boma: [{ value: null, disabled: true }],
       supportType: [''],
       payrollType: ['single'],
-      paymentCycle: [{ value: null, disabled: true }],
+       paymentCycle: [null],
       paymentType: [''],
-      paymentCycles: this.fb.array([]),
+        paymentCycles: this.fb.array(
+        this.paymentCycleOptions.map((c) =>
+          this.fb.group({
+            id: c.id,
+            name: c.name,
+            selected: false,
+          })
+        )
+      ),
     });
   }
 
@@ -150,9 +160,7 @@ export class GeneratePayroll implements OnInit {
     this.counties = [];
     this.payams = [];
     this.bomas = [];
-    this.paymentCycleOptions = [];
-    this.paymentCycles.clear();
-    this.searchForm.get('paymentCycle')?.reset({ value: null, disabled: true });
+   
 
     if (state?.id) {
       this.counties = await this.lookup.getCountyListByStateId(state.id);
@@ -166,9 +174,7 @@ export class GeneratePayroll implements OnInit {
     this.searchForm.get('boma')?.reset({ value: null, disabled: true });
     this.payams = [];
     this.bomas = [];
-    this.paymentCycleOptions = [];
-    this.paymentCycles.clear();
-    this.searchForm.get('paymentCycle')?.reset({ value: null, disabled: true });
+
 
     if (county?.id) {
       this.payams = await this.lookup.getPayamListByCountyId(county.id);
@@ -180,9 +186,7 @@ export class GeneratePayroll implements OnInit {
   async onPayamChange(payam: LookupItem | null) {
     this.searchForm.get('boma')?.reset({ value: null, disabled: true });
     this.bomas = [];
-    this.paymentCycleOptions = [];
-    this.paymentCycles.clear();
-    this.searchForm.get('paymentCycle')?.reset({ value: null, disabled: true });
+
 
     if (payam?.id) {
       this.bomas = await this.lookup.getBomaListByPayamId(payam.id);
@@ -191,62 +195,6 @@ export class GeneratePayroll implements OnInit {
     this.cdr.markForCheck();
   }
 
-  async onBomaChange(boma: LookupItem | null) {
-    this.paymentCycleOptions = [];
-    this.paymentCycles.clear();
-    this.searchForm.get('paymentCycle')?.reset({ value: null, disabled: true });
-
-    if (boma?.id) {
-      const formValues = this.searchForm.getRawValue();
-      const params = {
-        stateId: formValues.state?.id,
-        countyId: formValues.county?.id,
-        payamId: formValues.payam?.id,
-        bomaId: boma.id,
-      };
-
-      if (params.stateId && params.countyId && params.payamId && params.bomaId) {
-        try {
-          const response: any = await this.api.GET(
-            '/api/payroll/payment-cycles',
-            params
-          );
-
-          if (response && Array.isArray(response.data) && response.data.length > 0) {
-            this.paymentCycleOptions = response.data.map((cycle: number) => ({
-              id: cycle,
-              name: `Cycle ${cycle}`,
-            }));
-            this.searchForm.get('paymentCycle')?.enable();
-
-            this.paymentCycles.clear(); // remove old controls
-            this.paymentCycleOptions.forEach((c) => {
-              this.paymentCycles.push(
-                this.fb.group({
-                  id: c.id,
-                  name: c.name,
-                  selected: false,
-                })
-              );
-            });
-          } else {
-            this.paymentCycleOptions = [];
-            this.paymentCycles.clear();
-          }
-        } catch (error) {
-          console.error('Failed to fetch payment cycles', error);
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Error',
-            detail: 'Failed to fetch payment cycles.',
-          });
-          this.paymentCycleOptions = [];
-          this.paymentCycles.clear();
-        }
-      }
-    }
-    this.cdr.markForCheck();
-  }
 
   get paymentCycles() {
     return this.searchForm.get('paymentCycles') as FormArray;
@@ -369,15 +317,35 @@ export class GeneratePayroll implements OnInit {
       } else {
         this.generationStatus = `Status: ${response.data.status}`;
       }
-    } catch (error: any) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: error?.message || 'An error occurred while generating payroll.',
-        life: 5000,
-      });
-      this.generationStatus = 'Error occurred during generation.';
-    } finally {
+    }catch (error: any) {
+
+  const status =
+    error?.response?.status ??   
+    error?.status;               
+
+  if (status === 404) {
+    Swal.fire({
+      icon: 'info',
+      title: 'No Beneficiary Found',
+      text: 'Payroll generation failed: No beneficiary found for the selected payment cycle. Please adjust your search filters.',
+      confirmButtonText: 'Ok'
+    });
+
+    this.generationStatus = 'No beneficiary found.';
+    return;
+  }
+
+  
+  Swal.fire({
+    icon: 'error',
+    title: 'Error',
+    text: error?.message || 'An error occurred while generating payroll.',
+    confirmButtonText: 'Ok'
+  });
+
+  this.generationStatus = 'Error occurred during generation.';
+}
+ finally {
       this.isGenerating = false;
       this.cdr.markForCheck();
     }

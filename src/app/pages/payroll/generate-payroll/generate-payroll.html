@@ -35,18 +35,11 @@
         <!-- Boma -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
-                <p-select [options]="bomas" optionLabel="name" formControlName="boma" (onChange)="onBomaChange($event.value)" />
+                <p-select [options]="bomas" optionLabel="name" formControlName="boma" />
                 <label>Boma Name</label>
             </p-floatlabel>
         </div>
-      <!-- payment cycle dropdown -->
-        <div class="col-md-3" *ngIf="searchForm.get('payrollType')?.value === 'single'">
-            <p-floatlabel variant="on" class="w-100">
-                <p-select [options]="paymentCycleOptions" optionLabel="name" optionValue="id"
-                    formControlName="paymentCycle"></p-select>
-                <label>Payment Cycle</label>
-            </p-floatlabel>
-        </div>
+
         <!-- Support type -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
@@ -55,7 +48,14 @@
                 <label>Support Type</label>
             </p-floatlabel>
         </div>
-  
+        <!-- payment cycle dropdown -->
+        <div class="col-md-3" *ngIf="searchForm.get('payrollType')?.value === 'single'">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="paymentCycleOptions" optionLabel="name" optionValue="id"
+                    formControlName="paymentCycle"></p-select>
+                <label>Payment Cycle</label>
+            </p-floatlabel>
+        </div>
         <!-- New Payment Type Dropdown -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
@@ -81,9 +81,10 @@
         </div>
 
 
+
         <!-- payment cycles checkboxes -->
         <div class="col-md-12" *ngIf="searchForm.get('payrollType')?.value === 'combined'">
-            <label class="mb-2"> Available Payment Cycles</label>
+            <label class="mb-2">Payment Cycles</label>
             <div formArrayName="paymentCycles" class="d-flex flex-wrap gap-3">
                 <div *ngFor="let cycle of paymentCycles.controls; let i = index" [formGroupName]="i"
                     class="d-flex align-items-center">
@@ -112,19 +113,19 @@
 </div>
 
 <!-- Generation Status Card -->
-@if (generationStatus || lastGenerationResult) {
+@if ( lastGenerationResult) {
 <div class="card p-4 mb-3">
     <h5 class="mb-3">
         <i class="fas fa-info-circle me-2"></i>Generation Status
     </h5>
-
-    @if (isGenerating) {
+    
+    @if (isGenerating ) {
     <div class="d-flex align-items-center mb-3">
         <i class="pi pi-spin pi-spinner me-3" style="font-size: 1.5rem;"></i>
         <span class="text-muted">{{ generationStatus }}</span>
     </div>
     }
-
+    
     @if (lastGenerationResult && !isGenerating) {
     <div class="row g-3">
         <div class="col-md-6">
@@ -133,11 +134,11 @@
                 <span class="ms-2 badge bg-secondary">{{ lastGenerationResult.requestId }}</span>
             </div>
         </div>
-
+        
         <div class="col-md-6">
             <div class="status-item">
                 <strong>Status:</strong>
-                <span class="ms-2 badge"
+                <span class="ms-2 badge" 
                       [ngClass]="{
                         'bg-success': lastGenerationResult.status === 'SUCCESS',
                         'bg-danger': lastGenerationResult.status === 'FAILED',
@@ -148,21 +149,21 @@
                 </span>
             </div>
         </div>
-
+        
         <!-- <div class="col-md-6">
             <div class="status-item">
                 <strong>Request Date:</strong>
                 <span class="ms-2">{{ lastGenerationResult.requestDate | date:'medium' }}</span>
             </div>
-        </div>
-
+        </div> -->
+        
         <div class="col-md-6">
             <div class="status-item">
                 <strong>Operation Type:</strong>
                 <span class="ms-2 badge bg-primary">{{ lastGenerationResult.payrollType }}</span>
             </div>
-        </div> -->
-
+        </div>
+        
         @if (lastGenerationResult.errorReason) {
         <div class="col-12">
             <div class="alert alert-danger mb-0">
@@ -170,7 +171,7 @@
             </div>
         </div>
         }
-
+        
         @if (lastGenerationResult.status === 'SUCCESS') {
         <div class="col-12">
             <div class="alert alert-success mb-0">
