@@ -31,6 +31,7 @@ import { ApiService } from '../../../services/api.service';
 import { Loader } from '../../../components/loader/loader';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { CheckboxModule } from 'primeng/checkbox';
+import Swal from 'sweetalert2';
 
 interface PayrollGenerationResponse {
   id: number;
@@ -317,13 +318,13 @@ export class GeneratePayroll implements OnInit {
         this.generationStatus = `Status: ${response.data.status}`;
       }
     } catch (error: any) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: error?.message || 'An error occurred while generating payroll.',
-        life: 5000,
-      });
-      this.generationStatus = 'Error occurred during generation.';
+           Swal.fire({
+            icon: 'info',
+            title: 'No Beneficiary Found',
+            text: 'Payroll generation failed: No beneficiary found for the selected payment cycle. Please adjust your search filters.',
+            confirmButtonText: 'Ok'
+          });
+          // this.generationStatus = `Generation failed: No beneficiary found.`;
     } finally {
       this.isGenerating = false;
       this.cdr.markForCheck();

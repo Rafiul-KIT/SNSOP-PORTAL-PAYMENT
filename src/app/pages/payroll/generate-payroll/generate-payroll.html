@@ -113,13 +113,13 @@
 </div>
 
 <!-- Generation Status Card -->
-@if (generationStatus || lastGenerationResult) {
+@if ( lastGenerationResult) {
 <div class="card p-4 mb-3">
     <h5 class="mb-3">
         <i class="fas fa-info-circle me-2"></i>Generation Status
     </h5>
     
-    @if (isGenerating) {
+    @if (isGenerating ) {
     <div class="d-flex align-items-center mb-3">
         <i class="pi pi-spin pi-spinner me-3" style="font-size: 1.5rem;"></i>
         <span class="text-muted">{{ generationStatus }}</span>
@@ -155,14 +155,14 @@
                 <strong>Request Date:</strong>
                 <span class="ms-2">{{ lastGenerationResult.requestDate | date:'medium' }}</span>
             </div>
-        </div>
+        </div> -->
         
         <div class="col-md-6">
             <div class="status-item">
                 <strong>Operation Type:</strong>
                 <span class="ms-2 badge bg-primary">{{ lastGenerationResult.payrollType }}</span>
             </div>
-        </div> -->
+        </div>
         
         @if (lastGenerationResult.errorReason) {
         <div class="col-12">
