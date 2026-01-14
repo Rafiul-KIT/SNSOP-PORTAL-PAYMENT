@@ -18,7 +18,7 @@
           <i class="fas fa-users"></i>
         </div>
         <div class="stat-info">
-          <span class="stat-number">{{ filteredRecords.length }}</span>
+          <span class="stat-number">{{ totalBeneficiaries }}</span>
           <span class="stat-label">Total Beneficiaries</span>
         </div>
         <div class="stat-indicator">
@@ -121,6 +121,9 @@
               <input pInputText type="text" [(ngModel)]="filters['alternate1Name']" 
                 [ngModelOptions]="{standalone: true}" (input)="applyFilters()" 
                 placeholder="Filter by alternate" class="w-full p-2 border border-gray-300 rounded" />
+            </th>
+               <th>
+             
             </th>
             <th class="text-center ">
               <p-select [options]="statusOptions" [(ngModel)]="filters['paymentStatus']" 

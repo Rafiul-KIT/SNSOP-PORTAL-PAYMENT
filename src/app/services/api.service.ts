@@ -128,11 +128,8 @@ getUserRole(): number | null {
   };
 
   // ================= Basic HTTP Functions =================
-  GET = (endpoint: string, params?: any) => {
-    return this.axiosInstance.get(endpoint, {
-      ...this.apiHeader,
-      params: params
-    });
+   GET = (endpoint: string) => {
+    return this.axiosInstance.get(endpoint, this.apiHeader);
   };
 
   GET_AUTH = (endpoint: string) => {

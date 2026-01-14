@@ -45,7 +45,7 @@ export class ReconciliationMonitoringDetails implements OnInit {
   filterCriteria: any;
   records: any[] = [];
   filteredRecords: any[] = [];
-
+  totalBeneficiaries: number = 0;
   // Pagination properties
   rows: number = 10;
   rowsPerPageOptions: any[] = [10, 20, 50, { label: 'All', value: 0 }];
@@ -138,8 +138,10 @@ export class ReconciliationMonitoringDetails implements OnInit {
       .POST('api/payroll/recon/monitoring/geo/details', payload)
       .then((res: any) => {
         if (res.data.statusCode === 200) {
+            this.totalBeneficiaries=res.data.metadata.totalElements;
           this.records = res.data.data;
           this.filteredRecords = [...this.records];
+      
           this.extractSupportTypes();
         } else {
           this.records = [];
