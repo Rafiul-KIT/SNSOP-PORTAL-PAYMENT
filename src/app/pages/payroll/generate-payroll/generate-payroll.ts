@@ -359,6 +359,7 @@ export class GeneratePayroll implements OnInit {
       boma: { value: null, disabled: true },
       supportType: '',
       payrollType: 'single',
+      
       paymentCycle: null,
       paymentType: 'CASH_PAYMENT',
     });
