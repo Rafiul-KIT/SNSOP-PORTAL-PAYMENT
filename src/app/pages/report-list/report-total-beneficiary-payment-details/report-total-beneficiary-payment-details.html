@@ -1,21 +1,11 @@
 <div class="report-container">
-  <p-table
-    [value]="reportTotalBeneficiaryPaymentDetails"
-    [paginator]="true"
-    [rows]="10"
-    [rowsPerPageOptions]="[10, 20, 50, 100]"
-    [tableStyle]="{ 'width': '100%' }"
-  >
+  <p-table [value]="reportTotalBeneficiaryPaymentDetails" [paginator]="true" [rows]="10"
+    [rowsPerPageOptions]="[10, 20, 50, 100]" [tableStyle]="{ 'width': '100%' }">
 
     <ng-template pTemplate="caption">
       <div class="d-flex justify-content-start align-items-center">
-        <button
-          type="button"
-          class="btn btn-success btn-sm me-2"
-          (click)="exportExcel()"
-          pTooltip="XLS"
-          tooltipPosition="bottom"
-        >
+        <button type="button" class="btn btn-success btn-sm me-2" (click)="exportExcel()" pTooltip="XLS"
+          tooltipPosition="bottom">
           <i class="fas fa-file-excel me-2"></i>Export as XLS
         </button>
         <!-- <button
@@ -28,51 +18,74 @@
           <i class="fas fa-file-pdf me-2"></i>Export as PDF
         </button> -->
         <div class="d-flex flex-column flex-md-row align-items-center ms-auto">
-        <span class="me-4">
-          Total Beneficiaries:
-          <strong>{{ reportTotalBeneficiaryPaymentDetailsTotals.totalPaid + reportTotalBeneficiaryPaymentDetailsTotals.totalUnpaid }}</strong>
-        </span>
-        <span class="me-4">Total Paid: <strong>{{ reportTotalBeneficiaryPaymentDetailsTotals.totalPaid }}</strong></span>
-        <span>Total Unpaid: <strong>{{ reportTotalBeneficiaryPaymentDetailsTotals.totalUnpaid }}</strong></span>
-      </div>
+          <span class="me-4">
+            Total Beneficiaries:
+            <strong>{{ reportTotalBeneficiaryPaymentDetailsTotals.totalBeneficiaries }}</strong>
+          </span>
+          <span class="me-4">Total Paid: <strong>{{ reportTotalBeneficiaryPaymentDetailsTotals.totalPaid }}</strong></span>
+          <span>Total Unpaid: <strong>{{ reportTotalBeneficiaryPaymentDetailsTotals.totalUnpaid }}</strong></span>
+        </div>
       </div>
     </ng-template>
 
 
     <ng-template pTemplate="header">
       <tr class="text-center" style="background-color: cornflowerblue; color: white">
+        <th>State</th>
+        <th>County</th>
+        <th>Payam</th>
+        <th>Boma</th>
         <th>Household Number</th>
         <th>Name</th>
         <th>Wage</th>
         <th>Exchange Rate</th>
-        <th>Payment Date</th>
         <th>Support Type</th>
         <th>Request No</th>
         <th>Payment Cycle</th>
-        <th>Payment Center</th>
+        <th>Work Code</th>
+        <th>Wage Rate (USD)</th>
+        <th>Paid Amount (USD)</th>
+        <th>Attendance Days</th>
+        <th>Absence Days</th>
+        <th>Payment Generate Date</th>
+        <th>Payment Date</th>
+        <th>Paid Household Name</th>
+        <th>Paid To</th>
         <th>Status</th>
       </tr>
     </ng-template>
 
     <ng-template pTemplate="body" let-rowData>
       <tr class="text-center">
+        <td>{{ rowData.state }}</td>
+        <td>{{ rowData.county }}</td>
+        <td>{{ rowData.payam }}</td>
+        <td>{{ rowData.boma }}</td>
         <td>{{ rowData.householdNumber }}</td>
         <td>{{ rowData.name }}</td>
-        <td>SSP {{ rowData.wage}}</td>
-        <td> {{ rowData.exchangeRate }} </td>
-        <td> {{ rowData.paymentDate }} </td>
+        <td>SSP {{ rowData.wage }}</td>
+        <td>{{ rowData.exchangeRate }}</td>
         <td>{{ rowData.supportType }}</td>
         <td>{{ rowData.reqNo }}</td>
         <td>Payment Cycle {{ rowData.paymentCycle }}</td>
-        <td>{{ rowData.paymentCenter  || 'N/A' }}</td>
+        <td>{{ rowData.workCode }}</td>
+        <td>{{ rowData.wageRateUsd }}</td>
+        <td>{{ rowData.paidAmountUsd }}</td>
+        <td>{{ rowData.attendanceDays }}</td>
+        <td>{{ rowData.absenceDays }}</td>
+        <td>{{ rowData.paymentGenerateDate }}</td>
+        <td>{{ rowData.paymentDate }}</td>
+        <td>{{ rowData.paidHouseHoldName }}</td>
+        <td>{{ rowData.paidTo }}</td>
         <td>{{ rowData.status }}</td>
       </tr>
     </ng-template>
 
 
+
     <ng-template pTemplate="emptymessage">
       <tr>
-        <td colspan="11" class="text-center">Nothing Found.</td>
+        <td colspan="23" class="text-center">Nothing Found.</td>
       </tr>
     </ng-template>
   </p-table>
