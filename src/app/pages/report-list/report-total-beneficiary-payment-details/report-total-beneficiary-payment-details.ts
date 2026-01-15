@@ -9,16 +9,28 @@ import { PaginatorModule } from 'primeng/paginator';
 import { LookupService } from '../../../services/lookup.service';
 
 interface ReconciledSummaryRow {
+  state: string;
+  county: string;
+  payam: string;
+  boma: string;
   householdNumber: string;
   name: string;
   wage: number;
+  exchangeRate: number;
   supportType: string;
   reqNo: string;
-  exchangeRate: string;
-  paymentDate: string;
   paymentCycle: string;
-  paymentCenter: string;
+  workCode: string;
+  wageRateUsd: number;
+  paidAmountUsd: number;
+  attendanceDays: number;
+  absenceDays: number;
+  paymentGenerateDate: string;
+  paymentDate: string;
+  paidHouseHoldName: string;
+  paidTo: string;
   status: string;
+  paymentCenter: string;
 }
 
 interface SummaryTotals {
@@ -59,54 +71,73 @@ export class ReportTotalBeneficiaryPaymentDetails implements OnInit {
       console.error('No data available to export.');
       return;
     }
-
+  
     const { default: jsPDF } = await import('jspdf');
     const { default: autoTable } = await import('jspdf-autotable');
-
+  
     const doc = new jsPDF('landscape');
-
+  
     // Add title
     doc.setFontSize(18);
-    doc.text('Reconciled Summary Result Report', 14, 20);
-
+    doc.text('Total Beneficiary Payment Details Report', 14, 20);
+  
     // Add summary totals
     doc.setFontSize(10);
     const summaryText = `Total Beneficiaries: ${
-      this.reportTotalBeneficiaryPaymentDetailsTotals.totalPaid +
-      this.reportTotalBeneficiaryPaymentDetailsTotals.totalUnpaid
+      this.reportTotalBeneficiaryPaymentDetailsTotals.totalBeneficiaries
     } | Total Paid: ${
       this.reportTotalBeneficiaryPaymentDetailsTotals.totalPaid
     } | Total Unpaid: ${this.reportTotalBeneficiaryPaymentDetailsTotals.totalUnpaid}`;
     doc.text(summaryText, 14, 30);
-
+  
     const headers = [
+      'State',
+      'County',
+      'Payam',
+      'Boma',
       'HH Number',
       'Name',
       'Wage',
       'Ex Rate',
-      'Pay Date',
       'Supp Type',
       'Req No',
       'Pay Cycle',
-      'Pay Center',
+      'Work Code',
+      'Wage Rate (USD)',
+      'Paid Amount (USD)',
+      'Attd. Days',
+      'Abs. Days',
+      'Pay Gen Date',
+      'Pay Date',
+      'Paid HH Name',
+      'Paid To',
       'Status',
     ];
-
-    const data = this.reportTotalBeneficiaryPaymentDetails.map(
-      (row: ReconciledSummaryRow) => [
-        row.householdNumber,
-        row.name,
-        `SSP ${row.wage}`,
-        row.exchangeRate,
-        row.paymentDate,
-        row.supportType,
-        row.reqNo,
-        `Payment Cycle ${row.paymentCycle}`,
-        row.paymentCenter || 'N/A',
-        row.status,
-      ]
-    );
-
+  
+    const data = this.reportTotalBeneficiaryPaymentDetails.map((row: any) => [
+      row.state,
+      row.county,
+      row.payam,
+      row.boma,
+      row.householdNumber,
+      row.name,
+      `SSP ${row.wage}`,
+      row.exchangeRate,
+      row.supportType,
+      row.reqNo,
+      `PC ${row.paymentCycle}`,
+      row.workCode,
+      row.wageRateUsd,
+      row.paidAmountUsd,
+      row.attendanceDays,
+      row.absenceDays,
+      row.paymentGenerateDate,
+      row.paymentDate,
+      row.paidHouseHoldName,
+      row.paidTo,
+      row.status,
+    ]);
+  
     autoTable(doc, {
       head: [headers],
       body: data,
@@ -121,35 +152,115 @@ export class ReportTotalBeneficiaryPaymentDetails implements OnInit {
         fillColor: [240, 248, 255],
       },
       styles: {
-        fontSize: 8,
-        cellPadding: 2,
+        fontSize: 7,
+        cellPadding: 1,
+        overflow: 'linebreak',
+      },
+      columnStyles: {
+        0: { cellWidth: 'auto' },
+        1: { cellWidth: 'auto' },
+        2: { cellWidth: 'auto' },
+        3: { cellWidth: 'auto' },
+        4: { cellWidth: 'auto' },
+        5: { cellWidth: 20 },
+        6: { cellWidth: 'auto' },
+        7: { cellWidth: 'auto' },
+        8: { cellWidth: 'auto' },
+        9: { cellWidth: 'auto' },
+        10: { cellWidth: 'auto' },
+        11: { cellWidth: 'auto' },
+        12: { cellWidth: 'auto' },
+        13: { cellWidth: 'auto' },
+        14: { cellWidth: 'auto' },
+        15: { cellWidth: 'auto' },
+        16: { cellWidth: 'auto' },
+        17: { cellWidth: 'auto' },
+        18: { cellWidth: 20 },
+        19: { cellWidth: 'auto' },
+        20: { cellWidth: 'auto' },
       },
     });
-
+  
     doc.save('TotalBeneficiaryPaymentDetails.pdf');
   }
 
   async exportExcel() {
-     if (!this.reportTotalBeneficiaryPaymentDetails || this.reportTotalBeneficiaryPaymentDetails.length === 0) {
+    if (
+      !this.reportTotalBeneficiaryPaymentDetails ||
+      this.reportTotalBeneficiaryPaymentDetails.length === 0
+    ) {
       console.error('No data available to export.');
       return;
     }
 
+    const dataToExport = this.reportTotalBeneficiaryPaymentDetails.map(
+      (row: any, index: number) => ({
+        'S.No': index + 1,
+        'IP': '',
+        'State Name': row.state,
+        'County Name': row.county,
+        'Payam Name': row.payam,
+        'Boma Name': row.boma,
+        'Work Code': row.workCode,
+        'Enrollment Number': '',
+        'Benficiary Name': row.name,
+        'Original Household number': row.householdNumber,
+        'Gender': '',
+        'Component': row.supportType,
+        'From Date': row.fromDate,
+        'To Date': row.toDate,
+        'Wage Rate (In USD)': row.wageRateUsd,
+        'Paid Amount (In USD)': row.paidAmountUsd,
+        'Attendance Days': row.attendanceDays,
+        'Absence Days': row.absenceDays,
+        'Exchange Rate In SSP': row.exchangeRate,
+        'Paid Amount (In SSP)': row.paidAmountSsp,
+        'Payment Date': row.paymentDate,
+        'Payment Generate Date': row.paymentGenerateDate,
+        'Paid House Hold Name': row.paidHouseHoldName,
+        'Paidto': row.paidTo,
+        'Pay Status': row.status,
+        'Wage Request Number': row.reqNo,
+        'Payment Cycle': row.paymentCycle,
+        'Latitude': row.latitude,
+        'Longitude': row.longitude,
+      })
+    );
+
     const xlsx = await import('xlsx');
-    const worksheet = xlsx.utils.json_to_sheet(this.reportTotalBeneficiaryPaymentDetails);
+    const worksheet = xlsx.utils.json_to_sheet(dataToExport);
 
     // Adjust column widths
     const columnWidths = [
-      { wch: 45 }, // Household Number
-      { wch: 25 }, // Name
-      { wch: 10 }, // Wage
-      { wch: 10 }, //exchange rate
-      { wch: 10 }, // payment date
-      { wch: 10 }, // Support Type
-      { wch: 20 }, // Request Number
-      { wch: 20 }, // Payment Cycle
-      { wch: 15 }, // Payment Center
-      { wch: 10 }, // Status
+      { wch: 5 },   // S.No
+      { wch: 10 },  // IP
+      { wch: 15 },  // State Name
+      { wch: 15 },  // County Name
+      { wch: 15 },  // Payam Name
+      { wch: 15 },  // Boma Name
+      { wch: 15 },  // Work Code
+      { wch: 20 },  // Enrollment Number
+      { wch: 25 },  // Benficiary Name
+      { wch: 25 },  // Original Household number
+      { wch: 10 },  // Gender
+      { wch: 15 },  // Component
+      { wch: 15 },  // From Date
+      { wch: 15 },  // To Date
+      { wch: 20 },  // Wage Rate (In USD)
+      { wch: 20 },  // Paid Amount (In USD)
+      { wch: 15 },  // Attendance Days
+      { wch: 15 },  // Absence Days
+      { wch: 20 },  // Exchange Rate In SSP
+      { wch: 20 },  // Paid Amount (In SSP)
+      { wch: 15 },  // Payment Date
+      { wch: 25 },  // Payment Generate Date
+      { wch: 25 },  // Paid House Hold Name
+      { wch: 15 },  // Paidto
+      { wch: 10 },  // Pay Status
+      { wch: 20 },  // Wage Request Number
+      { wch: 15 },  // Payment Cycle
+      { wch: 10 },  // Latitude
+      { wch: 10 },  // Longitude
     ];
     worksheet['!cols'] = columnWidths;
 
@@ -166,9 +277,19 @@ export class ReportTotalBeneficiaryPaymentDetails implements OnInit {
     }
 
     const workbook = xlsx.utils.book_new();
-    xlsx.utils.book_append_sheet(workbook, worksheet, 'Total Beneficiary Payment Details');
-    const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array', cellStyles: true });
-    const data = new Blob([excelBuffer], { type: 'application/octet-stream' });
+    xlsx.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      'Beneficiary Payment Details'
+    );
+    const excelBuffer = xlsx.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array',
+      cellStyles: true,
+    });
+    const data = new Blob([excelBuffer], {
+      type: 'application/octet-stream',
+    });
     saveAs(data, 'TotalBeneficiaryPaymentDetails.xlsx');
   }
 }

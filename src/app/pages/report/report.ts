@@ -356,7 +356,7 @@ export class ReportComponent implements OnInit {
         endpoint = 'api/report/reconciliation-summary-count-report';
         break;
       case 11:
-        endpoint = 'api/payroll/recon/monitoring/geo/details/report';
+        endpoint = 'api/report/total-beneficiaries-payment-report';
         break;
     }
     return endpoint;
@@ -545,9 +545,9 @@ export class ReportComponent implements OnInit {
 
             this.reportTotalBeneficiaryPaymentDetailsTotals = {
               totalBeneficiaries:
-                res?.data?.reportData?.totalBeneficiaries ?? 0,
-              totalPaid: res?.data?.reportData?.totalPaid ?? 0,
-              totalUnpaid: res?.data?.reportData?.totalUnpaid ?? 0,
+                res?.data?.metadata?.totalBeneficiaries ?? 0,
+              totalPaid: res?.data?.metadata?.totalPaid ?? 0,
+              totalUnpaid: res?.data?.metadata?.totalUnpaid ?? 0,
             };
 
             console.log(
