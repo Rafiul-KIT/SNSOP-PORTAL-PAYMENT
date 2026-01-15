@@ -51,13 +51,13 @@ export class ReportReconciledSummaryResult implements OnInit {
   ngOnInit(): void {
   }
 
-  async exportPdf() {
+  private async createPdf(): Promise<any> {
     if (
       !this.reportReconciledSummaryResultCount ||
       this.reportReconciledSummaryResultCount.length === 0
     ) {
-      console.error('No data available to export.');
-      return;
+      console.error('No data available to generate PDF.');
+      return null;
     }
 
     const { default: jsPDF } = await import('jspdf');
@@ -67,7 +67,7 @@ export class ReportReconciledSummaryResult implements OnInit {
 
     // Add title
     doc.setFontSize(18);
-    doc.text('Reconciled Summary Result Report', 14, 20);
+    doc.text('Reconciled Details Result Report', 14, 20);
 
     // Add summary totals
     doc.setFontSize(10);
@@ -126,7 +126,28 @@ export class ReportReconciledSummaryResult implements OnInit {
       },
     });
 
-    doc.save('ReconciliationDetailReport.pdf');
+    return doc;
+  }
+
+  async exportPdf() {
+    const doc = await this.createPdf();
+    if (doc) {
+      doc.save('ReconciliationDetailReport.pdf');
+    }
+  }
+
+  async previewPdf() {
+    const doc = await this.createPdf();
+    if (doc) {
+      const string = doc.output('datauristring');
+      const embed = "<embed width='100%' height='100%' src='" + string + "'/>";
+      const x = window.open();
+      if (x) {
+        x.document.open();
+        x.document.write(embed);
+        x.document.close();
+      }
+    }
   }
 
   async exportExcel() {
@@ -166,7 +187,7 @@ export class ReportReconciledSummaryResult implements OnInit {
     }
 
     const workbook = xlsx.utils.book_new();
-    xlsx.utils.book_append_sheet(workbook, worksheet, 'Reconciliation Summary');
+    xlsx.utils.book_append_sheet(workbook, worksheet, 'Reconciliation Detail Report');
     const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array', cellStyles: true });
     const data = new Blob([excelBuffer], { type: 'application/octet-stream' });
     saveAs(data, 'ReconciliationDetailReport.xlsx');
