@@ -595,6 +595,7 @@ export class ReportComponent implements OnInit {
 
           if (res.status === 200 && res.data) {
             const dataLists = res?.data?.dataList ?? [];
+            const data = res?.data ?? [];
 
             this.reportReconciliationSummaryCount = dataLists.map(
               (dataList: any) => ({
@@ -605,6 +606,9 @@ export class ReportComponent implements OnInit {
                 totalDISUnpaid: dataList.totalDISUnpaid,
                 totalLIPWPaid: dataList.totalLIPWPaid,
                 totalLIPWUnpaid: dataList.totalLIPWUnpaid,
+                state: data.state,
+                county: data.county,
+                payam: data.payam,
               })
             );
           } else {

@@ -67,7 +67,7 @@ export class ReportReconciledSummaryResult implements OnInit {
 
     // Add title
     doc.setFontSize(18);
-    doc.text('Reconciled Summary Result Report', 14, 20);
+    doc.text('Reconciled Details Result Report', 14, 20);
 
     // Add summary totals
     doc.setFontSize(10);
@@ -187,7 +187,7 @@ export class ReportReconciledSummaryResult implements OnInit {
     }
 
     const workbook = xlsx.utils.book_new();
-    xlsx.utils.book_append_sheet(workbook, worksheet, 'Reconciliation Summary');
+    xlsx.utils.book_append_sheet(workbook, worksheet, 'Reconciliation Detail Report');
     const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array', cellStyles: true });
     const data = new Blob([excelBuffer], { type: 'application/octet-stream' });
     saveAs(data, 'ReconciliationDetailReport.xlsx');

@@ -42,7 +42,10 @@
     <ng-template pTemplate="header">
       <tr class="text-center header-row">
         <th rowspan="2" class="bordered">Serial No</th>
-        <th rowspan="2" class="bordered">Name of Boma</th>
+        <th rowspan="2" class="bordered">State</th>
+        <th rowspan="2" class="bordered">County</th>
+        <th rowspan="2" class="bordered">Payam</th>
+        <th rowspan="2" class="bordered">Boma</th>
         <th colspan="2" class="bordered">Approved/Payrolled Beneficiary</th>
         <th colspan="2" class="bordered">DIS</th>
         <th colspan="2" class="bordered">LIPW</th>
@@ -63,6 +66,9 @@
     <ng-template pTemplate="body" let-rowData let-rowIndex="rowIndex">
       <tr class="text-center data-row" [class.grey-row]="rowIndex % 2 === 0">
         <td class="bordered">{{ rowIndex + 1 }}</td>
+        <td class="bordered">{{ lookupService.getStateNameById(rowData.state) }}</td>
+        <td class="bordered">{{ lookupService.getCountyNameById(rowData.county) }}</td>
+        <td class="bordered">{{ lookupService.getPayamNameById(rowData.payam) }}</td>
         <td class="bordered">{{ lookupService.getBomaNameById(rowData.boma) }}</td>
         <td class="bordered">{{ rowData.totalDISPaid + rowData.totalDISUnpaid }}</td>
         <td class="bordered">{{ rowData.totalLIPWPaid + rowData.totalLIPWUnpaid }}</td>
