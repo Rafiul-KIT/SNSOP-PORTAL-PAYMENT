@@ -29,7 +29,14 @@ export class ReportReconciliationSummaryCount implements OnInit {
 
   ngOnInit(): void {}
 
-  exportPdf() {
+  private createPdf(): jsPDF | null {
+    if (
+      !this.reportReconciliationSummaryCount ||
+      this.reportReconciliationSummaryCount.length === 0
+    ) {
+      console.error('No data available to generate PDF.');
+      return null;
+    }
     const doc = new jsPDF('l', 'mm', 'a4'); // Landscape mode, mm units, A4 size
 
     // Title
@@ -78,7 +85,27 @@ export class ReportReconciliationSummaryCount implements OnInit {
       alternateRowStyles: { fillColor: [240, 240, 240] },
     });
 
-    // Save the PDF
-    doc.save('Reconciliation_Summary.pdf');
+    return doc;
+  }
+
+  exportPdf() {
+    const doc = this.createPdf();
+    if (doc) {
+      doc.save('Reconciliation_Summary.pdf');
+    }
+  }
+
+  previewPdf() {
+    const doc = this.createPdf();
+    if (doc) {
+      const string = doc.output('datauristring');
+      const embed = "<embed width='100%' height='100%' src='" + string + "'/>";
+      const x = window.open();
+      if (x) {
+        x.document.open();
+        x.document.write(embed);
+        x.document.close();
+      }
+    }
   }
 }

@@ -51,13 +51,13 @@ export class ReportReconciledSummaryResult implements OnInit {
   ngOnInit(): void {
   }
 
-  async exportPdf() {
+  private async createPdf(): Promise<any> {
     if (
       !this.reportReconciledSummaryResultCount ||
       this.reportReconciledSummaryResultCount.length === 0
     ) {
-      console.error('No data available to export.');
-      return;
+      console.error('No data available to generate PDF.');
+      return null;
     }
 
     const { default: jsPDF } = await import('jspdf');
@@ -126,7 +126,28 @@ export class ReportReconciledSummaryResult implements OnInit {
       },
     });
 
-    doc.save('ReconciliationDetailReport.pdf');
+    return doc;
+  }
+
+  async exportPdf() {
+    const doc = await this.createPdf();
+    if (doc) {
+      doc.save('ReconciliationDetailReport.pdf');
+    }
+  }
+
+  async previewPdf() {
+    const doc = await this.createPdf();
+    if (doc) {
+      const string = doc.output('datauristring');
+      const embed = "<embed width='100%' height='100%' src='" + string + "'/>";
+      const x = window.open();
+      if (x) {
+        x.document.open();
+        x.document.write(embed);
+        x.document.close();
+      }
+    }
   }
 
   async exportExcel() {
