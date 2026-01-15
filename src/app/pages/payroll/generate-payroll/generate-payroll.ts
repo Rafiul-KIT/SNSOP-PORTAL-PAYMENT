@@ -89,7 +89,7 @@ export class GeneratePayroll implements OnInit {
   paymentCycleOptions: LookupItemPayroll[] = [];
     paymentTypeOptions: LookupItem[] = [
        { id: 'CASH_PAYMENT', name: 'Cash' },
-      { id: 'MOBILE_PAYMENT', name: 'Mobile Money' }
+      // { id: 'MOBILE_PAYMENT', name: 'Mobile Money' }
     ];
 
   // Generation status
