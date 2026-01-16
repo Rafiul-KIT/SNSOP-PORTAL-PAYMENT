@@ -213,7 +213,7 @@ export class Header {
             routerLink: 'payroll/generate',
           },
           {
-            label: 'Payroll Download',
+            label: 'Cash Payroll Download',
             icon: 'fas fa-donate',
             routerLink: 'payroll/download',
           },

@@ -4,7 +4,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DatePipe, CommonModule } from '@angular/common';
 import {
   FormBuilder,
   FormGroup,
@@ -44,6 +44,7 @@ interface PayrollGenerationRequest {
   status: 'FAILED' | 'SUCCESS' | 'PENDING' | 'PROCESSING';
   reportFileName?: string;
   binFileName?: string;
+  created?: string;
 }
 interface PagedPayrollResponse {
   content: PayrollGenerationRequest[];
@@ -77,7 +78,7 @@ interface ApiResponse {
     ProgressBarModule,
     DialogModule,
   ],
-  providers: [],
+  providers: [DatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './payroll-download.html',
   styleUrl: './payroll-download.scss',
@@ -124,7 +125,8 @@ export class PayrollDownload implements OnInit {
     private api: ApiService,
     private lookup: LookupService,
     private cdr: ChangeDetectorRef,
-    private router: Router
+    private router: Router,
+    private datePipe: DatePipe
   ) {}
 
   public Math = Math;
@@ -457,6 +459,17 @@ export class PayrollDownload implements OnInit {
       this.downloadProgress = 0;
       this.cdr.markForCheck();
     }
+  }
+
+  formatCreatedDate(dateString: string | undefined): string {
+    if (!dateString) {
+      return '';
+    }
+    // Adjust format as needed, e.g., 'short', 'medium', 'long', 'full'
+    // Or custom format: 'MMM d, y, h:mm a'
+    return (
+      this.datePipe.transform(dateString, 'MMM d, y, h:mm a') || dateString
+    );
   }
 
   onRefreshClick() {
