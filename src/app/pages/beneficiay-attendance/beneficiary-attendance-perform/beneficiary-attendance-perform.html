@@ -16,10 +16,10 @@
                         <i class="pi pi-wallet me-2"></i>
                         Beneficiary Attendance
                     </h3>
-                    <!-- <div class="d-flex gap-2">
+                    <div class="d-flex gap-2">
                         <button pButton type="button" label="Upload Beneficiary Attendance" icon="pi pi-upload"
-                            class="p-button-primary" [disabled]="loading"></button>
-                    </div> -->
+                            class="p-button-primary" (click)="showUploadModal = true" [disabled]="loading || !subproject"></button>
+                    </div>
                 </div>
             </p-card>
 
@@ -156,4 +156,37 @@
                         </div>
                     </div>
                 </div>
-                }
+                
+<p-dialog header="Upload Beneficiary Attendance" [(visible)]="showUploadModal" [modal]="true" [style]="{width: '40vw'}" [draggable]="false" [resizable]="false">
+    <div class="upload-container p-3">
+        <div class="text-center mb-4">
+            <a (click)="downloadTemplate()" class="p-button p-button-success p-component" style="text-decoration: none; color: white; cursor: pointer;">
+                <span class="p-button-icon p-button-icon-left pi pi-download"></span>
+                <span class="p-button-label">Download Template</span>
+            </a>
+        </div>
+
+        <div class="text-center mb-4">
+            <label for="file-upload" class="p-button p-button-outlined p-component" style="cursor: pointer;">
+                <i class="pi pi-cloud-upload me-2"></i>
+                <span>{{ selectedFile ? selectedFile.name : 'Choose Excel File' }}</span>
+            </label>
+            <input id="file-upload" type="file" (change)="onFileSelect($event)" accept=".xlsx, .xls" class="d-none">
+        </div>
+
+        <div class="notes-section card bg-light border-warning p-3">
+            <h5 class="card-title text-dark"><i class="pi pi-info-circle me-2 text-warning"></i>Please Note:</h5>
+            <ul class="list-unstyled mb-0">
+                <li class="mb-2"><i class="pi pi-check-circle text-success me-2"></i>1. Download the attendance template.</li>
+                <li class="mb-2"><i class="pi pi-check-circle text-success me-2"></i>2. Add your data to the 'Beneficiary Attendance' sheet.</li>
+                <li class="mb-2"><i class="pi pi-check-circle text-success me-2"></i>3. Do not leave the Excel file open during upload.</li>
+                <li><i class="pi pi-check-circle text-success me-2"></i>4. Ensure all dates are in <strong>YYYY/MM/DD</strong> format.</li>
+            </ul>
+        </div>
+    </div>
+    <ng-template pTemplate="footer">
+        <button pButton type="button" icon="pi pi-times" (click)="showUploadModal=false" label="Cancel" class="p-button-text"></button>
+        <button pButton type="button" icon="pi pi-upload" (click)="uploadAttendanceFile()" label="Submit" [disabled]="!selectedFile || uploadInProgress" [loading]="uploadInProgress"></button>
+    </ng-template>
+</p-dialog>
+}
