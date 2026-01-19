@@ -9,15 +9,16 @@ export const TypeOfMeetingEnum = [
 ];
  // Define Enum for status
 export const StatusEnum = [
-  { id: '0', value: 'IP_Submitted', label: 'IP Submitted' },
-  { id: '1', value: 'QE_Approved', label: 'QE Approved' },
-  { id: '2', value: 'QE_Rejected', label: 'QE Rejected' },
-  { id: '3', value: 'ES_Approved', label: 'ES Approved' },
-  { id: '4', value: 'ES_Rejected', label: 'ES Rejected' },
-  { id: '5', value: 'TST_Approved', label: 'TST Approved' },
-  { id: '6', value: 'TST_Rejected', label: 'TST Rejected' },
-  { id: '7', value: 'InProgress', label: 'In Progress' },
-  { id: '8', value: 'Completed', label: 'Completed' }
+   { id: '0', value: 'draft', label: 'Draft' },
+  { id: '1', value: 'IP_Submitted', label: 'IP Submitted' },
+  { id: '2', value: 'QE_Approved', label: 'QE Approved' },
+  { id: '3', value: 'QE_Rejected', label: 'QE Rejected' },
+  { id: '4', value: 'ES_Approved', label: 'ES Approved' },
+  { id: '5', value: 'ES_Rejected', label: 'ES Rejected' },
+  { id: '6', value: 'TST_Approved', label: 'TST Approved' },
+  { id: '7', value: 'TST_Rejected', label: 'TST Rejected' },
+  { id: '8', value: 'InProgress', label: 'In Progress' },
+  { id: '9', value: 'Completed', label: 'Completed' }
 ];
 export const StatusEnumAssignRemove = [
   { id: '5', value: 'TST_Approved', label: 'TST Approved' },
