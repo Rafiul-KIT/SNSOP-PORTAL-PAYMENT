@@ -9,7 +9,7 @@ export const TypeOfMeetingEnum = [
 ];
  // Define Enum for status
 export const StatusEnum = [
-   { id: '0', value: 'draft', label: 'Draft' },
+   { id: '0', value: 'Draft', label: 'Draft' },
   { id: '1', value: 'IP_Submitted', label: 'IP Submitted' },
   { id: '2', value: 'QE_Approved', label: 'QE Approved' },
   { id: '3', value: 'QE_Rejected', label: 'QE Rejected' },
