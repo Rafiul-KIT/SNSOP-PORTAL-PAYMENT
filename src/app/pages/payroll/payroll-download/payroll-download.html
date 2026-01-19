@@ -109,7 +109,7 @@
         </ng-template>
         <ng-template pTemplate="body" let-request let-i="rowIndex">
             <tr>
-                <td>{{ (currentPage * pageSize) + i + 1 }}</td>
+                <td>{{ totalRecords - ((currentPage * pageSize) + i) }}</td>
                 <td>{{ request.requestId }}</td>
 
                 <td>{{ getStateName(request.state) }}</td>
