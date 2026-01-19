@@ -214,7 +214,7 @@ export class ReportComponent implements OnInit {
           bomaId: new FormControl(''),
           criteria: new FormControl('ALL'),
           paymentStatus: new FormControl('ALL'),
-          size: new FormControl(1000, Validators.required),
+          size: new FormControl(-1, Validators.required),
           paymentCycle: new FormControl('1', Validators.required),
         });
         break;

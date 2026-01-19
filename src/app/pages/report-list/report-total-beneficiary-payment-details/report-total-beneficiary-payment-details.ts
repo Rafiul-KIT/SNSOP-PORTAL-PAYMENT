@@ -97,19 +97,20 @@ export class ReportTotalBeneficiaryPaymentDetails implements OnInit {
       'Boma',
       'HH Number',
       'Name',
-      'Wage',
-      'Ex Rate',
+      
+     
       'Supp Type',
       'Req No',
       'Pay Cycle',
       'Work Code',
       'Wage Rate (USD)',
+       'Ex Rate(SSP)',
       'Paid Amount (USD)',
       'Attd. Days',
       'Abs. Days',
       'Pay Gen Date',
       'Pay Date',
-      'Paid HH Name',
+     
       'Paid To',
       'Status',
     ];
@@ -121,19 +122,20 @@ export class ReportTotalBeneficiaryPaymentDetails implements OnInit {
       row.boma,
       row.householdNumber,
       row.name,
-      `SSP ${row.wage}`,
-      row.exchangeRate,
+      
+     
       row.supportType,
       row.reqNo,
       `PC ${row.paymentCycle}`,
       row.workCode,
       row.wageRateUsd,
+       row.exchangeRate,
       row.paidAmountUsd,
       row.attendanceDays,
       row.absenceDays,
       row.paymentGenerateDate,
       row.paymentDate,
-      row.paidHouseHoldName,
+    
       row.paidTo,
       row.status,
     ]);
@@ -217,7 +219,6 @@ export class ReportTotalBeneficiaryPaymentDetails implements OnInit {
         'Paid Amount (In SSP)': row.paidAmountSsp,
         'Payment Date': row.paymentDate,
         'Payment Generate Date': row.paymentGenerateDate,
-        'Paid House Hold Name': row.paidHouseHoldName,
         'Paidto': row.paidTo,
         'Pay Status': row.status,
         'Wage Request Number': row.reqNo,
