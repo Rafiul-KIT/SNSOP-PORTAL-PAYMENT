@@ -410,7 +410,7 @@ export class BeneficiaryAttendancePerform implements OnInit {
           return;
       }
       const subprojectId = this.subproject.id;
-      this.api.axiosInstance.get(`api/attendance/download/template?subprojectId=${subprojectId}`, { responseType: 'blob' })
+      this.api.axiosInstance.get(`api/attendance/download/template`, { responseType: 'blob' })
           .then((response: any) => {
               const blob = new Blob([response.data], { type: response.headers['content-type'] });
               const url = window.URL.createObjectURL(blob);
