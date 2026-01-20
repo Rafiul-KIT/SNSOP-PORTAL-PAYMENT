@@ -567,7 +567,7 @@ export class BeneficiaryAttendancePerform implements OnInit {
     })
       .then((res: any) => {
         Swal.close();
-        if (res.data && res.data.code === 200) {
+        if (res.data && res.data.code === 200 && res.data.code === 202) {
           Swal.fire({
             title: 'Success',
             text: 'Attendance file uploaded successfully!',
