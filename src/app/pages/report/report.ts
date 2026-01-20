@@ -2,6 +2,7 @@ import { ReportTotalBeneficiaryPaymentDetails } from './../report-list/report-to
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
+  FormArray,
   FormControl,
   FormGroup,
   Validators,
@@ -94,6 +95,23 @@ export class ReportComponent implements OnInit {
 
   date: Date[] | undefined;
   reportForm: FormGroup = new FormGroup({});
+  paymentCyclesAvailable = Array.from({ length: 15 }, (_, i) => i + 1);
+
+  onPaymentCycleChange(e: any) {
+    const paymentCycles: FormArray = this.reportForm.get(
+      'paymentCycles'
+    ) as FormArray;
+
+    if (e.target.checked) {
+      paymentCycles.push(new FormControl(e.target.value));
+    } else {
+      const index = paymentCycles.controls.findIndex(
+        (x) => x.value === e.target.value
+      );
+      paymentCycles.removeAt(index);
+    }
+  }
+
 
   constructor(
     private apiService: ApiService,
@@ -216,7 +234,28 @@ export class ReportComponent implements OnInit {
           paymentStatus: new FormControl('ALL'),
           size: new FormControl(-1, Validators.required),
           paymentCycle: new FormControl('1', Validators.required),
+          paymentCycleSelectionType: new FormControl('single'),
+          paymentCycles: new FormArray([]),
         });
+
+        this.reportForm
+          .get('paymentCycleSelectionType')
+          ?.valueChanges.subscribe((val) => {
+            if (val === 'single') {
+              this.reportForm
+                .get('paymentCycle')
+                ?.setValidators([Validators.required]);
+              this.reportForm.get('paymentCycles')?.clearValidators();
+              (this.reportForm.get('paymentCycles') as FormArray).clear();
+            } else {
+              this.reportForm.get('paymentCycle')?.clearValidators();
+              this.reportForm
+                .get('paymentCycles')
+                ?.setValidators([Validators.required, Validators.minLength(1)]);
+            }
+            this.reportForm.get('paymentCycle')?.updateValueAndValidity();
+            this.reportForm.get('paymentCycles')?.updateValueAndValidity();
+          });
         break;
       default:
         this.reportForm.reset();
@@ -482,6 +521,14 @@ export class ReportComponent implements OnInit {
     }
 
     if (this.selectedReportTypeId === 11) {
+      let paymentCycle: number[] = [];
+      if (this.reportForm.value.paymentCycleSelectionType === 'single') {
+        paymentCycle = [parseInt(this.reportForm.value.paymentCycle, 10)];
+      } else {
+        paymentCycle = this.reportForm.value.paymentCycles.map((c: string) =>
+          parseInt(c, 10)
+        );
+      }
       const payloadForReport = {
         state: parseInt(this.reportForm.value.stateId) || null,
         county: parseInt(this.reportForm.value.countyId) || null,
@@ -490,9 +537,7 @@ export class ReportComponent implements OnInit {
         criteria: this.reportForm.value.criteria || null,
         paymentStatus: this.reportForm.value.paymentStatus || null,
         size: this.reportForm.value.size || null,
-        paymentCycle: this.reportForm.value.paymentCycle
-          ? parseInt(this.reportForm.value.paymentCycle, 10)
-          : null,
+        paymentCycles: paymentCycle,
       };
 
       this.reportTotalBeneficiaryPaymentDetailsTotals = {
