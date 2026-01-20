@@ -405,62 +405,239 @@ export class BeneficiaryAttendancePerform implements OnInit {
   }
 
   downloadTemplate(): void {
-      if (!this.subproject) {
-          Swal.fire('Error', 'Subproject details not loaded.', 'error');
-          return;
+    if (!this.subproject) {
+      Swal.fire({
+        title: 'Error',
+        text: 'Subproject details not loaded.',
+        icon: 'error',
+        customClass: { container: 'high-z-index-swal' }
+      });
+      return;
+    }
+
+    Swal.fire({
+      title: 'Downloading Template...',
+      html: `
+        <div class="text-center">
+          <p>Please wait...</p>
+          <div class="progress" style="height: 20px;">
+            <div id="download-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+              style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+          <p id="download-progress-text">0%</p>
+        </div>
+      `,
+      allowOutsideClick: false,
+      customClass: { container: 'high-z-index-swal' },
+      didOpen: () => {
+        Swal.showLoading();
       }
-      const subprojectId = this.subproject.id;
-      this.api.axiosInstance.get(`api/attendance/download/template/${subprojectId}`, { responseType: 'blob' })
-          .then((response: any) => {
-              const blob = new Blob([response.data], { type: response.headers['content-type'] });
-              const url = window.URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = `attendance_template_subproject_${subprojectId}.xlsx`;
-              document.body.appendChild(a);
-              a.click();
-              window.URL.revokeObjectURL(url);
-              a.remove();
-          }).catch(err => {
-              Swal.fire('Download Failed', 'Could not download the template file.', 'error');
-              console.error('Template download error:', err);
-          });
+    });
+
+    const subprojectId = this.subproject.id;
+    this.api.axiosInstance.get(`api/attendance/download/template/${subprojectId}`, {
+      responseType: 'blob',
+      onDownloadProgress: (progressEvent) => {
+        const percentCompleted = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 1));
+        const progressBar = document.getElementById('download-progress-bar');
+        const progressText = document.getElementById('download-progress-text');
+        if (progressBar && progressText) {
+          progressBar.style.width = `${percentCompleted}%`;
+          progressBar.setAttribute('aria-valuenow', percentCompleted.toString());
+          progressText.innerText = `${percentCompleted}%`;
+        }
+      }
+    })
+      .then((response: any) => {
+        Swal.close();
+        const blob = new Blob([response.data], { type: response.headers['content-type'] });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `attendance_template_subproject_${subprojectId}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+        Swal.fire({
+          title: 'Success',
+          text: 'Template downloaded successfully!',
+          icon: 'success',
+          customClass: { container: 'high-z-index-swal' }
+        });
+      }).catch(err => {
+        Swal.close();
+        const defaultErrorMessage = 'Could not download the template file. Please try again later.';
+        let errorMessage = defaultErrorMessage;
+
+        if (err.response && err.response.status === 400) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                try {
+                    const errorData = JSON.parse(reader.result as string);
+                    errorMessage = errorData.message || defaultErrorMessage;
+                } catch (e) {
+                    errorMessage = defaultErrorMessage;
+                }
+                Swal.fire({
+                  title: 'Download Failed',
+                  text: errorMessage,
+                  icon: 'error',
+                  customClass: { container: 'high-z-index-swal' }
+                });
+            };
+            reader.onerror = () => {
+                Swal.fire({
+                  title: 'Download Failed',
+                  text: defaultErrorMessage,
+                  icon: 'error',
+                  customClass: { container: 'high-z-index-swal' }
+                });
+            };
+            reader.readAsText(err.response.data);
+        } else {
+            Swal.fire({
+              title: 'Download Failed',
+              text: errorMessage,
+              icon: 'error',
+              customClass: { container: 'high-z-index-swal' }
+            });
+        }
+        console.error('Template download error:', err);
+      });
   }
 
   uploadAttendanceFile(): void {
     if (!this.selectedFile) {
-      Swal.fire('No File Selected', 'Please choose a file to upload.', 'warning');
+      Swal.fire({
+        title: 'No File Selected',
+        text: 'Please choose a file to upload.',
+        icon: 'warning',
+        customClass: { container: 'high-z-index-swal' }
+      });
       return;
     }
-  
+
     if (!this.subproject) {
-      Swal.fire('Error', 'Subproject not loaded. Cannot upload file.', 'error');
+      Swal.fire({
+        title: 'Error',
+        text: 'Subproject not loaded. Cannot upload file.',
+        icon: 'error',
+        customClass: { container: 'high-z-index-swal' }
+      });
       return;
     }
-  
+
     this.uploadInProgress = true;
+    Swal.fire({
+      title: 'Uploading Attendance File...',
+      html: `
+        <div class="text-center">
+          <p>Please wait while the file is being uploaded...</p>
+          <div class="progress" style="height: 20px;">
+            <div id="upload-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+              style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+          <p id="upload-progress-text">0%</p>
+        </div>
+      `,
+      allowOutsideClick: false,
+      customClass: { container: 'high-z-index-swal' },
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
     const formData = new FormData();
     formData.append('file', this.selectedFile);
     formData.append('subprojectId', this.subproject.id.toString());
-  
+
     this.api.axiosInstance.post('api/attendance/upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: (progressEvent) => {
+        const percentCompleted = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 1));
+        const progressBar = document.getElementById('upload-progress-bar');
+        const progressText = document.getElementById('upload-progress-text');
+        if (progressBar && progressText) {
+          progressBar.style.width = `${percentCompleted}%`;
+          progressBar.setAttribute('aria-valuenow', percentCompleted.toString());
+          progressText.innerText = `${percentCompleted}%`;
+        }
+      }
     })
       .then((res: any) => {
+        Swal.close();
         if (res.data && res.data.code === 200) {
-          Swal.fire('Success', 'Attendance file uploaded successfully!', 'success');
+          Swal.fire({
+            title: 'Success',
+            text: 'Attendance file uploaded successfully!',
+            icon: 'success',
+            customClass: { container: 'high-z-index-swal' }
+          });
           this.showUploadModal = false;
           this.selectedFile = null;
-          if (this.attendanceDate) { // only refresh if a date was selected
+          if (this.attendanceDate) {
             this.onSearch();
           }
         } else {
-          Swal.fire('Upload Failed', res.data.message || 'An unknown error occurred.', 'error');
+          Swal.fire({
+            title: 'Upload Failed',
+            text: res.data.message || 'An unknown error occurred.',
+            icon: 'error',
+            customClass: { container: 'high-z-index-swal' }
+          });
         }
       })
       .catch(err => {
+        Swal.close();
         console.error(err);
-        Swal.fire('API Error', 'An error occurred while uploading the file.', 'error');
+        const defaultErrorMessage = 'An error occurred while uploading the file.';
+        let errorMessage = defaultErrorMessage;
+
+        if (err.response && err.response.status === 400 && err.response.data) {
+            // If the error response is a blob, it needs to be read
+            if (err.response.data instanceof Blob) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    try {
+                        const errorData = JSON.parse(reader.result as string);
+                        errorMessage = errorData.message || defaultErrorMessage;
+                    } catch (e) {
+                        errorMessage = defaultErrorMessage;
+                    }
+                    Swal.fire({
+                      title: 'Upload Failed',
+                      text: errorMessage,
+                      icon: 'error',
+                      customClass: { container: 'high-z-index-swal' }
+                    });
+                };
+                reader.onerror = () => {
+                    Swal.fire({
+                      title: 'Upload Failed',
+                      text: defaultErrorMessage,
+                      icon: 'error',
+                      customClass: { container: 'high-z-index-swal' }
+                    });
+                };
+                reader.readAsText(err.response.data);
+            } else if (err.response.data.message) {
+                errorMessage = err.response.data.message;
+                Swal.fire({
+                  title: 'Upload Failed',
+                  text: errorMessage,
+                  icon: 'error',
+                  customClass: { container: 'high-z-index-swal' }
+                });
+            }
+        } else {
+            Swal.fire({
+              title: 'API Error',
+              text: errorMessage,
+              icon: 'error',
+              customClass: { container: 'high-z-index-swal' }
+            });
+        }
       })
       .finally(() => {
         this.uploadInProgress = false;
