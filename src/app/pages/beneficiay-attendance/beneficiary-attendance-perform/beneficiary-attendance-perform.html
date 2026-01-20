@@ -169,11 +169,12 @@
         <div class="text-center mb-4">
             <label for="file-upload" class="p-button p-button-outlined p-component" style="cursor: pointer;">
                 <i class="pi pi-cloud-upload me-2"></i>
-                <span>{{ selectedFile ? selectedFile.name : 'Choose Excel File' }}</span>
+                <span>{{ selectedFile ? selectedFile.name : 'Upload Attendacne Excel File' }}</span>
             </label>
             <input id="file-upload" type="file" (change)="onFileSelect($event)" accept=".xlsx, .xls" class="d-none">
         </div>
 
+        
         <div class="notes-section card bg-light border-warning p-3">
             <h5 class="card-title text-dark"><i class="pi pi-info-circle me-2 text-warning"></i>Please Note:</h5>
             <ul class="list-unstyled mb-0">

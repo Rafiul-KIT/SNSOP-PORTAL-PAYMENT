@@ -244,7 +244,7 @@ export class BeneficiarySubprojectRemove implements OnInit {
       typeOfMeeting: f.typeOfWork || null,
       meetingDate: null,
       screeningStatus: "1",
-      status: "7",
+      status: "InProgress",
     };
   }
 
