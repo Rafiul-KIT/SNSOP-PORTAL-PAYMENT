@@ -389,6 +389,25 @@ export class ReconciliationMonitoring implements OnInit {
     this.fetchPage(this.currentPage, this.pageSize);
   }
 
+  // Reset button handler
+  resetReconciliation(): void {
+    this.reconciliationForm.reset({
+      paymentCycleType: 'single',
+      paymentCycle: null,
+      state: null,
+      county: null,
+      payam: null,
+      boma: null
+    });
+    this.reconciliationForm.get('county')?.disable();
+    this.reconciliationForm.get('payam')?.disable();
+    this.reconciliationForm.get('boma')?.disable();
+
+    this.selectedPaymentCycles = [];
+    this.currentPage = 0;
+    this.fetchPage(this.currentPage, this.pageSize, true);
+  }
+
   // View details - now uses IDs from response
   async viewDetails(record: any): Promise<void> {
     this.isLoading = true;
