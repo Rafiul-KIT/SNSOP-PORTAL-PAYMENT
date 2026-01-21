@@ -454,7 +454,7 @@ export class BeneficiaryAttendancePerform implements OnInit {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `attendance_template_subproject_${subprojectId}.xlsx`;
+        a.download = `attendance_template_subproject_${subprojectId}.xls`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
