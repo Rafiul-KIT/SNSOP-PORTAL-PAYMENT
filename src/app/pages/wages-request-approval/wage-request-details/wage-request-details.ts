@@ -63,6 +63,13 @@ interface Beneficiary {
   wageSspTotal: number;
 }
 
+interface AttachmentHistory {
+  status: string;
+  attachmentUrl: string;
+  comments: string;
+  reviewedAt: string;
+}
+
 interface ApiResponse {
   code: number;
   message: string;
@@ -122,6 +129,8 @@ export class WageRequestDetails implements OnInit {
   selectedFile: File | null = null;
   isReviewSubmitting = false;
   reviewMessage: any[] = [];
+  attachmentHistory: AttachmentHistory[] = [];
+  isHistoryLoading = false;
 
   private readonly statusMap = new Map<number, StatusInfo>([
     [0, { value: 'Draft', label: 'Draft', class: 'bg-secondary' }],
@@ -243,6 +252,7 @@ export class WageRequestDetails implements OnInit {
       this.wageId = +wageId;
       this.subprojectId = +subprojectId;
       this.loadWageRequestDetails(this.wageId);
+      this.loadAttachmentHistory();
     } else {
       this.apiError = 'Invalid wage request ID';
     }
@@ -443,6 +453,26 @@ initBreadcrumb(): void {
 
 
 
+  async loadAttachmentHistory(): Promise<void> {
+    if (!this.wageId) {
+      return;
+    }
+    this.isHistoryLoading = true;
+    try {
+      const response: any = await this.apiService.GET(
+        `/api/wage-request-review/history?wageRequestId=${this.wageId}&getFiles=true`
+      );
+      if (response?.data?.content) {
+        this.attachmentHistory = response.data.content;
+      }
+    } catch (error) {
+      console.error('Failed to load attachment history:', error);
+    } finally {
+      this.isHistoryLoading = false;
+      this.cdr.detectChanges();
+    }
+  }
+
   async loadWageRequestDetails(id: number): Promise<void> {
     this.isLoading = true;
     this.apiError = '';
@@ -524,6 +554,10 @@ initBreadcrumb(): void {
       'December',
     ];
     return months[monthIndex - 1] || 'Unknown';
+  }
+
+  getAttachmentUrl(url: string): string {
+    return url;
   }
 
   async loadBeneficiaries(page: number, size: number): Promise<void> {
