@@ -321,6 +321,24 @@ export class SubProject implements OnInit {
 
   }
 
+  private static dateRangeValidator(group: FormGroup): { [key: string]: any } | null {
+    const startDate = group.get('workStartDate')?.value;
+    const endDate = group.get('workEndDate')?.value;
+
+    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+      return { 'dateRangeInvalid': true };
+    }
+    return null;
+  }
+
+  private static nonNegativeNumberValidator(control: FormControl): { [key: string]: boolean } | null {
+    const value = control.value;
+    if (value !== null && value < 0) {
+      return { 'nonNegativeNumber': true };
+    }
+    return null;
+  }
+
   private createWorkActivity(): FormGroup {
     return this.fb.group({
       id: [null],
@@ -328,9 +346,9 @@ export class SubProject implements OnInit {
       code: ['', Validators.required],
       typeOfWork: ['', Validators.required],
       secondaryActivity: ['', Validators.required],
-      estimatedManpower: [null, Validators.required],
-      estimatedManDays: [null, Validators.required],
-      estimatedCostOfEquipment: [null, Validators.required],
+      estimatedManpower: [null, [Validators.required, SubProject.nonNegativeNumberValidator]],
+      estimatedManDays: [null, [Validators.required, SubProject.nonNegativeNumberValidator]],
+      estimatedCostOfEquipment: [null, [Validators.required, SubProject.nonNegativeNumberValidator]],
       workPhoto: [null],
       workPhotoName: [''],
       workPhotoSize: [null],
@@ -348,10 +366,10 @@ export class SubProject implements OnInit {
 
       workStartDate: ['', Validators.required],
       workEndDate: ['', Validators.required],
-      estimatedCost: [null, Validators.required],
-      estimatedSkillLabour: [null, Validators.required],
-      estimatedMaterialCost: [null, Validators.required],
-    });
+      estimatedCost: [null, [Validators.required, SubProject.nonNegativeNumberValidator]],
+      estimatedSkillLabour: [null, [Validators.required, SubProject.nonNegativeNumberValidator]],
+      estimatedMaterialCost: [null, [Validators.required, SubProject.nonNegativeNumberValidator]],
+    }, { validators: SubProject.dateRangeValidator });
   }
 
   addWorkActivity(): void {
