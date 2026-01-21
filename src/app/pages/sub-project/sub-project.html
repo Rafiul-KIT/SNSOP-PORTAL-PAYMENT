@@ -251,6 +251,9 @@
                                   @if (activity.get('estimatedSkillLabour')?.invalid && activity.get('estimatedSkillLabour')?.touched) {
                                   <div class="text-danger mt-1">This field is required.</div>
                                   }
+                                  @if (activity.get('estimatedSkillLabour')?.errors?.['nonNegativeNumber']) {
+                                  <div class="text-danger mt-1">Value cannot be negative.</div>
+                                  }
                                 </div>
 
                                 <div class="col-md-6">
@@ -262,6 +265,9 @@
                                   </div>
                                   @if (activity.get('estimatedCost')?.invalid && activity.get('estimatedCost')?.touched) {
                                   <div class="text-danger mt-1">This field is required.</div>
+                                  }
+                                  @if (activity.get('estimatedCost')?.errors?.['nonNegativeNumber']) {
+                                  <div class="text-danger mt-1">Value cannot be negative.</div>
                                   }
                                 </div>
 
@@ -276,6 +282,9 @@
                                   @if (activity.get('estimatedCostOfEquipment')?.invalid && activity.get('estimatedCostOfEquipment')?.touched) {
                                   <div class="text-danger mt-1">This field is required.</div>
                                   }
+                                  @if (activity.get('estimatedCostOfEquipment')?.errors?.['nonNegativeNumber']) {
+                                  <div class="text-danger mt-1">Value cannot be negative.</div>
+                                  }
                                 </div>
 
                                 <div class="col-md-6">
@@ -288,6 +297,9 @@
                                   </div>
                                   @if (activity.get('estimatedMaterialCost')?.invalid && activity.get('estimatedMaterialCost')?.touched) {
                                   <div class="text-danger mt-1">This field is required.</div>
+                                  }
+                                  @if (activity.get('estimatedMaterialCost')?.errors?.['nonNegativeNumber']) {
+                                  <div class="text-danger mt-1">Value cannot be negative.</div>
                                   }
                                 </div>
                               </div>
@@ -374,6 +386,9 @@
                                   @if (activity.get('estimatedManpower')?.invalid && activity.get('estimatedManpower')?.touched) {
                                   <div class="text-danger mt-1">This field is required.</div>
                                   }
+                                  @if (activity.get('estimatedManpower')?.errors?.['nonNegativeNumber']) {
+                                  <div class="text-danger mt-1">Value cannot be negative.</div>
+                                  }
                                 </div>
 
                                 <div class="col-md-6">
@@ -381,6 +396,9 @@
                                   <input type="number" class="form-control" formControlName="estimatedManDays" placeholder="0" />
                                   @if (activity.get('estimatedManDays')?.invalid && activity.get('estimatedManDays')?.touched) {
                                   <div class="text-danger mt-1">This field is required.</div>
+                                  }
+                                  @if (activity.get('estimatedManDays')?.errors?.['nonNegativeNumber']) {
+                                  <div class="text-danger mt-1">Value cannot be negative.</div>
                                   }
                                 </div>
 
@@ -402,6 +420,9 @@
                                   }
                                 </div>
                               </div>
+                              @if (activity.errors?.['dateRangeInvalid'] && (activity.get('workStartDate')?.touched || activity.get('workEndDate')?.touched)) {
+                              <div class="text-danger mt-1">Estimated Work End Date cannot be before Estimated Work Start Date.</div>
+                              }
                             </div>
                           </div>
                         </div>
@@ -429,6 +450,11 @@
                 <button type="submit" class="btn btn-success">
                   <i class="fas fa-save me-2"></i>Save
                 </button>
+                @if (subprojectId) {
+                <button type="button" class="btn btn-primary" (click)="submitSubProject()">
+                  <i class="fas fa-paper-plane me-2"></i>Submit
+                </button>
+                }
               </div>
             </div>
           </div>

@@ -335,14 +335,14 @@ export class PayrollMobileMoney implements OnInit {
       .join(', ');
   }
 
-  getStatusSeverity(status: string): 'success' | 'danger' | 'warning' | 'info' {
+  getStatusSeverity(status: string): 'success' | 'danger' | 'warn' | 'info' {
     switch (status) {
       case 'SUCCESS':
         return 'success';
       case 'FAILED':
         return 'danger';
       case 'PENDING':
-        return 'warning';
+        return 'warn';
       case 'PROCESSING':
         return 'info';
       default:

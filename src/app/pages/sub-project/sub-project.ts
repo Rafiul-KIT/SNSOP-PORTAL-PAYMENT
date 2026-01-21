@@ -321,6 +321,24 @@ export class SubProject implements OnInit {
 
   }
 
+  private static dateRangeValidator(group: FormGroup): { [key: string]: any } | null {
+    const startDate = group.get('workStartDate')?.value;
+    const endDate = group.get('workEndDate')?.value;
+
+    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+      return { 'dateRangeInvalid': true };
+    }
+    return null;
+  }
+
+  private static nonNegativeNumberValidator(control: FormControl): { [key: string]: boolean } | null {
+    const value = control.value;
+    if (value !== null && value < 0) {
+      return { 'nonNegativeNumber': true };
+    }
+    return null;
+  }
+
   private createWorkActivity(): FormGroup {
     return this.fb.group({
       id: [null],
@@ -328,9 +346,9 @@ export class SubProject implements OnInit {
       code: ['', Validators.required],
       typeOfWork: ['', Validators.required],
       secondaryActivity: ['', Validators.required],
-      estimatedManpower: [null, Validators.required],
-      estimatedManDays: [null, Validators.required],
-      estimatedCostOfEquipment: [null, Validators.required],
+      estimatedManpower: [null, [Validators.required, SubProject.nonNegativeNumberValidator]],
+      estimatedManDays: [null, [Validators.required, SubProject.nonNegativeNumberValidator]],
+      estimatedCostOfEquipment: [null, [Validators.required, SubProject.nonNegativeNumberValidator]],
       workPhoto: [null],
       workPhotoName: [''],
       workPhotoSize: [null],
@@ -348,10 +366,10 @@ export class SubProject implements OnInit {
 
       workStartDate: ['', Validators.required],
       workEndDate: ['', Validators.required],
-      estimatedCost: [null, Validators.required],
-      estimatedSkillLabour: [null, Validators.required],
-      estimatedMaterialCost: [null, Validators.required],
-    });
+      estimatedCost: [null, [Validators.required, SubProject.nonNegativeNumberValidator]],
+      estimatedSkillLabour: [null, [Validators.required, SubProject.nonNegativeNumberValidator]],
+      estimatedMaterialCost: [null, [Validators.required, SubProject.nonNegativeNumberValidator]],
+    }, { validators: SubProject.dateRangeValidator });
   }
 
   addWorkActivity(): void {
@@ -622,7 +640,7 @@ export class SubProject implements OnInit {
         typeOfMeeting: formValue.typeOfMeeting,
         meetingDate: formValue.meetingDate ? this.formatDateForApi(formValue.meetingDate) : null,
         screeningStatus: formValue.paperScreeningStatus ? parseInt(formValue.paperScreeningStatus, 10) : null,
-        status: 'IP_Submitted',
+        status: '',
       };
 
       const subProjectResponse = await this.api.POST('api/subproject/save', subProjectPayload);
@@ -866,6 +884,59 @@ export class SubProject implements OnInit {
 
 
 
+
+  submitSubProject(): void {
+    if (!this.subprojectId) {
+      Swal.fire('Error', 'Sub-project ID not found. Please save the project first.', 'error');
+      return;
+    }
+
+    Swal.fire({
+      title: 'Are you sure you want to submit?',
+      // text: "Once submitted, you may not be able to edit it.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, submit it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.isLoading = true;
+        this.cdr.detectChanges();
+
+        this.api.POST(`/api/subproject/submit?subprojectId=${this.subprojectId}`, {})
+          .then((res: any) => {
+            if (res.data && res.data.code === 200) {
+              Swal.fire(
+                'Submitted!',
+                'The sub-project has been submitted successfully.',
+                'success'
+              ).then(() => {
+                this.router.navigate(['/sub-project/list']);
+              });
+            } else {
+              Swal.fire(
+                'Submission Failed',
+                res.data.message || 'An unknown error occurred during submission.',
+                'error'
+              );
+            }
+          })
+          .catch(err => {
+            console.error('Sub-project submission failed', err);
+            Swal.fire(
+              'API Error',
+              'An error occurred while submitting the sub-project.',
+              'error'
+            );
+          })
+          .finally(() => {
+            this.isLoading = false;
+            this.cdr.detectChanges();
+          });
+      }
+    });
+  }
 
   async loadAvailableProjects(): Promise<void> {
     try {

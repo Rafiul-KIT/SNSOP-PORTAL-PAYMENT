@@ -8,7 +8,7 @@ export const environment = {
   portals: {
     master: 'https://newmis.southsudansafetynet.info/trial/master',
     masterSettings: 'https://newmis.southsudansafetynet.info/trial/master/#/user-management/users',
-    surveyCTO: 'https://newmis.southsudansafetynet.info/trial/master/#/survey-cto',
+    surveyCTO: 'https://newmis.southsudansafetynet.info/trial/master/#/cto-dashboard',
     beneficiary: 'https://newmis.southsudansafetynet.info/trial/beneficiary',
     payment: 'https://newmis.southsudansafetynet.info/trial/payment',
     grm: 'https://newmis.southsudansafetynet.info/trial/grm',

@@ -49,7 +49,7 @@
         </div>
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
-                <p-select [options]="statusOptions" optionValue="id" optionLabel="name" formControlName="status"  />
+                <p-select [options]="statusOptions" optionValue="id" optionLabel="name" formControlName="status" />
                 <label>Status</label>
             </p-floatlabel>
         </div>
@@ -74,7 +74,12 @@
 <div class="card">
     <p-table [value]="requestsData" [scrollable]="true" scrollHeight="60vh">
         <ng-template pTemplate="caption">
-            <div class="text-end">
+            <div class="d-flex justify-content-between">
+                <p class="fw-semibold mb-2 d-flex align-items-center gap-2">
+                    <i class="pi pi-wallet text-success"></i>
+                    Payroll Generation for Cash Payments
+                </p>
+
                 <p class="fw-bold mb-2">
                     Showing <kbd>{{ (currentPage * pageSize) + 1 }} - {{ Math.min((currentPage * pageSize) +
                         requestsData.length, totalRecords) }}</kbd> of
@@ -92,16 +97,19 @@
                 <th>Payam</th>
                 <th>Boma</th>
                 <th>Support Type</th>
-                <th>Payroll Type</th>
+               
                 <th class="payment-cycles">Payment Cycles</th>
+                   <th>Created On</th>
                 <th>Status <i class="fas fa-refresh" style="cursor: pointer" (click)="resetForm()">
                     </i></th>
+                  
                 <th>Actions</th>
+                
             </tr>
         </ng-template>
         <ng-template pTemplate="body" let-request let-i="rowIndex">
             <tr>
-                <td>{{ (currentPage * pageSize) + i + 1 }}</td>
+                <td>{{ totalRecords - ((currentPage * pageSize) + i) }}</td>
                 <td>{{ request.requestId }}</td>
 
                 <td>{{ getStateName(request.state) }}</td>
@@ -109,11 +117,13 @@
                 <td>{{ getPayamName(request.payam) }}</td>
                 <td>{{ getBomaName(request.boma) }}</td>
                 <td>{{ request.supportType }}</td>
-                <td>{{ request.payrollType }}</td>
+   
                 <td>{{ getPaymentCycleNames(request.paymentCycles) }}</td>
+                 <td class="highlight-date">{{ formatCreatedDate(request.created) }}</td>
                 <td>
                     <p-tag [severity]="getStatusSeverity(request.status)" [value]="request.status"></p-tag>
                 </td>
+                            
                 <td>
                     <div class="d-flex gap-1">
                         <p-button (onClick)="onDownloadClick(request)" [disabled]="request.status !== 'SUCCESS'"

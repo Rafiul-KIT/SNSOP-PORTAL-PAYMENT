@@ -237,7 +237,8 @@ export class BeneficiaryAttendance implements OnInit {
       typeOfMeeting: f.typeOfMeeting || null,
       meetingDate: null,
       screeningStatus: "1",
-      status: "7",
+      status: "InProgress",
+
     };
   }
 

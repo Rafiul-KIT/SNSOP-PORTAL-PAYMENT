@@ -71,16 +71,16 @@ export class ReportTotalBeneficiaryPaymentDetails implements OnInit {
       console.error('No data available to export.');
       return;
     }
-  
+
     const { default: jsPDF } = await import('jspdf');
     const { default: autoTable } = await import('jspdf-autotable');
-  
+
     const doc = new jsPDF('landscape');
-  
+
     // Add title
     doc.setFontSize(18);
     doc.text('Total Beneficiary Payment Details Report', 14, 20);
-  
+
     // Add summary totals
     doc.setFontSize(10);
     const summaryText = `Total Beneficiaries: ${
@@ -89,7 +89,7 @@ export class ReportTotalBeneficiaryPaymentDetails implements OnInit {
       this.reportTotalBeneficiaryPaymentDetailsTotals.totalPaid
     } | Total Unpaid: ${this.reportTotalBeneficiaryPaymentDetailsTotals.totalUnpaid}`;
     doc.text(summaryText, 14, 30);
-  
+
     const headers = [
       'State',
       'County',
@@ -97,23 +97,24 @@ export class ReportTotalBeneficiaryPaymentDetails implements OnInit {
       'Boma',
       'HH Number',
       'Name',
-      'Wage',
-      'Ex Rate',
+
+
       'Supp Type',
       'Req No',
       'Pay Cycle',
       'Work Code',
       'Wage Rate (USD)',
+       'Ex Rate(SSP)',
       'Paid Amount (USD)',
       'Attd. Days',
       'Abs. Days',
       'Pay Gen Date',
       'Pay Date',
-      'Paid HH Name',
+
       'Paid To',
       'Status',
     ];
-  
+
     const data = this.reportTotalBeneficiaryPaymentDetails.map((row: any) => [
       row.state,
       row.county,
@@ -121,23 +122,24 @@ export class ReportTotalBeneficiaryPaymentDetails implements OnInit {
       row.boma,
       row.householdNumber,
       row.name,
-      `SSP ${row.wage}`,
-      row.exchangeRate,
+
+
       row.supportType,
       row.reqNo,
       `PC ${row.paymentCycle}`,
       row.workCode,
       row.wageRateUsd,
+       row.exchangeRate,
       row.paidAmountUsd,
       row.attendanceDays,
       row.absenceDays,
       row.paymentGenerateDate,
       row.paymentDate,
-      row.paidHouseHoldName,
+
       row.paidTo,
       row.status,
     ]);
-  
+
     autoTable(doc, {
       head: [headers],
       body: data,
@@ -180,7 +182,7 @@ export class ReportTotalBeneficiaryPaymentDetails implements OnInit {
         20: { cellWidth: 'auto' },
       },
     });
-  
+
     doc.save('TotalBeneficiaryPaymentDetails.pdf');
   }
 
@@ -217,11 +219,10 @@ export class ReportTotalBeneficiaryPaymentDetails implements OnInit {
         'Paid Amount (In SSP)': row.paidAmountSsp,
         'Payment Date': row.paymentDate,
         'Payment Generate Date': row.paymentGenerateDate,
-        'Paid House Hold Name': row.paidHouseHoldName,
         'Paidto': row.paidTo,
         'Pay Status': row.status,
         'Wage Request Number': row.reqNo,
-        'Payment Cycle': row.paymentCycle,
+        'Payment Cycle': 'Payment Cycle ' + row.paymentCycle,
         'Latitude': row.latitude,
         'Longitude': row.longitude,
       })
