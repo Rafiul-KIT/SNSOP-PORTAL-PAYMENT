@@ -2,7 +2,6 @@ import { ReportTotalBeneficiaryPaymentDetails } from './../report-list/report-to
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
-  FormArray,
   FormControl,
   FormGroup,
   Validators,
@@ -26,6 +25,7 @@ import { Button } from 'primeng/button';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { SelectModule } from 'primeng/select';
+import { MultiSelectModule } from 'primeng/multiselect';
 
 @Component({
   selector: 'app-report',
@@ -47,6 +47,7 @@ import { SelectModule } from 'primeng/select';
     Button,
     FloatLabelModule,
     SelectModule,
+    MultiSelectModule,
     ReportTotalBeneficiaryPaymentDetails,
   ],
   templateUrl: './report.html',
@@ -95,22 +96,10 @@ export class ReportComponent implements OnInit {
 
   date: Date[] | undefined;
   reportForm: FormGroup = new FormGroup({});
-  paymentCyclesAvailable = Array.from({ length: 15 }, (_, i) => i + 1);
-
-  onPaymentCycleChange(e: any) {
-    const paymentCycles: FormArray = this.reportForm.get(
-      'paymentCycles'
-    ) as FormArray;
-
-    if (e.target.checked) {
-      paymentCycles.push(new FormControl(e.target.value));
-    } else {
-      const index = paymentCycles.controls.findIndex(
-        (x) => x.value === e.target.value
-      );
-      paymentCycles.removeAt(index);
-    }
-  }
+  paymentCyclesAvailable = Array.from({ length: 15 }, (_, i) => ({
+    label: `Payment Cycle ${i + 1}`,
+    value: i + 1
+  }));
 
 
   constructor(
@@ -235,7 +224,7 @@ export class ReportComponent implements OnInit {
           size: new FormControl(-1, Validators.required),
           paymentCycle: new FormControl('1', Validators.required),
           paymentCycleSelectionType: new FormControl('single'),
-          paymentCycles: new FormArray([]),
+          paymentCycles: new FormControl([]),
         });
 
         this.reportForm
@@ -246,12 +235,12 @@ export class ReportComponent implements OnInit {
                 .get('paymentCycle')
                 ?.setValidators([Validators.required]);
               this.reportForm.get('paymentCycles')?.clearValidators();
-              (this.reportForm.get('paymentCycles') as FormArray).clear();
+              this.reportForm.get('paymentCycles')?.setValue([]);
             } else {
               this.reportForm.get('paymentCycle')?.clearValidators();
               this.reportForm
                 .get('paymentCycles')
-                ?.setValidators([Validators.required, Validators.minLength(1)]);
+                ?.setValidators([Validators.required]);
             }
             this.reportForm.get('paymentCycle')?.updateValueAndValidity();
             this.reportForm.get('paymentCycles')?.updateValueAndValidity();
@@ -525,9 +514,7 @@ export class ReportComponent implements OnInit {
       if (this.reportForm.value.paymentCycleSelectionType === 'single') {
         paymentCycle = [parseInt(this.reportForm.value.paymentCycle, 10)];
       } else {
-        paymentCycle = this.reportForm.value.paymentCycles.map((c: string) =>
-          parseInt(c, 10)
-        );
+        paymentCycle = this.reportForm.value.paymentCycles;
       }
       const payloadForReport = {
         state: parseInt(this.reportForm.value.stateId) || null,

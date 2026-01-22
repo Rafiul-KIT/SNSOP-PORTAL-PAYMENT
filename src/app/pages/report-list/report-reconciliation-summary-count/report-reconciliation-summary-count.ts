@@ -1,9 +1,10 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { PaginatorModule } from 'primeng/paginator';
 import { LookupService } from '../../../services/lookup.service';
+import { Loader } from '../../../components/loader/loader';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -21,16 +22,25 @@ interface ReportData {
 @Component({
   selector: 'app-report-reconciliation-summary-count',
   standalone: true,
-  imports: [TableModule, ButtonModule, TooltipModule, PaginatorModule],
+  imports: [TableModule, ButtonModule, TooltipModule, PaginatorModule, Loader],
   templateUrl: './report-reconciliation-summary-count.html',
   styleUrls: ['./report-reconciliation-summary-count.scss'],
 })
-export class ReportReconciliationSummaryCount implements OnInit {
+export class ReportReconciliationSummaryCount implements OnInit, OnChanges {
   @Input() reportReconciliationSummaryCount: ReportData[] = [];
+  @Input() isLoading: boolean = true;
 
-  constructor(public lookupService: LookupService) {}
+  isExporting: boolean = false;
+
+  constructor(public lookupService: LookupService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {}
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['reportReconciliationSummaryCount'] && this.reportReconciliationSummaryCount) {
+      this.isLoading = false;
+    }
+  }
 
   private createPdf(): jsPDF | null {
     if (
@@ -107,23 +117,35 @@ export class ReportReconciliationSummaryCount implements OnInit {
   }
 
   exportPdf() {
-    const doc = this.createPdf();
-    if (doc) {
-      doc.save('Reconciliation_Summary.pdf');
+    this.isExporting = true;
+    try {
+      const doc = this.createPdf();
+      if (doc) {
+        doc.save('Reconciliation_Summary.pdf');
+      }
+    } finally {
+      this.isExporting = false;
+      this.cdr.detectChanges();
     }
   }
 
   previewPdf() {
-    const doc = this.createPdf();
-    if (doc) {
-      const string = doc.output('datauristring');
-      const embed = "<embed width='100%' height='100%' src='" + string + "'/>";
-      const x = window.open();
-      if (x) {
-        x.document.open();
-        x.document.write(embed);
-        x.document.close();
+    this.isExporting = true;
+    try {
+      const doc = this.createPdf();
+      if (doc) {
+        const string = doc.output('datauristring');
+        const embed = "<embed width='100%' height='100%' src='" + string + "'/>";
+        const x = window.open();
+        if (x) {
+          x.document.open();
+          x.document.write(embed);
+          x.document.close();
+        }
       }
+    } finally {
+      this.isExporting = false;
+      this.cdr.detectChanges();
     }
   }
 }

@@ -1,12 +1,16 @@
 <div class="report-container">
+  @if (isLoading || isExporting) {
+    <app-loader [MESSAGE]="isExporting ? 'Exporting...' : 'Loading...'"></app-loader>
+  }
+
   <p-table [value]="reportTotalBeneficiaryPaymentDetails" [paginator]="true" [rows]="10"
     [rowsPerPageOptions]="[10, 20, 50, 100]" [tableStyle]="{ 'width': '100%' }">
 
     <ng-template pTemplate="caption">
       <div class="d-flex justify-content-start align-items-center">
-        <button type="button" class="btn btn-success btn-sm me-2" (click)="exportExcel()" pTooltip="XLS"
+        <button type="button" class="btn btn-success btn-sm me-2" (click)="exportExcel()" pTooltip="CSV"
           tooltipPosition="bottom">
-          <i class="fas fa-file-excel me-2"></i>Export as XLS
+          <i class="fas fa-file-csv me-2"></i>Export as CSV
         </button>
         <!-- <button
           type="button"
@@ -37,7 +41,6 @@
         <th>Boma</th>
         <th>Household Number</th>
         <th>Name</th>
-       
         <th>Support Type</th>
         <th>Request No</th>
         <th>Payment Cycle</th>
@@ -49,7 +52,6 @@
         <th>Absence Days</th>
         <th>Payment Generate Date</th>
         <th>Payment Date</th>
-      
         <th>Paid To</th>
         <th>Status</th>
       </tr>
@@ -63,7 +65,6 @@
         <td>{{ rowData.boma }}</td>
         <td>{{ rowData.householdNumber }}</td>
         <td>{{ rowData.name }}</td>
-      
         <td>{{ rowData.supportType }}</td>
         <td>{{ rowData.reqNo }}</td>
         <td>Payment Cycle {{ rowData.paymentCycle }}</td>
@@ -75,7 +76,6 @@
         <td>{{ rowData.absenceDays }}</td>
         <td>{{ rowData.paymentGenerateDate }}</td>
         <td>{{ rowData.paymentDate }}</td>
-       
         <td>{{ rowData.paidTo }}</td>
         <td>{{ rowData.status }}</td>
       </tr>
@@ -85,7 +85,7 @@
 
     <ng-template pTemplate="emptymessage">
       <tr>
-        <td colspan="23" class="text-center">Nothing Found.</td>
+        <td colspan="20" class="text-center">Nothing Found.</td>
       </tr>
     </ng-template>
   </p-table>

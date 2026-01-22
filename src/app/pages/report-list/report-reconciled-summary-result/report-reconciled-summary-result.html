@@ -1,4 +1,8 @@
 <div class="report-container">
+  @if (isLoading || isExporting) {
+    <app-loader [MESSAGE]="isExporting ? 'Exporting...' : 'Loading...'"></app-loader>
+  }
+
   <p-table
     [value]="reportReconciledSummaryResultCount"
     [paginator]="true"
