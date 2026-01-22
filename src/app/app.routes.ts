@@ -33,6 +33,7 @@ import { PayrollMobileMoney } from './pages/payroll/payroll-mobile-money/payroll
 import { GeneratePayroll } from './pages/payroll/generate-payroll/generate-payroll';
 import { ReconciliationMonitoring } from './pages/reconciliation-monitoring/reconciliation-monitoring';
 import { ReconciliationMonitoringDetails } from './pages/reconciliation-monitoring-details/reconciliation-monitoring-details';
+import { WageRequestAbstract } from './pages/wage-request-abstract/wage-request-abstract';
 
 
 export const routes: Routes = [
@@ -210,6 +211,12 @@ export const routes: Routes = [
         data: { reportType: 11, reportTitle: 'Total Beneficiary Payment Details' },
         canActivate: [routeGuard],
       },
+       {
+        path: 'wage-request-abstract',
+        component: WageRequestAbstract,
+        canActivate: [routeGuard],
+       }
+      ,
     ],
   },
   {
