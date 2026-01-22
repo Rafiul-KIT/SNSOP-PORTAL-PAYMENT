@@ -194,7 +194,7 @@ export class ReportTotalBeneficiaryPaymentDetails implements OnInit, OnChanges {
     doc.save('TotalBeneficiaryPaymentDetails.pdf');
   }
 
-  async exportExcel() {
+  exportExcel() {
     if (
       !this.reportTotalBeneficiaryPaymentDetails ||
       this.reportTotalBeneficiaryPaymentDetails.length === 0
@@ -206,91 +206,65 @@ export class ReportTotalBeneficiaryPaymentDetails implements OnInit, OnChanges {
     this.isExporting = true;
 
     try {
-    const dataToExport = this.reportTotalBeneficiaryPaymentDetails.map(
-      (row: any, index: number) => ({
-        'S.No': index + 1,
-        'State Name': row.state,
-        'County Name': row.county,
-        'Payam Name': row.payam,
-        'Boma Name': row.boma,
-        'Work Code': row.workCode,
-        'Benficiary Name': row.name,
-        'Household number': row.householdNumber,
-        'Gender': row.gender,
-        'Support Type': row.supportType,
-        'Wage Rate (In USD)': row.wageRateUsd,
-        'Paid Amount (In USD)': row.paidAmountUsd,
-        'Attendance Days': row.attendanceDays,
-        'Absence Days': row.absenceDays,
-        'Exchange Rate In SSP': row.exchangeRate,
-        'Total Amount (In SSP)': row.paidAmountSsp,
-        'Payment Date': row.paymentDate,
-        'Payment Generate Date': row.paymentGenerateDate,
-        'Paidto': row.paidTo,
-        'Pay Status': row.status,
-        'Wage Request Number': row.reqNo,
-        'Payment Cycle': 'Payment Cycle ' + row.paymentCycle,
-      })
-    );
+      const headers = [
+        'S.No',
+        'State Name',
+        'County Name',
+        'Payam Name',
+        'Boma Name',
+        'Work Code',
+        'Beneficiary Name',
+        'Household Number',
+        'Gender',
+        'Support Type',
+        'Wage Rate (In USD)',
+        'Paid Amount (In USD)',
+        'Attendance Days',
+        'Absence Days',
+        'Exchange Rate In SSP',
+        'Total Amount (In SSP)',
+        'Payment Date',
+        'Payment Generate Date',
+        'Paid To',
+        'Pay Status',
+        'Wage Request Number',
+        'Payment Cycle'
+      ];
 
-    const xlsx = await import('xlsx');
-    const worksheet = xlsx.utils.json_to_sheet(dataToExport);
+      const csvRows: string[] = [];
+      csvRows.push(headers.map(h => `"${h}"`).join(','));
 
-    // Adjust column widths
-    const columnWidths = [
-      { wch: 5 },   // S.No
-      { wch: 10 },
-      { wch: 15 },  // State Name
-      { wch: 15 },  // County Name
-      { wch: 15 },  // Payam Name
-      { wch: 15 },  // Boma Name
-      { wch: 15 },  // Work Code
-      { wch: 25 },  // Benficiary Name
-      { wch: 25 },  // Original Household number
-      { wch: 15 }, // Gender
-      { wch: 15 },  // Support Type
-      { wch: 20 },  // Wage Rate (In USD)
-      { wch: 20 },  // Paid Amount (In USD)
-      { wch: 15 },  // Attendance Days
-      { wch: 15 },  // Absence Days
-      { wch: 20 },  // Exchange Rate In SSP
-      { wch: 20 },  // Paid Amount (In SSP)
-      { wch: 15 },  // Payment Date
-      { wch: 25 },  // Payment Generate Date
-      { wch: 15 },  // Paidto
-      { wch: 10 },  // Pay Status
-      { wch: 20 },  // Wage Request Number
-      { wch: 15 },  // Payment Cycle
-    ];
-    worksheet['!cols'] = columnWidths;
+      this.reportTotalBeneficiaryPaymentDetails.forEach((row: any, index: number) => {
+        const values = [
+          index + 1,
+          row.state || '',
+          row.county || '',
+          row.payam || '',
+          row.boma || '',
+          row.workCode || '',
+          row.name || '',
+          row.householdNumber || '',
+          row.gender || '',
+          row.supportType || '',
+          row.wageRateUsd || '',
+          row.paidAmountUsd || '',
+          row.attendanceDays || '',
+          row.absenceDays || '',
+          row.exchangeRate || '',
+          row.paidAmountSsp || '',
+          row.paymentDate || '',
+          row.paymentGenerateDate || '',
+          row.paidTo || '',
+          row.status || '',
+          row.reqNo || '',
+          'Payment Cycle ' + (row.paymentCycle || '')
+        ];
+        csvRows.push(values.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','));
+      });
 
-    const range = xlsx.utils.decode_range(worksheet['!ref'] || '');
-    for (let row = range.s.r; row <= range.e.r; row++) {
-      for (let col = range.s.c; col <= range.e.c; col++) {
-        const cellAddress = xlsx.utils.encode_cell({ r: row, c: col });
-        const cell = worksheet[cellAddress];
-        if (cell) {
-          if (!cell.s) cell.s = {};
-          cell.s.alignment = { horizontal: 'center', vertical: 'center' };
-        }
-      }
-    }
-
-    const workbook = xlsx.utils.book_new();
-    xlsx.utils.book_append_sheet(
-      workbook,
-      worksheet,
-      'Beneficiary Payment Details'
-    );
-    const excelBuffer = xlsx.write(workbook, {
-      bookType: 'xlsx',
-      type: 'array',
-      cellStyles: true,
-    });
-    const data = new Blob([excelBuffer], {
-      type: 'application/octet-stream',
-    });
-    saveAs(data, 'TotalBeneficiaryPaymentDetails.xlsx');
+      const csvContent = csvRows.join('\n');
+      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      saveAs(blob, 'TotalBeneficiaryPaymentDetails.csv');
     } finally {
       this.isExporting = false;
       this.cdr.detectChanges();
