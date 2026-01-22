@@ -114,7 +114,7 @@
                             (change)="getCountyLookupByStateId($event)">
                             <option value="">Select State</option>
                             @if (selectedReportTypeId !== 1 && selectedReportTypeId !== 9 && selectedReportTypeId !==
-                            10) {
+                            10  && selectedReportTypeId !== 11) {
                             <option value="-1">ALL</option>
                             }
                             @for (state of lookupService.getStateList(); track state.id) {
@@ -270,7 +270,7 @@
                             <label class="form-check-label" for="multipleCycles">Multiple Payment Cycles</label>
                         </div>
                     </div>
-            
+
                     @if (reportForm.get('paymentCycleSelectionType')?.value === 'single') {
                         <div class="col-12 col-md-4 col-lg-3">
                             <div class="form-floating mb-3">

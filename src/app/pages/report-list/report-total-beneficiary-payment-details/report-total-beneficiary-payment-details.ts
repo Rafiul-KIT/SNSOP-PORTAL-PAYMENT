@@ -198,19 +198,14 @@ export class ReportTotalBeneficiaryPaymentDetails implements OnInit {
     const dataToExport = this.reportTotalBeneficiaryPaymentDetails.map(
       (row: any, index: number) => ({
         'S.No': index + 1,
-        'IP': '',
         'State Name': row.state,
         'County Name': row.county,
         'Payam Name': row.payam,
         'Boma Name': row.boma,
         'Work Code': row.workCode,
-        'Enrollment Number': '',
         'Benficiary Name': row.name,
-        'Original Household number': row.householdNumber,
-        'Gender': '',
+        'Household number': row.householdNumber,
         'Component': row.supportType,
-        'From Date': row.fromDate,
-        'To Date': row.toDate,
         'Wage Rate (In USD)': row.wageRateUsd,
         'Paid Amount (In USD)': row.paidAmountUsd,
         'Attendance Days': row.attendanceDays,
@@ -223,8 +218,6 @@ export class ReportTotalBeneficiaryPaymentDetails implements OnInit {
         'Pay Status': row.status,
         'Wage Request Number': row.reqNo,
         'Payment Cycle': 'Payment Cycle ' + row.paymentCycle,
-        'Latitude': row.latitude,
-        'Longitude': row.longitude,
       })
     );
 
@@ -240,13 +233,9 @@ export class ReportTotalBeneficiaryPaymentDetails implements OnInit {
       { wch: 15 },  // Payam Name
       { wch: 15 },  // Boma Name
       { wch: 15 },  // Work Code
-      { wch: 20 },  // Enrollment Number
       { wch: 25 },  // Benficiary Name
       { wch: 25 },  // Original Household number
-      { wch: 10 },  // Gender
       { wch: 15 },  // Component
-      { wch: 15 },  // From Date
-      { wch: 15 },  // To Date
       { wch: 20 },  // Wage Rate (In USD)
       { wch: 20 },  // Paid Amount (In USD)
       { wch: 15 },  // Attendance Days
@@ -255,13 +244,10 @@ export class ReportTotalBeneficiaryPaymentDetails implements OnInit {
       { wch: 20 },  // Paid Amount (In SSP)
       { wch: 15 },  // Payment Date
       { wch: 25 },  // Payment Generate Date
-      { wch: 25 },  // Paid House Hold Name
       { wch: 15 },  // Paidto
       { wch: 10 },  // Pay Status
       { wch: 20 },  // Wage Request Number
       { wch: 15 },  // Payment Cycle
-      { wch: 10 },  // Latitude
-      { wch: 10 },  // Longitude
     ];
     worksheet['!cols'] = columnWidths;
 
