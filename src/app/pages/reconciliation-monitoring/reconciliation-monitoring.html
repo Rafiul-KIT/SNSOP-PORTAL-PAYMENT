@@ -70,20 +70,22 @@
           </p-floatlabel>
         </div>
         } @else if (reconciliationForm.get('paymentCycleType')?.value === 'multiple') {
-        <div class="col-12">
-          <label class="mb-2">Select Payment Cycles</label>
-          <div class="row">
-            @for (cycle of paymentCycleOptions; track cycle.value) {
-            <div class="col-md-2 col-sm-4 col-6 mb-2">
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" [value]="cycle.value" [id]="'cycle_' + cycle.value"
-                  (change)="onMultiplePaymentCycleChange(cycle.value, $event.target)">
-                <label class="form-check-label" [for]="'cycle_' + cycle.value">
-                  {{ cycle.label }}
-                </label>
-              </div>
-            </div>
-            }
+        <div class="col-md-3">
+          <p-floatlabel variant="on" class="w-100">
+            <p-multiSelect [options]="paymentCycleOptions" formControlName="multiplePaymentCycles" optionLabel="label"
+              optionValue="value" [showClear]="true" [filter]="true">
+            </p-multiSelect>
+            <label>Payment Cycles</label>
+          </p-floatlabel>
+
+        </div>
+        }
+        @if(reconciliationForm.get('paymentCycleType')?.value === 'multiple'){
+        <!-- Display selected cycle names below -->
+        <div class="mt-2" *ngIf="selectedPaymentCycleNames.length > 0">
+          <strong>Selected Cycles:</strong>
+          <div class="d-flex flex-wrap gap-2 mt-1">
+            <span *ngFor="let name of selectedPaymentCycleNames" class="badge bg-secondary">{{ name }}</span>
           </div>
         </div>
         }
@@ -101,7 +103,8 @@
     </div>
     @if(isShow){
     <p-table [value]="records" [scrollable]="true" scrollHeight="64vh" size="small" dataKey="stateId"
-      class="p-datatable custom-table -sm p-datatable-striped p-datatable-gridlines" [tableStyle]="{ 'min-width': '100%' }">
+      class="p-datatable custom-table -sm p-datatable-striped p-datatable-gridlines"
+      [tableStyle]="{ 'min-width': '100%' }">
 
       <!-- HEADER -->
       <ng-template pTemplate="header">
@@ -123,13 +126,13 @@
           <th class="text-center">Payment Cycle</th>
           <th class="text-center">Total Beneficiary</th>
           <th class="text-center">Total Unpaid</th>
-          <th class="text-center"  style="width: 160px; min-width: 160px;">
+          <th class="text-center" style="width: 160px; min-width: 160px;">
             LIPW <br />
             <small class="text-muted">(Paid | Unpaid)</small>
           </th>
-          <th class="text-center"  style="width: 160px; min-width: 160px;">
+          <th class="text-center" style="width: 160px; min-width: 160px;">
             DIS <br />
-            <small class="text-muted" >(Paid | Unpaid)</small>
+            <small class="text-muted">(Paid | Unpaid)</small>
           </th>
 
           <th class="text-center">Last Reconciled at</th>

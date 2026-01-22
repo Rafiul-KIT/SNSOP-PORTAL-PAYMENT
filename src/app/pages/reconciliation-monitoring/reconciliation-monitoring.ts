@@ -30,6 +30,7 @@ import { PaginatorModule } from 'primeng/paginator';
 import { ToastModule } from 'primeng/toast';
 import { Tag } from "primeng/tag";
 import { Badge } from "primeng/badge";
+import { MultiSelectModule } from 'primeng/multiselect';
 
 @Component({
   selector: 'app-reconciliation-monitoring',
@@ -45,7 +46,8 @@ import { Badge } from "primeng/badge";
     Tooltip,
     PaginatorModule,
     ToastModule,
-    Tag
+    Tag,
+    MultiSelectModule
 ],
   templateUrl: './reconciliation-monitoring.html',
   styleUrl: './reconciliation-monitoring.scss',
@@ -76,7 +78,6 @@ export class ReconciliationMonitoring implements OnInit {
   bomaList: LookupItem[] = [];
 
   paymentCycleOptions = PaymentCycleEnum;
-  selectedPaymentCycles: number[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -122,6 +123,7 @@ export class ReconciliationMonitoring implements OnInit {
     this.reconciliationForm = this.fb.group({
       paymentCycleType: ['single'],
       paymentCycle: [null],
+      multiplePaymentCycles: [[]],
       state: [null],
       county: [{ value: null, disabled: true }],
       payam: [{ value: null, disabled: true }],
@@ -214,8 +216,10 @@ export class ReconciliationMonitoring implements OnInit {
             });
           }
         } else {
-          this.reconciliationForm.patchValue({ paymentCycleType: 'multiple' });
-          this.selectedPaymentCycles = state.paymentCycles;
+          this.reconciliationForm.patchValue({
+            paymentCycleType: 'multiple',
+            multiplePaymentCycles: state.paymentCycles || []
+          });
         }
       }
 
@@ -305,7 +309,7 @@ export class ReconciliationMonitoring implements OnInit {
         paymentCycles.push(formValues.paymentCycle.value);
       }
     } else {
-      paymentCycles = this.selectedPaymentCycles;
+      paymentCycles = formValues.multiplePaymentCycles || [];
     }
 
     return {
@@ -394,6 +398,7 @@ export class ReconciliationMonitoring implements OnInit {
     this.reconciliationForm.reset({
       paymentCycleType: 'single',
       paymentCycle: null,
+      multiplePaymentCycles: [],
       state: null,
       county: null,
       payam: null,
@@ -403,7 +408,6 @@ export class ReconciliationMonitoring implements OnInit {
     this.reconciliationForm.get('payam')?.disable();
     this.reconciliationForm.get('boma')?.disable();
 
-    this.selectedPaymentCycles = [];
     this.currentPage = 0;
     this.fetchPage(this.currentPage, this.pageSize, true);
   }
@@ -460,20 +464,19 @@ export class ReconciliationMonitoring implements OnInit {
   return new Intl.DateTimeFormat(undefined, options).format(date);
 }
   onPaymentCycleTypeChange(type: string): void {
-    this.selectedPaymentCycles = [];
     this.reconciliationForm.get('paymentCycle')?.reset(null);
+    this.reconciliationForm.get('multiplePaymentCycles')?.reset([]);
     this.cdr.markForCheck();
   }
 
-  onMultiplePaymentCycleChange(cycle: number, event: any): void {
-    if (event.checked) {
-      this.selectedPaymentCycles.push(cycle);
-    } else {
-      this.selectedPaymentCycles = this.selectedPaymentCycles.filter(
-        (c) => c !== cycle
-      );
+  get selectedPaymentCycleNames(): string[] {
+    const selectedIds: number[] = this.reconciliationForm.get('multiplePaymentCycles')?.value ?? [];
+    if (selectedIds.length === 0) {
+      return [];
     }
-    this.cdr.markForCheck();
+    return this.paymentCycleOptions
+      .filter((cycle) => selectedIds.includes(cycle.value))
+      .map((cycle) => cycle.label);
   }
 
   // Helper method for tracking rows
