@@ -302,7 +302,7 @@
                         </div>
 
                         <!-- Right: Page navigation -->
-                        @if (beneficiaryPageSize < totalBeneficiaries) { <div class="d-flex align-items-center gap-2">
+                     <div class="d-flex align-items-center gap-2">
                             <p-button icon="pi pi-angle-double-left" [disabled]="beneficiaryCurrentPage === 0"
                                 (onClick)="onPageChange(0)" [text]="true" severity="secondary" size="small">
                             </p-button>
@@ -333,7 +333,7 @@
                             [style]="{'width': '140px'}">
                         </p-select>
                     </div>
-                    }
+                    
         </div>
         }
         </p-card>

@@ -639,7 +639,7 @@ hasHistoryLoaded = false;
     // Always add "All" option if there are beneficiaries
     if (this.totalBeneficiaries > 0) {
       this.paginationOptions.push({
-        label: `All (${this.totalBeneficiaries})`,
+        label: `All `,
         value: this.totalBeneficiaries,
       });
     }
