@@ -1,4 +1,4 @@
-import { Component, inject, Input, input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 
 import { saveAs } from 'file-saver';
 import { TableModule } from 'primeng/table';
@@ -7,6 +7,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { PaginatorModule } from 'primeng/paginator';
 
 import { LookupService } from '../../../services/lookup.service';
+import { Loader } from '../../../components/loader/loader';
 
 interface ReconciledSummaryRow {
   state: string;
@@ -43,12 +44,11 @@ interface SummaryTotals {
 @Component({
   selector: 'app-report-total-beneficiary-payment-details',
   standalone: true,
-  imports: [TableModule, ButtonModule, TooltipModule, PaginatorModule],
+  imports: [TableModule, ButtonModule, TooltipModule, PaginatorModule, Loader],
   templateUrl: './report-total-beneficiary-payment-details.html',
   styleUrl: './report-total-beneficiary-payment-details.scss'
 })
-export class ReportTotalBeneficiaryPaymentDetails implements OnInit {
-
+export class ReportTotalBeneficiaryPaymentDetails implements OnInit, OnChanges {
 
   @Input() reportTotalBeneficiaryPaymentDetails: any;
   @Input() reportTotalBeneficiaryPaymentDetailsTotals: {
@@ -56,11 +56,19 @@ export class ReportTotalBeneficiaryPaymentDetails implements OnInit {
     totalPaid: number;
     totalUnpaid: number;
   } = { totalBeneficiaries: 0, totalPaid: 0, totalUnpaid: 0 };
+  @Input() isLoading: boolean = true;
 
-  constructor(public lookupService: LookupService) {}
+  isExporting: boolean = false;
 
+  constructor(public lookupService: LookupService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['reportTotalBeneficiaryPaymentDetails'] && this.reportTotalBeneficiaryPaymentDetails) {
+      this.isLoading = false;
+    }
   }
 
   async exportPdf() {
@@ -195,6 +203,9 @@ export class ReportTotalBeneficiaryPaymentDetails implements OnInit {
       return;
     }
 
+    this.isExporting = true;
+
+    try {
     const dataToExport = this.reportTotalBeneficiaryPaymentDetails.map(
       (row: any, index: number) => ({
         'S.No': index + 1,
@@ -205,13 +216,14 @@ export class ReportTotalBeneficiaryPaymentDetails implements OnInit {
         'Work Code': row.workCode,
         'Benficiary Name': row.name,
         'Household number': row.householdNumber,
-        'Component': row.supportType,
+        'Gender': row.gender,
+        'Support Type': row.supportType,
         'Wage Rate (In USD)': row.wageRateUsd,
         'Paid Amount (In USD)': row.paidAmountUsd,
         'Attendance Days': row.attendanceDays,
         'Absence Days': row.absenceDays,
         'Exchange Rate In SSP': row.exchangeRate,
-        'Paid Amount (In SSP)': row.paidAmountSsp,
+        'Total Amount (In SSP)': row.paidAmountSsp,
         'Payment Date': row.paymentDate,
         'Payment Generate Date': row.paymentGenerateDate,
         'Paidto': row.paidTo,
@@ -227,7 +239,7 @@ export class ReportTotalBeneficiaryPaymentDetails implements OnInit {
     // Adjust column widths
     const columnWidths = [
       { wch: 5 },   // S.No
-      { wch: 10 },  // IP
+      { wch: 10 },
       { wch: 15 },  // State Name
       { wch: 15 },  // County Name
       { wch: 15 },  // Payam Name
@@ -235,7 +247,8 @@ export class ReportTotalBeneficiaryPaymentDetails implements OnInit {
       { wch: 15 },  // Work Code
       { wch: 25 },  // Benficiary Name
       { wch: 25 },  // Original Household number
-      { wch: 15 },  // Component
+      { wch: 15 }, // Gender
+      { wch: 15 },  // Support Type
       { wch: 20 },  // Wage Rate (In USD)
       { wch: 20 },  // Paid Amount (In USD)
       { wch: 15 },  // Attendance Days
@@ -278,5 +291,9 @@ export class ReportTotalBeneficiaryPaymentDetails implements OnInit {
       type: 'application/octet-stream',
     });
     saveAs(data, 'TotalBeneficiaryPaymentDetails.xlsx');
+    } finally {
+      this.isExporting = false;
+      this.cdr.detectChanges();
+    }
   }
 }

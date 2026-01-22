@@ -1,4 +1,4 @@
-import { Component, inject, Input, input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 
 import { saveAs } from 'file-saver';
 import { TableModule } from 'primeng/table';
@@ -7,6 +7,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { PaginatorModule } from 'primeng/paginator';
 
 import { LookupService } from '../../../services/lookup.service';
+import { Loader } from '../../../components/loader/loader';
 
 interface ReconciledSummaryRow {
   householdNumber: string;
@@ -31,12 +32,11 @@ interface SummaryTotals {
 @Component({
   selector: 'app-report-reconciled-summary-result',
   standalone: true,
-  imports: [TableModule, ButtonModule, TooltipModule, PaginatorModule], // Import PrimeNG modules and CurrencyPipe
+  imports: [TableModule, ButtonModule, TooltipModule, PaginatorModule, Loader],
   templateUrl: './report-reconciled-summary-result.html',
   styleUrls: ['./report-reconciled-summary-result.scss'],
 })
-export class ReportReconciledSummaryResult implements OnInit {
-
+export class ReportReconciledSummaryResult implements OnInit, OnChanges {
 
   @Input() reportReconciledSummaryResultCount: any;
   @Input() reportReconciledSummaryTotals: {
@@ -44,11 +44,19 @@ export class ReportReconciledSummaryResult implements OnInit {
     totalPaid: number;
     totalUnpaid: number;
   } = { totalBeneficiaries: 0, totalPaid: 0, totalUnpaid: 0 };
+  @Input() isLoading: boolean = true;
 
-  constructor(public lookupService: LookupService) {}
+  isExporting: boolean = false;
 
+  constructor(public lookupService: LookupService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['reportReconciledSummaryResultCount'] && this.reportReconciledSummaryResultCount) {
+      this.isLoading = false;
+    }
   }
 
   private async createPdf(): Promise<any> {
@@ -130,66 +138,84 @@ export class ReportReconciledSummaryResult implements OnInit {
   }
 
   async exportPdf() {
-    const doc = await this.createPdf();
-    if (doc) {
-      doc.save('ReconciliationDetailReport.pdf');
+    this.isExporting = true;
+    try {
+      const doc = await this.createPdf();
+      if (doc) {
+        doc.save('ReconciliationDetailReport.pdf');
+      }
+    } finally {
+      this.isExporting = false;
+      this.cdr.detectChanges();
     }
   }
 
   async previewPdf() {
-    const doc = await this.createPdf();
-    if (doc) {
-      const string = doc.output('datauristring');
-      const embed = "<embed width='100%' height='100%' src='" + string + "'/>";
-      const x = window.open();
-      if (x) {
-        x.document.open();
-        x.document.write(embed);
-        x.document.close();
+    this.isExporting = true;
+    try {
+      const doc = await this.createPdf();
+      if (doc) {
+        const string = doc.output('datauristring');
+        const embed = "<embed width='100%' height='100%' src='" + string + "'/>";
+        const x = window.open();
+        if (x) {
+          x.document.open();
+          x.document.write(embed);
+          x.document.close();
+        }
       }
+    } finally {
+      this.isExporting = false;
+      this.cdr.detectChanges();
     }
   }
 
   async exportExcel() {
-     if (!this.reportReconciledSummaryResultCount || this.reportReconciledSummaryResultCount.length === 0) {
+    if (!this.reportReconciledSummaryResultCount || this.reportReconciledSummaryResultCount.length === 0) {
       console.error('No data available to export.');
       return;
     }
 
-    const xlsx = await import('xlsx');
-    const worksheet = xlsx.utils.json_to_sheet(this.reportReconciledSummaryResultCount);
+    this.isExporting = true;
+    try {
+      const xlsx = await import('xlsx');
+      const worksheet = xlsx.utils.json_to_sheet(this.reportReconciledSummaryResultCount);
 
-    // Adjust column widths
-    const columnWidths = [
-      { wch: 45 }, // Household Number
-      { wch: 25 }, // Name
-      { wch: 10 }, // Wage
-      { wch: 10 }, //exchange rate
-      { wch: 10 }, // payment date
-      { wch: 10 }, // Support Type
-      { wch: 20 }, // Request Number
-      { wch: 20 }, // Payment Cycle
-      { wch: 15 }, // Payment Center
-      { wch: 10 }, // Status
-    ];
-    worksheet['!cols'] = columnWidths;
+      // Adjust column widths
+      const columnWidths = [
+        { wch: 45 }, // Household Number
+        { wch: 25 }, // Name
+        { wch: 10 }, // Wage
+        { wch: 10 }, //exchange rate
+        { wch: 10 }, // payment date
+        { wch: 10 }, // Support Type
+        { wch: 20 }, // Request Number
+        { wch: 20 }, // Payment Cycle
+        { wch: 15 }, // Payment Center
+        { wch: 10 }, // Status
+      ];
+      worksheet['!cols'] = columnWidths;
 
-    const range = xlsx.utils.decode_range(worksheet['!ref'] || '');
-    for (let row = range.s.r; row <= range.e.r; row++) {
-      for (let col = range.s.c; col <= range.e.c; col++) {
-        const cellAddress = xlsx.utils.encode_cell({ r: row, c: col });
-        const cell = worksheet[cellAddress];
-        if (cell) {
-          if (!cell.s) cell.s = {};
-          cell.s.alignment = { horizontal: 'center', vertical: 'center' };
+      const range = xlsx.utils.decode_range(worksheet['!ref'] || '');
+      for (let row = range.s.r; row <= range.e.r; row++) {
+        for (let col = range.s.c; col <= range.e.c; col++) {
+          const cellAddress = xlsx.utils.encode_cell({ r: row, c: col });
+          const cell = worksheet[cellAddress];
+          if (cell) {
+            if (!cell.s) cell.s = {};
+            cell.s.alignment = { horizontal: 'center', vertical: 'center' };
+          }
         }
       }
-    }
 
-    const workbook = xlsx.utils.book_new();
-    xlsx.utils.book_append_sheet(workbook, worksheet, 'Reconciliation Detail Report');
-    const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array', cellStyles: true });
-    const data = new Blob([excelBuffer], { type: 'application/octet-stream' });
-    saveAs(data, 'ReconciliationDetailReport.xlsx');
+      const workbook = xlsx.utils.book_new();
+      xlsx.utils.book_append_sheet(workbook, worksheet, 'Reconciliation Detail Report');
+      const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array', cellStyles: true });
+      const data = new Blob([excelBuffer], { type: 'application/octet-stream' });
+      saveAs(data, 'ReconciliationDetailReport.xlsx');
+    } finally {
+      this.isExporting = false;
+      this.cdr.detectChanges();
+    }
   }
 }
