@@ -131,7 +131,10 @@ export class WageRequestDetails implements OnInit {
   reviewMessage: any[] = [];
   attachmentHistory: AttachmentHistory[] = [];
   isHistoryLoading = false;
+hasHistoryLoaded = false;
 
+  rowsPerPageOptions: number[] = [10, 25, 50]; // Will be updated dynamically
+  paginationOptions: { label: string; value: number }[] = [];
   private readonly statusMap = new Map<number, StatusInfo>([
     [0, { value: 'Draft', label: 'Draft', class: 'bg-secondary' }],
     [
@@ -238,37 +241,65 @@ export class WageRequestDetails implements OnInit {
     private cdr: ChangeDetectorRef,
     private fb: FormBuilder,
     private lookupService: LookupService, // Inject LookupService
-    private location: Location
-  ) {}
+    private location: Location,
+  ) {
 
+  }
   ngOnInit(): void {
-    this.roleId = this.apiService.getUserRole();
     this.initBreadcrumb();
     this.initReviewForm();
-    const subprojectId = this.route.snapshot.paramMap.get('subprojectId');
+    this.roleId = this.apiService.getUserRole();
+    const subprojectIdParam = this.route.snapshot.paramMap.get('subprojectId');
+    const wageIdParam = this.route.snapshot.paramMap.get('wageId');
 
-    const wageId = this.route.snapshot.paramMap.get('wageId');
-    if (wageId && subprojectId) {
-      this.wageId = +wageId;
-      this.subprojectId = +subprojectId;
-      this.loadWageRequestDetails(this.wageId);
-      this.loadAttachmentHistory();
+    if (wageIdParam && subprojectIdParam) {
+      this.wageId = +wageIdParam;
+      this.subprojectId = +subprojectIdParam;
+      this.loadInitialData();
     } else {
-      this.apiError = 'Invalid wage request ID';
+      this.apiError = 'Invalid wage request ID or subproject ID';
+      // this.showErrorAlert('Invalid Parameters', this.apiError);
     }
   }
-initBreadcrumb(): void {
-  this.breadcrumbHome = { icon: 'fas fa-home' };
-  this.breadcrumbItems = [
-    {
-      label: 'Wage Requests',
-      command: () => this.location.back()
-    },
-    { label: 'Details' },
-  ];
-}
+  private async loadInitialData(): Promise<void> {
+    if (!this.wageId) return;
+
+    this.isLoading = true;
+
+    try {
+      await Promise.all([
+        this.loadWageRequestDetails(this.wageId),
+        this.loadAttachmentHistory(),
+      ]);
+
+      // Load beneficiaries and update rowsPerPageOptions
+      await this.loadBeneficiaries(
+        this.beneficiaryCurrentPage,
+        this.beneficiaryPageSize,
+      );
+      this.updateRowsPerPageOptions(); // Add this line
+    } catch (error) {
+      console.error('Error loading initial data:', error);
+      this.apiError = 'Failed to load page data. Please refresh the page.';
+    } finally {
+      this.isLoading = false;
+      this.cdr.detectChanges();
+    }
+  }
+  initBreadcrumb(): void {
+    this.breadcrumbHome = { icon: 'fas fa-home' };
+    this.breadcrumbItems = [
+      {
+        label: 'Wage Requests',
+        command: () => this.location.back(),
+      },
+      { label: 'Details' },
+    ];
+  }
   getGenderName(genderId: string | number): string {
-    const gender = this.lookupService.getGenderListbyId().find(g => g.id == genderId);
+    const gender = this.lookupService
+      .getGenderListbyId()
+      .find((g) => g.id == genderId);
     return gender ? gender.name : 'Unknown';
   }
 
@@ -380,7 +411,7 @@ initBreadcrumb(): void {
     try {
       const response: any = await this.apiService.POST_FORM_DATA(
         '/api/wage-request-review/first',
-        formData
+        formData,
       );
 
       const responseData = response.data;
@@ -406,11 +437,9 @@ initBreadcrumb(): void {
         this.selectedFile = null;
 
         const fileInput = document.getElementById(
-          'attachment'
+          'attachment',
         ) as HTMLInputElement;
         if (fileInput) fileInput.value = '';
-
-       
       } else {
         this.reviewMessage = [
           {
@@ -451,8 +480,6 @@ initBreadcrumb(): void {
     }
   }
 
-
-
   async loadAttachmentHistory(): Promise<void> {
     if (!this.wageId) {
       return;
@@ -460,7 +487,7 @@ initBreadcrumb(): void {
     this.isHistoryLoading = true;
     try {
       const response: any = await this.apiService.GET(
-        `/api/wage-request-review/history?wageRequestId=${this.wageId}&getFiles=true`
+        `/api/wage-request-review/history?wageRequestId=${this.wageId}&getFiles=true`,
       );
       if (response?.data?.content) {
         this.attachmentHistory = response.data.content;
@@ -480,7 +507,7 @@ initBreadcrumb(): void {
     try {
       const wageResponse: any = await this.apiService.POST(
         'api/wage-request/get?page=0&size=10',
-        { id: id }
+        { id: id },
       );
 
       if (wageResponse?.data?.content?.length > 0) {
@@ -492,20 +519,19 @@ initBreadcrumb(): void {
           try {
             const subprojectResponse: any = await this.apiService.POST(
               '/api/subproject/get?page=0&size=10',
-              { id: subprojectId }
+              { id: subprojectId },
             );
             if (subprojectResponse?.data?.content?.length > 0) {
               this.subproject = subprojectResponse.data.content[0];
             } else {
               console.warn(
-                `Subproject details not found for id: ${subprojectId}`
+                `Subproject details not found for id: ${subprojectId}`,
               );
             }
           } catch (subError) {
             console.error('Failed to load subproject details:', subError);
           }
         }
-
       } else {
         this.apiError = 'No wage request found with the provided ID.';
       }
@@ -567,29 +593,119 @@ initBreadcrumb(): void {
     }
 
     this.isBeneficiaryLoading = true;
+    this.cdr.detectChanges();
     try {
       const response: any = await this.apiService.GET(
-        `/api/wage-request/beneficiary-list/get?page=${page}&size=${size}&wageRequestId=${this.wageId}`
+        `/api/wage-request/beneficiary-list/get?page=${page}&size=${size}&wageRequestId=${this.wageId}`,
       );
 
-      if (response?.data?.content) {
+      if (response?.data?.content && Array.isArray(response.data.content)) {
         this.beneficiaries = response.data.content;
-        this.totalBeneficiaries = response.data.totalElements;
+        this.totalBeneficiaries = response.data.totalElements || 0;
+
+        // Update dropdown options after getting total count
+        if (this.totalBeneficiaries > 0) {
+          this.updateRowsPerPageOptions();
+        }
+      } else {
+        this.beneficiaries = [];
+        this.totalBeneficiaries = 0;
       }
     } catch (error) {
       console.error('Failed to load beneficiaries:', error);
+      this.beneficiaries = [];
+      this.totalBeneficiaries = 0;
+      // this.showErrorAlert('Loading Error', 'Failed to load beneficiaries. Please try refreshing the page.');
     } finally {
       this.isBeneficiaryLoading = false;
       this.cdr.detectChanges();
     }
   }
 
-  onBeneficiaryLazyLoad(event: any): void {
-    this.beneficiaryCurrentPage = event.first / event.rows;
-    this.beneficiaryPageSize = event.rows;
+  private updateRowsPerPageOptions(): void {
+    const baseOptions = [10, 25, 50];
+    this.paginationOptions = [];
+
+    // Add standard options
+    baseOptions.forEach((option) => {
+      if (option <= this.totalBeneficiaries) {
+        this.paginationOptions.push({
+          label: option.toString(),
+          value: option,
+        });
+      }
+    });
+
+    // Always add "All" option if there are beneficiaries
+    if (this.totalBeneficiaries > 0) {
+      this.paginationOptions.push({
+        label: `All (${this.totalBeneficiaries})`,
+        value: this.totalBeneficiaries,
+      });
+    }
+
+    // Set default if needed
+    if (
+      !this.paginationOptions.find(
+        (opt) => opt.value === this.beneficiaryPageSize,
+      )
+    ) {
+      this.beneficiaryPageSize = this.paginationOptions[0]?.value || 10;
+    }
+  }
+  onPageSizeChange(newSize: number): void {
+    this.beneficiaryPageSize = newSize;
+    this.beneficiaryCurrentPage = 0; // Reset to first page
     this.loadBeneficiaries(
       this.beneficiaryCurrentPage,
-      this.beneficiaryPageSize
+      this.beneficiaryPageSize,
     );
   }
+
+  // 4. Add method to handle page change:
+  onPageChange(page: number): void {
+    this.beneficiaryCurrentPage = page;
+    this.loadBeneficiaries(
+      this.beneficiaryCurrentPage,
+      this.beneficiaryPageSize,
+    );
+  }
+
+  // 5. Add computed properties for pagination display:
+  get totalPages(): number {
+    return Math.ceil(this.totalBeneficiaries / this.beneficiaryPageSize);
+  }
+
+  get currentPageDisplay(): number {
+    return this.beneficiaryCurrentPage + 1;
+  }
+
+  get startRecord(): number {
+    return this.totalBeneficiaries === 0
+      ? 0
+      : this.beneficiaryCurrentPage * this.beneficiaryPageSize + 1;
+  }
+
+  get endRecord(): number {
+    const end = (this.beneficiaryCurrentPage + 1) * this.beneficiaryPageSize;
+    return Math.min(end, this.totalBeneficiaries);
+  }
+  onBeneficiaryLazyLoad(event: any): void {
+    const requestedRows = event.rows;
+
+    // Check if user selected "All" (totalBeneficiaries)
+    if (requestedRows === this.totalBeneficiaries) {
+      this.beneficiaryCurrentPage = 0;
+      this.beneficiaryPageSize = this.totalBeneficiaries;
+    } else {
+      this.beneficiaryCurrentPage = event.first / event.rows;
+      this.beneficiaryPageSize = event.rows;
+    }
+
+    this.loadBeneficiaries(
+      this.beneficiaryCurrentPage,
+      this.beneficiaryPageSize,
+    );
+  }
+  
 }
