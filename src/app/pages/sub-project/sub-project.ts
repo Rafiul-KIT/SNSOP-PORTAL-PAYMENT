@@ -386,51 +386,19 @@ export class SubProject implements OnInit {
     }
   }
 
-  private handleFileInput(event: Event, index: number, fileControlName: string, fileNameControlName: string, fileSizeControlName: string): void {
-    const input = event.target as HTMLInputElement;
-    const file = input?.files?.[0];
-    const MAX_FILE_SIZE_MB = 1;
-    const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
-
-    if (file) {
-      if (file.size > MAX_FILE_SIZE_BYTES) {
-        Swal.fire({
-          icon: 'error',
-          title: 'File Too Large',
-          text: `File size exceeds the limit of ${MAX_FILE_SIZE_MB} MB. Please select a smaller file.`,
-        });
-        // Clear the input field
-        if (input) {
-          input.value = '';
-        }
-        const activity = this.workActivities.at(index);
-        activity.patchValue({
-          [fileControlName]: null,
-          [fileNameControlName]: '',
-          [fileSizeControlName]: null
-        });
-        return;
-      }
-
-      const activity = this.workActivities.at(index);
-      activity.patchValue({
-        [fileControlName]: file,
-        [fileNameControlName]: file.name,
-        [fileSizeControlName]: file.size
-      });
-    }
-  }
-
   onWorkPhotoSelect(event: Event, index: number): void {
-    this.handleFileInput(event, index, 'workPhoto', 'workPhotoName', 'workPhotoSize');
+    const sizeControlNames = ['workPhotoSize', 'equipmentPhotoSize', 'materialPhotoSize'];
+    this.lookupService.handleFileUploadValidation(event, this.workActivities, index, 'workPhoto', 'workPhotoName', 'workPhotoSize', sizeControlNames);
   }
 
   onEquipmentPhotoSelect(event: Event, index: number): void {
-    this.handleFileInput(event, index, 'equipmentPhoto', 'equipmentPhotoName', 'equipmentPhotoSize');
+    const sizeControlNames = ['workPhotoSize', 'equipmentPhotoSize', 'materialPhotoSize'];
+    this.lookupService.handleFileUploadValidation(event, this.workActivities, index, 'equipmentPhoto', 'equipmentPhotoName', 'equipmentPhotoSize', sizeControlNames);
   }
 
   onMaterialsPhotoSelect(event: Event, index: number): void {
-    this.handleFileInput(event, index, 'materialPhoto', 'materialPhotoName', 'materialPhotoSize');
+    const sizeControlNames = ['workPhotoSize', 'equipmentPhotoSize', 'materialPhotoSize'];
+    this.lookupService.handleFileUploadValidation(event, this.workActivities, index, 'materialPhoto', 'materialPhotoName', 'materialPhotoSize', sizeControlNames);
   }
 
   private formatBytes(bytes: number, decimals = 2): string {
@@ -526,7 +494,7 @@ export class SubProject implements OnInit {
           'Authorization': `Bearer ${token}`
         },
         responseType: 'blob'
-      });
+      });  
 
       const blob = response.data;
       const objectUrl = URL.createObjectURL(blob);

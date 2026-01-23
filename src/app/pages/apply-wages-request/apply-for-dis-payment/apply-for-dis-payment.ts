@@ -17,7 +17,7 @@ import { ApiService } from '../../../services/api.service';
 import { Loader } from "../../../components/loader/loader";
 import { LookupService, LookupItem, PaymentCycleEnum } from '../../../services/lookup.service';
 import Swal from 'sweetalert2';
-import { handleFileUpload } from '../../../validators/file-validator';
+import { handleMultipleFileUpload } from '../../../validators/file-validator'; // Updated import
 
 interface Beneficiary {
   beneficiaryId: number;
@@ -59,9 +59,10 @@ export class ApplyForDisPayment implements OnInit {
   filteredBeneficiaries: any[] = [];
   selectedBeneficiaries: any[] = [];
 
-  attachmentFile: File | null = null;
+  attachmentFiles: File[] = []; // Changed to handle multiple files
+
   showResults = false;
-  readonly MAX_ATTACHMENT_SIZE_MB = 3;
+  readonly MAX_ATTACHMENT_SIZE_MB = 25; // Updated max attachment size
 
   // Dropdown options
   years: any[] = [];
@@ -88,6 +89,8 @@ export class ApplyForDisPayment implements OnInit {
 
   breadcrumbItems: any[] = [];
   breadcrumbHome: any;
+
+
 
   constructor(
     private fb: FormBuilder,
@@ -162,13 +165,6 @@ export class ApplyForDisPayment implements OnInit {
     });
   }
 
-  initializeSubmissionForm(): void {
-    this.submissionForm = this.fb.group({
-      totalDays: [null, [Validators.required, Validators.min(1)]],
-      attachment: [null]
-    });
-  }
-
   populateYearAndMonth(): void {
     const currentYear = new Date().getFullYear();
     for (let i = 0; i < 5; i++) {
@@ -236,8 +232,37 @@ export class ApplyForDisPayment implements OnInit {
     this.paymentCycles = PaymentCycleEnum;
   }
 
-  onFileChange(event: any): void {
-    handleFileUpload(event, this.submissionForm, 'attachment');
+  initializeSubmissionForm(): void {
+    this.submissionForm = this.fb.group({
+      totalDays: [null, [Validators.required, Validators.min(1)]],
+      // attachment control is no longer needed here, files are managed in attachmentFiles array
+    });
+  }
+
+  onFileChange(event: Event): void {
+    const result = handleMultipleFileUpload(event, this.attachmentFiles, this.MAX_ATTACHMENT_SIZE_MB);
+    if (result.error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Upload Error',
+        html: result.error,
+      });
+    } else {
+      this.attachmentFiles = result.validFiles;
+    }
+  }
+
+  removeAttachment(index: number): void {
+    this.attachmentFiles.splice(index, 1);
+  }
+
+  formatBytes(bytes: number, decimals = 2): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
   }
 
   async onSearch(): Promise<void> {
@@ -384,8 +409,10 @@ export class ApplyForDisPayment implements OnInit {
       formData.append('beneficiaryIds', id);
     });
 
-    if (this.submissionForm.value.attachment) {
-      formData.append('attachment', this.submissionForm.value.attachment, this.submissionForm.value.attachment.name);
+    if (this.attachmentFiles.length > 0) {
+      this.attachmentFiles.forEach(file => {
+        formData.append('attachment', file, file.name);
+      });
     }
 
     const url = 'api/wage-request/dis/beneficiary/include';
@@ -398,6 +425,7 @@ export class ApplyForDisPayment implements OnInit {
         this.filteredBeneficiaries = [];
         this.selectedBeneficiaries = [];
         this.submissionForm.reset({ totalDays: null });
+        this.attachmentFiles = []; // Clear attachments after successful submission
         this.showResults = false;
       } else {
         Swal.fire({ icon: 'error', title: 'Error', text:  'Failed to submit DIS wage request.' });

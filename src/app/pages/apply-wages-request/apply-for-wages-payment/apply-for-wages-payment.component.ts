@@ -21,7 +21,7 @@ import Swal from 'sweetalert2';
 import { ApiService } from '../../../services/api.service';
 import { PaymentCycleEnum } from '../../../services/lookup.service';
 import { Loader } from "../../../components/loader/loader";
-import { handleFileUpload } from '../../../validators/file-validator';
+import { handleMultipleFileUpload } from '../../../validators/file-validator';
 
 interface Beneficiary {
   beneficiaryId: number;
@@ -76,6 +76,7 @@ export class ApplyForWagesPaymentComponent implements OnInit {
   showTable = false;
   tableLoading = false;
   submitting = false;
+  attachments: File[] = [];
 
   // Client-side state
   sortField: string = '';
@@ -119,15 +120,30 @@ export class ApplyForWagesPaymentComponent implements OnInit {
         fromDate: [null, Validators.required],
         toDate: [null, Validators.required],
         paymentCycle: [null, Validators.required],
-        attachment: [null]
+        attachment: [[]]
       },
       { validators: this.dateRangeValidator }
     );
   }
 
   onFileChange(event: Event): void {
-    handleFileUpload(event, this.wagesForm, 'attachment');
+    const { validFiles, error } = handleMultipleFileUpload(event, this.attachments);
+    this.attachments = validFiles;
+    this.wagesForm.get('attachment')?.setValue(this.attachments);
+    if (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'File Upload Error',
+        text: error
+      });
+    }
   }
+
+  removeAttachment(fileToRemove: File): void {
+    this.attachments = this.attachments.filter(file => file !== fileToRemove);
+    this.wagesForm.get('attachment')?.setValue(this.attachments);
+  }
+
 
   async loadProjectData(id: string): Promise<void> {
     this.isLoading = true;
@@ -339,8 +355,10 @@ export class ApplyForWagesPaymentComponent implements OnInit {
       
       beneficiaryIds.forEach(id => formData.append('beneficiaryIds', id.toString()));
 
-      if (formValue.attachment) {
-        formData.append('attachment', formValue.attachment);
+      if (this.attachments.length > 0) {
+        this.attachments.forEach(file => {
+          formData.append('attachments', file);
+        });
       }
       
       const response: any = await this.apiService.POST_FORM_DATA(
