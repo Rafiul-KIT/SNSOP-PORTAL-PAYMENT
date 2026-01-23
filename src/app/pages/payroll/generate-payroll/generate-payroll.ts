@@ -91,7 +91,7 @@ export class GeneratePayroll implements OnInit {
   paymentCycleOptions: LookupItemPayroll[] = [];
     paymentTypeOptions: LookupItem[] = [
        { id: 'CASH_PAYMENT', name: 'Cash' },
-      // { id: 'MOBILE_PAYMENT', name: 'Mobile Money' }
+      { id: 'MOBILE_PAYMENT', name: 'Mobile Money' }
     ];
 
   // Generation status
@@ -154,7 +154,7 @@ export class GeneratePayroll implements OnInit {
     this.counties = [];
     this.payams = [];
     this.bomas = [];
-   
+
 
     if (state?.id) {
       this.counties = await this.lookup.getCountyListByStateId(state.id);
@@ -318,8 +318,8 @@ export class GeneratePayroll implements OnInit {
     }catch (error: any) {
 
   const status =
-    error?.response?.status ??   
-    error?.status;               
+    error?.response?.status ??
+    error?.status;
 
   if (status === 404) {
     Swal.fire({
@@ -333,7 +333,7 @@ export class GeneratePayroll implements OnInit {
     return;
   }
 
-  
+
   Swal.fire({
     icon: 'error',
     title: 'Error',
