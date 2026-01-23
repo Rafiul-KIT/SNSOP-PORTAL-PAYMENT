@@ -520,7 +520,6 @@ export class SubProject implements OnInit {
       const decodedPath = decodeURIComponent(path);
       const fullUrl = `${environment.globalApi}api/subproject/work-details/attachment/get?filePath=${decodedPath}`;
 
-      console.log('Fetching attachment from URL:', fullUrl); // Log the URL
 
       const response = await axios.get(fullUrl, {
         headers: {

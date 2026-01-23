@@ -31,6 +31,7 @@ import { ApiService } from '../../../services/api.service';
 import { Loader } from '../../../components/loader/loader';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { CheckboxModule } from 'primeng/checkbox';
+import { MultiSelectModule } from 'primeng/multiselect';
 import Swal from 'sweetalert2';
 
 interface PayrollGenerationResponse {
@@ -65,6 +66,7 @@ interface PayrollGenerationResponse {
     Loader,
     RadioButtonModule,
     CheckboxModule,
+    MultiSelectModule,
   ],
   providers: [MessageService, ConfirmationService],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -133,17 +135,9 @@ export class GeneratePayroll implements OnInit {
       boma: [{ value: null, disabled: true }],
       supportType: [''],
       payrollType: ['single'],
-       paymentCycle: [null],
+      paymentCycle: [null],
       paymentType: [''],
-        paymentCycles: this.fb.array(
-        this.paymentCycleOptions.map((c) =>
-          this.fb.group({
-            id: c.id,
-            name: c.name,
-            selected: false,
-          })
-        )
-      ),
+      paymentCycles: [[]],
     });
   }
 
@@ -196,14 +190,18 @@ export class GeneratePayroll implements OnInit {
   }
 
 
-  get paymentCycles() {
-    return this.searchForm.get('paymentCycles') as FormArray;
+  getSelectedPaymentCycles(): Number[] {
+    return this.searchForm.get('paymentCycles')?.value ?? [];
   }
 
-  getSelectedPaymentCycles(): number[] {
-    return this.paymentCycles.controls
-      .filter((control) => control.get('selected')?.value)
-      .map((control) => control.get('id')?.value);
+  get selectedPaymentCycleNames(): string[] {
+    const selectedIds: Number[] = this.searchForm.get('paymentCycles')?.value ?? [];
+    if (selectedIds.length === 0) {
+      return [];
+    }
+    return this.paymentCycleOptions
+      .filter((cycle) => selectedIds.includes(cycle.id))
+      .map((cycle) => cycle.name);
   }
 
   get isGenerateDisabled(): boolean {
@@ -237,7 +235,7 @@ export class GeneratePayroll implements OnInit {
 
   async generatePayroll() {
     const formValues = this.searchForm.value;
-    let selectedCycles: number[] = [];
+    let selectedCycles: Number[] = [];
 
     if (formValues.payrollType === 'single') {
       if (formValues.paymentCycle) {
@@ -267,7 +265,7 @@ export class GeneratePayroll implements OnInit {
     });
   }
 
-  private async executePayrollGeneration(selectedCycles: number[]) {
+  private async executePayrollGeneration(selectedCycles: Number[]) {
     this.isGenerating = true;
     this.generationStatus = 'Generating payroll...';
     this.cdr.markForCheck();
@@ -281,7 +279,7 @@ export class GeneratePayroll implements OnInit {
       payam: formValues.payam?.id ?? 0,
       boma: formValues.boma?.id ?? 0,
       supportType: formValues.supportType || 'LIPW',
-      paymentCycles: selectedCycles,
+      paymentCycles: selectedCycles.map(id => id.valueOf() as number), // Explicit conversion for API
       isCombined: formValues.payrollType === 'combined',
       payrollType: formValues.paymentType,
       requestId: requestId,
@@ -359,14 +357,10 @@ export class GeneratePayroll implements OnInit {
       boma: { value: null, disabled: true },
       supportType: '',
       payrollType: 'single',
-      
       paymentCycle: null,
       paymentType: 'CASH_PAYMENT',
+      paymentCycles: [],
     });
-
-    this.paymentCycles.controls.forEach((control) =>
-      control.get('selected')?.setValue(false)
-    );
 
     this.counties = [];
     this.payams = [];

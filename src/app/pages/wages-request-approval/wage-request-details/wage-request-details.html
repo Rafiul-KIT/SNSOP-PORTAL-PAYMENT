@@ -77,7 +77,7 @@
                                     </div>
                                     }
                                     @else {
-                                           <div
+                                    <div
                                         class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
                                         <span class="text-muted">Project Name:</span>
                                         <span class="fw-semibold text-dark">Direct Income Support</span>
@@ -167,121 +167,234 @@
                 }
 
                 <p-divider></p-divider>
+                @if (attachmentHistory.length > 0) {
+                <p-card class="mt-4 shadow-sm border-0">
+                    <h5 class="mb-3 text-success">
+                        <i class="pi pi-history me-2"></i>
+                        Review History & Attachments
+                    </h5>
+                    <p-table [value]="attachmentHistory" [loading]="isHistoryLoading" responsiveLayout="scroll"
+                        class="p-datatable-sm">
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th>Reviewed At</th>
+                                <th>Status</th>
+                                <th>Comments</th>
+                                <th>Attachment</th>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="body" let-history>
+                            <tr>
+                                <td>{{ formatDate(history.reviewedAt) }}</td>
+                                <td>{{ history.status }}</td>
+                                <td>{{ history.comments }}</td>
+                                <td>
+                                    @if (history.attachmentUrl) {
+                                    <a [href]="getAttachmentUrl(history.attachmentUrl)" target="_blank"
+                                        class="btn btn-sm btn-outline-primary">
+                                        <i class="pi pi-download me-1"></i> Preview Attachment
+                                    </a>
+                                    } @else {
+                                    <span>—</span>
+                                    }
+                                </td>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="emptymessage">
+                            <tr>
+                                <td colspan="4" class="text-center">No history found.</td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
+                </p-card>
+                }
+                @else{
+                <p-card>
+                    <h5 class="mb-3 text-success">
+                        <i class="pi pi-history me-2"></i>
+                        Review History & Attachments
+                    </h5>
 
+                    <p-table [value]="attachmentHistory" [loading]="isHistoryLoading" responsiveLayout="scroll">
+
+                        <ng-template pTemplate="emptymessage">
+                            <tr>
+                                <td colspan="4" class="text-center">No history found.</td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
+                </p-card>
+                }
+                <p-divider></p-divider>
                 <!-- Beneficiary List Table -->
                 @if (wageRequest) {
+                <!-- Replace the beneficiaries p-table section with this: -->
+
                 <p-card class="mt-4 shadow-sm border-0">
                     <h5 class="mb-3 text-success">
                         <i class="pi pi-users me-2"></i>
                         Beneficiaries
                     </h5>
+
+                    <!-- Table without built-in paginator -->
                     <p-table [value]="beneficiaries" [loading]="isBeneficiaryLoading" responsiveLayout="scroll"
-                        [paginator]="true" [rows]="beneficiaryPageSize" [totalRecords]="totalBeneficiaries"
-                        (onLazyLoad)="onBeneficiaryLazyLoad($event)" [lazy]="true"
-                        [rowsPerPageOptions]="[10, 25, 50]" class="p-datatable-sm">
-                                                <ng-template pTemplate="header">
-                                                    <tr>
-                                                        <th>House Hold Number</th>
-                                                        <th>Name</th>
-                                                        <th>Gender</th>
-                                                        <th>Age</th>
-                                                        <th>Phone</th>
-                                                        <th>Total Days</th>
-                                                        <th>Payment Status</th>
-                                                        <th>Wage (USD)</th>
-                                                        @if(showSspColumns()){
-                                                        <th>Exchange Rate</th>
-                                                        <th>Wage (SSP)</th>
-                                                        }
-                                                        <th>Total (USD)</th>
-                                                         @if(showSspColumns()){
-                                                        <th>Total (SSP)</th>
-                                                        }
-                                                    </tr>
-                                                </ng-template>
-                                                <ng-template pTemplate="body" let-bene>
-                                                    <tr>
-                                                        <td>{{ bene.householdNumber }}</td>
-                                                        <td>{{ bene.beneficiaryName }}</td>
-                                                        <td>{{ getGenderName(bene.gender) }}</td>
-                                                        <td>{{ bene.age }}</td>
-                                                        <td>{{ bene.phoneNo }}</td>
-                                                        <td>{{ bene.totalDays }}</td>
-                                                        <td>{{ bene.paymentStatus == 1 ? 'Paid' : 'Unpaid' }}</td>
-                                                        <td>{{ bene.wageRateUSD | number:'1.2-2' }}</td>
-                                                        @if(showSspColumns()){
-                                                        <td>{{ bene.exchangeRate | number:'1.2-2' }}</td>
-                                                        <td>{{ bene.wageRateSSP | number:'1.2-2' }}</td>
-                                                        }
-                                                        <td>{{ bene.wageUsdTotal | number:'1.2-2' }}</td>
-                                                        @if(showSspColumns()){
-                                                        <td>{{ bene.wageSspTotal | number:'1.2-2' }}</td>
-                                                        }
-                                                    </tr>
-                                                </ng-template>
-                                                <ng-template pTemplate="emptymessage">
-                                                    <tr>
-                                                        <td [attr.colspan]="showSspColumns() ? 12 : 9" class="text-center">No beneficiaries found.</td>
-                                                    </tr>
-                                                </ng-template>
+                        class="p-datatable-sm">
+
+                        <ng-template pTemplate="header">
+                            <tr>
+                                <th>House Hold Number</th>
+                                <th>Name</th>
+                                <th>Gender</th>
+                                <th>Age</th>
+                                <th>Phone</th>
+                                <th>Total Days</th>
+                                <th>Payment Status</th>
+                                <th>Wage (USD)</th>
+                                @if(showSspColumns()){
+                                <th>Exchange Rate</th>
+                                <th>Wage (SSP)</th>
+                                }
+                                <th>Total (USD)</th>
+                                @if(showSspColumns()){
+                                <th>Total (SSP)</th>
+                                }
+                            </tr>
+                        </ng-template>
+
+                        <ng-template pTemplate="body" let-bene>
+                            <tr>
+                                <td>{{ bene.householdNumber }}</td>
+                                <td>{{ bene.beneficiaryName }}</td>
+                                <td>{{ getGenderName(bene.gender) }}</td>
+                                <td>{{ bene.age }}</td>
+                                <td>{{ bene.phoneNo }}</td>
+                                <td>{{ bene.totalDays }}</td>
+                                <td>{{ bene.paymentStatus == 1 ? 'Paid' : 'Unpaid' }}</td>
+                                <td>{{ bene.wageRateUSD | number:'1.2-2' }}</td>
+                                @if(showSspColumns()){
+                                <td>{{ bene.exchangeRate | number:'1.2-2' }}</td>
+                                <td>{{ bene.wageRateSSP | number:'1.2-2' }}</td>
+                                }
+                                <td>{{ bene.wageUsdTotal | number:'1.2-2' }}</td>
+                                @if(showSspColumns()){
+                                <td>{{ bene.wageSspTotal | number:'1.2-2' }}</td>
+                                }
+                            </tr>
+                        </ng-template>
+
+                        <ng-template pTemplate="emptymessage">
+                            <tr>
+                                <td [attr.colspan]="showSspColumns() ? 12 : 9" class="text-center">
+                                    No beneficiaries found.
+                                </td>
+                            </tr>
+                        </ng-template>
                     </p-table>
-                </p-card>
-                }
-                <!-- Review Form Card -->
-                @if (wageRequest && roleId === 14) {
-                <p-card class="mt-4 shadow-sm border-0">
-                    <h5 class="mb-3 text-success">
-                        <i class="pi pi-check-circle me-2"></i>
-                        Review Wage Request
-                    </h5>
-                    <form [formGroup]="reviewForm" (ngSubmit)="onSubmitReview()">
-                        <div class="row d-flex flex-column g-3">
-                            <div class="d-flex flex-column col-2 gap-2">
-                                <label for="approved" class="form-label fw-semibold">Approval Status</label>
-                                <p-select id="approved" formControlName="approved" [options]="approvedOptions"
-                                    optionLabel="label" placeholder="Select Approval Status"
-                                    [ngClass]="{ 'ng-invalid ng-dirty border-danger': reviewForm.get('approved')?.invalid && reviewForm.get('approved')?.touched }"
-                                    class="w-10">
-                                </p-select>
-                                @if (reviewForm.get('approved')?.invalid && reviewForm.get('approved')?.touched) {
-                                <small class="p-error text-danger mt-1 d-block">Approval Status is required.</small>
-                                }
-                            </div>
 
-                       
+                    <!-- Custom Pagination Controls -->
+                    @if (totalBeneficiaries > 0) {
+                    <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-3">
 
-                            <div class="col-2">
-                                <label for="attachment" class="form-label fw-semibold">Attachment (Optional)</label>
-                                <input type="file" class="form-control " id="attachment"
-                                    (change)="onFileSelected($event)" accept="image/*,.pdf">
-                                @if (selectedFile) {
-                                <div class="mt-2 text-muted">
-                                    <i class="pi pi-file me-1"></i>
-                                    Selected file: {{ selectedFile.name }}
-                                </div>
-                                }
-                            </div>
 
-                            <div class="col-2">
-                                @for (msg of reviewMessage; track msg) {
-                                <p-message [severity]="msg.severity" [text]="msg.detail" class="mb-2 d-block">
-                                </p-message>
-                                }
-                            </div>
-
-                            <div class="col-12">
-                                <p-button type="submit" label="Submit Review" icon="pi pi-send"
-                                    [disabled]="reviewForm.invalid || isReviewSubmitting">
-                                </p-button>
-                            </div>
+                        <!-- Center: Page info -->
+                        <div class="text-muted">
+                            Showing {{ startRecord }} to {{ endRecord }} of {{ totalBeneficiaries }} beneficiaries
                         </div>
-                    </form>
-                </p-card>
-                }
 
-            </p-card>
-            }
+                        <!-- Right: Page navigation -->
+                     <div class="d-flex align-items-center gap-2">
+                            <p-button icon="pi pi-angle-double-left" [disabled]="beneficiaryCurrentPage === 0"
+                                (onClick)="onPageChange(0)" [text]="true" severity="secondary" size="small">
+                            </p-button>
+                            <p-button icon="pi pi-angle-left" [disabled]="beneficiaryCurrentPage === 0"
+                                (onClick)="onPageChange(beneficiaryCurrentPage - 1)" [text]="true" severity="secondary"
+                                size="small">
+                            </p-button>
+
+                            <span class="text-muted mx-2">
+                                Page {{ currentPageDisplay }} of {{ totalPages }}
+                            </span>
+
+                            <p-button icon="pi pi-angle-right" [disabled]="beneficiaryCurrentPage >= totalPages - 1"
+                                (onClick)="onPageChange(beneficiaryCurrentPage + 1)" [text]="true" severity="secondary"
+                                size="small">
+                            </p-button>
+                            <p-button icon="pi pi-angle-double-right"
+                                [disabled]="beneficiaryCurrentPage >= totalPages - 1"
+                                (onClick)="onPageChange(totalPages - 1)" [text]="true" severity="secondary"
+                                size="small">
+                            </p-button>
+                    </div>
+                    <!-- Left: Rows per page selector -->
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted">Rows per page:</span>
+                        <p-select [options]="paginationOptions" [(ngModel)]="beneficiaryPageSize"
+                            (onChange)="onPageSizeChange($event.value)" optionLabel="label" optionValue="value"
+                            [style]="{'width': '140px'}">
+                        </p-select>
+                    </div>
+
         </div>
+        }
+        </p-card>
+        }
+        <!-- Review History & Attachments section -->
+
+        <!-- Review Form Card -->
+        @if (wageRequest && roleId === 14) {
+        <p-card class="mt-4 shadow-sm border-0">
+            <h5 class="mb-3 text-success">
+                <i class="pi pi-check-circle me-2"></i>
+                Review Wage Request
+            </h5>
+            <form [formGroup]="reviewForm" (ngSubmit)="onSubmitReview()">
+                <div class="row d-flex flex-column g-3">
+                    <div class="d-flex flex-column col-2 gap-2">
+                        <label for="approved" class="form-label fw-semibold">Approval Status</label>
+                        <p-select id="approved" formControlName="approved" [options]="approvedOptions"
+                            optionLabel="label" placeholder="Select Approval Status"
+                            [ngClass]="{ 'ng-invalid ng-dirty border-danger': reviewForm.get('approved')?.invalid && reviewForm.get('approved')?.touched }"
+                            class="w-10">
+                        </p-select>
+                        @if (reviewForm.get('approved')?.invalid && reviewForm.get('approved')?.touched) {
+                        <small class="p-error text-danger mt-1 d-block">Approval Status is required.</small>
+                        }
+                    </div>
+
+
+
+                    <div class="col-2">
+                        <label for="attachment" class="form-label fw-semibold">Attachment (Optional)</label>
+                        <input type="file" class="form-control " id="attachment" (change)="onFileSelected($event)"
+                            accept="image/*,.pdf">
+                        @if (selectedFile) {
+                        <div class="mt-2 text-muted">
+                            <i class="pi pi-file me-1"></i>
+                            Selected file: {{ selectedFile.name }}
+                        </div>
+                        }
+                    </div>
+
+                    <div class="col-2">
+                        @for (msg of reviewMessage; track msg) {
+                        <p-message [severity]="msg.severity" [text]="msg.detail" class="mb-2 d-block">
+                        </p-message>
+                        }
+                    </div>
+
+                    <div class="col-12">
+                        <p-button type="submit" label="Submit Review" icon="pi pi-send"
+                            [disabled]="reviewForm.invalid || isReviewSubmitting">
+                        </p-button>
+                    </div>
+                </div>
+            </form>
+        </p-card>
+        }
+
+        </p-card>
+        }
     </div>
+</div>
 </div>
 }

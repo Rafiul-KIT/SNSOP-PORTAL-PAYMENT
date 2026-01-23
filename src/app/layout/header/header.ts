@@ -248,6 +248,11 @@ export class Header {
             icon: 'fas fa-file-alt',
             routerLink: 'report/payment-details',
           },
+           {
+            label: 'Wage Request Abstract Report',
+            icon: 'fas fa-file-alt',
+            routerLink: 'report/wage-request-abstract',
+          },
         ],
       },
     ];
