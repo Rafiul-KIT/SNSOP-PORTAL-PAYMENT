@@ -269,7 +269,7 @@ subprojectStatusChartOptions: any;
         this.paymentCycles = this.dashboardData.cycleData;
 
         // Populate geoStateData (GeoStateData)
-        this.geoStateData = this.dashboardData.geoStateData;
+        this.geoStateData = this.dashboardData.geoStateData || [];
 
 
         // Gender data
