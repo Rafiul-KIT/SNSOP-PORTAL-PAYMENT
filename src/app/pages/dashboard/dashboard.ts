@@ -138,7 +138,7 @@ export class Dashboard {
   };
 
   paymentCycles: CycleData[] = [];
-  
+
   paymentCycleChartData: any;
   paymentCycleChartOptions: any;
 projectStatusChartData: any;
@@ -147,7 +147,7 @@ wageRequestChartData: any;
 wageRequestChartOptions: any;
 subprojectStatusChartData: any;
 subprojectStatusChartOptions: any;
-  
+
   supportTypes: any[] = []; // Will be populated based on wageReqData
   geoStateData: GeoStateData[] = [];
 
@@ -222,7 +222,7 @@ subprojectStatusChartOptions: any;
         // Populate wageRequestStats
         this.wageRequestStats.approved = this.dashboardData.wageReqData.totalWageReqApprovedInEveryLevel;
         this.wageRequestStats.rejected = this.dashboardData.wageReqData.totalRejectedWageRequests;
-        
+
         let pendingWageCount = 0;
         if (userRole === 14) {
           pendingWageCount = this.dashboardData.wageReqData.totalWageReqPendingForIpApprover;
@@ -264,12 +264,12 @@ subprojectStatusChartOptions: any;
             unpaid: this.dashboardData.wageReqData.totalUnpaidAmount,
           },
         ];
-        
+
         // Populate paymentCycles
         this.paymentCycles = this.dashboardData.cycleData;
 
         // Populate geoStateData (GeoStateData)
-        this.geoStateData = this.dashboardData.geoStateData;
+        this.geoStateData = this.dashboardData.geoStateData || [];
 
 
         // Gender data
