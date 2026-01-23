@@ -6,7 +6,7 @@
 </div>
  <div class="card p-3 mb-3">
     <form [formGroup]="searchForm" class="row g-3">
-      
+
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
                 <p-select [options]="states" optionLabel="name" formControlName="state"
@@ -15,7 +15,7 @@
             </p-floatlabel>
         </div>
 
-  
+
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
                 <p-select [options]="counties" optionLabel="name" formControlName="county"
@@ -24,7 +24,7 @@
             </p-floatlabel>
         </div>
 
-   
+
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
                 <p-select [options]="payams" optionLabel="name" formControlName="payam"
@@ -33,7 +33,7 @@
             </p-floatlabel>
         </div>
 
-    
+
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
                 <p-select [options]="bomas" optionLabel="name" formControlName="boma" />
@@ -56,7 +56,7 @@
             </div>
         </div>
     </form>
-</div> 
+</div>
 
 <div class="card">
     <p-table [value]="requestsData" [scrollable]="true" scrollHeight="60vh">
@@ -102,7 +102,7 @@
                 </td>
                 <td>
                     <div class="d-flex gap-1">
-                        <p-button (onClick)="onViewClick(request)" [disabled]="request.status !== 'PENDING'"
+                        <p-button (onClick)="onViewClick(request)"
                             pTooltip="View Mobile Payment Details" tooltipPosition="top" severity="info"
                             [style]="{ width: 'auto', height: '30px', padding: '0 8px',cursor: 'pointer' }" >
                             <ng-template pTemplate="content">
@@ -110,7 +110,8 @@
                                 <span style="font-size: 10px; margin-left: 2px; ">View</span>
                             </ng-template>
                         </p-button>
-                        <p-button (onClick)="onProceedClick(request)" [disabled]="request.status !== 'PENDING'"
+                        <!-- [disabled]="request.status !== 'PENDING'" -->
+                        <p-button (onClick)="onProceedClick(request)"
                             pTooltip="Proceed Mobile Payment" tooltipPosition="top" severity="success"
                             [style]="{ width: 'auto', height: '30px', padding: '0 8px',cursor: 'pointer' }">
                             <ng-template pTemplate="content">
