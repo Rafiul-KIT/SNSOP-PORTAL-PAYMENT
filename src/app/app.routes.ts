@@ -33,7 +33,8 @@ import { PayrollMobileMoney } from './pages/payroll/payroll-mobile-money/payroll
 import { GeneratePayroll } from './pages/payroll/generate-payroll/generate-payroll';
 import { ReconciliationMonitoring } from './pages/reconciliation-monitoring/reconciliation-monitoring';
 import { ReconciliationMonitoringDetails } from './pages/reconciliation-monitoring-details/reconciliation-monitoring-details';
-import { WageRequestAbstract } from './pages/wage-request-abstract/wage-request-abstract';
+import { WageRequestAbstract } from './pages/report-list/wage-request-abstract/wage-request-abstract';
+import { MultipleAttendanceReport } from './pages/report-list/multiple-attendance-report/multiple-attendance-report';
 
 
 export const routes: Routes = [
@@ -214,6 +215,11 @@ export const routes: Routes = [
        {
         path: 'wage-request-abstract',
         component: WageRequestAbstract,
+        canActivate: [routeGuard],
+       },
+       {
+        path: 'multiple-attendance',
+        component: MultipleAttendanceReport,
         canActivate: [routeGuard],
        }
       ,
