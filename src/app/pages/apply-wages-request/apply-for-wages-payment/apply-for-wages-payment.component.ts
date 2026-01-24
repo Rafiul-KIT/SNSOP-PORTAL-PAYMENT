@@ -113,6 +113,14 @@ export class ApplyForWagesPaymentComponent implements OnInit {
     this.breadcrumbItems = [{ label: 'Create Wages Request' }];
   }
 
+  attachmentRequiredValidator(control: AbstractControl): ValidationErrors | null {
+    const value = control.value;
+    if (!value || (Array.isArray(value) && value.length === 0)) {
+      return { required: true };
+    }
+    return null;
+  }
+
   initializeForm(): void {
     this.wagesForm = this.fb.group(
       {
@@ -120,7 +128,7 @@ export class ApplyForWagesPaymentComponent implements OnInit {
         fromDate: [null, Validators.required],
         toDate: [null, Validators.required],
         paymentCycle: [null, Validators.required],
-        attachment: [[]]
+        attachment: [[], [this.attachmentRequiredValidator]]
       },
       { validators: this.dateRangeValidator }
     );
@@ -342,6 +350,15 @@ export class ApplyForWagesPaymentComponent implements OnInit {
     }
 
     this.submitting = true;
+    Swal.fire({
+      title: 'Submitting...',
+      text: 'Please wait while your wage request is being processed.',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
 
     try {
       const formValue = this.wagesForm.getRawValue();

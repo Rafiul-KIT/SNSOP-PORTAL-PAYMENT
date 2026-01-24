@@ -585,22 +585,22 @@ hasHistoryLoaded = false;
   }
 
   async handleAttachmentClick(history: AttachmentHistory): Promise<void> {
-    if (history.attachmentUrl && (history.attachmentUrl.startsWith('http://') || history.attachmentUrl.startsWith('https://'))) {
-      // It's a full URL, open in a new tab
+    if (history.attachmentUrl &&  history.attachmentUrl.startsWith('https://')) {
+
       window.open(history.attachmentUrl, '_blank');
     } else if (history.filePath) {
-      // It's a relative path, call the download API
+    
       try {
         const response: any = await this.apiService.GET_CONFIG(
           `/api/wage-request-review/wageRequest/attachment/get?filePath=${history.filePath}`,
-          { responseType: 'blob' } // Important for binary data
+          { responseType: 'blob' } 
         );
 
         const blob = new Blob([response.data], { type: response.headers.get('Content-Type') });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = history.fileName || 'download'; // Use fileName from history, or a default
+        a.download = history.fileName || 'download'; 
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -640,7 +640,6 @@ hasHistoryLoaded = false;
         this.beneficiaries = response.data.content;
         this.totalBeneficiaries = response.data.totalElements || 0;
 
-        // Update dropdown options after getting total count
         if (this.totalBeneficiaries > 0) {
           this.updateRowsPerPageOptions();
         }

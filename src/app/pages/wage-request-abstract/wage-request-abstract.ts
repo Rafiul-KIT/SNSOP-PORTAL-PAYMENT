@@ -8,71 +8,49 @@ import { CommonModule } from '@angular/common';
 import {
   FormBuilder,
   FormGroup,
-  FormsModule,
   ReactiveFormsModule,
-  ValidatorFn,
-  AbstractControl,
-  Validators,
 } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { PaginatorModule } from 'primeng/paginator';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
-import { TooltipModule } from 'primeng/tooltip';
-import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { SelectModule } from 'primeng/select';
-
-import { DatePickerModule } from 'primeng/datepicker';
 import { InputTextModule } from 'primeng/inputtext';
-import { MessageService, ConfirmationService } from 'primeng/api';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { TooltipModule } from 'primeng/tooltip';
+import { MessageService } from 'primeng/api';
+import { Router } from '@angular/router';
 
-import Swal from 'sweetalert2';
 import { Loader } from '../../components/loader/loader';
 import { ApiService } from '../../services/api.service';
-import { LookupService, StatusWageEnum } from '../../services/lookup.service';
+import { LookupService, LookupItem } from '../../services/lookup.service';
 
-interface WageRequestDto {
-  id: number;
-  subprojectId: number;
+interface WageAbstractRecord {
+  sNo: number;
+  ipName: string;
+  state: string;
+  county: string;
+  payam: string;
+  boma: string;
+  workCode: string;
+  requestNumber: string;
   fromDate: string;
   toDate: string;
-  requestYear: number;
-  requestMonthIndex: number;
-  paymentCycle: number;
-  status: number;
-  requestNumber: string;
-  remarks: string;
+  totalMembers: number;
+  workDays: number;
+  amountPaid: number;
+  wageStatus: string;
+  paymentCycle: string;
 }
-
-interface SubProjectLookup {
-  id: number;
-  workCode: string;
-  projectName: string;
-}
-
-const dateRangeValidator: ValidatorFn = (
-  control: AbstractControl
-): { [key: string]: boolean } | null => {
-  const fromDate = control.get('fromDate')?.value;
-  const toDate = control.get('toDate')?.value;
-
-  if (fromDate && toDate && fromDate > toDate) {
-    return { dateRangeInvalid: true };
-  }
-  return null;
-};
 
 @Component({
- selector: 'app-wage-request-abstract',
+  selector: 'app-wage-request-abstract',
   templateUrl: './wage-request-abstract.html',
   styleUrl: './wage-request-abstract.scss',
-   standalone: true,
+  standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
     ReactiveFormsModule,
     TableModule,
     ButtonModule,
@@ -81,356 +59,221 @@ const dateRangeValidator: ValidatorFn = (
     BreadcrumbModule,
     FloatLabelModule,
     SelectModule,
-    RouterModule,
-    TooltipModule,
-    DatePickerModule,
     InputTextModule,
+    TooltipModule,
     Loader,
-    ConfirmDialogModule
-],
-  providers: [MessageService, ConfirmationService],
+  ],
+  providers: [MessageService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WageRequestAbstract implements OnInit {
   isLoading = true;
-  lookupsLoaded = false;
   searchForm!: FormGroup;
-  roleId: number | null = null;
-  // Lookup data
-  subProjects: SubProjectLookup[] = [];
-  years: any[] = [];
-  months: any[] = [
-    { label: 'January', value: 1 },
-    { label: 'February', value: 2 },
-    { label: 'March', value: 3 },
-    { label: 'April', value: 4 },
-    { label: 'May', value: 5 },
-    { label: 'June', value: 6 },
-    { label: 'July', value: 7 },
-    { label: 'August', value: 8 },
-    { label: 'September', value: 9 },
-    { label: 'October', value: 10 },
-    { label: 'November', value: 11 },
-    { label: 'December', value: 12 },
-  ];
-  paymentCycles: any[] = [];
-  statuses: any[] = [];
-  wageRequests: WageRequestDto[] = [];
-  totalRecords = 0;
 
   breadcrumbItems: any[] = [];
   breadcrumbHome: any;
 
+  // Location lookups
+  states: LookupItem[] = [];
+  countyList: LookupItem[] = [];
+  payamList: LookupItem[] = [];
+  bomaList: LookupItem[] = [];
+
+  // Implementing partners (dummy - will come from API later)
+  implementingPartners: { id: number; name: string }[] = [
+    { id: 1, name: 'UNOPS Field Office' },
+  ];
+
+  // Table data
+  abstractRecords: WageAbstractRecord[] = [];
+  totalRecords = 0;
   currentPage = 0;
   pageSize = 10;
+
+  // Summary
+  totalMembers = 0;
+  totalWorkDays = 0;
+  totalPaidAmount = 0;
+
   advanceSearchPanelVisible = false;
 
   constructor(
     private fb: FormBuilder,
     private messageService: MessageService,
     private router: Router,
-    private route: ActivatedRoute,
     private api: ApiService,
-    private lookup: LookupService,
-    private cdr: ChangeDetectorRef,
-    private confirmationService: ConfirmationService
+    private lookupService: LookupService,
+    private cdr: ChangeDetectorRef
   ) {}
 
-  private async loadInitialLookups() {
-    try {
-      // Load sub-projects for dropdown
-      const subProjectRes: any = await this.api.POST(
-        'api/subproject/get?page=0&size=10000',
-        {}
-      );
-
-      if (subProjectRes.data && subProjectRes.data.content) {
-        this.subProjects = subProjectRes.data.content.map((sp: any) => ({
-          id: sp.id,
-          workCode: sp.workCode,
-          projectName: sp.projectName,
-        }));
-      }
-
-      // Generate years (curren
-      // t year - 5 to current year + 2)
-      const currentYear = new Date().getFullYear();
-      this.years = [];
-      for (let i = currentYear - 5; i <= currentYear + 2; i++) {
-        this.years.push({ label: i.toString(), value: i });
-      }
-
-      this.cdr.markForCheck();
-    } catch (err) {
-      console.error('Error loading lookups:', err);
-      throw err;
-    }
-  }
-
   async ngOnInit() {
-    this.roleId = this.api.getUserRole();
-    this.statuses = this.getRoleSpecificStatuses();;
-    this.paymentCycles = this.lookup.getPaymentCycleEnum();
-      await this.loadInitialLookups();
     this.initBreadcrumb();
     this.initForm();
-    this.fetchPage(this.currentPage, this.pageSize);
-  }
-
-  initForm() {
-    this.searchForm = this.fb.group({
-      subprojectId: [null],
-      fromDate: [null],
-      toDate: [null],
-      requestYear: [null],
-      requestMonthIndex: [null],
-      paymentCycle: [null],
-      status: [null],
-      requestNumber: [''],
-    }, { validators: dateRangeValidator });
+    await this.loadStates();
+    this.loadDummyData();
+    this.isLoading = false;
+    this.cdr.markForCheck();
   }
 
   initBreadcrumb() {
     this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
-    this.breadcrumbItems = [{ label: 'Wage Request Drafts' }];
+    this.breadcrumbItems = [{ label: 'Wages Request Abstract' }];
   }
 
-  async toggleAdvanceSearch() {
-    this.advanceSearchPanelVisible = !this.advanceSearchPanelVisible;
-    if (this.advanceSearchPanelVisible && !this.lookupsLoaded) {
-      this.isLoading = true;
+  initForm() {
+    this.searchForm = this.fb.group({
+      state: [null],
+      county: [{ value: null, disabled: true }],
+      payam: [{ value: null, disabled: true }],
+      boma: [{ value: null, disabled: true }],
+      implementingPartnerId: [null],
+      workCode: [''],
+      requestNo: [''],
+    });
+  }
+
+  private async loadStates(): Promise<void> {
+    try {
+      await this.lookupService.getOrFetchStateList();
+      this.states = this.lookupService.getStateList();
       this.cdr.markForCheck();
+    } catch (error) {
+      console.error('Error loading states:', error);
+    }
+  }
+
+  async onStateChange(state: any): Promise<void> {
+    this.searchForm.get('county')?.reset({ value: null, disabled: true });
+    this.searchForm.get('payam')?.reset({ value: null, disabled: true });
+    this.searchForm.get('boma')?.reset({ value: null, disabled: true });
+    this.countyList = [];
+    this.payamList = [];
+    this.bomaList = [];
+
+    if (state?.id) {
       try {
-      
-        this.lookupsLoaded = true;
-      } catch (err) {
-        console.error('Lookups loading error:', err);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to load lookup data.',
-        });
-      } finally {
-        this.isLoading = false;
-        this.cdr.markForCheck();
+        this.countyList = await this.lookupService.getCountyListByStateId(String(state.id));
+        this.searchForm.get('county')?.enable();
+      } catch (error) {
+        console.error('Error loading counties:', error);
       }
     }
+    this.cdr.markForCheck();
   }
 
-  private buildSearchBody(page: number, size: number) {
-    const f = this.searchForm.value;
-    return {
-      id: null,
-      subprojectId: f.subprojectId || null,
-      fromDate: f.fromDate ? this.formatDate(f.fromDate) : null,
-      toDate: f.toDate ? this.formatDate(f.toDate) : null,
-      requestYear: f.requestYear || null,
-      requestMonthIndex: f.requestMonthIndex || null,
-      paymentCycle: f.paymentCycle || null,
-      status: f.status !== null ? f.status : null,
-      requestNumber: f.requestNumber ? f.requestNumber.trim() : null,
-      remarks: null,
-    };
-  }
+  async onCountyChange(county: any): Promise<void> {
+    this.searchForm.get('payam')?.reset({ value: null, disabled: true });
+    this.searchForm.get('boma')?.reset({ value: null, disabled: true });
+    this.payamList = [];
+    this.bomaList = [];
 
-  private formatDate(date: Date): string {
-    if (!date) return '';
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
-
-  fetchPage(page: number, size: number, showLoader: boolean = true) {
-    if (showLoader) {
-        this.isLoading = true;
+    if (county?.id) {
+      try {
+        this.payamList = await this.lookupService.getPayamListByCountyId(String(county.id));
+        this.searchForm.get('payam')?.enable();
+      } catch (error) {
+        console.error('Error loading payams:', error);
+      }
     }
-    const body = this.buildSearchBody(page, size);
+    this.cdr.markForCheck();
+  }
 
-    this.api
-      .POST(`api/wage-request/get?page=${page}&size=${size}`, body)
-      .then((res: any) => {
-        if (!res) throw new Error('Empty response');
+  async onPayamChange(payam: any): Promise<void> {
+    this.searchForm.get('boma')?.reset({ value: null, disabled: true });
+    this.bomaList = [];
 
-        const data = res.data || res;
-        const content = data.content || [];
-        this.wageRequests = content;
-        this.totalRecords = data.totalElements || 0;
+    if (payam?.id) {
+      try {
+        this.bomaList = await this.lookupService.getBomaListByPayamId(String(payam.id));
+        this.searchForm.get('boma')?.enable();
+      } catch (error) {
+        console.error('Error loading bomas:', error);
+      }
+    }
+    this.cdr.markForCheck();
+  }
 
-        if (content.length === 0) {
-          this.messageService.add({
-            severity: 'info',
-            summary: 'Search',
-            detail: 'No wage requests found',
-          });
-        }
-      })
-      .catch((err) => {
-        console.error('Fetch wage requests error:', err);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to fetch wage requests',
-        });
-      })
-      .finally(() => {
-        if (showLoader) {
-            this.isLoading = false;
-        }
-        this.cdr.markForCheck();
-      });
+  // Dummy data loader - will be replaced with actual API call later
+  private loadDummyData() {
+    this.abstractRecords = [
+      { sNo: 1, ipName: 'UNOPS FIELD OFFICE', state: 'CENTRAL EQUATORIA', county: 'JUBA', payam: 'JUBA TOWN', boma: 'HAI-BULUK', workCode: '2024-SNSOP 2023-3469', requestNumber: '2024-SNSOPWR-9228', fromDate: '11 NOV 2024', toDate: '04 DEC 2024', totalMembers: 182, workDays: 3276, amountPaid: 8905.95, wageStatus: 'PAID FROM API', paymentCycle: 'PAYMENT CYCLE 1' },
+      { sNo: 2, ipName: 'UNOPS FIELD OFFICE', state: 'CENTRAL EQUATORIA', county: 'JUBA', payam: 'JUBA TOWN', boma: 'HAI-BULUK', workCode: '2025-SNSOP 2023-4300', requestNumber: '2025-SNSOPWR-10733', fromDate: '04 FEB 2025', toDate: '10 MAR 2025', totalMembers: 80, workDays: 1346, amountPaid: 3635.10, wageStatus: 'PAID FROM API', paymentCycle: 'PAYMENT CYCLE 2' },
+      { sNo: 3, ipName: 'UNOPS FIELD OFFICE', state: 'CENTRAL EQUATORIA', county: 'JUBA', payam: 'JUBA TOWN', boma: 'HAI-BULUK', workCode: '2025-SNSOP 2023-4300', requestNumber: '2025-SNSOPWR-10784', fromDate: '11 MAR 2025', toDate: '07 APR 2025', totalMembers: 77, workDays: 1310, amountPaid: 3538.58, wageStatus: 'PAID FROM API', paymentCycle: 'PAYMENT CYCLE 3' },
+      { sNo: 4, ipName: 'UNOPS FIELD OFFICE', state: 'CENTRAL EQUATORIA', county: 'JUBA', payam: 'JUBA TOWN', boma: 'HAI-BULUK', workCode: '2025-SNSOP 2023-4300', requestNumber: '2025-SNSOPWR-12080', fromDate: '08 APR 2025', toDate: '03 MAY 2025', totalMembers: 72, workDays: 1184, amountPaid: 1382.79, wageStatus: 'PAID FROM API', paymentCycle: 'PAYMENT CYCLE 4' },
+      { sNo: 5, ipName: 'UNOPS FIELD OFFICE', state: 'CENTRAL EQUATORIA', county: 'JUBA', payam: 'JUBA TOWN', boma: 'HAI-BULUK', workCode: '2025-SNSOP 2023-4300', requestNumber: '2025-SNSOPWR-12206', fromDate: '06 MAY 2025', toDate: '30 MAY 2025', totalMembers: 78, workDays: 1395, amountPaid: 1507.06, wageStatus: 'PAID FROM API', paymentCycle: 'PAYMENT CYCLE 5' },
+      { sNo: 6, ipName: 'UNOPS FIELD OFFICE', state: 'CENTRAL EQUATORIA', county: 'JUBA', payam: 'JUBA TOWN', boma: 'HAI-BULUK', workCode: '2025-SNSOP 2023-4300', requestNumber: '2025-SNSOPWR-12925', fromDate: '03 JUN 2025', toDate: '27 JUN 2025', totalMembers: 80, workDays: 1440, amountPaid: 1604.27, wageStatus: 'PAID FROM API', paymentCycle: 'PAYMENT CYCLE 6' },
+    ];
+
+    this.totalRecords = this.abstractRecords.length;
+    this.calculateSummary();
+  }
+
+  private calculateSummary() {
+    this.totalMembers = this.abstractRecords.reduce((sum, r) => sum + r.totalMembers, 0);
+    this.totalWorkDays = this.abstractRecords.reduce((sum, r) => sum + r.workDays, 0);
+    this.totalPaidAmount = this.abstractRecords.reduce((sum, r) => sum + r.amountPaid, 0);
+  }
+
+  toggleAdvanceSearch() {
+    this.advanceSearchPanelVisible = !this.advanceSearchPanelVisible;
+    this.cdr.markForCheck();
+  }
+
+  searchAbstract() {
+    // TODO: Integrate with API
+    this.currentPage = 0;
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Search',
+      detail: 'Search functionality will be integrated with API later.',
+    });
+  }
+
+  resetForm() {
+    this.searchForm.reset();
+    this.searchForm.get('county')?.disable();
+    this.searchForm.get('payam')?.disable();
+    this.searchForm.get('boma')?.disable();
+    this.countyList = [];
+    this.payamList = [];
+    this.bomaList = [];
+    this.cdr.markForCheck();
+  }
+
+  exportData() {
+    // TODO: Integrate with API
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Export',
+      detail: 'Export functionality will be integrated later.',
+    });
+  }
+
+  exportCompressed() {
+    // TODO: Integrate with API
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Export Compressed',
+      detail: 'Compressed export functionality will be integrated later.',
+    });
+  }
+
+  printData() {
+    window.print();
+  }
+
+  viewBeneficiaries(item: WageAbstractRecord) {
+    // TODO: Navigate to beneficiaries view
+    this.messageService.add({
+      severity: 'info',
+      summary: 'View',
+      detail: `Viewing beneficiaries for ${item.requestNumber}`,
+    });
   }
 
   onPageChange(event: any) {
     this.currentPage = event.page;
     this.pageSize = event.rows;
-    this.fetchPage(this.currentPage, this.pageSize);
+    // TODO: Fetch from API with pagination
   }
-
-  searchWageRequests() {
-    if (this.searchForm.invalid) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Validation Error',
-        detail: 'From Date cannot be after To Date.',
-      });
-      return;
-    }
-    this.currentPage = 0;
-    this.fetchPage(this.currentPage, this.pageSize);
-  }
-
-  resetForm() {
-    this.searchForm.reset();
-    this.currentPage = 0;
-    this.fetchPage(this.currentPage, this.pageSize);
-    this.cdr.markForCheck();
-  }
-
-viewWageRequest(wageId: number, subprojectId: number) {
-  this.router.navigate([
-    '/wage-request/details',
-    wageId,
-    subprojectId
-  ]);
-}
-
-removeWageRequest(wageRequest: WageRequestDto) {
-  Swal.fire({
-    title: 'Confirm Deletion',
-    text: `Are you sure you want to remove this wage request (${wageRequest.requestNumber || 'N/A'})?`,
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Yes, remove it',
-    cancelButtonText: 'Cancel'
-  }).then((result) => {
-    if (result.isConfirmed) {
-      this.api.PATCH(`api/wage-request/remove/${wageRequest.id}`, {})
-        .then(() => {
-          Swal.fire({
-            icon: 'success',
-            title: 'Removed!',
-            text: 'Wage request removed successfully.'
-          });
-
-          this.fetchPage(this.currentPage, this.pageSize, false);
-        })
-        .catch(err => {
-          console.error('Remove wage request error:', err);
-
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Failed to remove wage request.'
-          });
-
-          this.cdr.markForCheck();
-        });
-    }
-  });
-}
-
-
-private getRoleSpecificStatuses(): { id: number; label: string }[] {
-    let statusIds: number[] = [];
-    switch (Number(this.roleId)) {
-      case 5:
-        statusIds = [105];
-        break;
-      case 2:
-        statusIds = [1, 101];
-        break;
-      case 11:
-        statusIds = [2, 102];
-        break;
-      case 6:
-        statusIds = [3];
-        break;
-      default:
-        statusIds = StatusWageEnum.map(s => Number(s.id));
-        break;
-    }
-    return StatusWageEnum
-      .filter(status => statusIds.includes(Number(status.id)))
-      .map(({ id, label }) => ({ id: Number(id), label }));
-  }
-
-  getStatusLabel(value: number): string {
-    const found = this.statuses.find((item) => item.id == value);
-    return found ? found.label : value.toString();
-  }
-
-  getStatusClass(status: number): string {
-    const statusId = Number(status);
-    switch (statusId) {
-      // Draft
-      case 0:
-        return 'bg-secondary';
-
-      // In Review / Submitted
-      case 1: // To be Reviewed at Initial Reviewer
-      case 2: // To be Reviewed at Financial Approver
-      case 3: // To be Reviewed at Final Payment Authorizer
-        return 'bg-info';
-
-      // Approved / Cleared
-      case 4: // Approved at Final Payment Authorizer
-      case 103: // Cleared by WB
-        return 'bg-success';
-
-      // Paid
-      case 5:
-      case 6:
-        return 'bg-primary';
-
-      // Rejected
-      case 100: // Rejected by Initial Reviewer
-      case 101: // Rejected by Financial Approver
-      case 102: // Rejected by Final Payment Authorizer
-      case 105: // Draft Rejected
-      case 1000: // Rejected after Pay
-      case 1001: // Rejected after Pay
-      case 1002: // Rejected after Pay
-      case 1003: // Rejected after Pay
-        return 'bg-danger';
-
-      default:
-        return 'bg-secondary';
-    }
-  }
-
-  getMonthLabel(value: number): string {
-    const found = this.months.find((item) => item.value === value);
-    return found ? found.label : value.toString();
-  }
-
-  getSubProjectName(id: number): string {
-      if (id === 999) {
-    return 'Dis-Direct Income Support';
-  }
-    const found = this.subProjects.find((sp) => sp.id === id);
-    return found ? `${found.workCode}` : id.toString();
-  }
-
-  trackById = (_: number, row: WageRequestDto) => row.id;
 }

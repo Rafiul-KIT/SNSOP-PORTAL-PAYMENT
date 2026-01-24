@@ -1,5 +1,4 @@
 <p-toast></p-toast>
-<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
 @if (isLoading) {
 <app-loader></app-loader>
 } @else {
@@ -10,238 +9,165 @@
 <div class="card p-3 mb-2">
     <form [formGroup]="searchForm" class="row g-3">
 
-        
-
-        <!-- Sub-Project -->
+        <!-- State Name -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
-                <p-select 
-                    [options]="subProjects" 
-                    optionLabel="workCode" 
-                    optionValue="id"
-                    formControlName="subprojectId"
-                    [filter]="true"
-                    filterPlaceholder="Search sub-project"
-                  >
-                    <ng-template let-item pTemplate="item">
-                        <div>{{ item.workCode }} - {{ item.projectName }}</div>
-                    </ng-template>
-                </p-select>
-                <label>Sub-Project</label>
+                <p-select [options]="states" optionLabel="name" formControlName="state"
+                    (onChange)="onStateChange($event.value)" />
+                <label>State </label>
             </p-floatlabel>
         </div>
 
-        <!-- From Date -->
+        <!-- County / Municipality Name -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
-                <p-datepicker 
-                    formControlName="fromDate" 
-                    dateFormat="dd/mm/yy"
-                    [showIcon]="true"
-                    appendTo="body"
-                    class="w-100">
-                </p-datepicker >
-                <label>From Date</label>
+                <p-select [options]="countyList" optionLabel="name" formControlName="county"
+                    (onChange)="onCountyChange($event.value)" />
+                <label>County</label>
             </p-floatlabel>
         </div>
 
-        <!-- To Date -->
+        <!-- Payam / Block Name -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
-                <p-datepicker  
-                    formControlName="toDate" 
-                    dateFormat="dd/mm/yy"
-                    [showIcon]="true"
-                    appendTo="body"
-                    class="w-100">
-                </p-datepicker >
-                <label>To Date</label>
-            </p-floatlabel>
-            @if(searchForm.hasError('dateRangeInvalid')) {
-            <div class="text-danger small-text mt-1">
-                From Date cannot be after To Date.
-            </div>
-            }
-        </div>
-
-        <!-- Payment Cycle -->
-        <div class="col-md-3">
-            <p-floatlabel variant="on" class="w-100">
-                <p-select 
-                    [options]="paymentCycles" 
-                    optionLabel="label" 
-                    optionValue="value"
-                    formControlName="paymentCycle">
-                </p-select>
-                <label>Payment Cycle</label>
-            </p-floatlabel>
-        </div>
-                @if (advanceSearchPanelVisible) {
-        <!-- Request Year -->
-        <div class="col-md-3">
-            <p-floatlabel variant="on" class="w-100">
-                <p-select 
-                    [options]="years" 
-                    optionLabel="label" 
-                    optionValue="value"
-                    formControlName="requestYear">
-                </p-select>
-                <label>Request Year</label>
+                <p-select [options]="payamList" optionLabel="name" formControlName="payam"
+                    (onChange)="onPayamChange($event.value)" />
+                <label>Payam </label>
             </p-floatlabel>
         </div>
 
-        <!-- Request Month -->
+        <!-- Boma / Quarter Council Name -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
-                <p-select 
-                    [options]="months" 
-                    optionLabel="label" 
-                    optionValue="value"
-                    formControlName="requestMonthIndex">
-                </p-select>
-                <label>Request Month</label>
+                <p-select [options]="bomaList" optionLabel="name" formControlName="boma" />
+                <label>Boma </label>
             </p-floatlabel>
         </div>
 
+        @if (advanceSearchPanelVisible) {
+        <!-- Implementing Partner -->
+    
 
-        <!-- Status -->
+        <!-- Work Code -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
-                <p-select 
-                    [options]="statuses" 
-                    optionLabel="label" 
-                    optionValue="id"
-                    formControlName="status">
-                </p-select>
-                <label>Status</label>
+                <input pInputText class="form-control" formControlName="workCode" />
+                <label>Work Code</label>
             </p-floatlabel>
         </div>
 
+        <!-- Request No -->
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <input pInputText class="form-control" formControlName="requestNo" />
+                <label>Request No</label>
+            </p-floatlabel>
+        </div>
         }
 
         <div class="col-12">
             <div class="d-grid d-sm-flex justify-content-end align-items-center gap-2">
-                <p-button 
-                    [label]="advanceSearchPanelVisible ? 'Close' : 'Advance Search'" 
-                    icon="fas fa-filter"
-                    severity="warn" 
-                    size="small" 
-                    [outlined]="true"
+                <p-button [label]="advanceSearchPanelVisible ? 'Close' : 'Advance Search'" icon="fas fa-filter"
+                    severity="warn" size="small" [outlined]="true"
                     (onClick)="toggleAdvanceSearch()">
                 </p-button>
 
-                <p-button 
-                    label="Reset" 
-                    icon="fas fa-refresh" 
-                    severity="danger" 
-                    size="small" 
-                    [outlined]="true"
+                <p-button label="Reset" icon="fas fa-refresh" severity="danger" size="small" [outlined]="true"
                     (onClick)="resetForm()">
                 </p-button>
 
-                <p-button 
-                    label="Search" 
-                    icon="fas fa-search" 
-                    severity="primary" 
-                    size="small"
-                    (onClick)="searchWageRequests()">
-                </p-button>            
+                <p-button label="Search" icon="fas fa-search" severity="primary" size="small"
+                    (onClick)="searchAbstract()">
+                </p-button>
+
+                <p-button label="Export" icon="fas fa-file-excel" severity="success" size="small"
+                    [outlined]="true" (onClick)="exportData()">
+                </p-button>
+
+                <p-button label="Export (Compressed)" icon="fas fa-file-archive" severity="info" size="small"
+                    [outlined]="true" (onClick)="exportCompressed()">
+                </p-button>
+
+                <p-button label="Print" icon="fas fa-print" severity="secondary" size="small"
+                    [outlined]="true" (onClick)="printData()">
+                </p-button>
             </div>
         </div>
 
     </form>
 </div>
 
-<p-table 
-    [value]="wageRequests" 
-    [scrollable]="true" 
-    [scrollHeight]="advanceSearchPanelVisible ? '52vh' : '64vh'"
-    [tableStyle]="{ 'min-width': '100%', 'margin-bottom': '5px' }" 
-    dataKey="id" 
-    [rowTrackBy]="trackById" 
-    size="small">
+<!-- Summary Statistics -->
+
+
+<p-table [value]="abstractRecords" [scrollable]="true" [scrollHeight]="advanceSearchPanelVisible ? '48vh' : '58vh'"
+    [tableStyle]="{ 'min-width': '1800px', 'margin-bottom': '5px' }" dataKey="sNo" size="small">
 
     <ng-template pTemplate="header">
         <tr>
-            <th colspan="10" class="text-end">
+            <th colspan="16" class="text-end">
                 <p class="fw-bold mb-2">
-                    Showing <kbd>{{ wageRequests.length }}</kbd> of
-                    <kbd>{{ totalRecords }}</kbd> wage requests
+                    Showing <kbd>{{ abstractRecords.length }}</kbd> of
+                    <kbd>{{ totalRecords }}</kbd> records
                 </p>
             </th>
         </tr>
         <tr>
-            <th class="text-center">Serial</th>
+            <th class="text-center">S.No</th>
+            <th class="text-center">IP Name</th>
+            <th class="text-center">State</th>
+            <th class="text-center">County</th>
+            <th class="text-center">Payam</th>
+            <th class="text-center">Boma</th>
+            <th class="text-center">Work Code</th>
             <th class="text-center">Request Number</th>
-            <th class="text-center">Sub-Project</th>
             <th class="text-center">From Date</th>
             <th class="text-center">To Date</th>
-            <th class="text-center">Year</th>
-            <th class="text-center">Month</th>
+            <th class="text-center">Total Members</th>
+            <th class="text-center">Work Days</th>
+            <th class="text-center">Amount Paid in USD</th>
+            <th class="text-center">Wage Status</th>
             <th class="text-center">Payment Cycle</th>
-            <th class="text-center">Status</th>
-            <th class="text-center" [style]="{ width: '185px' }">Action</th>
+            <th class="text-center">Action</th>
         </tr>
     </ng-template>
 
-    <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
+    <ng-template pTemplate="body" let-item let-i="rowIndex">
         <tr>
-            <td class="text-center">{{ rowIndex + 1 }}</td>
-            <td class="text-center">{{ item.requestNumber || 'N/A' }}</td>
-            <td class="text-center">{{ getSubProjectName(item.subprojectId) }}</td>
-            <td class="text-center">{{ item.fromDate | date: 'dd/MM/yyyy' }}</td>
-            <td class="text-center">{{ item.toDate | date: 'dd/MM/yyyy' }}</td>
-            <td class="text-center">{{ item.requestYear }}</td>
-            <td class="text-center">{{ getMonthLabel(item.requestMonthIndex) }}</td>
-            <td class="text-center">Payment Cycle {{ item.paymentCycle }}</td>
+            <td class="text-center">{{ (currentPage * pageSize) + i + 1 }}</td>
+            <td class="text-center">{{ item.ipName }}</td>
+            <td class="text-center">{{ item.state }}</td>
+            <td class="text-center">{{ item.county }}</td>
+            <td class="text-center">{{ item.payam }}</td>
+            <td class="text-center">{{ item.boma }}</td>
+            <td class="text-center">{{ item.workCode }}</td>
+            <td class="text-center">{{ item.requestNumber }}</td>
+            <td class="text-center">{{ item.fromDate }}</td>
+            <td class="text-center">{{ item.toDate }}</td>
+            <td class="text-center">{{ item.totalMembers }}</td>
+            <td class="text-center">{{ item.workDays }}</td>
+            <td class="text-center">{{ item.amountPaid | number:'1.2-2' }}</td>
+            <td class="text-center">{{ item.wageStatus }}</td>
+            <td class="text-center">{{ item.paymentCycle }}</td>
             <td class="text-center">
-                <span [class]="'badge ' + getStatusClass(item.status)">
-                    {{ getStatusLabel(item.status) }}
-                </span>
-            </td>
-            <td class="text-center">
-                <p-button 
-                    type="button" 
-                   icon="fa-solid fa-eye fa-lg" pTooltip="view"
-                    tooltipPosition="top"
-                    appendTo="body" 
-                    (onClick)="viewWageRequest(item.id,item.subprojectId)" 
-                    size="small" 
-                    outlined="true" 
-                    severity="secondary"
-                    class="me-2 big-icon-btn"/>
-                    <!-- <p-button 
-                    *ngIf="item.status === 100 || item.status === 101 || item.status === 102 || item.status === 105 || item.status === 1000 || item.status === 1001 || item.status === 1002 || item.status === 1003"
-                    type="button" 
-                    icon="fa-solid fa-trash-can fa-lg" pTooltip="Remove"
-                    tooltipPosition="top"
-                    appendTo="body" 
-                    (onClick)="removeWageRequest(item)"
-                    size="small" 
-                    outlined="true" 
-                    severity="danger"
-                    class="big-icon-btn"/> -->
-                
+                <p-button type="button" icon="fa-solid fa-eye fa-lg" pTooltip="View" tooltipPosition="top"
+                    appendTo="body" (onClick)="viewBeneficiaries(item)" size="small" outlined="true"
+                    severity="secondary" />
             </td>
         </tr>
     </ng-template>
 
     <ng-template pTemplate="emptymessage">
         <tr>
-            <td colspan="10" class="text-center text-danger">
-                <b>No wage requests found!</b>
+            <td colspan="16" class="text-center text-danger">
+                <b>No records found!</b>
             </td>
         </tr>
     </ng-template>
 </p-table>
 
-<p-paginator 
-    class="paginator-sticky" 
-    [rows]="pageSize" 
-    [totalRecords]="totalRecords"
-    [rowsPerPageOptions]="[10, 25, 50]" 
-    (onPageChange)="onPageChange($event)" 
-    [first]="(currentPage) * pageSize"
+<p-paginator class="paginator-sticky" [rows]="pageSize" [totalRecords]="totalRecords"
+    [rowsPerPageOptions]="[10, 25, 50]" (onPageChange)="onPageChange($event)" [first]="(currentPage) * pageSize"
     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
 </p-paginator>
 

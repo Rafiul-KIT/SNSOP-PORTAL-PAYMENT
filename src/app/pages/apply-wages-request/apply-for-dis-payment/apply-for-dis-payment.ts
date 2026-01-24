@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
 
 // PrimeNG Imports
@@ -232,10 +232,18 @@ export class ApplyForDisPayment implements OnInit {
     this.paymentCycles = PaymentCycleEnum;
   }
 
+  attachmentRequiredValidator(control: AbstractControl): ValidationErrors | null {
+    const value = control.value;
+    if (!value || (Array.isArray(value) && value.length === 0)) {
+      return { required: true };
+    }
+    return null;
+  }
+
   initializeSubmissionForm(): void {
     this.submissionForm = this.fb.group({
       totalDays: [null, [Validators.required, Validators.min(1)]],
-      // attachment control is no longer needed here, files are managed in attachmentFiles array
+      attachment: [[], [this.attachmentRequiredValidator]],
     });
   }
 
@@ -250,10 +258,13 @@ export class ApplyForDisPayment implements OnInit {
     } else {
       this.attachmentFiles = result.validFiles;
     }
+    this.submissionForm.get('attachment')?.setValue(this.attachmentFiles);
+    this.submissionForm.get('attachment')?.markAsTouched();
   }
 
   removeAttachment(index: number): void {
     this.attachmentFiles.splice(index, 1);
+    this.submissionForm.get('attachment')?.setValue([...this.attachmentFiles]);
   }
 
   formatBytes(bytes: number, decimals = 2): string {

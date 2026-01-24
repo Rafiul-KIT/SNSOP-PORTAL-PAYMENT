@@ -143,10 +143,14 @@
             <div class="col-md-6 col-lg-4">
               <label for="attachment" class="form-label fw-semibold">
                 Attachment
-                <small class="text-muted">(Required for submission)</small>
+                <small class="text-muted"><span class="text-danger">*</span>(Required for submission)</small>
               </label>
 
-              <input type="file" id="attachment" class="form-control" (change)="onFileChange($event)" multiple />
+              <input type="file" id="attachment" class="form-control" (change)="onFileChange($event)" multiple
+                [class.is-invalid]="submissionForm.get('attachment')?.invalid && submissionForm.get('attachment')?.touched" />
+              @if (submissionForm.get('attachment')?.hasError('required') && submissionForm.get('attachment')?.touched) {
+                <div class="text-danger small mt-1">Attachment is required.</div>
+              }
             </div>
 
             <!-- Selected attachments -->
