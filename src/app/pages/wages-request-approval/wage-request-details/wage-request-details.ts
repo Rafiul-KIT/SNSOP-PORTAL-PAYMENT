@@ -13,16 +13,15 @@ import { DividerModule } from 'primeng/divider';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { TableModule } from 'primeng/table';
 import { PaginatorModule } from 'primeng/paginator';
-import { Select } from 'primeng/select';
-import { InputNumber } from 'primeng/inputnumber';
-import { Textarea } from 'primeng/textarea';
+import { SelectModule } from 'primeng/select';
 import { FileUploadModule } from 'primeng/fileupload';
-import { Message } from 'primeng/message';
+import { MessageModule } from 'primeng/message';
 import { ButtonModule } from 'primeng/button';
 import { Loader } from '../../../components/loader/loader';
 import { ApiService } from '../../../services/api.service';
-import { LookupService, LookupItem } from '../../../services/lookup.service';
+import { LookupService } from '../../../services/lookup.service';
 import Swal from 'sweetalert2';
+import { formatBytes, handleMultipleFileUpload } from '../../../validators/file-validator';
 
 interface WageRequest {
   id: number;
@@ -99,8 +98,8 @@ interface StatusInfo {
     BreadcrumbModule,
     TableModule,
     PaginatorModule,
-    Select,
-    Message,
+    SelectModule,
+    MessageModule,
     ButtonModule,
     FileUploadModule,
     Loader,
@@ -128,12 +127,11 @@ export class WageRequestDetails implements OnInit {
     { label: 'Approve', value: true },
     { label: 'Reject', value: false },
   ];
-  selectedFile: File | null = null;
+  selectedFiles: File[] = [];
   isReviewSubmitting = false;
   reviewMessage: any[] = [];
   attachmentHistory: AttachmentHistory[] = [];
   isHistoryLoading = false;
-hasHistoryLoaded = false;
 
   rowsPerPageOptions: number[] = [10, 25, 50]; // Will be updated dynamically
   paginationOptions: { label: string; value: number }[] = [];
@@ -313,40 +311,33 @@ hasHistoryLoaded = false;
     return !rolesToHide.includes(this.roleId);
   }
 
-  onFileSelected(event: any): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      const file = input.files[0];
-      const MAX_SIZE = 1 * 1024 * 1024; // 1 MB
-
-      if (file.size > MAX_SIZE) {
-        this.reviewMessage = [
-          {
-            severity: 'error',
-            summary: 'Validation Error',
-            detail: 'File size exceeds the 1MB limit.',
-          },
-        ];
-        Swal.fire({
-          icon: 'error',
-          title: 'File Size Exceeded',
-          text: 'The attached file must not be larger than 1MB.',
-        });
-        this.selectedFile = null;
-        this.reviewForm.patchValue({ attachment: null });
-        input.value = ''; // Clear the file input
-        return;
-      }
-
-      this.selectedFile = file;
-      this.reviewForm.patchValue({
-        attachment: this.selectedFile?.name || null,
+  onFilesSelected(event: Event): void {
+    const result = handleMultipleFileUpload(event, this.selectedFiles, 25);
+    
+    if (result.error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'File Upload Error',
+        text: result.error,
       });
-      this.reviewMessage = [];
-    } else {
-      this.selectedFile = null;
-      this.reviewForm.patchValue({ attachment: null });
     }
+    
+    this.selectedFiles = result.validFiles;
+    
+    // Update form control if needed, e.g., for validation state
+    this.reviewForm.get('attachment')?.setValue(this.selectedFiles.length > 0 ? this.selectedFiles : null);
+    this.cdr.detectChanges();
+  }
+  
+  removeFile(index: number): void {
+    this.selectedFiles.splice(index, 1);
+    // Update form control if needed
+    this.reviewForm.get('attachment')?.setValue(this.selectedFiles.length > 0 ? this.selectedFiles : null);
+    this.cdr.detectChanges();
+  }
+
+  formatBytes(bytes: number, decimals = 2): string {
+    return formatBytes(bytes, decimals);
   }
 
   initReviewForm(): void {
@@ -402,12 +393,13 @@ hasHistoryLoaded = false;
     formData.append('wageRequestId', this.wageId.toString());
 
     const approvedValue = this.reviewForm.get('approved')?.value;
-    const approvedBoolean =
-      approvedValue?.value !== undefined ? approvedValue.value : approvedValue;
-    formData.append('approved', approvedBoolean);
+    formData.append('approved', approvedValue.toString());
 
-    if (this.selectedFile) {
-      formData.append('attachment', this.selectedFile, this.selectedFile.name);
+    // Append all selected files
+    if (this.selectedFiles.length > 0) {
+      this.selectedFiles.forEach(file => {
+        formData.append('attachment', file, file.name);
+      });
     }
 
     try {
@@ -436,12 +428,14 @@ hasHistoryLoaded = false;
         });
 
         this.reviewForm.reset();
-        this.selectedFile = null;
+        this.selectedFiles = [];
 
+        // Clear the file input
         const fileInput = document.getElementById(
           'attachment',
         ) as HTMLInputElement;
         if (fileInput) fileInput.value = '';
+
       } else {
         this.reviewMessage = [
           {

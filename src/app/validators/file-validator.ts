@@ -63,7 +63,7 @@ export function handleFileUpload(
  * @param bytes The number of bytes.
  * @param decimals The number of decimal places to include.
  */
-function formatBytes(bytes: number, decimals = 2): string {
+export function formatBytes(bytes: number, decimals = 2): string {
   if (bytes === 0) return '0 Bytes';
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;

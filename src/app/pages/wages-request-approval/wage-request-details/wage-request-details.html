@@ -348,34 +348,63 @@
                 Review Wage Request
             </h5>
             <form [formGroup]="reviewForm" (ngSubmit)="onSubmitReview()">
-                <div class="row d-flex flex-column g-3">
-                    <div class="d-flex flex-column col-2 gap-2">
-                        <label for="approved" class="form-label fw-semibold">Approval Status</label>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label for="approved" class="form-label fw-semibold">Approval Status</label> &nbsp;
                         <p-select id="approved" formControlName="approved" [options]="approvedOptions"
-                            optionLabel="label" placeholder="Select Approval Status"
-                            [ngClass]="{ 'ng-invalid ng-dirty border-danger': reviewForm.get('approved')?.invalid && reviewForm.get('approved')?.touched }"
-                            class="w-10">
+                            optionLabel="label" optionValue="value" placeholder="Select Approval Status"
+                            [ngClass]="{ 'ng-invalid ng-dirty border-danger': reviewForm.get('approved')?.invalid && reviewForm.get('approved')?.touched }">
                         </p-select>
                         @if (reviewForm.get('approved')?.invalid && reviewForm.get('approved')?.touched) {
                         <small class="p-error text-danger mt-1 d-block">Approval Status is required.</small>
                         }
                     </div>
 
+                    <div class="row align-items-stretch mt-4">
+                        <div class="col-md-6 d-flex flex-column">
+                            <label class="form-label fw-semibold">
+                                Attachments (Optional, 25MB Total Limit)
+                            </label>
 
+                            <input type="file"
+                                class="form-control"
+                                id="attachment"
+                                (change)="onFilesSelected($event)"
+                                multiple
+                                accept="image/*,.pdf,.doc,.docx,.xls,.xlsx">
 
-                    <div class="col-2">
-                        <label for="attachment" class="form-label fw-semibold">Attachment (Optional)</label>
-                        <input type="file" class="form-control " id="attachment" (change)="onFileSelected($event)"
-                            accept="image/*,.pdf">
-                        @if (selectedFile) {
-                        <div class="mt-2 text-muted">
-                            <i class="pi pi-file me-1"></i>
-                            Selected file: {{ selectedFile.name }}
+                            <!-- spacer to stretch -->
+                            <div class="flex-grow-1"></div>
                         </div>
-                        }
+
+                        <div class="col-md-6 d-flex flex-column">
+                            @if (selectedFiles.length > 0) {
+                                <label class="form-label fw-semibold">Selected Files</label>
+
+                                <ul class="list-group file-list flex-grow-1">
+                                    @for (file of selectedFiles; track $index) {
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div class="text-muted text-truncate">
+                                                <i class="fas fa-file me-2"></i>
+                                                {{ file.name }}
+                                                <span class="text-secondary">
+                                                    ({{ formatBytes(file.size) }})
+                                                </span>
+                                            </div>
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-danger p-1"
+                                                    (click)="removeFile($index)">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        </div>
                     </div>
 
-                    <div class="col-2">
+
+                    <div class="col-12">
                         @for (msg of reviewMessage; track msg) {
                         <p-message [severity]="msg.severity" [text]="msg.detail" class="mb-2 d-block">
                         </p-message>
