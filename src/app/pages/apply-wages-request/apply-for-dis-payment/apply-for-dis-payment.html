@@ -141,14 +141,14 @@
 
             <!-- Choose file -->
             <div class="col-md-6 col-lg-4">
-              <label for="attachment" class="form-label fw-semibold">
-                Attachment
+              <label for="attachments" class="form-label fw-semibold">
+                Attachments
                 <small class="text-muted"><span class="text-danger">*</span>(Required for submission)</small>
               </label>
 
-              <input type="file" id="attachment" class="form-control" (change)="onFileChange($event)" multiple
-                [class.is-invalid]="submissionForm.get('attachment')?.invalid && submissionForm.get('attachment')?.touched" />
-              @if (submissionForm.get('attachment')?.hasError('required') && submissionForm.get('attachment')?.touched) {
+              <input type="file" id="attachments" class="form-control" (change)="onFileChange($event)" multiple
+                [class.is-invalid]="submissionForm.get('attachments')?.invalid && submissionForm.get('attachments')?.touched" />
+              @if (submissionForm.get('attachments')?.hasError('required') && submissionForm.get('attachments')?.touched) {
                 <div class="text-danger small mt-1">Attachment is required.</div>
               }
             </div>

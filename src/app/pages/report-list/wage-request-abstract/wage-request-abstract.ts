@@ -18,30 +18,34 @@ import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { SelectModule } from 'primeng/select';
 import { InputTextModule } from 'primeng/inputtext';
+import { DatePickerModule } from 'primeng/datepicker';
 import { TooltipModule } from 'primeng/tooltip';
 import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
 
 import { Loader } from '../../../components/loader/loader';
 import { ApiService } from '../../../services/api.service';
-import { LookupService, LookupItem } from '../../../services/lookup.service';
+import { LookupService, LookupItem, PaymentCycleEnum, StatusWageEnum } from '../../../services/lookup.service';
+import { saveAs } from 'file-saver';
 
 interface WageAbstractRecord {
-  sNo: number;
-  ipName: string;
   state: string;
   county: string;
   payam: string;
   boma: string;
-  workCode: string;
+  subprojectCode: string;
   requestNumber: string;
   fromDate: string;
   toDate: string;
+  paymentCycle: number;
+  status: number;
+  criteria: string;
+  paymentStatus: string;
   totalMembers: number;
-  workDays: number;
-  amountPaid: number;
-  wageStatus: string;
-  paymentCycle: string;
+  totalPaidMembers: number;
+  totalWorkDays: number;
+  totalAmountInUsd: number;
+  totalAmountInSsp: number;
 }
 
 @Component({
@@ -60,6 +64,7 @@ interface WageAbstractRecord {
     FloatLabelModule,
     SelectModule,
     InputTextModule,
+    DatePickerModule,
     TooltipModule,
     Loader,
   ],
@@ -79,9 +84,20 @@ export class WageRequestAbstract implements OnInit {
   payamList: LookupItem[] = [];
   bomaList: LookupItem[] = [];
 
-  // Implementing partners (dummy - will come from API later)
-  implementingPartners: { id: number; name: string }[] = [
-    { id: 1, name: 'UNOPS Field Office' },
+  // Dropdown options
+  paymentCycles: any[] = [];
+  statuses: any[] = [];
+  criteriaOptions: any[] = [];
+  paymentStatusOptions: any[] = [];
+  reportSizeOptions = [
+    { label: '100', value: 100 },
+    { label: '500', value: 500 },
+    { label: '1000', value: 1000 },
+    { label: '5000', value: 5000 },
+    { label: '10000', value: 10000 },
+    { label: '50000', value: 50000 },
+    { label: '100000', value: 100000 },
+    { label: 'All', value: -1 },
   ];
 
   // Table data
@@ -89,11 +105,6 @@ export class WageRequestAbstract implements OnInit {
   totalRecords = 0;
   currentPage = 0;
   pageSize = 10;
-
-  // Summary
-  totalMembers = 0;
-  totalWorkDays = 0;
-  totalPaidAmount = 0;
 
   advanceSearchPanelVisible = false;
 
@@ -108,16 +119,29 @@ export class WageRequestAbstract implements OnInit {
 
   async ngOnInit() {
     this.initBreadcrumb();
+    this.initDropdowns();
     this.initForm();
     await this.loadStates();
-    this.loadDummyData();
-    this.isLoading = false;
-    this.cdr.markForCheck();
+    this.fetchPage(this.currentPage, this.pageSize);
   }
 
   initBreadcrumb() {
     this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
     this.breadcrumbItems = [{ label: 'Wages Request Abstract' }];
+  }
+
+  initDropdowns() {
+    this.paymentCycles = PaymentCycleEnum;
+    this.statuses = StatusWageEnum;
+    this.criteriaOptions = [
+      { label: 'Public Works', value: 'LIPW' },
+      { label: 'Direct Income Support', value: 'DIS' },
+    ];
+    this.paymentStatusOptions = [
+      { label: 'All', value: 'ALL' },
+      { label: 'Paid', value: 'PAID' },
+      { label: 'Unpaid', value: 'UNPAID' },
+    ];
   }
 
   initForm() {
@@ -126,9 +150,15 @@ export class WageRequestAbstract implements OnInit {
       county: [{ value: null, disabled: true }],
       payam: [{ value: null, disabled: true }],
       boma: [{ value: null, disabled: true }],
-      implementingPartnerId: [null],
-      workCode: [''],
-      requestNo: [''],
+      subprojectId: [null],
+      requestNumber: [''],
+      fromDate: [null],
+      toDate: [null],
+      status: [null],
+      paymentCycle: [null],
+      criteria: [null],
+      paymentStatus: [null],
+      reportSize: [null],
     });
   }
 
@@ -193,25 +223,66 @@ export class WageRequestAbstract implements OnInit {
     this.cdr.markForCheck();
   }
 
-  // Dummy data loader - will be replaced with actual API call later
-  private loadDummyData() {
-    this.abstractRecords = [
-      { sNo: 1, ipName: 'UNOPS FIELD OFFICE', state: 'CENTRAL EQUATORIA', county: 'JUBA', payam: 'JUBA TOWN', boma: 'HAI-BULUK', workCode: '2024-SNSOP 2023-3469', requestNumber: '2024-SNSOPWR-9228', fromDate: '11 NOV 2024', toDate: '04 DEC 2024', totalMembers: 182, workDays: 3276, amountPaid: 8905.95, wageStatus: 'PAID FROM API', paymentCycle: 'PAYMENT CYCLE 1' },
-      { sNo: 2, ipName: 'UNOPS FIELD OFFICE', state: 'CENTRAL EQUATORIA', county: 'JUBA', payam: 'JUBA TOWN', boma: 'HAI-BULUK', workCode: '2025-SNSOP 2023-4300', requestNumber: '2025-SNSOPWR-10733', fromDate: '04 FEB 2025', toDate: '10 MAR 2025', totalMembers: 80, workDays: 1346, amountPaid: 3635.10, wageStatus: 'PAID FROM API', paymentCycle: 'PAYMENT CYCLE 2' },
-      { sNo: 3, ipName: 'UNOPS FIELD OFFICE', state: 'CENTRAL EQUATORIA', county: 'JUBA', payam: 'JUBA TOWN', boma: 'HAI-BULUK', workCode: '2025-SNSOP 2023-4300', requestNumber: '2025-SNSOPWR-10784', fromDate: '11 MAR 2025', toDate: '07 APR 2025', totalMembers: 77, workDays: 1310, amountPaid: 3538.58, wageStatus: 'PAID FROM API', paymentCycle: 'PAYMENT CYCLE 3' },
-      { sNo: 4, ipName: 'UNOPS FIELD OFFICE', state: 'CENTRAL EQUATORIA', county: 'JUBA', payam: 'JUBA TOWN', boma: 'HAI-BULUK', workCode: '2025-SNSOP 2023-4300', requestNumber: '2025-SNSOPWR-12080', fromDate: '08 APR 2025', toDate: '03 MAY 2025', totalMembers: 72, workDays: 1184, amountPaid: 1382.79, wageStatus: 'PAID FROM API', paymentCycle: 'PAYMENT CYCLE 4' },
-      { sNo: 5, ipName: 'UNOPS FIELD OFFICE', state: 'CENTRAL EQUATORIA', county: 'JUBA', payam: 'JUBA TOWN', boma: 'HAI-BULUK', workCode: '2025-SNSOP 2023-4300', requestNumber: '2025-SNSOPWR-12206', fromDate: '06 MAY 2025', toDate: '30 MAY 2025', totalMembers: 78, workDays: 1395, amountPaid: 1507.06, wageStatus: 'PAID FROM API', paymentCycle: 'PAYMENT CYCLE 5' },
-      { sNo: 6, ipName: 'UNOPS FIELD OFFICE', state: 'CENTRAL EQUATORIA', county: 'JUBA', payam: 'JUBA TOWN', boma: 'HAI-BULUK', workCode: '2025-SNSOP 2023-4300', requestNumber: '2025-SNSOPWR-12925', fromDate: '03 JUN 2025', toDate: '27 JUN 2025', totalMembers: 80, workDays: 1440, amountPaid: 1604.27, wageStatus: 'PAID FROM API', paymentCycle: 'PAYMENT CYCLE 6' },
-    ];
-
-    this.totalRecords = this.abstractRecords.length;
-    this.calculateSummary();
+  private formatDate(date: Date | null): string | null {
+    if (!date) return null;
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
-  private calculateSummary() {
-    this.totalMembers = this.abstractRecords.reduce((sum, r) => sum + r.totalMembers, 0);
-    this.totalWorkDays = this.abstractRecords.reduce((sum, r) => sum + r.workDays, 0);
-    this.totalPaidAmount = this.abstractRecords.reduce((sum, r) => sum + r.amountPaid, 0);
+  private buildSearchBody() {
+    const f = this.searchForm.value;
+    return {
+      state: f.state?.id || null,
+      county: f.county?.id || null,
+      payam: f.payam?.id || null,
+      boma: f.boma?.id || null,
+      subprojectId: f.subprojectId ? Number(f.subprojectId) : null,
+      requestNumber: f.requestNumber?.trim() || null,
+      fromDate: this.formatDate(f.fromDate),
+      toDate: this.formatDate(f.toDate),
+      status: f.status != null ? Number(f.status) : null,
+      paymentCycle: f.paymentCycle || null,
+      criteria: f.criteria || null,
+      paymentStatus: f.paymentStatus || null,
+    };
+  }
+
+  fetchPage(page: number, size: number) {
+    this.isLoading = true;
+    this.cdr.markForCheck();
+    const body = this.buildSearchBody();
+
+    this.api
+      .POST(`api/wage-request/abstract/get?page=${page}&size=${size}`, body)
+      .then((res: any) => {
+        if (!res) throw new Error('Empty response');
+        const data = res.data || res;
+        this.abstractRecords = data.content || [];
+        this.totalRecords = data.totalElements || 0;
+
+        if (this.abstractRecords.length === 0) {
+          this.messageService.add({
+            severity: 'info',
+            summary: 'Report',
+            detail: 'No records found.',
+          });
+        }
+      })
+      .catch((err) => {
+        console.error('Fetch wage request abstract error:', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to fetch wage request abstract.',
+        });
+      })
+      .finally(() => {
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      });
   }
 
   toggleAdvanceSearch() {
@@ -220,13 +291,14 @@ export class WageRequestAbstract implements OnInit {
   }
 
   searchAbstract() {
-    // TODO: Integrate with API
+    const selectedSize = this.searchForm.get('reportSize')?.value;
     this.currentPage = 0;
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Search',
-      detail: 'Search functionality will be integrated with API later.',
-    });
+    if (selectedSize === -1) {
+      this.pageSize = this.totalRecords || 10;
+    } else if (selectedSize) {
+      this.pageSize = selectedSize;
+    }
+    this.fetchPage(this.currentPage, this.pageSize);
   }
 
   resetForm() {
@@ -237,43 +309,138 @@ export class WageRequestAbstract implements OnInit {
     this.countyList = [];
     this.payamList = [];
     this.bomaList = [];
+    this.abstractRecords = [];
+    this.totalRecords = 0;
+    this.currentPage = 0;
     this.cdr.markForCheck();
-  }
-
-  exportData() {
-    // TODO: Integrate with API
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Export',
-      detail: 'Export functionality will be integrated later.',
-    });
-  }
-
-  exportCompressed() {
-    // TODO: Integrate with API
-    this.messageService.add({
-      severity: 'info',
-      summary: 'Export Compressed',
-      detail: 'Compressed export functionality will be integrated later.',
-    });
-  }
-
-  printData() {
-    window.print();
-  }
-
-  viewBeneficiaries(item: WageAbstractRecord) {
-    // TODO: Navigate to beneficiaries view
-    this.messageService.add({
-      severity: 'info',
-      summary: 'View',
-      detail: `Viewing beneficiaries for ${item.requestNumber}`,
-    });
   }
 
   onPageChange(event: any) {
     this.currentPage = event.page;
     this.pageSize = event.rows;
-    // TODO: Fetch from API with pagination
+    this.fetchPage(this.currentPage, this.pageSize);
+  }
+
+  getPaymentCycleLabel(value: number): string {
+    const found = this.paymentCycles.find((item: any) => item.value === value);
+    return found ? found.label : value?.toString() || '';
+  }
+
+  getStatusLabel(value: number): string {
+    const found = this.statuses.find((item: any) => Number(item.id) === value);
+    return found ? found.label : value?.toString() || '';
+  }
+
+  getCriteriaLabel(value: string): string {
+    const found = this.criteriaOptions.find((item: any) => item.value === value);
+    return found ? found.label : value || '';
+  }
+
+  async exportExcel() {
+    if (this.abstractRecords.length === 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Export',
+        detail: 'No data to export.',
+      });
+      return;
+    }
+
+    this.isLoading = true;
+    this.cdr.markForCheck();
+
+    try {
+      const rows = this.abstractRecords.map((r, idx) => ({
+        'S.No': idx + 1,
+        'State': r.state,
+        'County': r.county,
+        'Payam': r.payam,
+        'Boma': r.boma,
+        'Sub-Project Code': r.subprojectCode,
+        'Request Number': r.requestNumber,
+        'From Date': r.fromDate,
+        'To Date': r.toDate,
+        'Payment Cycle': this.getPaymentCycleLabel(r.paymentCycle),
+        'Status': this.getStatusLabel(r.status),
+        'Criteria': this.getCriteriaLabel(r.criteria),
+        'Payment Status': r.paymentStatus,
+        'Total Members': r.totalMembers,
+        'Paid Members': r.totalPaidMembers,
+        'Work Days': r.totalWorkDays,
+        'Amount (USD)': r.totalAmountInUsd,
+        'Amount (SSP)': r.totalAmountInSsp,
+      }));
+
+      const xlsx = await import('xlsx');
+      const worksheet = xlsx.utils.json_to_sheet(rows);
+      const workbook = { Sheets: { 'Wage Request Abstract': worksheet }, SheetNames: ['Wage Request Abstract'] };
+      const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([excelBuffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8',
+      });
+      saveAs(blob, `wage_request_abstract_${Date.now()}.xlsx`);
+    } finally {
+      this.isLoading = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  async exportPdf() {
+    if (this.abstractRecords.length === 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Export',
+        detail: 'No data to export.',
+      });
+      return;
+    }
+
+    this.isLoading = true;
+    this.cdr.markForCheck();
+
+    try {
+      const jsPDF = await import('jspdf');
+      const { default: autoTable } = await import('jspdf-autotable');
+      const doc = new jsPDF.default('l', 'px', 'a4');
+
+      const head = [['S.No', 'State', 'County', 'Payam', 'Boma', 'Sub-Project Code',
+        'Request No', 'From', 'To', 'Cycle', 'Status', 'Criteria', 'Pay Status',
+        'Members', 'Paid', 'Days', 'USD', 'SSP']];
+
+      const body = this.abstractRecords.map((r, idx) => [
+        idx + 1,
+        r.state,
+        r.county,
+        r.payam,
+        r.boma,
+        r.subprojectCode,
+        r.requestNumber,
+        r.fromDate,
+        r.toDate,
+        this.getPaymentCycleLabel(r.paymentCycle),
+        this.getStatusLabel(r.status),
+        this.getCriteriaLabel(r.criteria),
+        r.paymentStatus,
+        r.totalMembers,
+        r.totalPaidMembers,
+        r.totalWorkDays,
+        r.totalAmountInUsd?.toFixed(2),
+        r.totalAmountInSsp?.toFixed(2),
+      ]);
+
+      autoTable(doc, { head, body, styles: { fontSize: 5 } });
+      doc.save(`wage_request_abstract_${Date.now()}.pdf`);
+    } finally {
+      this.isLoading = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  viewBeneficiaries(item: WageAbstractRecord) {
+    this.messageService.add({
+      severity: 'info',
+      summary: 'View',
+      detail: `Viewing beneficiaries for ${item.requestNumber}`,
+    });
   }
 }

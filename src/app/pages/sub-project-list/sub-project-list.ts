@@ -436,6 +436,45 @@ cancelDelete() {
   this.isDeleting = false;
   this.cdr.markForCheck();
 }
+  async completeSubProject(id: number) {
+    const result = await Swal.fire({
+      title: 'Confirm',
+      text: 'Are you sure you want to mark this sub-project as Completed?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Complete',
+      cancelButtonText: 'Cancel',
+    });
+
+    if (!result.isConfirmed) return;
+
+    this.isLoading = true;
+    this.cdr.markForCheck();
+
+    try {
+      await this.api.POST(
+        `api/subproject/submit?subprojectId=${id}&status=Completed`, {}
+      );
+
+      await Swal.fire({
+        title: 'Success',
+        text: 'Sub-project marked as Completed.',
+        icon: 'success',
+      });
+
+      this.fetchPage(this.currentPage, this.pageSize);
+    } catch (err: any) {
+      console.error('Error completing sub-project:', err);
+      this.isLoading = false;
+      this.cdr.markForCheck();
+      await Swal.fire({
+        title: 'Error',
+        text: err.message || 'Failed to complete sub-project.',
+        icon: 'error',
+      });
+    }
+  }
+
     getScreeningStatusLabel(value: string): string {
     const numericValue = parseInt(value, 10);
     const found = ScreeningStatusEnum.find(item => item.value === numericValue);

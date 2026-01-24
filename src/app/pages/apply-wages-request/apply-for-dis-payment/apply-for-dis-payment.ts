@@ -243,7 +243,7 @@ export class ApplyForDisPayment implements OnInit {
   initializeSubmissionForm(): void {
     this.submissionForm = this.fb.group({
       totalDays: [null, [Validators.required, Validators.min(1)]],
-      attachment: [[], [this.attachmentRequiredValidator]],
+      attachments: [[], [this.attachmentRequiredValidator]],
     });
   }
 
@@ -258,13 +258,13 @@ export class ApplyForDisPayment implements OnInit {
     } else {
       this.attachmentFiles = result.validFiles;
     }
-    this.submissionForm.get('attachment')?.setValue(this.attachmentFiles);
-    this.submissionForm.get('attachment')?.markAsTouched();
+    this.submissionForm.get('attachments')?.setValue(this.attachmentFiles);
+    this.submissionForm.get('attachments')?.markAsTouched();
   }
 
   removeAttachment(index: number): void {
     this.attachmentFiles.splice(index, 1);
-    this.submissionForm.get('attachment')?.setValue([...this.attachmentFiles]);
+    this.submissionForm.get('attachments')?.setValue([...this.attachmentFiles]);
   }
 
   formatBytes(bytes: number, decimals = 2): string {
@@ -404,6 +404,15 @@ export class ApplyForDisPayment implements OnInit {
     }
 
     this.loading = true;
+    Swal.fire({
+      title: 'Submitting...',
+      text: 'Please wait while your wage request is being processed.',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
 
     const searchFormValue = this.wagesForm.getRawValue();
     const submissionFormValue = this.submissionForm.getRawValue();
@@ -422,7 +431,7 @@ export class ApplyForDisPayment implements OnInit {
 
     if (this.attachmentFiles.length > 0) {
       this.attachmentFiles.forEach(file => {
-        formData.append('attachment', file, file.name);
+        formData.append('attachments', file, file.name);
       });
     }
 
