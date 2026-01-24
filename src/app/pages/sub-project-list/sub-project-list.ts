@@ -437,6 +437,21 @@ cancelDelete() {
   this.cdr.markForCheck();
 }
   async completeSubProject(id: number) {
+    const subProject = this.subProjects.find((sp) => sp.id === id);
+    if (!subProject) {
+      await Swal.fire('Error', 'Sub-project not found!', 'error');
+      return;
+    }
+
+    if (subProject.status !== 'InProgress') {
+      await Swal.fire({
+        title: 'Action Not Allowed',
+        text: `Sub-projects can only be completed if their status is "In Progress". Current status: "${subProject.status}"`,
+        icon: 'warning',
+      });
+      return;
+    }
+
     const result = await Swal.fire({
       title: 'Confirm',
       text: 'Are you sure you want to mark this sub-project as Completed?',
@@ -448,28 +463,52 @@ cancelDelete() {
 
     if (!result.isConfirmed) return;
 
-    this.isLoading = true;
-    this.cdr.markForCheck();
+    Swal.fire({
+      title: 'Submitting',
+      text: 'Please wait...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
 
     try {
-      await this.api.POST(
-        `api/subproject/submit?subprojectId=${id}&status=Completed`, {}
+      const res: any = await this.api.POST(
+        `api/subproject/submit?subprojectId=${id}&status=Completed`,
+        {}
       );
 
-      await Swal.fire({
-        title: 'Success',
-        text: 'Sub-project marked as Completed.',
-        icon: 'success',
-      });
+      const responseData = res.data;
 
-      this.fetchPage(this.currentPage, this.pageSize);
+      if (responseData && responseData.code === 200) {
+        await Swal.fire({
+          title: 'Success',
+          text: responseData.message || 'Sub-project marked as Completed.',
+          icon: 'success',
+        });
+        this.fetchPage(this.currentPage, this.pageSize);
+      } else {
+        await Swal.fire({
+          title: 'Could Not Complete',
+          text:
+            (responseData && responseData.message) ||
+            'The server responded, but the operation could not be completed.',
+          icon: 'error',
+        });
+      }
     } catch (err: any) {
       console.error('Error completing sub-project:', err);
-      this.isLoading = false;
-      this.cdr.markForCheck();
+
+      let errorMessage = 'Failed to complete sub-project.';
+      if (err.error && err.error.code === 406 && err.error.message) {
+        errorMessage = err.error.message;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
       await Swal.fire({
         title: 'Error',
-        text: err.message || 'Failed to complete sub-project.',
+        text: errorMessage,
         icon: 'error',
       });
     }
