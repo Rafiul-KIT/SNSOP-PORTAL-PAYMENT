@@ -34,17 +34,16 @@ interface WageRequest {
   status: number;
   requestNumber: string;
   remarks: string;
+  // New fields from updated API
+  state?: string;
+  county?: string;
+  payam?: string;
+  boma?: string;
+  projectName?: string;
+  subprojectName?: string;
 }
 
-interface Subproject {
-  workCode: string;
-  projectId: number;
-  projectName: string;
-  stateName: string;
-  countyName: string;
-  payamName: string;
-  bomaName: string;
-}
+
 
 interface Beneficiary {
   householdNumber: string;
@@ -109,7 +108,7 @@ interface StatusInfo {
 })
 export class WageRequestDetails implements OnInit {
   wageRequest: WageRequest | null = null;
-  subproject: Subproject | null = null;
+
   beneficiaries: Beneficiary[] = [];
   totalBeneficiaries = 0;
   beneficiaryCurrentPage = 0;
@@ -398,7 +397,7 @@ export class WageRequestDetails implements OnInit {
     // Append all selected files
     if (this.selectedFiles.length > 0) {
       this.selectedFiles.forEach(file => {
-        formData.append('attachment', file, file.name);
+        formData.append('attachments', file, file.name);
       });
     }
 
@@ -509,25 +508,7 @@ export class WageRequestDetails implements OnInit {
       if (wageResponse?.data?.content?.length > 0) {
         this.wageRequest = wageResponse.data.content[0];
 
-        const subprojectId = this.subprojectId;
 
-        if (subprojectId) {
-          try {
-            const subprojectResponse: any = await this.apiService.POST(
-              '/api/subproject/get?page=0&size=10',
-              { id: subprojectId },
-            );
-            if (subprojectResponse?.data?.content?.length > 0) {
-              this.subproject = subprojectResponse.data.content[0];
-            } else {
-              console.warn(
-                `Subproject details not found for id: ${subprojectId}`,
-              );
-            }
-          } catch (subError) {
-            console.error('Failed to load subproject details:', subError);
-          }
-        }
       } else {
         this.apiError = 'No wage request found with the provided ID.';
       }
