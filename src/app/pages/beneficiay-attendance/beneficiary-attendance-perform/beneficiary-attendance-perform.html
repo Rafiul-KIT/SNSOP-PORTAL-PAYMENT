@@ -113,6 +113,21 @@
                 </div>
                 <p-divider></p-divider>
                 @if (beneficiaries.length > 0) {
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <p class="fw-bold text-primary mb-0">
+                       <span class="fw-semibold text-secondary">
+        Total Beneficiaries
+        <kbd class="bg-primary">{{ beneficiaries.length }}</kbd>
+    </span>
+
+  
+
+    <span class="fw-semibold text-secondary">
+        Selected
+        <kbd class="bg-success">{{ selectedBeneficiaries.length }}</kbd>
+    </span>
+                    </p>
+                </div>
                 <p-table [value]="beneficiaries" [(selection)]="selectedBeneficiaries" dataKey="beneficiaryId"
                     [tableStyle]="{'min-width': '50rem'}">
                     <ng-template pTemplate="header">
@@ -120,6 +135,7 @@
                             <th style="width: 4rem">
                                ALL <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
                             </th>
+                            <th class="text-center-aligned">S.No</th>
                             <th class="text-center-aligned">Household No.</th>
                             <th class="text-center-aligned">Beneficiary Name</th>
                             <th class="text-center-aligned">Gender</th>
@@ -128,11 +144,12 @@
                             <th class="text-center-aligned">Status <p-select [options]="statusOptions" (onChange)="onSelectAllStatus($event)" placeholder="--select--" appendTo="body" [disabled]="selectedBeneficiaries.length === 0"></p-select></th>
                         </tr>
                     </ng-template>
-                    <ng-template pTemplate="body" let-beneficiary>
+                    <ng-template pTemplate="body" let-beneficiary let-i="rowIndex">
                         <tr>
                             <td>
                                 <p-tableCheckbox [value]="beneficiary"></p-tableCheckbox>
                             </td>
+                            <td class="text-center-aligned">{{ i + 1 }}</td>
                             <td class="text-center-aligned">{{beneficiary.householdNumber}}</td>
                             <td class="text-center-aligned">{{beneficiary.beneficiaryName}}</td>
                             <td class="text-center-aligned">{{beneficiary.gender}}</td>
