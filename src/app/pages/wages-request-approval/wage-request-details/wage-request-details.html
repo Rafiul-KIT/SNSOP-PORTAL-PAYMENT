@@ -42,54 +42,69 @@
                                     <span>Basic Information</span>
                                 </h5>
 
-                                <div class="list-group list-group-flush">
-                                    @if (subproject) {
+                                                                <div class="list-group list-group-flush">
 
-                                    <div
-                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
-                                        <span class="text-muted">Project Name:</span>
-                                        <span class="fw-semibold text-dark">{{ subproject.projectName }}</span>
-                                    </div>
-                                    <div
-                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
-                                        <span class="text-muted">Work Code:</span>
-                                        <span class="fw-semibold text-dark">{{ subproject.workCode }}</span>
-                                    </div>
-                                    <div
-                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
-                                        <span class="text-muted">State:</span>
-                                        <span class="fw-semibold text-dark">{{ subproject.stateName }}</span>
-                                    </div>
-                                    <div
-                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
-                                        <span class="text-muted">County:</span>
-                                        <span class="fw-semibold text-dark">{{ subproject.countyName }}</span>
-                                    </div>
-                                    <div
-                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
-                                        <span class="text-muted">Payam:</span>
-                                        <span class="fw-semibold text-dark">{{ subproject.payamName }}</span>
-                                    </div>
-                                    <div
-                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 py-2">
-                                        <span class="text-muted">Boma:</span>
-                                        <span class="fw-semibold text-dark">{{ subproject.bomaName }}</span>
-                                    </div>
-                                    }
-                                    @else {
-                                    <div
-                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
-                                        <span class="text-muted">Project Name:</span>
-                                        <span class="fw-semibold text-dark">Direct Income Support</span>
-                                    </div>
-                                    <div
-                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
-                                        <span class="text-muted">Work Code:</span>
-                                        <span class="fw-semibold text-dark">DIS-Direct Income Support</span>
-                                    </div>
-                                    }
+                                                                    <div
 
-                                </div>
+                                                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+
+                                                                        <span class="text-muted">Project Name:</span>
+
+                                                                        <span class="fw-semibold text-dark">{{ wageRequest.projectName || '—' }}</span>
+
+                                                                    </div>
+
+                                                                    <div
+
+                                                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+
+                                                                        <span class="text-muted">Work Code:</span>
+
+                                                                        <span class="fw-semibold text-dark">{{ wageRequest.subprojectName || '—' }}</span>
+
+                                                                    </div>
+
+                                                                    <div
+
+                                                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+
+                                                                        <span class="text-muted">State:</span>
+
+                                                                        <span class="fw-semibold text-dark">{{ wageRequest.state || '—' }}</span>
+
+                                                                    </div>
+
+                                                                    <div
+
+                                                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+
+                                                                        <span class="text-muted">County:</span>
+
+                                                                        <span class="fw-semibold text-dark">{{ wageRequest.county || '—' }}</span>
+
+                                                                    </div>
+
+                                                                    <div
+
+                                                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+
+                                                                        <span class="text-muted">Payam:</span>
+
+                                                                        <span class="fw-semibold text-dark">{{ wageRequest.payam || '—' }}</span>
+
+                                                                    </div>
+
+                                                                    <div
+
+                                                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 py-2">
+
+                                                                        <span class="text-muted">Boma:</span>
+
+                                                                        <span class="fw-semibold text-dark">{{ wageRequest.boma || '—' }}</span>
+
+                                                                    </div>
+
+                                                                </div>
                             </div>
                         </div>
                     </div>
