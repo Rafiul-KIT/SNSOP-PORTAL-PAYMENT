@@ -22,9 +22,9 @@ import { TooltipModule } from 'primeng/tooltip';
 import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
 
-import { Loader } from '../../components/loader/loader';
-import { ApiService } from '../../services/api.service';
-import { LookupService, LookupItem } from '../../services/lookup.service';
+import { Loader } from '../../../components/loader/loader';
+import { ApiService } from '../../../services/api.service';
+import { LookupService, LookupItem } from '../../../services/lookup.service';
 
 interface WageAbstractRecord {
   sNo: number;

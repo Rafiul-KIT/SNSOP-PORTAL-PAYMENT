@@ -18,7 +18,8 @@
                     </h3>
                     <div class="d-flex gap-2">
                         <button pButton type="button" label="Upload Beneficiary Attendance" icon="pi pi-upload"
-                            class="p-button-primary" (click)="showUploadModal = true" [disabled]="loading || !subproject"></button>
+                            class="p-button-primary" (click)="showUploadModal = true"
+                            [disabled]="loading || !subproject"></button>
                     </div>
                 </div>
             </p-card>
@@ -52,7 +53,8 @@
                                     <div
                                         class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom ">
                                         <span class="text-muted">Approved Date:</span>
-                                        <span class="fw-semibold text-dark">{{subproject.tstApprovedAt | date: 'dd/MM/yyyy'}}</span>
+                                        <span class="fw-semibold text-dark">{{subproject.tstApprovedAt | date:
+                                            'dd/MM/yyyy'}}</span>
                                     </div>
                                     <div class="list-group-item d-flex gap-3 align-items-center px-0 border-0 py-1">
                                         <span class="text-muted pb-4">Attendance Date:</span>
@@ -60,12 +62,16 @@
                                             <div class="p-inputgroup">
                                                 <p-datepicker [(ngModel)]="attendanceDate"
                                                     (ngModelChange)="onAttendanceDateChange($event)" [showIcon]="true"
-                                                    dateFormat="dd/mm/yy" placeholder="Select date" [minDate]="minAttendanceDate"
-                                                    [ngClass]="{'ng-invalid ng-dirty': isAttendanceDateInvalid() && attendanceDateTouched}"></p-datepicker> &nbsp; &nbsp; &nbsp;
-                                                    <button pButton type="button" icon="fas fa-search" class="p-button-primary" label="Search" (click)="onSearch()" [disabled]="isAttendanceDateInvalid()"></button>
+                                                    dateFormat="dd/mm/yy" placeholder="Select date"
+                                                    [minDate]="minAttendanceDate"
+                                                    [ngClass]="{'ng-invalid ng-dirty': isAttendanceDateInvalid() && attendanceDateTouched}"></p-datepicker>
+                                                &nbsp; &nbsp; &nbsp;
+                                                <button pButton type="button" icon="fas fa-search"
+                                                    class="p-button-primary" label="Search" (click)="onSearch()"
+                                                    [disabled]="isAttendanceDateInvalid()"></button>
                                             </div>
                                             @if (isAttendanceDateInvalid() && attendanceDateTouched) {
-                                                <div class="text-danger mt-1">Attendance Date is required.</div>
+                                            <div class="text-danger mt-1">Attendance Date is required.</div>
                                             }
                                         </div>
                                     </div>
@@ -105,7 +111,7 @@
                                         <span class="text-muted">Boma Name:</span>
                                         <span class="fw-semibold text-dark">{{ subproject.bomaName || '—' }}</span>
                                     </div>
-                                    
+
                                 </div>
                             </div>
                         </div>
@@ -113,33 +119,54 @@
                 </div>
                 <p-divider></p-divider>
                 @if (beneficiaries.length > 0) {
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <p class="fw-bol d-flex  flex-column text-primary mb-0">
+                        <span class="fw-semibold text-secondary">
+                            Total Beneficiaries
+                            <kbd class="bg-primary">{{ beneficiaries.length }}</kbd>
+                        </span>
+
+
+
+                        <span class="fw-semibold text-secondary">
+                            Selected
+                            <kbd class="bg-success">{{ selectedBeneficiaries.length }}</kbd>
+                        </span>
+                    </p>
+                </div>
                 <p-table [value]="beneficiaries" [(selection)]="selectedBeneficiaries" dataKey="beneficiaryId"
                     [tableStyle]="{'min-width': '50rem'}">
                     <ng-template pTemplate="header">
                         <tr>
                             <th style="width: 4rem">
-                               ALL <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+                                ALL <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
                             </th>
+                            <th class="text-center-aligned">S.No</th>
                             <th class="text-center-aligned">Household No.</th>
                             <th class="text-center-aligned">Beneficiary Name</th>
                             <th class="text-center-aligned">Gender</th>
                             <th class="text-center-aligned">Age</th>
                             <th class="text-center-aligned">Phone No.</th>
-                            <th class="text-center-aligned">Status <p-select [options]="statusOptions" (onChange)="onSelectAllStatus($event)" placeholder="--select--" appendTo="body" [disabled]="selectedBeneficiaries.length === 0"></p-select></th>
+                            <th class="text-center-aligned">Status <p-select [options]="statusOptions"
+                                    (onChange)="onSelectAllStatus($event)" placeholder="--select--" appendTo="body"
+                                    [disabled]="selectedBeneficiaries.length === 0"></p-select></th>
                         </tr>
                     </ng-template>
-                    <ng-template pTemplate="body" let-beneficiary>
+                    <ng-template pTemplate="body" let-beneficiary let-i="rowIndex">
                         <tr>
                             <td>
                                 <p-tableCheckbox [value]="beneficiary"></p-tableCheckbox>
                             </td>
+                            <td class="text-center-aligned">{{ i + 1 }}</td>
                             <td class="text-center-aligned">{{beneficiary.householdNumber}}</td>
                             <td class="text-center-aligned">{{beneficiary.beneficiaryName}}</td>
                             <td class="text-center-aligned">{{beneficiary.gender}}</td>
                             <td class="text-center-aligned">{{beneficiary.age}}</td>
                             <td class="text-center-aligned">{{beneficiary.phoneNo}}</td>
                             <td class="text-center-aligned">
-                                <p-select [options]="statusOptions" [(ngModel)]="beneficiary.present" optionLabel="label" optionValue="value" appendTo="body" placeholder="--select--" [disabled]="!selectedBeneficiaries.includes(beneficiary)"></p-select>
+                                <p-select [options]="statusOptions" [(ngModel)]="beneficiary.present"
+                                    optionLabel="label" optionValue="value" appendTo="body" placeholder="--select--"
+                                    [disabled]="!selectedBeneficiaries.includes(beneficiary)"></p-select>
                             </td>
                         </tr>
                     </ng-template>
@@ -148,19 +175,22 @@
 
 
                 <div class="d-flex justify-content-end mt-3">
-                    <button pButton type="button" label="Save Attendance" class="p-button-primary px-5" [disabled]="loading" (click)="saveAttendance()"></button>
+                    <button pButton type="button" label="Save Attendance" class="p-button-primary px-5"
+                        [disabled]="loading" (click)="saveAttendance()"></button>
                 </div>
                 }
                 }
-                            </p-card>
-                        </div>
-                    </div>
-                </div>
-                
-<p-dialog header="Upload Beneficiary Attendance" [(visible)]="showUploadModal" [modal]="true" [style]="{width: '40vw'}" [draggable]="false" [resizable]="false">
+            </p-card>
+        </div>
+    </div>
+</div>
+
+<p-dialog header="Upload Beneficiary Attendance" [(visible)]="showUploadModal" [modal]="true" [style]="{width: '40vw'}"
+    [draggable]="false" [resizable]="false">
     <div class="upload-container p-3">
         <div class="text-center mb-4">
-            <a (click)="downloadTemplate()" class="p-button p-button-success p-component" style="text-decoration: none; color: white; cursor: pointer;">
+            <a (click)="downloadTemplate()" class="p-button p-button-success p-component"
+                style="text-decoration: none; color: white; cursor: pointer;">
                 <span class="p-button-icon p-button-icon-left pi pi-download"></span>
                 <span class="p-button-label">Download Template</span>
             </a>
@@ -174,20 +204,26 @@
             <input id="file-upload" type="file" (change)="onFileSelect($event)" accept=".xlsx, .xls" class="d-none">
         </div>
 
-        
+
         <div class="notes-section card bg-light border-warning p-3">
             <h5 class="card-title text-dark"><i class="pi pi-info-circle me-2 text-warning"></i>Please Note:</h5>
             <ul class="list-unstyled mb-0">
-                <li class="mb-2"><i class="pi pi-check-circle text-success me-2"></i>1. Download the attendance template.</li>
-                <li class="mb-2"><i class="pi pi-check-circle text-success me-2"></i>2. Add your data to the 'Beneficiary Attendance' sheet.</li>
-                <li class="mb-2"><i class="pi pi-check-circle text-success me-2"></i>3. Do not leave the Excel file open during upload.</li>
-                <li><i class="pi pi-check-circle text-success me-2"></i>4. Ensure all dates are in <strong>YYYY/MM/DD</strong> format.</li>
+                <li class="mb-2"><i class="pi pi-check-circle text-success me-2"></i>1. Download the attendance
+                    template.</li>
+                <li class="mb-2"><i class="pi pi-check-circle text-success me-2"></i>2. Add your data to the
+                    'Beneficiary Attendance' sheet.</li>
+                <li class="mb-2"><i class="pi pi-check-circle text-success me-2"></i>3. Do not leave the Excel file open
+                    during upload.</li>
+                <li><i class="pi pi-check-circle text-success me-2"></i>4. Ensure all dates are in
+                    <strong>YYYY/MM/DD</strong> format.</li>
             </ul>
         </div>
     </div>
     <ng-template pTemplate="footer">
-        <button pButton type="button" icon="pi pi-times" (click)="showUploadModal=false" label="Cancel" class="p-button-text"></button>
-        <button pButton type="button" icon="pi pi-upload" (click)="uploadAttendanceFile()" label="Submit" [disabled]="!selectedFile || uploadInProgress" [loading]="uploadInProgress"></button>
+        <button pButton type="button" icon="pi pi-times" (click)="showUploadModal=false" label="Cancel"
+            class="p-button-text"></button>
+        <button pButton type="button" icon="pi pi-upload" (click)="uploadAttendanceFile()" label="Submit"
+            [disabled]="!selectedFile || uploadInProgress" [loading]="uploadInProgress"></button>
     </ng-template>
 </p-dialog>
 }
