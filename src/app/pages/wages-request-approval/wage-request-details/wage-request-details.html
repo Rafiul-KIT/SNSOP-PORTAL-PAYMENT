@@ -177,22 +177,22 @@
                         class="p-datatable-sm">
                         <ng-template pTemplate="header">
                             <tr>
-                                <th>Reviewed At</th>
-                                <th>Status</th>
-                                <th>Comments</th>
-                                <th>Attachment</th>
+                                <th class="text-center">Reviewed At</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Comments</th>
+                                <th class="text-center">Attachment</th>
                             </tr>
                         </ng-template>
                         <ng-template pTemplate="body" let-history>
                             <tr>
-                                <td>{{ formatDate(history.reviewedAt) }}</td>
-                                <td>{{ history.status }}</td>
-                                <td>{{ history.comments }}</td>
-                                <td>
+                                <td class="text-center">{{ formatDate(history.reviewedAt) }}</td>
+                                <td class="text-center">{{ history.status }}</td>
+                                <td class="text-center">{{ history.comments }}</td>
+                                <td class="text-center">
                                     @if (history.attachmentUrl) {
-                                    <a [href]="getAttachmentUrl(history.attachmentUrl)" target="_blank"
-                                        class="btn btn-sm btn-outline-primary">
-                                        <i class="pi pi-download me-1"></i> Preview Attachment
+                                    <a (click)="handleAttachmentClick(history)"
+                                        class="btn btn-sm btn-outline-primary cursor-pointer">
+                                        <i class="pi pi-download me-1"></i> {{ history.fileName }}
                                     </a>
                                     } @else {
                                     <span>—</span>

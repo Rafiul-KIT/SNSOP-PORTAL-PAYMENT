@@ -66,6 +66,8 @@ interface Beneficiary {
 interface AttachmentHistory {
   status: string;
   attachmentUrl: string;
+  fileName: string;
+  filePath: string;
   comments: string;
   reviewedAt: string;
 }
@@ -582,8 +584,43 @@ hasHistoryLoaded = false;
     return months[monthIndex - 1] || 'Unknown';
   }
 
-  getAttachmentUrl(url: string): string {
-    return url;
+  async handleAttachmentClick(history: AttachmentHistory): Promise<void> {
+    if (history.attachmentUrl && (history.attachmentUrl.startsWith('http://') || history.attachmentUrl.startsWith('https://'))) {
+      // It's a full URL, open in a new tab
+      window.open(history.attachmentUrl, '_blank');
+    } else if (history.filePath) {
+      // It's a relative path, call the download API
+      try {
+        const response: any = await this.apiService.GET_CONFIG(
+          `/api/wage-request-review/wageRequest/attachment/get?filePath=${history.filePath}`,
+          { responseType: 'blob' } // Important for binary data
+        );
+
+        const blob = new Blob([response.data], { type: response.headers.get('Content-Type') });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = history.fileName || 'download'; // Use fileName from history, or a default
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error('Failed to download attachment:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Download Failed',
+          text: 'Could not download the attachment. Please try again.',
+        });
+      }
+    } else {
+      console.warn('No attachment URL or file path available for download.');
+      Swal.fire({
+        icon: 'warning',
+        title: 'No Attachment',
+        text: 'No valid attachment found for this entry.',
+      });
+    }
   }
 
   async loadBeneficiaries(page: number, size: number): Promise<void> {
