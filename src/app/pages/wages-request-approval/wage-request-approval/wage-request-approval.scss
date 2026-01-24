@@ -1,0 +1,52 @@
+.attachment-dialog .text-center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 150px;
+}
+
+::ng-deep .on-top-modal {
+
+  z-index: 10000 !important;
+
+}
+
+
+
+// Force vertical alignment for all cells in the table body
+
+::ng-deep .p-datatable-tbody > tr > td {
+
+  vertical-align: middle !important;
+
+}
+
+
+
+// Add some space between the buttons in the action cell
+
+
+
+::ng-deep .action-cell .button-group {
+
+
+
+    display: flex;
+
+
+
+    align-items: center;
+
+
+
+    justify-content: center;
+
+
+
+    gap: 0.25rem;
+
+
+
+}
+
