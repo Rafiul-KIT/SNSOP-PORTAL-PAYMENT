@@ -117,12 +117,12 @@
         </tr>
         <tr>
             <th class="text-center">S.No</th>
+            <th class="text-center">IP Name</th>
             <th class="text-center">State</th>
             <th class="text-center">County</th>
             <th class="text-center">Payam</th>
             <th class="text-center">Boma</th>
-            <th class="text-center">Sub-Project Code</th>
-            <th class="text-center">Household Number</th>
+            <th class="text-center">Work Code</th>
             <th class="text-center">Beneficiary Name</th>
             <th class="text-center">Age</th>
             <th class="text-center">Gender</th>
@@ -136,12 +136,12 @@
     <ng-template pTemplate="body" let-item let-i="rowIndex">
         <tr>
             <td class="text-center">{{ (currentPage * pageSize) + i + 1 }}</td>
+            <td class="text-center">{{ "UNOPS Field Office" }}</td>
             <td class="text-center">{{ item.stateName }}</td>
             <td class="text-center">{{ item.countyName }}</td>
             <td class="text-center">{{ item.payamName }}</td>
             <td class="text-center">{{ item.bomaName }}</td>
             <td class="text-center">{{ item.subprojectCode }}</td>
-            <td class="text-center">{{ item.householdNumber }}</td>
             <td class="text-center">{{ item.beneficiaryName }}</td>
             <td class="text-center">{{ item.beneficiaryAge }}</td>
             <td class="text-center">{{ item.gender }}</td>
@@ -158,7 +158,7 @@
 
     <ng-template pTemplate="emptymessage">
         <tr>
-            <td colspan="14" class="text-center text-danger">
+            <td colspan="13" class="text-center text-danger">
                 <b>No records found!</b>
             </td>
         </tr>

@@ -44,6 +44,7 @@ interface WageAbstractRecord {
   totalMembers: number;
   totalPaidMembers: number;
   totalWorkDays: number;
+  exchangeRate: number;
   totalAmountInUsd: number;
   totalAmountInSsp: number;
 }
@@ -323,7 +324,10 @@ export class WageRequestAbstract implements OnInit {
 
   getPaymentCycleLabel(value: number): string {
     const found = this.paymentCycles.find((item: any) => item.value === value);
-    return found ? found.label : value?.toString() || '';
+    if (found) {
+      return found.label.replace('Cycle ', 'Payment Cycle ');
+    }
+    return value?.toString() || '';
   }
 
   getStatusLabel(value: number): string {
@@ -366,13 +370,13 @@ export class WageRequestAbstract implements OnInit {
       }
 
       // CSV headers
-      const headers = ['S.No', 'State', 'County', 'Payam', 'Boma', 'Sub-Project Code',
-        'Request Number', 'From Date', 'To Date', 'Payment Cycle', 'Status', 'Criteria',
-        'Payment Status', 'Total Members', 'Paid Members', 'Work Days', 'Amount (USD)', 'Amount (SSP)'];
+      const headers = ['IP Name', 'State', 'County', 'Payam', 'Boma', 'Work Code',
+        'Request Number', 'From Date', 'To Date', 'Total Members', 'Work Days', 'Exchange Rate',
+        'Amount Paid in USD', 'Amount Paid in SSP', 'Wage Status',  'Payment Cycle'];
 
       // CSV rows
       const csvRows = allRecords.map((r, idx) => [
-        idx + 1,
+        this.escapeCsvField('UNOPS Field Office'),
         this.escapeCsvField(r.state),
         this.escapeCsvField(r.county),
         this.escapeCsvField(r.payam),
@@ -381,15 +385,20 @@ export class WageRequestAbstract implements OnInit {
         this.escapeCsvField(r.requestNumber),
         this.escapeCsvField(r.fromDate),
         this.escapeCsvField(r.toDate),
-        this.escapeCsvField(this.getPaymentCycleLabel(r.paymentCycle)),
-        this.escapeCsvField(this.getStatusLabel(r.status)),
-        this.escapeCsvField(this.getCriteriaLabel(r.criteria)),
-        this.escapeCsvField(r.paymentStatus),
-        r.totalMembers,
-        r.totalPaidMembers,
-        r.totalWorkDays,
-        r.totalAmountInUsd,
+         r.totalMembers,
+         r.totalWorkDays,
+         r.exchangeRate,
+         r.totalAmountInUsd,
         r.totalAmountInSsp,
+        this.escapeCsvField(this.getStatusLabel(r.status)),
+        this.escapeCsvField(this.getPaymentCycleLabel(r.paymentCycle)),
+
+        // this.escapeCsvField(this.getCriteriaLabel(r.criteria)),
+        // this.escapeCsvField(r.paymentStatus),
+
+        // r.totalPaidMembers,
+
+
       ].join(','));
 
       const csvContent = [headers.join(','), ...csvRows].join('\n');
@@ -450,12 +459,13 @@ export class WageRequestAbstract implements OnInit {
       const { default: autoTable } = await import('jspdf-autotable');
       const doc = new jsPDF.default('l', 'px', 'a4');
 
-      const head = [['S.No', 'State', 'County', 'Payam', 'Boma', 'Sub-Project Code',
+      const head = [['S.No', 'IP Name', 'State', 'County', 'Payam', 'Boma', 'Sub-Project Code',
         'Request No', 'From', 'To', 'Cycle', 'Status', 'Criteria', 'Pay Status',
         'Members', 'Paid', 'Days', 'USD', 'SSP']];
 
       const pdfBody = allRecords.map((r, idx) => [
         idx + 1,
+        'UNOPS Field Office',
         r.state,
         r.county,
         r.payam,

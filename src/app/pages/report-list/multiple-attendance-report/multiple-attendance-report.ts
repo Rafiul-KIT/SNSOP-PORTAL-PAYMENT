@@ -324,19 +324,19 @@ export class MultipleAttendanceReport implements OnInit {
       }
 
       // CSV headers
-      const headers = ['S.No', 'State', 'County', 'Payam', 'Boma', 'Sub-Project Code',
-        'Household Number', 'Beneficiary Name', 'Age', 'Gender', 'Support Type',
-        'Mobile Number', 'Attendance Date', 'Status'];
+      const headers = ['S.No', 'IP', 'State', 'County', 'Payam', 'Boma',
+        'Work Code', 'Beneficiary Name', 'Age', 'Gender', 'Component',
+        'Mobile Number', 'Date', 'Status'];
 
       // CSV rows
       const csvRows = allRecords.map((r, idx) => [
         idx + 1,
+        this.escapeCsvField('UNOPS Field Office'),
         this.escapeCsvField(r.stateName),
         this.escapeCsvField(r.countyName),
         this.escapeCsvField(r.payamName),
         this.escapeCsvField(r.bomaName),
         this.escapeCsvField(r.subprojectCode),
-        this.escapeCsvField(r.householdNumber),
         this.escapeCsvField(r.beneficiaryName),
         r.beneficiaryAge,
         this.escapeCsvField(r.gender),

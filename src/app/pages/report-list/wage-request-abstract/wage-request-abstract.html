@@ -45,7 +45,7 @@
         </div>
 
         <!-- @if (advanceSearchPanelVisible) { -->
-    
+
 
         <!-- Criteria -->
         <div class="col-md-3">
@@ -164,19 +164,17 @@
             <th class="text-center">County</th>
             <th class="text-center">Payam</th>
             <th class="text-center">Boma</th>
-            <th class="text-center">Sub-Project Code</th>
+            <th class="text-center">Work Code</th>
             <th class="text-center">Request Number</th>
             <th class="text-center">From Date</th>
             <th class="text-center">To Date</th>
-            <th class="text-center">Payment Cycle</th>
-            <th class="text-center">Status</th>
-            <th class="text-center">Criteria</th>
-            <th class="text-center">Payment Status</th>
             <th class="text-center">Total Members</th>
-            <th class="text-center">Paid Members</th>
             <th class="text-center">Work Days</th>
+            <th class="text-center">Exchange Rate</th>
             <th class="text-center">Amount (USD)</th>
             <th class="text-center">Amount (SSP)</th>
+            <th class="text-center">Wage Status</th>
+            <th class="text-center">Payment Cycle</th>
         </tr>
     </ng-template>
 
@@ -191,21 +189,19 @@
             <td class="text-center">{{ item.requestNumber }}</td>
             <td class="text-center">{{ item.fromDate }}</td>
             <td class="text-center">{{ item.toDate }}</td>
-            <td class="text-center">{{ getPaymentCycleLabel(item.paymentCycle) }}</td>
-            <td class="text-center">{{ getStatusLabel(item.status) }}</td>
-            <td class="text-center">{{ getCriteriaLabel(item.criteria) }}</td>
-            <td class="text-center">{{ item.paymentStatus }}</td>
             <td class="text-center">{{ item.totalMembers }}</td>
-            <td class="text-center">{{ item.totalPaidMembers }}</td>
             <td class="text-center">{{ item.totalWorkDays }}</td>
+            <td class="text-center">{{ item.exchangeRate }}</td>
             <td class="text-center">{{ item.totalAmountInUsd | number:'1.2-2' }}</td>
             <td class="text-center">{{ item.totalAmountInSsp | number:'1.2-2' }}</td>
+            <td class="text-center">{{ getStatusLabel(item.status) }}</td>
+            <td class="text-center">Payment Cycle {{ item.paymentCycle }}</td>
         </tr>
     </ng-template>
 
     <ng-template pTemplate="emptymessage">
         <tr>
-            <td colspan="18" class="text-center text-danger">
+            <td colspan="16" class="text-center text-danger">
                 <b>No records found!</b>
             </td>
         </tr>
