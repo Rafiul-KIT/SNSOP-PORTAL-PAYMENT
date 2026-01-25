@@ -217,11 +217,11 @@ export class Header {
             icon: 'fas fa-donate',
             routerLink: 'payroll/download',
           },
-          {
-            label: 'Mobile Money',
-            icon: 'fas fa-donate',
-            routerLink: 'payroll/mobile-money-download',
-          },
+          // {
+          //   label: 'Mobile Money',
+          //   icon: 'fas fa-donate',
+          //   routerLink: 'payroll/mobile-money-download',
+          // },
           {
             label: 'Reconciliation Monitoring',
             icon: 'fas fa-eye',
@@ -259,7 +259,7 @@ export class Header {
             routerLink: 'report/multiple-attendance',
           }
 
-          
+
         ],
       },
     ];
