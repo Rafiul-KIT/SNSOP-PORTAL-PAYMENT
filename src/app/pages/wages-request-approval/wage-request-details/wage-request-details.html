@@ -357,7 +357,16 @@
 
         <!-- Review Form Card -->
         @if (wageRequest && roleId === 14) {
-        <p-card class="mt-4 shadow-sm border-0">
+        <p-card class="mt-4 shadow-sm border-0 position-relative">
+            <!-- Loading Overlay -->
+            @if (isReviewSubmitting) {
+            <div class="review-loading-overlay">
+                <div class="d-flex flex-column align-items-center">
+                    <i class="pi pi-spin pi-spinner" style="font-size: 2.5rem; color: #198754;"></i>
+                    <span class="mt-2 fw-semibold text-success">Submitting review...</span>
+                </div>
+            </div>
+            }
             <h5 class="mb-3 text-success">
                 <i class="pi pi-check-circle me-2"></i>
                 Review Wage Request
@@ -426,8 +435,11 @@
                     </div>
 
                     <div class="col-12">
-                        <p-button type="submit" label="Submit Review" icon="pi pi-send"
-                            [disabled]="reviewForm.invalid || isReviewSubmitting">
+                        <p-button type="submit"
+                            [label]="isReviewSubmitting ? 'Submitting...' : 'Submit Review'"
+                            [icon]="isReviewSubmitting ? 'pi pi-spin pi-spinner' : 'pi pi-send'"
+                            [disabled]="reviewForm.invalid || isReviewSubmitting"
+                            [loading]="isReviewSubmitting">
                         </p-button>
                     </div>
                 </div>

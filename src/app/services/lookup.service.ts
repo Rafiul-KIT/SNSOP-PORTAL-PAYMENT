@@ -40,9 +40,7 @@ export const StatusWageEnum = [
   { id: '103', value: 'ClearedWB', label: 'Cleared by WB' },
   { id: '105', value: 'DraftRejected', label: 'Draft Rejected' },
   { id: '1000', value: 'RejectedAfterPay', label: 'Rejected after Pay' },
-  { id: '1001', value: 'RejectedAfterPay', label: 'Rejected after Pay' },
-  { id: '1002', value: 'RejectedAfterPay', label: 'Rejected after Pay' },
-  { id: '1003', value: 'RejectedAfterPay', label: 'Rejected after Pay' },
+
 ];
 
 export const PaymentCycleEnum = Array.from({ length: 15 }, (_, i) => ({
