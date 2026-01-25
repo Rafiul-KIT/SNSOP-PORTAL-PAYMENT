@@ -1,5 +1,5 @@
 <p-toast position="bottom-right"></p-toast>
-@if (isLoading) {
+@if (loading) {
 <app-loader></app-loader>
 } @else {
 <div class="breadcrumb-wrapper">
@@ -14,7 +14,7 @@
             <p-floatlabel variant="on" class="w-100">
                 <p-select [options]="states" optionLabel="name" formControlName="state"
                     (onChange)="onStateChange($event.value)" />
-                <label>State</label>
+                <label>State <span class="text-danger">*</span></label>
             </p-floatlabel>
         </div>
 
@@ -23,7 +23,7 @@
             <p-floatlabel variant="on" class="w-100">
                 <p-select [options]="countyList" optionLabel="name" formControlName="county"
                     (onChange)="onCountyChange($event.value)" />
-                <label>County</label>
+                <label>County <span class="text-danger">*</span></label>
             </p-floatlabel>
         </div>
 
@@ -32,7 +32,7 @@
             <p-floatlabel variant="on" class="w-100">
                 <p-select [options]="payamList" optionLabel="name" formControlName="payam"
                     (onChange)="onPayamChange($event.value)" />
-                <label>Payam</label>
+                <label>Payam <span class="text-danger">*</span></label>
             </p-floatlabel>
         </div>
 
@@ -40,7 +40,7 @@
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
                 <p-select [options]="bomaList" optionLabel="name" formControlName="boma" />
-                <label>Boma</label>
+                <label>Boma <span class="text-danger">*</span></label>
             </p-floatlabel>
         </div>
 
@@ -57,7 +57,7 @@
             <p-floatlabel variant="on" class="w-100">
                 <p-datePicker formControlName="fromDate" [showIcon]="true" dateFormat="dd/mm/yy"
                     class="w-100"></p-datePicker>
-                <label>From Date</label>
+                <label>From Date <span class="text-danger">*</span></label>
             </p-floatlabel>
         </div>
 
@@ -66,7 +66,7 @@
             <p-floatlabel variant="on" class="w-100">
                 <p-datePicker formControlName="toDate" [showIcon]="true" dateFormat="dd/mm/yy"
                     class="w-100"></p-datePicker>
-                <label>To Date</label>
+                <label>To Date <span class="text-danger">*</span></label>
             </p-floatlabel>
         </div>
 
@@ -83,36 +83,33 @@
         <div class="col text-end">
             <p-button label="Reset" icon="fas fa-refresh" severity="danger" size="small" [outlined]="true"
                 class="me-2" (onClick)="resetForm()"></p-button>
-            <p-button label="Show Report" icon="fas fa-search" severity="primary" size="small"
-                (onClick)="showReport()"></p-button>
+            <p-button label="Generate" icon="fas fa-search" severity="primary" size="small"
+                [disabled]="searchForm.invalid" (onClick)="showReport()"></p-button>
         </div>
 
         <!-- Export Buttons -->
         @if (attendanceRecords.length > 0) {
         <div class="col-12">
-            <div class="d-flex justify-content-end gap-2">
-                <p-button label="Export CSV" icon="fas fa-file-csv" severity="success" size="small"
-                    [outlined]="true" (onClick)="exportCsv()"></p-button>
-                <p-button label="Export PDF" icon="fas fa-file-pdf" severity="danger" size="small"
-                    [outlined]="true" (onClick)="exportPdf()"></p-button>
-            </div>
+
         </div>
         }
 
     </form>
 </div>
 
-@if (attendanceRecords.length > 0) {
+@if (hasSearched) {
 <p-table [value]="attendanceRecords" [scrollable]="true" [scrollHeight]="'55vh'"
     [tableStyle]="{ 'min-width': '1600px', 'margin-bottom': '5px' }" size="small">
 
     <ng-template pTemplate="header">
         <tr>
-            <th colspan="14" class="text-end">
-                <p class="fw-bold mb-2">
-                    Showing <kbd>{{ attendanceRecords.length }}</kbd> of
-                    <kbd>{{ totalRecords }}</kbd> records
-                </p>
+            <th colspan="14" class="text-start">
+                <div class="d-flex justify-content-start gap-2">
+                <p-button label="Export CSV" icon="fas fa-file-csv" severity="success" size="small"
+                    [outlined]="true" (onClick)="exportCsv()"></p-button>
+                <p-button label="Export PDF" icon="fas fa-file-pdf" severity="danger" size="small"
+                    [outlined]="true" (onClick)="exportPdf()"></p-button>
+            </div>
             </th>
         </tr>
         <tr>
@@ -165,10 +162,12 @@
     </ng-template>
 </p-table>
 
+@if(totalRecords > 0){
 <p-paginator class="paginator-sticky" [rows]="pageSize" [totalRecords]="totalRecords"
     [rowsPerPageOptions]="[10, 25, 50]" (onPageChange)="onPageChange($event)" [first]="(currentPage) * pageSize"
     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
 </p-paginator>
+}
 }
 
 }

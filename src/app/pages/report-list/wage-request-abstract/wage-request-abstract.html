@@ -118,7 +118,7 @@
                     (onClick)="resetForm()">
                 </p-button>
 
-                <p-button label="Search" icon="fas fa-search" severity="primary" size="small"
+                <p-button label="Generate" icon="fas fa-search" severity="primary" size="small"
                     (onClick)="searchAbstract()">
                 </p-button>
 
@@ -128,7 +128,7 @@
     </form>
 </div>
 
-@if (false) {
+@if (loading) {
   <app-loader></app-loader>
 } @else {
   @if (hasSearched) {

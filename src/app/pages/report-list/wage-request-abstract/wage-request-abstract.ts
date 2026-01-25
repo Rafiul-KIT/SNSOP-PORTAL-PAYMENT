@@ -108,6 +108,7 @@ export class WageRequestAbstract implements OnInit {
 
   advanceSearchPanelVisible = false;
   hasSearched: boolean = false;
+  loading = false;
 
   constructor(
     private fb: FormBuilder,
@@ -252,6 +253,7 @@ export class WageRequestAbstract implements OnInit {
   }
 
   fetchPage(page: number, size: number) {
+    this.loading = true;
     this.cdr.markForCheck();
     const body = this.buildSearchBody();
 
@@ -280,7 +282,7 @@ export class WageRequestAbstract implements OnInit {
         });
       })
       .finally(() => {
-
+        this.loading = false;
         this.cdr.detectChanges();
       });
   }
@@ -314,6 +316,7 @@ export class WageRequestAbstract implements OnInit {
     this.totalRecords = 0;
     this.currentPage = 0;
     this.hasSearched = false;
+    this.loading = false;
     this.cdr.markForCheck();
   }
 
@@ -351,6 +354,7 @@ export class WageRequestAbstract implements OnInit {
       return;
     }
 
+    this.loading = true;
     this.cdr.markForCheck();
 
     try {
@@ -412,7 +416,7 @@ export class WageRequestAbstract implements OnInit {
         detail: 'Failed to export data.',
       });
     } finally {
-
+      this.loading = false;
       this.cdr.detectChanges();
     }
   }
@@ -436,7 +440,7 @@ export class WageRequestAbstract implements OnInit {
       return;
     }
 
-
+    this.loading = true;
     this.cdr.markForCheck();
 
     try {
@@ -495,7 +499,7 @@ export class WageRequestAbstract implements OnInit {
         detail: 'Failed to export data.',
       });
     } finally {
-      
+      this.loading = false;
       this.cdr.detectChanges();
     }
   }

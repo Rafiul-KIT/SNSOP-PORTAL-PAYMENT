@@ -9,6 +9,7 @@ import {
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
+  Validators,
 } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -67,7 +68,7 @@ interface AttendanceRecord {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MultipleAttendanceReport implements OnInit {
-  isLoading = true;
+
   searchForm!: FormGroup;
 
   breadcrumbItems: any[] = [];
@@ -96,6 +97,8 @@ export class MultipleAttendanceReport implements OnInit {
   totalRecords = 0;
   currentPage = 0;
   pageSize = 10;
+  loading = false;
+  hasSearched = false;
 
 
   constructor(
@@ -110,7 +113,7 @@ export class MultipleAttendanceReport implements OnInit {
     this.initBreadcrumb();
     this.initForm();
     await this.loadStates();
-    this.fetchPage(this.currentPage, this.pageSize);
+    // this.fetchPage(this.currentPage, this.pageSize);
   }
 
   initBreadcrumb() {
@@ -120,13 +123,13 @@ export class MultipleAttendanceReport implements OnInit {
 
   initForm() {
     this.searchForm = this.fb.group({
-      state: [null],
-      county: [{ value: null, disabled: true }],
-      payam: [{ value: null, disabled: true }],
-      boma: [{ value: null, disabled: true }],
+      state: [null, Validators.required],
+      county: [{ value: null, disabled: true }, Validators.required],
+      payam: [{ value: null, disabled: true }, Validators.required],
+      boma: [{ value: null, disabled: true }, Validators.required],
       subprojectCode: [''],
-      fromDate: [null],
-      toDate: [null],
+      fromDate: [null, Validators.required],
+      toDate: [null, Validators.required],
       reportSize: [null],
     });
   }
@@ -235,11 +238,12 @@ export class MultipleAttendanceReport implements OnInit {
     } else if (selectedSize) {
       this.pageSize = selectedSize;
     }
+    this.hasSearched = true;
     this.fetchPage(this.currentPage, this.pageSize);
   }
 
   fetchPage(page: number, size: number) {
-    this.isLoading = true;
+    this.loading = true;
     this.cdr.markForCheck();
     const body = this.buildSearchBody(page, size);
 
@@ -266,9 +270,11 @@ export class MultipleAttendanceReport implements OnInit {
           summary: 'Error',
           detail: 'Failed to fetch attendance report.',
         });
+        this.attendanceRecords = [];
+        this.totalRecords = 0;
       })
       .finally(() => {
-        this.isLoading = false;
+        this.loading = false;
         this.cdr.detectChanges();
       });
   }
@@ -291,6 +297,8 @@ export class MultipleAttendanceReport implements OnInit {
     this.totalRecords = 0;
     this.currentPage = 0;
     this.pageSize = 10;
+    this.hasSearched = false;
+    this.loading = false;
     this.cdr.markForCheck();
   }
 
@@ -304,7 +312,7 @@ export class MultipleAttendanceReport implements OnInit {
       return;
     }
 
-    this.isLoading = true;
+    this.loading = true;
     this.cdr.markForCheck();
 
     try {
@@ -357,7 +365,7 @@ export class MultipleAttendanceReport implements OnInit {
         detail: 'Failed to export data.',
       });
     } finally {
-      this.isLoading = false;
+      this.loading = false;
       this.cdr.detectChanges();
     }
   }
@@ -381,7 +389,7 @@ export class MultipleAttendanceReport implements OnInit {
       return;
     }
 
-    this.isLoading = true;
+    this.loading = true;
     this.cdr.markForCheck();
 
     try {
@@ -434,7 +442,7 @@ export class MultipleAttendanceReport implements OnInit {
         detail: 'Failed to export data.',
       });
     } finally {
-      this.isLoading = false;
+      this.loading = false;
       this.cdr.detectChanges();
     }
   }
