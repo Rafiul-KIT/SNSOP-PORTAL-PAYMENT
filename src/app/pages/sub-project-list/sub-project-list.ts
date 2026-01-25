@@ -147,7 +147,7 @@ export class SubProjectList implements OnInit {
     if (this.userRole === 5) { // IP User
       this.statuses = StatusEnum.filter(
         (status) =>
-          status.value === 'QE_Rejected' || status.value === 'TST_Approved' || status.value === 'InProgress' || status.value === 'Completed'
+          status.value === 'QE_Rejected' || status.value === 'TST_Approved' || status.value === 'InProgress' || status.value === 'Completed' || status.value === 'Draft'
       );
     } else {
       this.statuses = StatusEnum;
