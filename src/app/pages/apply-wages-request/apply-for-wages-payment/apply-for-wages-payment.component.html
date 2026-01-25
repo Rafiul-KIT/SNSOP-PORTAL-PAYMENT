@@ -134,7 +134,7 @@
                 </div>
                    <!-- Attachment -->
                 <div class="col-md-3 col-lg-3 mb-3">
-                  <label for="attachment" class="form-label fw-semibold">Attachment <small class="text-muted"><span class="text-danger">*</span>(Required for
+                  <label for="attachment" class="form-label fw-semibold">Attachments <small class="text-muted"><span class="text-danger">*</span>(Required for
                       submission)</small></label>
                   <input type="file" id="attachment" class="form-control" (change)="onFileChange($event)" multiple
                     [class.is-invalid]="wagesForm.get('attachment')?.invalid && wagesForm.get('attachment')?.touched">
@@ -147,7 +147,7 @@
                     <div class="list-group">
                       @for (file of attachments; track $index) {
                         <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                          <span>{{ file.name }}</span>
+                          <span class="attachment-filename" [title]="file.name">{{ file.name }}</span>
                           <button pButton type="button" icon="pi pi-times" class="p-button-danger p-button-text" (click)="removeAttachment(file)"></button>
                         </div>
                       }
