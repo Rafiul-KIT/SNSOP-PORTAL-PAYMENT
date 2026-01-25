@@ -336,8 +336,8 @@ export class WageRequestAbstract implements OnInit {
     return found ? found.label : value || '';
   }
 
-  async exportExcel() {
-    if (this.abstractRecords.length === 0) {
+  async exportCsv() {
+    if (this.totalRecords === 0) {
       this.messageService.add({
         severity: 'warn',
         summary: 'Export',
@@ -350,43 +350,75 @@ export class WageRequestAbstract implements OnInit {
     this.cdr.markForCheck();
 
     try {
-      const rows = this.abstractRecords.map((r, idx) => ({
-        'S.No': idx + 1,
-        'State': r.state,
-        'County': r.county,
-        'Payam': r.payam,
-        'Boma': r.boma,
-        'Sub-Project Code': r.subprojectCode,
-        'Request Number': r.requestNumber,
-        'From Date': r.fromDate,
-        'To Date': r.toDate,
-        'Payment Cycle': this.getPaymentCycleLabel(r.paymentCycle),
-        'Status': this.getStatusLabel(r.status),
-        'Criteria': this.getCriteriaLabel(r.criteria),
-        'Payment Status': r.paymentStatus,
-        'Total Members': r.totalMembers,
-        'Paid Members': r.totalPaidMembers,
-        'Work Days': r.totalWorkDays,
-        'Amount (USD)': r.totalAmountInUsd,
-        'Amount (SSP)': r.totalAmountInSsp,
-      }));
+      // Fetch all records for export
+      const body = this.buildSearchBody();
+      const res: any = await this.api.POST(`api/wage-request/abstract/get?page=0&size=${this.totalRecords}`, body);
+      const data = res?.data || res;
+      const allRecords: WageAbstractRecord[] = data?.content || [];
 
-      const xlsx = await import('xlsx');
-      const worksheet = xlsx.utils.json_to_sheet(rows);
-      const workbook = { Sheets: { 'Wage Request Abstract': worksheet }, SheetNames: ['Wage Request Abstract'] };
-      const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
-      const blob = new Blob([excelBuffer], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8',
+      if (allRecords.length === 0) {
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Export',
+          detail: 'No data to export.',
+        });
+        return;
+      }
+
+      // CSV headers
+      const headers = ['S.No', 'State', 'County', 'Payam', 'Boma', 'Sub-Project Code',
+        'Request Number', 'From Date', 'To Date', 'Payment Cycle', 'Status', 'Criteria',
+        'Payment Status', 'Total Members', 'Paid Members', 'Work Days', 'Amount (USD)', 'Amount (SSP)'];
+
+      // CSV rows
+      const csvRows = allRecords.map((r, idx) => [
+        idx + 1,
+        this.escapeCsvField(r.state),
+        this.escapeCsvField(r.county),
+        this.escapeCsvField(r.payam),
+        this.escapeCsvField(r.boma),
+        this.escapeCsvField(r.subprojectCode),
+        this.escapeCsvField(r.requestNumber),
+        this.escapeCsvField(r.fromDate),
+        this.escapeCsvField(r.toDate),
+        this.escapeCsvField(this.getPaymentCycleLabel(r.paymentCycle)),
+        this.escapeCsvField(this.getStatusLabel(r.status)),
+        this.escapeCsvField(this.getCriteriaLabel(r.criteria)),
+        this.escapeCsvField(r.paymentStatus),
+        r.totalMembers,
+        r.totalPaidMembers,
+        r.totalWorkDays,
+        r.totalAmountInUsd,
+        r.totalAmountInSsp,
+      ].join(','));
+
+      const csvContent = [headers.join(','), ...csvRows].join('\n');
+      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      saveAs(blob, `wage_request_abstract_${Date.now()}.csv`);
+    } catch (error) {
+      console.error('Export error:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Export',
+        detail: 'Failed to export data.',
       });
-      saveAs(blob, `wage_request_abstract_${Date.now()}.xlsx`);
     } finally {
       this.isLoading = false;
       this.cdr.detectChanges();
     }
   }
 
+  private escapeCsvField(field: any): string {
+    if (field == null) return '';
+    const str = String(field);
+    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+  }
+
   async exportPdf() {
-    if (this.abstractRecords.length === 0) {
+    if (this.totalRecords === 0) {
       this.messageService.add({
         severity: 'warn',
         summary: 'Export',
@@ -399,6 +431,21 @@ export class WageRequestAbstract implements OnInit {
     this.cdr.markForCheck();
 
     try {
+      // Fetch all records for export
+      const body = this.buildSearchBody();
+      const res: any = await this.api.POST(`api/wage-request/abstract/get?page=0&size=${this.totalRecords}`, body);
+      const data = res?.data || res;
+      const allRecords: WageAbstractRecord[] = data?.content || [];
+
+      if (allRecords.length === 0) {
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Export',
+          detail: 'No data to export.',
+        });
+        return;
+      }
+
       const jsPDF = await import('jspdf');
       const { default: autoTable } = await import('jspdf-autotable');
       const doc = new jsPDF.default('l', 'px', 'a4');
@@ -407,7 +454,7 @@ export class WageRequestAbstract implements OnInit {
         'Request No', 'From', 'To', 'Cycle', 'Status', 'Criteria', 'Pay Status',
         'Members', 'Paid', 'Days', 'USD', 'SSP']];
 
-      const body = this.abstractRecords.map((r, idx) => [
+      const pdfBody = allRecords.map((r, idx) => [
         idx + 1,
         r.state,
         r.county,
@@ -428,8 +475,15 @@ export class WageRequestAbstract implements OnInit {
         r.totalAmountInSsp?.toFixed(2),
       ]);
 
-      autoTable(doc, { head, body, styles: { fontSize: 5 } });
+      autoTable(doc, { head, body: pdfBody, styles: { fontSize: 5 } });
       doc.save(`wage_request_abstract_${Date.now()}.pdf`);
+    } catch (error) {
+      console.error('Export error:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Export',
+        detail: 'Failed to export data.',
+      });
     } finally {
       this.isLoading = false;
       this.cdr.detectChanges();

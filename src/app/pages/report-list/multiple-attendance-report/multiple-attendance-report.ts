@@ -295,7 +295,7 @@ export class MultipleAttendanceReport implements OnInit {
   }
 
   async exportCsv() {
-    if (this.attendanceRecords.length === 0) {
+    if (this.totalRecords === 0) {
       this.messageService.add({
         severity: 'warn',
         summary: 'Export',
@@ -308,39 +308,71 @@ export class MultipleAttendanceReport implements OnInit {
     this.cdr.markForCheck();
 
     try {
-      const rows = this.attendanceRecords.map((r, idx) => ({
-        'S.No': idx + 1,
-        'State': r.stateName,
-        'County': r.countyName,
-        'Payam': r.payamName,
-        'Boma': r.bomaName,
-        'Sub-Project Code': r.subprojectCode,
-        'Household Number': r.householdNumber,
-        'Beneficiary Name': r.beneficiaryName,
-        'Age': r.beneficiaryAge,
-        'Gender': r.gender,
-        'Support Type': r.supportType,
-        'Mobile Number': r.mobileNumber,
-        'Attendance Date': r.attendanceDate,
-        'Status': r.status,
-      }));
+      // Fetch all records for export
+      const body = this.buildSearchBody(0, this.totalRecords);
+      const res: any = await this.api.POST('api/report/attendance/multiple', body);
+      const data = res?.data || res;
+      const allRecords: AttendanceRecord[] = data?.content || [];
 
-      const xlsx = await import('xlsx');
-      const worksheet = xlsx.utils.json_to_sheet(rows);
-      const workbook = { Sheets: { 'Attendance Report': worksheet }, SheetNames: ['Attendance Report'] };
-      const excelBuffer = xlsx.write(workbook, { bookType: 'xlsx', type: 'array' });
-      const blob = new Blob([excelBuffer], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8',
+      if (allRecords.length === 0) {
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Export',
+          detail: 'No data to export.',
+        });
+        return;
+      }
+
+      // CSV headers
+      const headers = ['S.No', 'State', 'County', 'Payam', 'Boma', 'Sub-Project Code',
+        'Household Number', 'Beneficiary Name', 'Age', 'Gender', 'Support Type',
+        'Mobile Number', 'Attendance Date', 'Status'];
+
+      // CSV rows
+      const csvRows = allRecords.map((r, idx) => [
+        idx + 1,
+        this.escapeCsvField(r.stateName),
+        this.escapeCsvField(r.countyName),
+        this.escapeCsvField(r.payamName),
+        this.escapeCsvField(r.bomaName),
+        this.escapeCsvField(r.subprojectCode),
+        this.escapeCsvField(r.householdNumber),
+        this.escapeCsvField(r.beneficiaryName),
+        r.beneficiaryAge,
+        this.escapeCsvField(r.gender),
+        this.escapeCsvField(r.supportType),
+        this.escapeCsvField(r.mobileNumber),
+        this.escapeCsvField(r.attendanceDate),
+        this.escapeCsvField(r.status),
+      ].join(','));
+
+      const csvContent = [headers.join(','), ...csvRows].join('\n');
+      const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+      saveAs(blob, `multiple_attendance_report_${Date.now()}.csv`);
+    } catch (error) {
+      console.error('Export error:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Export',
+        detail: 'Failed to export data.',
       });
-      saveAs(blob, `multiple_attendance_report_${Date.now()}.xlsx`);
     } finally {
       this.isLoading = false;
       this.cdr.detectChanges();
     }
   }
 
+  private escapeCsvField(field: any): string {
+    if (field == null) return '';
+    const str = String(field);
+    if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+      return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+  }
+
   async exportPdf() {
-    if (this.attendanceRecords.length === 0) {
+    if (this.totalRecords === 0) {
       this.messageService.add({
         severity: 'warn',
         summary: 'Export',
@@ -353,6 +385,21 @@ export class MultipleAttendanceReport implements OnInit {
     this.cdr.markForCheck();
 
     try {
+      // Fetch all records for export
+      const body = this.buildSearchBody(0, this.totalRecords);
+      const res: any = await this.api.POST('api/report/attendance/multiple', body);
+      const data = res?.data || res;
+      const allRecords: AttendanceRecord[] = data?.content || [];
+
+      if (allRecords.length === 0) {
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Export',
+          detail: 'No data to export.',
+        });
+        return;
+      }
+
       const jsPDF = await import('jspdf');
       const { default: autoTable } = await import('jspdf-autotable');
       const doc = new jsPDF.default('l', 'px', 'a4');
@@ -360,7 +407,7 @@ export class MultipleAttendanceReport implements OnInit {
       const head = [['S.No', 'State', 'County', 'Payam', 'Boma', 'Sub-Project Code',
         'HH Number', 'Beneficiary', 'Age', 'Gender', 'Support Type', 'Mobile', 'Attendance Date', 'Status']];
 
-      const body = this.attendanceRecords.map((r, idx) => [
+      const pdfBody = allRecords.map((r, idx) => [
         idx + 1,
         r.stateName,
         r.countyName,
@@ -377,8 +424,15 @@ export class MultipleAttendanceReport implements OnInit {
         r.status,
       ]);
 
-      autoTable(doc, { head, body, styles: { fontSize: 6 } });
+      autoTable(doc, { head, body: pdfBody, styles: { fontSize: 6 } });
       doc.save(`multiple_attendance_report_${Date.now()}.pdf`);
+    } catch (error) {
+      console.error('Export error:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Export',
+        detail: 'Failed to export data.',
+      });
     } finally {
       this.isLoading = false;
       this.cdr.detectChanges();
