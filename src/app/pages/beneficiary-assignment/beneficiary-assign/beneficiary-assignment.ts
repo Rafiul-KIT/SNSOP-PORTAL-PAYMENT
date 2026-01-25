@@ -21,7 +21,7 @@ import { Loader } from '../../../components/loader/loader';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService } from '../../../services/api.service';
 import Swal from 'sweetalert2';
-import { handleFileUpload } from '../../../validators/file-validator';
+import { handleMultipleFileUpload } from '../../../validators/file-validator';
 
 interface Beneficiary {
   id: number;
@@ -98,6 +98,9 @@ export class BeneficiaryAssignment implements OnInit {
     { label: 'PARENT', value: 'PARENT' },
   ];
 
+  // Multiple attachments
+  attachments: File[] = [];
+
 
   constructor(
     private route: ActivatedRoute,
@@ -119,7 +122,35 @@ export class BeneficiaryAssignment implements OnInit {
   }
 
   onFileSelect(event: any): void {
-    handleFileUpload(event, this.projectForm, 'attachment');
+    const result = handleMultipleFileUpload(event, this.attachments);
+    this.attachments = result.validFiles;
+
+    if (result.error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'File Upload Error',
+        text: result.error,
+      });
+    }
+
+    // Update form control validity
+    if (this.attachments.length > 0) {
+      this.projectForm.get('attachments')?.setValue(this.attachments);
+      this.projectForm.get('attachments')?.setErrors(null);
+    } else {
+      this.projectForm.get('attachments')?.setValue(null);
+      this.projectForm.get('attachments')?.setErrors({ required: true });
+    }
+  }
+
+  removeAttachment(index: number): void {
+    this.attachments.splice(index, 1);
+    if (this.attachments.length === 0) {
+      this.projectForm.get('attachments')?.setValue(null);
+      this.projectForm.get('attachments')?.setErrors({ required: true });
+    } else {
+      this.projectForm.get('attachments')?.setValue(this.attachments);
+    }
   }
 
   toggleSelectAll(event: any): void {
@@ -152,7 +183,7 @@ export class BeneficiaryAssignment implements OnInit {
       workStartAt: ['', Validators.required],
       inchargeName: ['', [Validators.pattern(/^[a-zA-Z\s]*$/)]],
       comments: [''],
-      attachment: [null, Validators.required],
+      attachments: [null, Validators.required],
     });
   }
 
@@ -352,10 +383,12 @@ export class BeneficiaryAssignment implements OnInit {
       const formValue = this.projectForm.value;
       const formData = new FormData();
       formData.append('subprojectId', this.subprojectId || '');
-      formData.append('workStartAt',this.formatDate(formValue.workStartAt));
+      formData.append('workStartAt', this.formatDate(formValue.workStartAt));
       formData.append('inchargeName', formValue.inchargeName || '');
       formData.append('comments', formValue.comments || '');
-      formData.append('attachment', formValue.attachment, formValue.attachment.name);
+      this.attachments.forEach((file) =>
+        formData.append('attachments', file, file.name)
+      );
       selectedIds.forEach((id) =>
         formData.append('beneficiaryIds', id.toString())
       );
@@ -384,7 +417,8 @@ export class BeneficiaryAssignment implements OnInit {
 
         this.projectForm.reset();
         this.isSubmitted = false;
-        const fileInput = document.getElementById('attachment') as HTMLInputElement;
+        this.attachments = [];
+        const fileInput = document.getElementById('attachments') as HTMLInputElement;
         if (fileInput) fileInput.value = '';
 
         this.router.navigate(['beneficiaries/assignment-asign-list']);

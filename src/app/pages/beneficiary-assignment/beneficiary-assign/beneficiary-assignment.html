@@ -107,24 +107,32 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label for="attachment" class="form-label">
-                                    Attachment <span class="text-danger">*</span>
+                                <label for="attachments" class="form-label">
+                                    Attachments <span class="text-danger">*</span>
                                 </label>
-                                <input type="file" id="attachment" class="form-control" (change)="onFileSelect($event)"
-                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                                    [class.is-invalid]="projectForm.get('attachment')?.invalid && (projectForm.get('attachment')?.touched || isSubmitted)" />
-                                @if (projectForm.get('attachment')?.invalid && (projectForm.get('attachment')?.touched
+                                <input type="file" id="attachments" class="form-control" (change)="onFileSelect($event)"
+                                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" multiple
+                                    [class.is-invalid]="projectForm.get('attachments')?.invalid && (projectForm.get('attachments')?.touched || isSubmitted)" />
+                                @if (projectForm.get('attachments')?.invalid && (projectForm.get('attachments')?.touched
                                 || isSubmitted)) {
-                                @if (projectForm.get('attachment')?.hasError('required')) {
-                                <small class="text-danger">Attachment is required</small>
-                                }
-                                @if (projectForm.get('attachment')?.hasError('invalidSize')) {
-                                <small class="text-danger">File size must not exceed 3MB.</small>
+                                @if (projectForm.get('attachments')?.hasError('required')) {
+                                <small class="text-danger">At least one attachment is required</small>
                                 }
                                 }
-                                @if (projectForm.get('attachment')?.value) {
-                                <small class="text-success">Selected: {{ projectForm.get('attachment')?.value.name
-                                    }}</small>
+                                @if (attachments.length > 0) {
+                                <div class="mt-2">
+                                    <small class="text-muted">Selected files ({{ attachments.length }}):</small>
+                                    <ul class="list-unstyled mb-0 mt-1">
+                                        @for (file of attachments; track $index) {
+                                        <li class="d-flex align-items-center justify-content-between py-1">
+                                            <small class="text-success"><i class="pi pi-file me-1"></i>{{ file.name }}</small>
+                                            <button type="button" class="btn btn-link btn-sm text-danger p-0" (click)="removeAttachment($index)">
+                                                <i class="pi pi-times"></i>
+                                            </button>
+                                        </li>
+                                        }
+                                    </ul>
+                                </div>
                                 }
                             </div>
 
