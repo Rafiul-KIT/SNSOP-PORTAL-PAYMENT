@@ -73,7 +73,6 @@ interface WageAbstractRecord {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WageRequestAbstract implements OnInit {
-  isLoading = true;
   searchForm!: FormGroup;
 
   breadcrumbItems: any[] = [];
@@ -108,6 +107,7 @@ export class WageRequestAbstract implements OnInit {
   pageSize = 10;
 
   advanceSearchPanelVisible = false;
+  hasSearched: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -123,7 +123,7 @@ export class WageRequestAbstract implements OnInit {
     this.initDropdowns();
     this.initForm();
     await this.loadStates();
-    this.fetchPage(this.currentPage, this.pageSize);
+    // this.fetchPage(this.currentPage, this.pageSize);
   }
 
   initBreadcrumb() {
@@ -252,7 +252,6 @@ export class WageRequestAbstract implements OnInit {
   }
 
   fetchPage(page: number, size: number) {
-    this.isLoading = true;
     this.cdr.markForCheck();
     const body = this.buildSearchBody();
 
@@ -281,7 +280,7 @@ export class WageRequestAbstract implements OnInit {
         });
       })
       .finally(() => {
-        this.isLoading = false;
+
         this.cdr.detectChanges();
       });
   }
@@ -300,6 +299,7 @@ export class WageRequestAbstract implements OnInit {
       this.pageSize = selectedSize;
     }
     this.fetchPage(this.currentPage, this.pageSize);
+    this.hasSearched = true;
   }
 
   resetForm() {
@@ -313,6 +313,7 @@ export class WageRequestAbstract implements OnInit {
     this.abstractRecords = [];
     this.totalRecords = 0;
     this.currentPage = 0;
+    this.hasSearched = false;
     this.cdr.markForCheck();
   }
 
@@ -350,7 +351,6 @@ export class WageRequestAbstract implements OnInit {
       return;
     }
 
-    this.isLoading = true;
     this.cdr.markForCheck();
 
     try {
@@ -412,7 +412,7 @@ export class WageRequestAbstract implements OnInit {
         detail: 'Failed to export data.',
       });
     } finally {
-      this.isLoading = false;
+
       this.cdr.detectChanges();
     }
   }
@@ -436,7 +436,7 @@ export class WageRequestAbstract implements OnInit {
       return;
     }
 
-    this.isLoading = true;
+
     this.cdr.markForCheck();
 
     try {
@@ -495,7 +495,7 @@ export class WageRequestAbstract implements OnInit {
         detail: 'Failed to export data.',
       });
     } finally {
-      this.isLoading = false;
+      
       this.cdr.detectChanges();
     }
   }
