@@ -132,6 +132,10 @@ getUserRole(): number | null {
     return this.axiosInstance.get(endpoint, this.apiHeader);
   };
 
+  GET_CONFIG = (endpoint: string, config?: object) => {
+    return this.axiosInstance.get(endpoint, { ...this.apiHeader, ...config });
+  };
+
   GET_AUTH = (endpoint: string) => {
     return this.authAxiosInstance.get(endpoint, this.apiHeader);
   };

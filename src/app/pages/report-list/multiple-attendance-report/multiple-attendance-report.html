@@ -1,0 +1,173 @@
+<p-toast position="bottom-right"></p-toast>
+@if (loading) {
+<app-loader></app-loader>
+} @else {
+<div class="breadcrumb-wrapper">
+    <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
+</div>
+
+<div class="card p-3 mb-2">
+    <form [formGroup]="searchForm" class="row g-3">
+
+        <!-- State -->
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="states" optionLabel="name" formControlName="state"
+                    (onChange)="onStateChange($event.value)" />
+                <label>State <span class="text-danger">*</span></label>
+            </p-floatlabel>
+        </div>
+
+        <!-- County -->
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="countyList" optionLabel="name" formControlName="county"
+                    (onChange)="onCountyChange($event.value)" />
+                <label>County <span class="text-danger">*</span></label>
+            </p-floatlabel>
+        </div>
+
+        <!-- Payam -->
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="payamList" optionLabel="name" formControlName="payam"
+                    (onChange)="onPayamChange($event.value)" />
+                <label>Payam <span class="text-danger">*</span></label>
+            </p-floatlabel>
+        </div>
+
+        <!-- Boma -->
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="bomaList" optionLabel="name" formControlName="boma" />
+                <label>Boma <span class="text-danger">*</span></label>
+            </p-floatlabel>
+        </div>
+
+        <!-- Sub-Project Code -->
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <input pInputText class="form-control" formControlName="subprojectCode" />
+                <label>Sub-Project Code</label>
+            </p-floatlabel>
+        </div>
+
+        <!-- From Date -->
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-datePicker formControlName="fromDate" [showIcon]="true" dateFormat="dd/mm/yy"
+                    class="w-100"></p-datePicker>
+                <label>From Date <span class="text-danger">*</span></label>
+            </p-floatlabel>
+        </div>
+
+        <!-- To Date -->
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-datePicker formControlName="toDate" [showIcon]="true" dateFormat="dd/mm/yy"
+                    class="w-100"></p-datePicker>
+                <label>To Date <span class="text-danger">*</span></label>
+            </p-floatlabel>
+        </div>
+
+        <!-- Report Size -->
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="reportSizeOptions" optionLabel="label" optionValue="value"
+                    formControlName="reportSize" />
+                <label>Report Size</label>
+            </p-floatlabel>
+        </div>
+
+        <!-- Buttons -->
+        <div class="col text-end">
+            <p-button label="Reset" icon="fas fa-refresh" severity="danger" size="small" [outlined]="true"
+                class="me-2" (onClick)="resetForm()"></p-button>
+            <p-button label="Generate" icon="fas fa-search" severity="primary" size="small"
+                [disabled]="searchForm.invalid" (onClick)="showReport()"></p-button>
+        </div>
+
+        <!-- Export Buttons -->
+        @if (attendanceRecords.length > 0) {
+        <div class="col-12">
+
+        </div>
+        }
+
+    </form>
+</div>
+
+@if (hasSearched) {
+<p-table [value]="attendanceRecords" [scrollable]="true" [scrollHeight]="'55vh'"
+    [tableStyle]="{ 'min-width': '1600px', 'margin-bottom': '5px' }" size="small">
+
+    <ng-template pTemplate="header">
+        <tr>
+            <th colspan="14" class="text-start">
+                <div class="d-flex justify-content-start gap-2">
+                <p-button label="Export CSV" icon="fas fa-file-csv" severity="success" size="small"
+                    [outlined]="true" (onClick)="exportCsv()"></p-button>
+                <p-button label="Export PDF" icon="fas fa-file-pdf" severity="danger" size="small"
+                    [outlined]="true" (onClick)="exportPdf()"></p-button>
+            </div>
+            </th>
+        </tr>
+        <tr>
+            <th class="text-center">S.No</th>
+            <th class="text-center">IP Name</th>
+            <th class="text-center">State</th>
+            <th class="text-center">County</th>
+            <th class="text-center">Payam</th>
+            <th class="text-center">Boma</th>
+            <th class="text-center">Work Code</th>
+            <th class="text-center">Beneficiary Name</th>
+            <th class="text-center">Age</th>
+            <th class="text-center">Gender</th>
+            <th class="text-center">Support Type</th>
+            <th class="text-center">Mobile Number</th>
+            <th class="text-center">Attendance Date</th>
+            <th class="text-center">Status</th>
+        </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-item let-i="rowIndex">
+        <tr>
+            <td class="text-center">{{ (currentPage * pageSize) + i + 1 }}</td>
+            <td class="text-center">{{ "UNOPS Field Office" }}</td>
+            <td class="text-center">{{ item.stateName }}</td>
+            <td class="text-center">{{ item.countyName }}</td>
+            <td class="text-center">{{ item.payamName }}</td>
+            <td class="text-center">{{ item.bomaName }}</td>
+            <td class="text-center">{{ item.subprojectCode }}</td>
+            <td class="text-center">{{ item.beneficiaryName }}</td>
+            <td class="text-center">{{ item.beneficiaryAge }}</td>
+            <td class="text-center">{{ item.gender }}</td>
+            <td class="text-center">{{ item.supportType }}</td>
+            <td class="text-center">{{ item.mobileNumber }}</td>
+            <td class="text-center">{{ item.attendanceDate | date: 'dd/MM/yyyy' }}</td>
+            <td class="text-center">
+                <span [class]="'badge ' + (item.status === 'Present' ? 'bg-success' : item.status === 'Absent' ? 'bg-danger' : 'bg-warning')">
+                    {{ item.status }}
+                </span>
+            </td>
+        </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+        <tr>
+            <td colspan="13" class="text-center text-danger">
+                <b>No records found!</b>
+            </td>
+        </tr>
+    </ng-template>
+</p-table>
+
+@if(totalRecords > 0){
+<p-paginator class="paginator-sticky" [rows]="pageSize" [totalRecords]="totalRecords"
+    [rowsPerPageOptions]="[10, 25, 50]" (onPageChange)="onPageChange($event)" [first]="(currentPage) * pageSize"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
+</p-paginator>
+}
+}
+
+}

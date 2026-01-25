@@ -1,6 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
 
 // PrimeNG Imports
@@ -17,7 +17,7 @@ import { ApiService } from '../../../services/api.service';
 import { Loader } from "../../../components/loader/loader";
 import { LookupService, LookupItem, PaymentCycleEnum } from '../../../services/lookup.service';
 import Swal from 'sweetalert2';
-import { handleFileUpload } from '../../../validators/file-validator';
+import { handleMultipleFileUpload } from '../../../validators/file-validator'; // Updated import
 
 interface Beneficiary {
   beneficiaryId: number;
@@ -59,9 +59,10 @@ export class ApplyForDisPayment implements OnInit {
   filteredBeneficiaries: any[] = [];
   selectedBeneficiaries: any[] = [];
 
-  attachmentFile: File | null = null;
+  attachmentFiles: File[] = []; // Changed to handle multiple files
+
   showResults = false;
-  readonly MAX_ATTACHMENT_SIZE_MB = 3;
+  readonly MAX_ATTACHMENT_SIZE_MB = 25; // Updated max attachment size
 
   // Dropdown options
   years: any[] = [];
@@ -88,6 +89,8 @@ export class ApplyForDisPayment implements OnInit {
 
   breadcrumbItems: any[] = [];
   breadcrumbHome: any;
+
+
 
   constructor(
     private fb: FormBuilder,
@@ -162,13 +165,6 @@ export class ApplyForDisPayment implements OnInit {
     });
   }
 
-  initializeSubmissionForm(): void {
-    this.submissionForm = this.fb.group({
-      totalDays: [null, [Validators.required, Validators.min(1)]],
-      attachment: [null]
-    });
-  }
-
   populateYearAndMonth(): void {
     const currentYear = new Date().getFullYear();
     for (let i = 0; i < 5; i++) {
@@ -236,8 +232,48 @@ export class ApplyForDisPayment implements OnInit {
     this.paymentCycles = PaymentCycleEnum;
   }
 
-  onFileChange(event: any): void {
-    handleFileUpload(event, this.submissionForm, 'attachment');
+  attachmentRequiredValidator(control: AbstractControl): ValidationErrors | null {
+    const value = control.value;
+    if (!value || (Array.isArray(value) && value.length === 0)) {
+      return { required: true };
+    }
+    return null;
+  }
+
+  initializeSubmissionForm(): void {
+    this.submissionForm = this.fb.group({
+      totalDays: [null, [Validators.required, Validators.min(1)]],
+      attachments: [[], [this.attachmentRequiredValidator]],
+    });
+  }
+
+  onFileChange(event: Event): void {
+    const result = handleMultipleFileUpload(event, this.attachmentFiles, this.MAX_ATTACHMENT_SIZE_MB);
+    if (result.error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Upload Error',
+        html: result.error,
+      });
+    } else {
+      this.attachmentFiles = result.validFiles;
+    }
+    this.submissionForm.get('attachments')?.setValue(this.attachmentFiles);
+    this.submissionForm.get('attachments')?.markAsTouched();
+  }
+
+  removeAttachment(index: number): void {
+    this.attachmentFiles.splice(index, 1);
+    this.submissionForm.get('attachments')?.setValue([...this.attachmentFiles]);
+  }
+
+  formatBytes(bytes: number, decimals = 2): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
   }
 
   async onSearch(): Promise<void> {
@@ -368,6 +404,15 @@ export class ApplyForDisPayment implements OnInit {
     }
 
     this.loading = true;
+    Swal.fire({
+      title: 'Submitting...',
+      text: 'Please wait while your wage request is being processed.',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
 
     const searchFormValue = this.wagesForm.getRawValue();
     const submissionFormValue = this.submissionForm.getRawValue();
@@ -384,8 +429,10 @@ export class ApplyForDisPayment implements OnInit {
       formData.append('beneficiaryIds', id);
     });
 
-    if (this.submissionForm.value.attachment) {
-      formData.append('attachment', this.submissionForm.value.attachment, this.submissionForm.value.attachment.name);
+    if (this.attachmentFiles.length > 0) {
+      this.attachmentFiles.forEach(file => {
+        formData.append('attachments', file, file.name);
+      });
     }
 
     const url = 'api/wage-request/dis/beneficiary/include';
@@ -398,6 +445,7 @@ export class ApplyForDisPayment implements OnInit {
         this.filteredBeneficiaries = [];
         this.selectedBeneficiaries = [];
         this.submissionForm.reset({ totalDays: null });
+        this.attachmentFiles = []; // Clear attachments after successful submission
         this.showResults = false;
       } else {
         Swal.fire({ icon: 'error', title: 'Error', text:  'Failed to submit DIS wage request.' });

@@ -113,7 +113,7 @@
         </form>
     </div>
 
-   <p-table [value]="wageRequests" [scrollable]="true" [scrollHeight]="advanceSearchPanelVisible ? '52vh' : '64vh'"
+   <p-table [value]="wageRequests" 
         [tableStyle]="{ 'min-width': '100%', 'margin-bottom': '5px' }" dataKey="id" [rowTrackBy]="trackById"
         size="small">
 
@@ -157,7 +157,7 @@
                     <input type="number" pInputText [(ngModel)]="item.exchangeRate" class="w-100" />
                 </td>
                 <td class="text-center">
-                    <input type="file" (change)="onFileSelect($event, item)" class="w-100" />
+                    <p-button type="button" icon="fa-solid fa-paperclip" (onClick)="openAttachmentModal(item)" [label]="'Attach (' + (item.attachments?.length || 0) + ')'" size="small" />
                 </td>
                 }
                 <td class="text-center">
@@ -167,14 +167,15 @@
                 <td class="text-center">
                     <textarea pInputText [(ngModel)]="item.remarksText" rows="1" class="w-100"></textarea>
                 </td>
-                <td class="text-center d-sm-flex">
-                    <p-button type="button" label="Submit" [loading]="item.isSubmitting"
-                        (onClick)="submitRowReview(item)" size="small" />
-                    <p-button type="button" icon="fa-solid fa-eye"
-                        (onClick)="viewWageRequest(item.id, item.subprojectId)" [text]="true" [rounded]="true"
-                        severity="secondary" />
-                </td>
-            </tr>
+                <td class="text-center action-cell">
+                    <div class="button-group">
+                        <p-button type="button" label="Submit" [loading]="item.isSubmitting"
+                            (onClick)="submitRowReview(item)" size="small" />
+                        <p-button type="button" icon="fa-solid fa-eye"
+                            (onClick)="viewWageRequest(item.id, item.subprojectId)" [text]="true" [rounded]="true"
+                            severity="secondary" />
+                    </div>
+                </td>            </tr>
         </ng-template>
         <ng-template pTemplate="emptymessage">
             <tr>
@@ -191,3 +192,43 @@
     </p-paginator>
 
 }
+
+
+<p-dialog header="Upload Attachments" [(visible)]="displayAttachmentModal" [modal]="true" [style]="{ width: '50vw' }" (onHide)="cancelAttachments()">
+    <div class="attachment-dialog">
+        <div class="mb-3">
+            <input type="file" #fileUpload style="display: none" multiple (change)="onFilesInModalSelect($event)" accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx">
+            <p-button type="button" label="Choose Files" icon="pi pi-upload" (onClick)="fileUpload.click()"></p-button>
+        </div>
+
+        @if (selectedFiles.length > 0) {
+        <p-table [value]="selectedFiles" styleClass="p-datatable-sm" [tableStyle]="{ 'min-width': '100%' }">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Name</th>
+                    <th>Size (KB)</th>
+                    <th>Action</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-file>
+                <tr>
+                    <td>{{ file.name }}</td>
+                    <td>{{ (file.size / 1024) | number: '1.1-2' }}</td>
+                    <td>
+                        <p-button icon="pi pi-times" severity="danger" [text]="true" [rounded]="true" (onClick)="removeSelectedFile(file)"></p-button>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+        } @else {
+        <div class="text-center p-3">
+            <i class="fa fa-folder-open" style="font-size: 3rem; color: #ccc;"></i>
+            <p class="mt-2">No files selected.</p>
+        </div>
+        }
+    </div>
+    <ng-template pTemplate="footer">
+        <p-button label="Cancel" icon="pi pi-times" (onClick)="cancelAttachments()" severity="secondary"></p-button>
+        <p-button label="Save Attachments" icon="pi pi-check" (onClick)="saveAttachments()"></p-button>
+    </ng-template>
+</p-dialog>

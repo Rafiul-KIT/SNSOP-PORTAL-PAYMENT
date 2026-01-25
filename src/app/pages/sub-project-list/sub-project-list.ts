@@ -147,7 +147,7 @@ export class SubProjectList implements OnInit {
     if (this.userRole === 5) { // IP User
       this.statuses = StatusEnum.filter(
         (status) =>
-          status.value === 'QE_Rejected' || status.value === 'TST_Approved' || status.value === 'InProgress'
+          status.value === 'QE_Rejected' || status.value === 'TST_Approved' || status.value === 'InProgress' || status.value === 'Completed' || status.value === 'Draft'
       );
     } else {
       this.statuses = StatusEnum;
@@ -436,6 +436,84 @@ cancelDelete() {
   this.isDeleting = false;
   this.cdr.markForCheck();
 }
+  async completeSubProject(id: number) {
+    const subProject = this.subProjects.find((sp) => sp.id === id);
+    if (!subProject) {
+      await Swal.fire('Error', 'Sub-project not found!', 'error');
+      return;
+    }
+
+    if (subProject.status !== 'InProgress') {
+      await Swal.fire({
+        title: 'Action Not Allowed',
+        text: `Sub-projects can only be completed if their status is "In Progress". Current status: "${subProject.status}"`,
+        icon: 'warning',
+      });
+      return;
+    }
+
+    const result = await Swal.fire({
+      title: 'Confirm',
+      text: 'Are you sure you want to mark this sub-project as Completed?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Complete',
+      cancelButtonText: 'Cancel',
+    });
+
+    if (!result.isConfirmed) return;
+
+    Swal.fire({
+      title: 'Submitting',
+      text: 'Please wait...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    try {
+      const res: any = await this.api.POST(
+        `api/subproject/submit?subprojectId=${id}&status=Completed`,
+        {}
+      );
+
+      const responseData = res.data;
+
+      if (responseData && responseData.code === 200) {
+        await Swal.fire({
+          title: 'Success',
+          text: responseData.message || 'Sub-project marked as Completed.',
+          icon: 'success',
+        });
+        this.fetchPage(this.currentPage, this.pageSize);
+      } else {
+        await Swal.fire({
+          title: 'Could Not Complete',
+          text:
+            (responseData && responseData.message) ||
+            'The server responded, but the operation could not be completed.',
+          icon: 'error',
+        });
+      }
+    } catch (err: any) {
+      console.error('Error completing sub-project:', err);
+
+      let errorMessage = 'Failed to complete sub-project.';
+      if (err.error && err.error.code === 406 && err.error.message) {
+        errorMessage = err.error.message;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
+      await Swal.fire({
+        title: 'Error',
+        text: errorMessage,
+        icon: 'error',
+      });
+    }
+  }
+
     getScreeningStatusLabel(value: string): string {
     const numericValue = parseInt(value, 10);
     const found = ScreeningStatusEnum.find(item => item.value === numericValue);

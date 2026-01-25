@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from './api.service';
+import { FormArray } from '@angular/forms';
+import Swal from 'sweetalert2';
 
 // Define Enum for typeOfMeeting
 export const TypeOfMeetingEnum = [
@@ -38,9 +40,7 @@ export const StatusWageEnum = [
   { id: '103', value: 'ClearedWB', label: 'Cleared by WB' },
   { id: '105', value: 'DraftRejected', label: 'Draft Rejected' },
   { id: '1000', value: 'RejectedAfterPay', label: 'Rejected after Pay' },
-  { id: '1001', value: 'RejectedAfterPay', label: 'Rejected after Pay' },
-  { id: '1002', value: 'RejectedAfterPay', label: 'Rejected after Pay' },
-  { id: '1003', value: 'RejectedAfterPay', label: 'Rejected after Pay' },
+
 ];
 
 export const PaymentCycleEnum = Array.from({ length: 15 }, (_, i) => ({
@@ -1172,5 +1172,66 @@ getPaymentCycleList(): LookupItemPayroll[] {
       }
       return [];
     }).catch(() => []);
+  }
+
+  // =================== Reusable File Validation Service ===================
+
+  private formatBytes(bytes: number, decimals = 2): string {
+    if (!bytes || bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+  }
+
+  public handleFileUploadValidation(
+    event: Event,
+    formArray: FormArray,
+    activityIndex: number,
+    fileControlName: string,
+    fileNameControlName: string,
+    fileSizeControlName: string,
+    allSizeControlNames: string[], // <-- New parameter
+    maxTotalSizeMB: number = 25
+  ): void {
+    const input = event.target as HTMLInputElement;
+    const file = input?.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    const maxTotalSizeBytes = maxTotalSizeMB * 1024 * 1024;
+
+    // Dynamically calculate total size based on the provided control names
+    let currentTotalSize = 0;
+    formArray.controls.forEach((activity: any) => {
+      for (const sizeControl of allSizeControlNames) {
+        currentTotalSize += (activity.get(sizeControl)?.value || 0);
+      }
+    });
+    
+    const activityControl = formArray.at(activityIndex);
+    const sizeOfFileBeingReplaced = activityControl.get(fileSizeControlName)?.value || 0;
+    const projectedTotalSize = currentTotalSize - sizeOfFileBeingReplaced + file.size;
+
+    if (projectedTotalSize > maxTotalSizeBytes) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Total Upload Size Exceeded',
+        html: `Adding this file (${this.formatBytes(file.size)}) would make the total size ${this.formatBytes(projectedTotalSize)}, which exceeds the ${maxTotalSizeMB} MB limit.
+               <br/><br/>Please remove other attachments or choose a smaller file.`,
+      });
+      input.value = ''; // Clear the input
+      return;
+    }
+
+    // If all checks pass, update the form
+    activityControl.patchValue({
+      [fileControlName]: file,
+      [fileNameControlName]: file.name,
+      [fileSizeControlName]: file.size
+    });
   }
 }

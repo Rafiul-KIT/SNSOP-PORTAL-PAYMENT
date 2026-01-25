@@ -30,7 +30,7 @@ export function handleFileUpload(
   event: Event,
   form: FormGroup,
   controlName: string,
-  maxSizeInMB: number = 3
+  maxSizeInMB: number = 25
 ): void {
   const input = event.target as HTMLInputElement;
   
@@ -56,4 +56,70 @@ export function handleFileUpload(
     form.get(controlName)?.setValue(file);
     form.get(controlName)?.setErrors(null);
   }
+}
+
+/**
+ * Formats bytes into a human-readable string (e.g., 1024 -> 1KB).
+ * @param bytes The number of bytes.
+ * @param decimals The number of decimal places to include.
+ */
+export function formatBytes(bytes: number, decimals = 2): string {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const dm = decimals < 0 ? 0 : decimals;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+}
+
+/**
+ * Handles the file input change event for multiple files.
+ * Validates total cumulative file size and returns a list of valid files.
+ * @param event The file input change event.
+ * @param existingFiles The array of files already selected in the component.
+ * @param maxTotalSizeMB The maximum total size allowed for all files in megabytes. Defaults to 25MB.
+ * @returns An object with `validFiles` (an array of File objects) and an optional `error` message.
+ */
+export function handleMultipleFileUpload(
+  event: Event,
+  existingFiles: File[],
+  maxTotalSizeMB: number = 25
+): { validFiles: File[]; error?: string } {
+  const input = event.target as HTMLInputElement;
+  const newFiles = input.files;
+
+  if (!newFiles || newFiles.length === 0) {
+    // If no new files were selected (e.g., user opened and closed dialog), return existing files
+    return { validFiles: existingFiles };
+  }
+
+  const maxTotalSizeBytes = maxTotalSizeMB * 1024 * 1024;
+  let combinedFiles: File[] = [...existingFiles];
+  let currentTotalSize = existingFiles.reduce((sum, file) => sum + file.size, 0);
+
+  for (let i = 0; i < newFiles.length; i++) {
+    const file = newFiles[i];
+
+    if (currentTotalSize + file.size > maxTotalSizeBytes) {
+      const remainingBytes = maxTotalSizeBytes - currentTotalSize;
+      const errorMessage = `Cannot add file "${file.name}" (${formatBytes(file.size)}).
+        Adding it would exceed the total ${maxTotalSizeMB}MB limit.
+        You can add up to ${formatBytes(remainingBytes)} more.`;
+      
+      // Clear the input value to allow re-selection without issues
+      if (input) {
+        input.value = '';
+      }
+      return { validFiles: combinedFiles, error: errorMessage };
+    }
+    combinedFiles.push(file);
+    currentTotalSize += file.size;
+  }
+
+  // Clear the input value after successfully adding files
+  // This allows the same file(s) to be selected again if needed
+  if (input) {
+    input.value = '';
+  }
+  return { validFiles: combinedFiles };
 }

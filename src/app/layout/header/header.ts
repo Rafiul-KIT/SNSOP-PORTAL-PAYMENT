@@ -253,6 +253,13 @@ export class Header {
             icon: 'fas fa-file-alt',
             routerLink: 'report/wage-request-abstract',
           },
+           {
+            label: 'Multiple Attendance Report',
+            icon: 'fas fa-file-alt',
+            routerLink: 'report/multiple-attendance',
+          }
+
+          
         ],
       },
     ];

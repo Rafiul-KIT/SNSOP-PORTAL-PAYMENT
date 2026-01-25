@@ -119,23 +119,72 @@
 
           </div>
         </form>
-             @if (showResults && originalBeneficiaries.length > 0) {
+        @if (showResults && originalBeneficiaries.length > 0) {
         <form [formGroup]="submissionForm" class="mt-4">
           <div class="row">
-            <div class="col-md-6 col-lg-3">
-              <label for="totalDays" class="form-label fw-semibold">Total Days <span
-                  class="text-danger">*</span></label>
+
+            <!-- Total Days (full row on md, 1/3 on lg) -->
+            <div class="col-12 col-lg-4">
+              <label for="totalDays" class="form-label fw-semibold">
+                Total Days <span class="text-danger">*</span>
+              </label>
               <p-inputNumber id="totalDays" formControlName="totalDays" placeholder="0" class="w-100"
-                [ngClass]="{ 'ng-invalid ng-dirty': isSubmissionFieldInvalid('totalDays') }"></p-inputNumber>
+                [ngClass]="{ 'ng-invalid ng-dirty': isSubmissionFieldInvalid('totalDays') }">
+              </p-inputNumber>
+
               @if (isSubmissionFieldInvalid('totalDays')) {
-              <small class="text-danger">Total days is required and must be at least 1.</small>
+              <small class="text-danger">
+                Total days is required and must be at least 1.
+              </small>
               }
             </div>
+
+            <!-- Choose file -->
             <div class="col-md-6 col-lg-4">
-              <label for="attachment" class="form-label fw-semibold">Attachment</label>
-              <input type="file" id="attachment" (change)="onFileChange($event)" class="form-control">
+              <label for="attachments" class="form-label fw-semibold">
+                Attachments
+                <small class="text-muted"><span class="text-danger">*</span>(Required for submission)</small>
+              </label>
+
+              <input type="file" id="attachments" class="form-control" (change)="onFileChange($event)" multiple
+                [class.is-invalid]="submissionForm.get('attachments')?.invalid && submissionForm.get('attachments')?.touched" />
+              @if (submissionForm.get('attachments')?.hasError('required') && submissionForm.get('attachments')?.touched) {
+                <div class="text-danger small mt-1">Attachment is required.</div>
+              }
             </div>
+
+            <!-- Selected attachments -->
+            <div class="col-md-6 col-lg-4">
+              <label class="form-label fw-semibold">Attachments</label>
+
+              <div class="border rounded p-2 bg-light h-85">
+
+                @if (attachmentFiles.length > 0) {
+                <ul class="list-group list-group-flush">
+                  @for (file of attachmentFiles; track $index) {
+                  <li class="list-group-item d-flex justify-content-between align-items-center px-2 py-1">
+                    <span class="text-truncate">
+                      {{ file.name }}
+                    </span>
+                    <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeAttachment($index)">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </li>
+                  }
+                </ul>
+                }
+
+                @if (attachmentFiles.length === 0) {
+                <div class="text-muted small">
+                  No files attached
+                </div>
+                }
+
+              </div>
+            </div>
+
           </div>
+
         </form>
         }
       </p-card>
@@ -153,44 +202,53 @@
           </span>
           }
         </div>
-   
+
         <p-table [value]="filteredBeneficiaries" [(selection)]="selectedBeneficiaries" dataKey="beneficiaryId"
           responsiveLayout="scroll">
           <ng-template pTemplate="header">
-             <tr class="filter-row">
-                <th style="padding-bottom: 1rem;"></th>
-                <th style="padding-bottom: 2rem;">
-                  <label class="text-sm font-medium">Household :&nbsp; </label>
-                    <input pInputText type="text" [(ngModel)]="householdNumberFilter" [ngModelOptions]="{standalone: true}" (input)="onFilterChange()" placeholder="Filter Household " class="w-full p-column-filter">
-                </th>
-                <th style="padding-bottom: 2rem;">
-                  <label class="text-sm font-medium">Name :&nbsp; </label>
-                    <input pInputText type="text" [(ngModel)]="beneficiaryNameFilter" [ngModelOptions]="{standalone: true}" (input)="onFilterChange()" placeholder="Filter Name" class="w-full p-column-filter">
-                </th>
-                <th style="padding-bottom: 2rem;">
-                  <label class="text-sm font-medium">Registration Phase :&nbsp; </label>
-                    <p-select [options]="registrationPhases" [(ngModel)]="registrationPhaseFilter" [ngModelOptions]="{standalone: true}" (onChange)="onFilterChange()" placeholder="Select" class="w-full p-column-filter" optionLabel="label" optionValue="value"></p-select>
-                </th>
-                <th style="padding-bottom: 2rem;"></th>
-                <th style="padding-bottom: 2rem;"></th>
-                <th style="padding-bottom: 2rem;"></th>
-                <th style="padding-bottom: 2rem;"></th>
-                <th style="padding-bottom: 2rem;">
-                    <button pButton type="button" icon="pi pi-filter-slash" (click)="clearFilters()" class="p-button-outlined p-button-sm">Clear</button>
-                </th>
-                <th style="padding-bottom: 2rem;"></th>
+            <tr class="filter-row">
+              <th style="padding-bottom: 1rem;"></th>
+              <th style="padding-bottom: 2rem;">
+                <label class="text-sm font-medium">Household :&nbsp; </label>
+                <input pInputText type="text" [(ngModel)]="householdNumberFilter" [ngModelOptions]="{standalone: true}"
+                  (input)="onFilterChange()" placeholder="Filter Household " class="w-full p-column-filter">
+              </th>
+              <th style="padding-bottom: 2rem;">
+                <label class="text-sm font-medium">Name :&nbsp; </label>
+                <input pInputText type="text" [(ngModel)]="beneficiaryNameFilter" [ngModelOptions]="{standalone: true}"
+                  (input)="onFilterChange()" placeholder="Filter Name" class="w-full p-column-filter">
+              </th>
+              <th style="padding-bottom: 2rem;">
+                <label class="text-sm font-medium">Registration Phase :&nbsp; </label>
+                <p-select [options]="registrationPhases" [(ngModel)]="registrationPhaseFilter"
+                  [ngModelOptions]="{standalone: true}" (onChange)="onFilterChange()" placeholder="Select"
+                  class="w-full p-column-filter" optionLabel="label" optionValue="value"></p-select>
+              </th>
+              <th style="padding-bottom: 2rem;"></th>
+              <th style="padding-bottom: 2rem;"></th>
+              <th style="padding-bottom: 2rem;"></th>
+              <th style="padding-bottom: 2rem;"></th>
+              <th style="padding-bottom: 2rem;">
+                <button pButton type="button" icon="pi pi-filter-slash" (click)="clearFilters()"
+                  class="p-button-outlined p-button-sm">Clear</button>
+              </th>
+              <th style="padding-bottom: 2rem;"></th>
             </tr>
             <tr>
               <th class="select-all-header">
                 <p-tableHeaderCheckbox [disabled]="submissionForm.get('totalDays')?.invalid"></p-tableHeaderCheckbox>
                 <span class="select-all-text">Select all</span>
               </th>
-            
-              <th >Household Number </th>
-              <th (click)="sortOnClient('beneficiaryName')" style="cursor: pointer;">Beneficiary Name <i [ngClass]="getSortIcon('beneficiaryName')" class="pi ms-2"></i></th>
-              <th (click)="sortOnClient('registrationPhase')" style="cursor: pointer;">Registration Phase <i [ngClass]="getSortIcon('registrationPhase')" class="pi ms-2"></i></th>
-              <th (click)="sortOnClient('gender')" style="cursor: pointer;">Gender <i [ngClass]="getSortIcon('gender')" class="pi ms-2"></i></th>
-              <th (click)="sortOnClient('age')" style="cursor: pointer;">Age <i [ngClass]="getSortIcon('age')" class="pi ms-2"></i></th>
+
+              <th>Household Number </th>
+              <th (click)="sortOnClient('beneficiaryName')" style="cursor: pointer;">Beneficiary Name <i
+                  [ngClass]="getSortIcon('beneficiaryName')" class="pi ms-2"></i></th>
+              <th (click)="sortOnClient('registrationPhase')" style="cursor: pointer;">Registration Phase <i
+                  [ngClass]="getSortIcon('registrationPhase')" class="pi ms-2"></i></th>
+              <th (click)="sortOnClient('gender')" style="cursor: pointer;">Gender <i [ngClass]="getSortIcon('gender')"
+                  class="pi ms-2"></i></th>
+              <th (click)="sortOnClient('age')" style="cursor: pointer;">Age <i [ngClass]="getSortIcon('age')"
+                  class="pi ms-2"></i></th>
               <th>Phone No.</th>
               <th>Legal Status</th>
             </tr>
@@ -201,17 +259,16 @@
                 <p-tableCheckbox [value]="beneficiary"
                   [disabled]="submissionForm.get('totalDays')?.invalid"></p-tableCheckbox>
               </td>
-             
+
               <td>{{ beneficiary.householdNumber }}</td>
               <td>{{ beneficiary.beneficiaryName }}</td>
-                                         <td>
-  <span 
-    [class]="'badge ' + 
+              <td>
+                <span [class]="'badge ' + 
       (beneficiary.registrationPhase === 'PARENT' ? 'bg-primary' : 
        beneficiary.registrationPhase === 'AF' ? 'bg-success' : 'bg-secondary')">
-    {{ beneficiary.registrationPhase || '—' }}
-  </span>
-</td>
+                  {{ beneficiary.registrationPhase || '—' }}
+                </span>
+              </td>
               <td>{{ beneficiary.gender }}</td>
               <td>{{ beneficiary.age }}</td>
               <td>{{ beneficiary.phoneNo }}</td>
@@ -224,21 +281,21 @@
             </tr>
           </ng-template>
         </p-table>
-      @if (filteredBeneficiaries.length > 0) {
-    <div class="d-flex justify-content-end gap-3 mt-4">
-          
+        @if (filteredBeneficiaries.length > 0) {
+        <div class="d-flex justify-content-end gap-3 mt-4">
+
           <button pButton type="button" label="Apply for DIS Wage" icon="pi pi-check" class="p-button-success px-5"
             (click)="onSubmitDisRequest()"
             [disabled]="selectedBeneficiaries.length === 0 || submissionForm.invalid || loading"
             [loading]="loading"></button>
         </div>
-      }
+        }
 
       </p-card>
 
-       
+
       }
-      
+
     </div>
   </div>
 </div>

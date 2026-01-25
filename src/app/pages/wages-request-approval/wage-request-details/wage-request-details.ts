@@ -13,16 +13,15 @@ import { DividerModule } from 'primeng/divider';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { TableModule } from 'primeng/table';
 import { PaginatorModule } from 'primeng/paginator';
-import { Select } from 'primeng/select';
-import { InputNumber } from 'primeng/inputnumber';
-import { Textarea } from 'primeng/textarea';
+import { SelectModule } from 'primeng/select';
 import { FileUploadModule } from 'primeng/fileupload';
-import { Message } from 'primeng/message';
+import { MessageModule } from 'primeng/message';
 import { ButtonModule } from 'primeng/button';
 import { Loader } from '../../../components/loader/loader';
 import { ApiService } from '../../../services/api.service';
-import { LookupService, LookupItem } from '../../../services/lookup.service';
+import { LookupService } from '../../../services/lookup.service';
 import Swal from 'sweetalert2';
+import { formatBytes, handleMultipleFileUpload } from '../../../validators/file-validator';
 
 interface WageRequest {
   id: number;
@@ -35,17 +34,16 @@ interface WageRequest {
   status: number;
   requestNumber: string;
   remarks: string;
+  // New fields from updated API
+  state?: string;
+  county?: string;
+  payam?: string;
+  boma?: string;
+  projectName?: string;
+  subprojectName?: string;
 }
 
-interface Subproject {
-  workCode: string;
-  projectId: number;
-  projectName: string;
-  stateName: string;
-  countyName: string;
-  payamName: string;
-  bomaName: string;
-}
+
 
 interface Beneficiary {
   householdNumber: string;
@@ -66,6 +64,8 @@ interface Beneficiary {
 interface AttachmentHistory {
   status: string;
   attachmentUrl: string;
+  fileName: string;
+  filePath: string;
   comments: string;
   reviewedAt: string;
 }
@@ -97,8 +97,8 @@ interface StatusInfo {
     BreadcrumbModule,
     TableModule,
     PaginatorModule,
-    Select,
-    Message,
+    SelectModule,
+    MessageModule,
     ButtonModule,
     FileUploadModule,
     Loader,
@@ -108,7 +108,7 @@ interface StatusInfo {
 })
 export class WageRequestDetails implements OnInit {
   wageRequest: WageRequest | null = null;
-  subproject: Subproject | null = null;
+
   beneficiaries: Beneficiary[] = [];
   totalBeneficiaries = 0;
   beneficiaryCurrentPage = 0;
@@ -126,12 +126,11 @@ export class WageRequestDetails implements OnInit {
     { label: 'Approve', value: true },
     { label: 'Reject', value: false },
   ];
-  selectedFile: File | null = null;
+  selectedFiles: File[] = [];
   isReviewSubmitting = false;
   reviewMessage: any[] = [];
   attachmentHistory: AttachmentHistory[] = [];
   isHistoryLoading = false;
-hasHistoryLoaded = false;
 
   rowsPerPageOptions: number[] = [10, 25, 50]; // Will be updated dynamically
   paginationOptions: { label: string; value: number }[] = [];
@@ -311,40 +310,33 @@ hasHistoryLoaded = false;
     return !rolesToHide.includes(this.roleId);
   }
 
-  onFileSelected(event: any): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      const file = input.files[0];
-      const MAX_SIZE = 1 * 1024 * 1024; // 1 MB
-
-      if (file.size > MAX_SIZE) {
-        this.reviewMessage = [
-          {
-            severity: 'error',
-            summary: 'Validation Error',
-            detail: 'File size exceeds the 1MB limit.',
-          },
-        ];
-        Swal.fire({
-          icon: 'error',
-          title: 'File Size Exceeded',
-          text: 'The attached file must not be larger than 1MB.',
-        });
-        this.selectedFile = null;
-        this.reviewForm.patchValue({ attachment: null });
-        input.value = ''; // Clear the file input
-        return;
-      }
-
-      this.selectedFile = file;
-      this.reviewForm.patchValue({
-        attachment: this.selectedFile?.name || null,
+  onFilesSelected(event: Event): void {
+    const result = handleMultipleFileUpload(event, this.selectedFiles, 25);
+    
+    if (result.error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'File Upload Error',
+        text: result.error,
       });
-      this.reviewMessage = [];
-    } else {
-      this.selectedFile = null;
-      this.reviewForm.patchValue({ attachment: null });
     }
+    
+    this.selectedFiles = result.validFiles;
+    
+    // Update form control if needed, e.g., for validation state
+    this.reviewForm.get('attachment')?.setValue(this.selectedFiles.length > 0 ? this.selectedFiles : null);
+    this.cdr.detectChanges();
+  }
+  
+  removeFile(index: number): void {
+    this.selectedFiles.splice(index, 1);
+    // Update form control if needed
+    this.reviewForm.get('attachment')?.setValue(this.selectedFiles.length > 0 ? this.selectedFiles : null);
+    this.cdr.detectChanges();
+  }
+
+  formatBytes(bytes: number, decimals = 2): string {
+    return formatBytes(bytes, decimals);
   }
 
   initReviewForm(): void {
@@ -400,12 +392,13 @@ hasHistoryLoaded = false;
     formData.append('wageRequestId', this.wageId.toString());
 
     const approvedValue = this.reviewForm.get('approved')?.value;
-    const approvedBoolean =
-      approvedValue?.value !== undefined ? approvedValue.value : approvedValue;
-    formData.append('approved', approvedBoolean);
+    formData.append('approved', approvedValue.toString());
 
-    if (this.selectedFile) {
-      formData.append('attachment', this.selectedFile, this.selectedFile.name);
+    // Append all selected files
+    if (this.selectedFiles.length > 0) {
+      this.selectedFiles.forEach(file => {
+        formData.append('attachments', file, file.name);
+      });
     }
 
     try {
@@ -434,12 +427,14 @@ hasHistoryLoaded = false;
         });
 
         this.reviewForm.reset();
-        this.selectedFile = null;
+        this.selectedFiles = [];
 
+        // Clear the file input
         const fileInput = document.getElementById(
           'attachment',
         ) as HTMLInputElement;
         if (fileInput) fileInput.value = '';
+
       } else {
         this.reviewMessage = [
           {
@@ -513,25 +508,7 @@ hasHistoryLoaded = false;
       if (wageResponse?.data?.content?.length > 0) {
         this.wageRequest = wageResponse.data.content[0];
 
-        const subprojectId = this.subprojectId;
 
-        if (subprojectId) {
-          try {
-            const subprojectResponse: any = await this.apiService.POST(
-              '/api/subproject/get?page=0&size=10',
-              { id: subprojectId },
-            );
-            if (subprojectResponse?.data?.content?.length > 0) {
-              this.subproject = subprojectResponse.data.content[0];
-            } else {
-              console.warn(
-                `Subproject details not found for id: ${subprojectId}`,
-              );
-            }
-          } catch (subError) {
-            console.error('Failed to load subproject details:', subError);
-          }
-        }
       } else {
         this.apiError = 'No wage request found with the provided ID.';
       }
@@ -582,8 +559,43 @@ hasHistoryLoaded = false;
     return months[monthIndex - 1] || 'Unknown';
   }
 
-  getAttachmentUrl(url: string): string {
-    return url;
+  async handleAttachmentClick(history: AttachmentHistory): Promise<void> {
+    if (history.attachmentUrl &&  history.attachmentUrl.startsWith('https://')) {
+
+      window.open(history.attachmentUrl, '_blank');
+    } else if (history.filePath) {
+    
+      try {
+        const response: any = await this.apiService.GET_CONFIG(
+          `/api/wage-request-review/wageRequest/attachment/get?filePath=${history.filePath}`,
+          { responseType: 'blob' } 
+        );
+
+        const blob = new Blob([response.data], { type: response.headers.get('Content-Type') });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = history.fileName || 'download'; 
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error('Failed to download attachment:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Download Failed',
+          text: 'Could not download the attachment. Please try again.',
+        });
+      }
+    } else {
+      console.warn('No attachment URL or file path available for download.');
+      Swal.fire({
+        icon: 'warning',
+        title: 'No Attachment',
+        text: 'No valid attachment found for this entry.',
+      });
+    }
   }
 
   async loadBeneficiaries(page: number, size: number): Promise<void> {
@@ -603,7 +615,6 @@ hasHistoryLoaded = false;
         this.beneficiaries = response.data.content;
         this.totalBeneficiaries = response.data.totalElements || 0;
 
-        // Update dropdown options after getting total count
         if (this.totalBeneficiaries > 0) {
           this.updateRowsPerPageOptions();
         }

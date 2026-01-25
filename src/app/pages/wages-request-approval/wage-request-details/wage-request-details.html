@@ -42,54 +42,69 @@
                                     <span>Basic Information</span>
                                 </h5>
 
-                                <div class="list-group list-group-flush">
-                                    @if (subproject) {
+                                                                <div class="list-group list-group-flush">
 
-                                    <div
-                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
-                                        <span class="text-muted">Project Name:</span>
-                                        <span class="fw-semibold text-dark">{{ subproject.projectName }}</span>
-                                    </div>
-                                    <div
-                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
-                                        <span class="text-muted">Work Code:</span>
-                                        <span class="fw-semibold text-dark">{{ subproject.workCode }}</span>
-                                    </div>
-                                    <div
-                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
-                                        <span class="text-muted">State:</span>
-                                        <span class="fw-semibold text-dark">{{ subproject.stateName }}</span>
-                                    </div>
-                                    <div
-                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
-                                        <span class="text-muted">County:</span>
-                                        <span class="fw-semibold text-dark">{{ subproject.countyName }}</span>
-                                    </div>
-                                    <div
-                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
-                                        <span class="text-muted">Payam:</span>
-                                        <span class="fw-semibold text-dark">{{ subproject.payamName }}</span>
-                                    </div>
-                                    <div
-                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 py-2">
-                                        <span class="text-muted">Boma:</span>
-                                        <span class="fw-semibold text-dark">{{ subproject.bomaName }}</span>
-                                    </div>
-                                    }
-                                    @else {
-                                    <div
-                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
-                                        <span class="text-muted">Project Name:</span>
-                                        <span class="fw-semibold text-dark">Direct Income Support</span>
-                                    </div>
-                                    <div
-                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
-                                        <span class="text-muted">Work Code:</span>
-                                        <span class="fw-semibold text-dark">DIS-Direct Income Support</span>
-                                    </div>
-                                    }
+                                                                    <div
 
-                                </div>
+                                                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+
+                                                                        <span class="text-muted">Project Name:</span>
+
+                                                                        <span class="fw-semibold text-dark">{{ wageRequest.projectName || '—' }}</span>
+
+                                                                    </div>
+
+                                                                    <div
+
+                                                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+
+                                                                        <span class="text-muted">Work Code:</span>
+
+                                                                        <span class="fw-semibold text-dark">{{ wageRequest.subprojectName || '—' }}</span>
+
+                                                                    </div>
+
+                                                                    <div
+
+                                                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+
+                                                                        <span class="text-muted">State:</span>
+
+                                                                        <span class="fw-semibold text-dark">{{ wageRequest.state || '—' }}</span>
+
+                                                                    </div>
+
+                                                                    <div
+
+                                                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+
+                                                                        <span class="text-muted">County:</span>
+
+                                                                        <span class="fw-semibold text-dark">{{ wageRequest.county || '—' }}</span>
+
+                                                                    </div>
+
+                                                                    <div
+
+                                                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+
+                                                                        <span class="text-muted">Payam:</span>
+
+                                                                        <span class="fw-semibold text-dark">{{ wageRequest.payam || '—' }}</span>
+
+                                                                    </div>
+
+                                                                    <div
+
+                                                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 py-2">
+
+                                                                        <span class="text-muted">Boma:</span>
+
+                                                                        <span class="fw-semibold text-dark">{{ wageRequest.boma || '—' }}</span>
+
+                                                                    </div>
+
+                                                                </div>
                             </div>
                         </div>
                     </div>
@@ -177,22 +192,22 @@
                         class="p-datatable-sm">
                         <ng-template pTemplate="header">
                             <tr>
-                                <th>Reviewed At</th>
-                                <th>Status</th>
-                                <th>Comments</th>
-                                <th>Attachment</th>
+                                <th class="text-center">Reviewed At</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Comments</th>
+                                <th class="text-center">Attachment</th>
                             </tr>
                         </ng-template>
                         <ng-template pTemplate="body" let-history>
                             <tr>
-                                <td>{{ formatDate(history.reviewedAt) }}</td>
-                                <td>{{ history.status }}</td>
-                                <td>{{ history.comments }}</td>
-                                <td>
+                                <td class="text-center">{{ formatDate(history.reviewedAt) }}</td>
+                                <td class="text-center">{{ history.status }}</td>
+                                <td class="text-center">{{ history.comments }}</td>
+                                <td class="text-center">
                                     @if (history.attachmentUrl) {
-                                    <a [href]="getAttachmentUrl(history.attachmentUrl)" target="_blank"
-                                        class="btn btn-sm btn-outline-primary">
-                                        <i class="pi pi-download me-1"></i> Preview Attachment
+                                    <a (click)="handleAttachmentClick(history)"
+                                        class="btn btn-sm btn-outline-primary cursor-pointer">
+                                        <i class="pi pi-download me-1"></i> {{ history.fileName }}
                                     </a>
                                     } @else {
                                     <span>—</span>
@@ -342,40 +357,77 @@
 
         <!-- Review Form Card -->
         @if (wageRequest && roleId === 14) {
-        <p-card class="mt-4 shadow-sm border-0">
+        <p-card class="mt-4 shadow-sm border-0 position-relative">
+            <!-- Loading Overlay -->
+            @if (isReviewSubmitting) {
+            <div class="review-loading-overlay">
+                <div class="d-flex flex-column align-items-center">
+                    <i class="pi pi-spin pi-spinner" style="font-size: 2.5rem; color: #198754;"></i>
+                    <span class="mt-2 fw-semibold text-success">Submitting review...</span>
+                </div>
+            </div>
+            }
             <h5 class="mb-3 text-success">
                 <i class="pi pi-check-circle me-2"></i>
                 Review Wage Request
             </h5>
             <form [formGroup]="reviewForm" (ngSubmit)="onSubmitReview()">
-                <div class="row d-flex flex-column g-3">
-                    <div class="d-flex flex-column col-2 gap-2">
-                        <label for="approved" class="form-label fw-semibold">Approval Status</label>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label for="approved" class="form-label fw-semibold">Approval Status</label> &nbsp;
                         <p-select id="approved" formControlName="approved" [options]="approvedOptions"
-                            optionLabel="label" placeholder="Select Approval Status"
-                            [ngClass]="{ 'ng-invalid ng-dirty border-danger': reviewForm.get('approved')?.invalid && reviewForm.get('approved')?.touched }"
-                            class="w-10">
+                            optionLabel="label" optionValue="value" placeholder="Select Approval Status"
+                            [ngClass]="{ 'ng-invalid ng-dirty border-danger': reviewForm.get('approved')?.invalid && reviewForm.get('approved')?.touched }">
                         </p-select>
                         @if (reviewForm.get('approved')?.invalid && reviewForm.get('approved')?.touched) {
                         <small class="p-error text-danger mt-1 d-block">Approval Status is required.</small>
                         }
                     </div>
 
+                    <div class="row align-items-stretch mt-4">
+                        <div class="col-md-6 d-flex flex-column">
+                            <label class="form-label fw-semibold">
+                                Attachments (Optional, 25MB Total Limit)
+                            </label>
 
+                            <input type="file"
+                                class="form-control"
+                                id="attachment"
+                                (change)="onFilesSelected($event)"
+                                multiple>
 
-                    <div class="col-2">
-                        <label for="attachment" class="form-label fw-semibold">Attachment (Optional)</label>
-                        <input type="file" class="form-control " id="attachment" (change)="onFileSelected($event)"
-                            accept="image/*,.pdf">
-                        @if (selectedFile) {
-                        <div class="mt-2 text-muted">
-                            <i class="pi pi-file me-1"></i>
-                            Selected file: {{ selectedFile.name }}
+                            <!-- spacer to stretch -->
+                            <div class="flex-grow-1"></div>
                         </div>
-                        }
+
+                        <div class="col-md-6 d-flex flex-column">
+                            @if (selectedFiles.length > 0) {
+                                <label class="form-label fw-semibold">Selected Files</label>
+
+                                <ul class="list-group file-list flex-grow-1">
+                                    @for (file of selectedFiles; track $index) {
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div class="text-muted text-truncate">
+                                                <i class="fas fa-file me-2"></i>
+                                                {{ file.name }}
+                                                <span class="text-secondary">
+                                                    ({{ formatBytes(file.size) }})
+                                                </span>
+                                            </div>
+                                            <button type="button"
+                                                    class="btn btn-sm btn-outline-danger p-1"
+                                                    (click)="removeFile($index)">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        </div>
                     </div>
 
-                    <div class="col-2">
+
+                    <div class="col-12">
                         @for (msg of reviewMessage; track msg) {
                         <p-message [severity]="msg.severity" [text]="msg.detail" class="mb-2 d-block">
                         </p-message>
@@ -383,8 +435,11 @@
                     </div>
 
                     <div class="col-12">
-                        <p-button type="submit" label="Submit Review" icon="pi pi-send"
-                            [disabled]="reviewForm.invalid || isReviewSubmitting">
+                        <p-button type="submit"
+                            [label]="isReviewSubmitting ? 'Submitting...' : 'Submit Review'"
+                            [icon]="isReviewSubmitting ? 'pi pi-spin pi-spinner' : 'pi pi-send'"
+                            [disabled]="reviewForm.invalid || isReviewSubmitting"
+                            [loading]="isReviewSubmitting">
                         </p-button>
                     </div>
                 </div>

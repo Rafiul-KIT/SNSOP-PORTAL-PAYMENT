@@ -31,7 +31,8 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { InputTextModule } from 'primeng/inputtext';
 import { LookupService, StatusWageEnum } from '../../../services/lookup.service';
 import Swal from 'sweetalert2';
-import { validateFileSize } from '../../../validators/file-validator';
+import { handleMultipleFileUpload } from '../../../validators/file-validator';
+import { DialogModule } from 'primeng/dialog';
 
 interface WageRequest {
   id: number;
@@ -49,7 +50,7 @@ interface WageRequest {
   remarksText?: string;
   isSubmitting?: boolean;
   exchangeRate?: number;
-  attachment?: File;
+  attachments?: File[];
 }
 
 interface SubProjectLookup {
@@ -93,6 +94,7 @@ const dateRangeValidator: ValidatorFn = (
     SelectModule,
     DatePickerModule,
     InputTextModule,
+    DialogModule,
   ],
   providers: [MessageService],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -137,6 +139,10 @@ export class WageRequestApproval implements OnInit {
     { label: 'Approve', value: true },
     { label: 'Reject', value: false },
   ];
+
+  displayAttachmentModal = false;
+  currentWageRequestForAttachment: WageRequest | null = null;
+  selectedFiles: File[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -271,24 +277,6 @@ export class WageRequestApproval implements OnInit {
       status: f.status || null,
     };
 
-    // if (f.status !== null && f.status !== undefined) {
-    //   body.status = f.status;
-    // } else {
-    //   switch (Number(this.roleId)) {
-    //     case 2:
-    //       body.status = 1;
-    //       break;
-    //     case 11:
-    //       body.status = 2;
-    //       break;
-    //     case 6:
-    //       body.status = 3;
-    //       break;
-    //     default:
-    //       body.status = null;
-    //       break;
-    //   }
-    // }
     return body;
   }
 
@@ -310,7 +298,7 @@ export class WageRequestApproval implements OnInit {
           remarksText: '',
           isSubmitting: false,
           exchangeRate: undefined,
-          attachment: undefined,
+          attachments: [],
         }));
         this.totalRecords = data.totalElements || 0;
 
@@ -337,28 +325,45 @@ export class WageRequestApproval implements OnInit {
       });
   }
 
-  onFileSelect(event: any, item: WageRequest) {
-    const input = event.target as HTMLInputElement;
-    const file = input.files ? input.files[0] : null;
+  openAttachmentModal(wageRequest: WageRequest) {
+    this.currentWageRequestForAttachment = wageRequest;
+    this.selectedFiles = [...(wageRequest.attachments || [])];
+    this.displayAttachmentModal = true;
+  }
 
-    if (file) {
-      const validation = validateFileSize(file); 
+  onFilesInModalSelect(event: any) {
+    const result = handleMultipleFileUpload(event, this.selectedFiles); 
 
-      if (validation.isValid) {
-        item.attachment = file;
-      } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'File Too Large',
-          text: validation.message as string,
-        });
-        // Clear the input
-        input.value = '';
-        item.attachment = undefined;
-      }
-    } else {
-      item.attachment = undefined;
+    this.selectedFiles = result.validFiles;
+
+    if (result.error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'File Upload Error',
+        text: result.error,
+        customClass: {
+          container: 'on-top-modal'
+        }
+      });
     }
+  }
+
+  removeSelectedFile(fileToRemove: File) {
+    this.selectedFiles = this.selectedFiles.filter(file => file !== fileToRemove);
+  }
+
+  saveAttachments() {
+    if (this.currentWageRequestForAttachment) {
+      this.currentWageRequestForAttachment.attachments = [...this.selectedFiles];
+      this.cdr.markForCheck();
+    }
+    this.cancelAttachments();
+  }
+
+  cancelAttachments() {
+    this.displayAttachmentModal = false;
+    this.currentWageRequestForAttachment = null;
+    this.selectedFiles = [];
   }
 
   async submitRowReview(wageRequest: WageRequest) {
@@ -392,7 +397,7 @@ export class WageRequestApproval implements OnInit {
         });
         return;
       }
-      if (!wageRequest.attachment) {
+      if (!wageRequest.attachments || wageRequest.attachments.length === 0) {
         Swal.fire({
           icon: 'warning',
           title: 'Validation Error',
@@ -422,8 +427,10 @@ export class WageRequestApproval implements OnInit {
         if (wageRequest.exchangeRate) {
           formData.append('exchangeRate', wageRequest.exchangeRate.toString());
         }
-        if (wageRequest.attachment) {
-          formData.append('attachment', wageRequest.attachment);
+        if (wageRequest.attachments && wageRequest.attachments.length > 0) {
+          wageRequest.attachments.forEach(file => {
+            formData.append('attachments', file, file.name);
+          });
         }
         break;
       case 6:

@@ -208,27 +208,34 @@ export class ReportTotalBeneficiaryPaymentDetails implements OnInit, OnChanges {
     try {
       const headers = [
         'S.No',
+        'IP',
         'State Name',
         'County Name',
         'Payam Name',
         'Boma Name',
         'Work Code',
+        'Enrollment Number',
         'Beneficiary Name',
-        'Household Number',
+        'Original Household number',
         'Gender',
-        'Support Type',
+        'Component',
+        'From Date',
+        'To Date',
         'Wage Rate (In USD)',
         'Paid Amount (In USD)',
         'Attendance Days',
         'Absence Days',
         'Exchange Rate In SSP',
-        'Total Amount (In SSP)',
+        'Paid Amount (In SSP)',
         'Payment Date',
         'Payment Generate Date',
+        'Paid Household Name',
         'Paid To',
         'Pay Status',
         'Wage Request Number',
-        'Payment Cycle'
+        'Payment Cycle',
+        'Latitude',
+        'Longitude',
       ];
 
       const csvRows: string[] = [];
@@ -237,15 +244,19 @@ export class ReportTotalBeneficiaryPaymentDetails implements OnInit, OnChanges {
       this.reportTotalBeneficiaryPaymentDetails.forEach((row: any, index: number) => {
         const values = [
           index + 1,
+          row.ip || 'UNOPS Field Office',
           row.state || '',
           row.county || '',
           row.payam || '',
           row.boma || '',
           row.workCode || '',
+          row.enrollmentNumber || '',
           row.name || '',
           row.householdNumber || '',
           row.gender || '',
           row.supportType || '',
+          row.fromDate || '',
+          row.toDate || '',
           row.wageRateUsd || '',
           row.paidAmountUsd || '',
           row.attendanceDays || '',
@@ -254,10 +265,13 @@ export class ReportTotalBeneficiaryPaymentDetails implements OnInit, OnChanges {
           row.paidAmountSsp || '',
           row.paymentDate || '',
           row.paymentGenerateDate || '',
+          row.paidHouseHoldName || '',
           row.paidTo || '',
           row.status || '',
           row.reqNo || '',
-          'Payment Cycle ' + (row.paymentCycle || '')
+          'Payment Cycle ' + (row.paymentCycle || ''),
+          row.latitude || '',
+          row.longitude || '',
         ];
         csvRows.push(values.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','));
       });
