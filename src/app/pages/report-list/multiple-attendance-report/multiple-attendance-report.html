@@ -14,7 +14,7 @@
             <p-floatlabel variant="on" class="w-100">
                 <p-select [options]="states" optionLabel="name" formControlName="state"
                     (onChange)="onStateChange($event.value)" />
-                <label>State <span class="text-danger">*</span></label>
+                <label>State </label>
             </p-floatlabel>
         </div>
 
@@ -23,7 +23,7 @@
             <p-floatlabel variant="on" class="w-100">
                 <p-select [options]="countyList" optionLabel="name" formControlName="county"
                     (onChange)="onCountyChange($event.value)" />
-                <label>County <span class="text-danger">*</span></label>
+                <label>County </label>
             </p-floatlabel>
         </div>
 
@@ -32,7 +32,7 @@
             <p-floatlabel variant="on" class="w-100">
                 <p-select [options]="payamList" optionLabel="name" formControlName="payam"
                     (onChange)="onPayamChange($event.value)" />
-                <label>Payam <span class="text-danger">*</span></label>
+                <label>Payam </label>
             </p-floatlabel>
         </div>
 
@@ -40,7 +40,7 @@
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
                 <p-select [options]="bomaList" optionLabel="name" formControlName="boma" />
-                <label>Boma <span class="text-danger">*</span></label>
+                <label>Boma </label>
             </p-floatlabel>
         </div>
 
@@ -56,7 +56,7 @@
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
                 <p-datePicker formControlName="fromDate" [showIcon]="true" dateFormat="dd/mm/yy"
-                    class="w-100"></p-datePicker>
+                    class="w-100" [maxDate]="maxDate"></p-datePicker>
                 <label>From Date <span class="text-danger">*</span></label>
             </p-floatlabel>
         </div>
@@ -65,10 +65,12 @@
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
                 <p-datePicker formControlName="toDate" [showIcon]="true" dateFormat="dd/mm/yy"
-                    class="w-100"></p-datePicker>
+                    class="w-100" [maxDate]="maxDate"></p-datePicker>
                 <label>To Date <span class="text-danger">*</span></label>
             </p-floatlabel>
         </div>
+
+
 
         <!-- Report Size -->
         <!-- <div class="col-md-3">
@@ -84,7 +86,7 @@
             <p-button label="Reset" icon="fas fa-refresh" severity="danger" size="small" [outlined]="true"
                 class="me-2" (onClick)="resetForm()"></p-button>
             <p-button label="Generate" icon="fas fa-search" severity="primary" size="small"
-                [disabled]="searchForm.invalid" (onClick)="showReport()"></p-button>
+               (onClick)="showReport()"></p-button>
         </div>
 
         <!-- Export Buttons -->
@@ -102,6 +104,14 @@
     [tableStyle]="{ 'min-width': '1600px', 'margin-bottom': '5px' }" size="small">
 
     <ng-template pTemplate="header">
+            <tr>
+            <th colspan="14" class="text-end">
+                <p class="fw-bold mb-2">
+                    Showing <kbd>{{ attendanceRecords.length }}</kbd> of
+                    <kbd>{{ totalRecords }}</kbd> records
+                </p>
+            </th>
+        </tr>
         <tr>
             <th colspan="14" class="text-start">
                 <div class="d-flex justify-content-start gap-2">
