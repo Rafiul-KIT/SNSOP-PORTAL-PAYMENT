@@ -6,9 +6,12 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
+  AbstractControl,
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
 } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -27,6 +30,25 @@ import { Loader } from '../../../components/loader/loader';
 import { ApiService } from '../../../services/api.service';
 import { LookupService, LookupItem, PaymentCycleEnum, StatusWageEnum } from '../../../services/lookup.service';
 import { saveAs } from 'file-saver';
+import Swal from 'sweetalert2';
+
+
+
+// Custom validator for the date range (fromDate cannot be after toDate)
+export function dateRangeValidator(group: AbstractControl): ValidationErrors | null {
+  const fromDate = group.get('fromDate')?.value;
+  const toDate = group.get('toDate')?.value;
+
+  if (fromDate && toDate) {
+    const from = new Date(fromDate);
+    const to = new Date(toDate);
+    
+    if (from > to) {
+      return { fromDateAfterToDate: true };
+    }
+  }
+  return null;
+}
 
 interface WageAbstractRecord {
   state: string;
@@ -162,7 +184,7 @@ export class WageRequestAbstract implements OnInit {
       criteria: [null],
       paymentStatus: [null],
       reportSize: [null],
-    });
+    }, { validators: dateRangeValidator });
   }
 
   private async loadStates(): Promise<void> {
@@ -294,6 +316,22 @@ export class WageRequestAbstract implements OnInit {
   }
 
   searchAbstract() {
+    if (this.searchForm.invalid) {
+        let errorMessages = '';
+        if (this.searchForm.hasError('fromDateAfterToDate')) {
+            errorMessages += '<p>From Date cannot be after To Date.</p>';
+        }
+        
+        if(errorMessages) {
+          Swal.fire({
+              icon: 'error',
+              title: 'Date Validation Errors',
+              html: errorMessages,
+          });
+          return;
+        }
+    }
+
     const selectedSize = this.searchForm.get('reportSize')?.value;
     this.currentPage = 0;
     if (selectedSize === -1) {

@@ -6,9 +6,11 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
+  AbstractControl,
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
+  ValidationErrors,
   Validators,
 } from '@angular/forms';
 import { TableModule } from 'primeng/table';
@@ -27,6 +29,41 @@ import { Loader } from '../../../components/loader/loader';
 import { ApiService } from '../../../services/api.service';
 import { LookupService, LookupItem } from '../../../services/lookup.service';
 import { saveAs } from 'file-saver';
+import Swal from 'sweetalert2';
+
+// Custom validator to ensure the date is not in the future
+export function noFutureDateValidator(control: AbstractControl): ValidationErrors | null {
+  if (!control.value) {
+    return null;
+  }
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const selectedDate = new Date(control.value);
+  return selectedDate > today ? { futureDate: true } : null;
+}
+
+// Custom validator for the date range (max 75 days)
+export function dateRangeValidator(group: AbstractControl): ValidationErrors | null {
+  const fromDate = group.get('fromDate')?.value;
+  const toDate = group.get('toDate')?.value;
+
+  if (fromDate && toDate) {
+    const from = new Date(fromDate);
+    const to = new Date(toDate);
+    
+    if (from > to) {
+      return { fromDateAfterToDate: true };
+    }
+
+    const diffTime = Math.abs(to.getTime() - from.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays > 75) {
+      return { dateRangeTooLarge: true };
+    }
+  }
+  return null;
+}
 
 interface AttendanceRecord {
   stateName: string;
@@ -99,6 +136,7 @@ export class MultipleAttendanceReport implements OnInit {
   pageSize = 10;
   loading = false;
   hasSearched = false;
+  maxDate: Date;
 
 
   constructor(
@@ -107,7 +145,9 @@ export class MultipleAttendanceReport implements OnInit {
     private api: ApiService,
     private lookupService: LookupService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) {
+    this.maxDate = new Date();
+  }
 
   async ngOnInit() {
     this.initBreadcrumb();
@@ -123,15 +163,15 @@ export class MultipleAttendanceReport implements OnInit {
 
   initForm() {
     this.searchForm = this.fb.group({
-      state: [null, Validators.required],
-      county: [{ value: null, disabled: true }, Validators.required],
-      payam: [{ value: null, disabled: true }, Validators.required],
-      boma: [{ value: null, disabled: true }, Validators.required],
+      state: [null],
+      county: [{ value: null, disabled: true }],
+      payam: [{ value: null, disabled: true } ],
+      boma: [{ value: null, disabled: true } ],
       subprojectCode: [''],
-      fromDate: [null, Validators.required],
-      toDate: [null, Validators.required],
+      fromDate: [null, [Validators.required, noFutureDateValidator]],
+      toDate: [null, [Validators.required, noFutureDateValidator]],
       reportSize: [null],
-    });
+    }, { validators: dateRangeValidator });
   }
 
   // onReportSizeChange(size: number | null) {
@@ -231,6 +271,48 @@ export class MultipleAttendanceReport implements OnInit {
   }
 
   showReport() {
+    if (this.searchForm.invalid) {
+        let errorMessages = '';
+        if (this.searchForm.hasError('dateRangeTooLarge')) {
+            errorMessages += '<p>The date range cannot exceed 75 days.</p>';
+        }
+        if (this.searchForm.hasError('fromDateAfterToDate')) {
+            errorMessages += '<p>From Date cannot be after To Date.</p>';
+        }
+
+        const fromDateControl = this.searchForm.get('fromDate');
+        if (fromDateControl && fromDateControl.errors) {
+            if (fromDateControl.errors['required']) {
+                errorMessages += '<p>From Date is required.</p>';
+            }
+            if (fromDateControl.errors['futureDate']) {
+                errorMessages += '<p>From Date cannot be a future date.</p>';
+            }
+        }
+
+        const toDateControl = this.searchForm.get('toDate');
+        if (toDateControl && toDateControl.errors) {
+            if (toDateControl.errors['required']) {
+                errorMessages += '<p>To Date is required.</p>';
+            }
+            if (toDateControl.errors['futureDate']) {
+                errorMessages += '<p>To Date cannot be a future date.</p>';
+            }
+        }
+        
+        const stateControl = this.searchForm.get('state');
+        if (stateControl && stateControl.errors && stateControl.errors['required']) {
+             errorMessages += '<p>State is required.</p>';
+        }
+
+        Swal.fire({
+            icon: 'error',
+            title: 'Date Validation Errors',
+            html: errorMessages,
+        });
+        return;
+    }
+
     const selectedSize = this.searchForm.get('reportSize')?.value;
     this.currentPage = 0;
     if (selectedSize === -1) {

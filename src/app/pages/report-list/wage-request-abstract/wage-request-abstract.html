@@ -97,16 +97,17 @@
             <!-- From Date -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
-                <p-datePicker formControlName="fromDate" [showIcon]="true" dateFormat="dd/mm/yy"
+                <p-datePicker formControlName="fromDate" [showIcon]="true" dateFormat="dd/mm/yy" class="w-100"
                     placeholder="Select date" />
                 <label>From Date</label>
             </p-floatlabel>
+            
         </div>
 
         <!-- To Date -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
-                <p-datePicker formControlName="toDate" [showIcon]="true" dateFormat="dd/mm/yy"
+                <p-datePicker formControlName="toDate" [showIcon]="true" dateFormat="dd/mm/yy" class="w-100"
                     placeholder="Select date" />
                 <label>To Date</label>
             </p-floatlabel>
@@ -132,10 +133,18 @@
   <app-loader></app-loader>
 } @else {
   @if (hasSearched) {
-  <p-table [value]="abstractRecords" [scrollable]="true" [scrollHeight]="advanceSearchPanelVisible ? '42vh' : '58vh'"
+  <p-table [value]="abstractRecords" 
       [tableStyle]="{ 'min-width': '2200px', 'margin-bottom': '5px' }" dataKey="requestNumber" size="small">
 
       <ng-template pTemplate="header">
+           <tr>
+            <th colspan="18" class="text-start">
+                <p class="fw-bold mb-2">
+                    Showing <kbd>{{ abstractRecords.length }}</kbd> of
+                    <kbd>{{ totalRecords }}</kbd> records
+                </p>
+            </th>
+        </tr>
           <tr>
               <th colspan="18" class="text-start">
                   <p-button label="Export CSV" icon="fas fa-file-csv" severity="success" size="small"
