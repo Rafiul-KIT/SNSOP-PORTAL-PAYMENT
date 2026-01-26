@@ -473,7 +473,7 @@ export class ReportComponent implements OnInit {
                 status: beneficiary.paymentStatus,
                 exchangeRate: beneficiary.exchangeRate,
                 paymentDate: beneficiary.paymentDate
-                  ? beneficiary.paymentDate.split(' ')[0]
+                  ? beneficiary.paymentDate
                   : 'N/A',
               })
             );
@@ -563,7 +563,7 @@ export class ReportComponent implements OnInit {
                 attendanceDays: beneficiary.attendanceDays,
                 absenceDays: beneficiary.absenceDays,
                 paymentDate: beneficiary.paymentDate
-                  ? beneficiary.paymentDate.split(' ')[0]
+                  ? beneficiary.paymentDate
                   : 'N/A',
                 paymentGenerateDate: beneficiary.paymentGenerateDate,
                 fromDate: beneficiary.fromDate,
