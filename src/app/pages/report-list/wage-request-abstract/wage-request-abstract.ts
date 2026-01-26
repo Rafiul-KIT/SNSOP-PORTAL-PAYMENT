@@ -136,6 +136,7 @@ export class WageRequestAbstract implements OnInit {
     this.paymentCycles = PaymentCycleEnum;
     this.statuses = StatusWageEnum;
     this.criteriaOptions = [
+       { label: 'ALL', value: 'ALL' },
       { label: 'LIPW', value: 'LIPW' },
       { label: 'Direct Income Support', value: 'DIS' },
     ];
