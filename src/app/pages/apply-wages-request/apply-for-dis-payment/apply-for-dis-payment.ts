@@ -60,6 +60,7 @@ export class ApplyForDisPayment implements OnInit {
   selectedBeneficiaries: any[] = [];
 
   attachmentFiles: File[] = []; // Changed to handle multiple files
+  totalAttachmentSize = 0;
 
   showResults = false;
   readonly MAX_ATTACHMENT_SIZE_MB = 25; // Updated max attachment size
@@ -243,7 +244,7 @@ export class ApplyForDisPayment implements OnInit {
   initializeSubmissionForm(): void {
     this.submissionForm = this.fb.group({
       totalDays: [null, [Validators.required, Validators.min(1)]],
-      attachments: [[], [this.attachmentRequiredValidator]],
+      attachments: [[], []],
     });
   }
 
@@ -260,11 +261,17 @@ export class ApplyForDisPayment implements OnInit {
     }
     this.submissionForm.get('attachments')?.setValue(this.attachmentFiles);
     this.submissionForm.get('attachments')?.markAsTouched();
+    this.updateTotalAttachmentSize();
   }
 
   removeAttachment(index: number): void {
     this.attachmentFiles.splice(index, 1);
     this.submissionForm.get('attachments')?.setValue([...this.attachmentFiles]);
+    this.updateTotalAttachmentSize();
+  }
+
+  updateTotalAttachmentSize(): void {
+    this.totalAttachmentSize = this.attachmentFiles.reduce((total, file) => total + file.size, 0);
   }
 
   formatBytes(bytes: number, decimals = 2): string {
@@ -446,6 +453,7 @@ export class ApplyForDisPayment implements OnInit {
         this.selectedBeneficiaries = [];
         this.submissionForm.reset({ totalDays: null });
         this.attachmentFiles = []; // Clear attachments after successful submission
+        this.updateTotalAttachmentSize();
         this.showResults = false;
       } else {
         Swal.fire({ icon: 'error', title: 'Error', text:  'Failed to submit DIS wage request.' });

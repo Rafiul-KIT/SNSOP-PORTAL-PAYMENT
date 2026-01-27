@@ -77,6 +77,8 @@ export class ApplyForWagesPaymentComponent implements OnInit {
   tableLoading = false;
   submitting = false;
   attachments: File[] = [];
+  readonly MAX_ATTACHMENT_SIZE_MB = 25;
+  totalAttachmentSize = 0;
 
   // Client-side state
   sortField: string = '';
@@ -135,7 +137,7 @@ export class ApplyForWagesPaymentComponent implements OnInit {
   }
 
   onFileChange(event: Event): void {
-    const { validFiles, error } = handleMultipleFileUpload(event, this.attachments);
+    const { validFiles, error } = handleMultipleFileUpload(event, this.attachments, this.MAX_ATTACHMENT_SIZE_MB);
     this.attachments = validFiles;
     this.wagesForm.get('attachment')?.setValue(this.attachments);
     if (error) {
@@ -145,11 +147,26 @@ export class ApplyForWagesPaymentComponent implements OnInit {
         text: error
       });
     }
+    this.updateTotalAttachmentSize();
   }
 
   removeAttachment(fileToRemove: File): void {
     this.attachments = this.attachments.filter(file => file !== fileToRemove);
     this.wagesForm.get('attachment')?.setValue(this.attachments);
+    this.updateTotalAttachmentSize();
+  }
+
+  updateTotalAttachmentSize(): void {
+    this.totalAttachmentSize = this.attachments.reduce((total, file) => total + file.size, 0);
+  }
+
+  formatBytes(bytes: number, decimals = 2): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
   }
 
 

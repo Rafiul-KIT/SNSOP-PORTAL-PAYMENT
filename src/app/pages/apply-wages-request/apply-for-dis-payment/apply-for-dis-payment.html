@@ -142,8 +142,8 @@
             <!-- Choose file -->
             <div class="col-md-6 col-lg-4">
               <label for="attachments" class="form-label fw-semibold">
-                Attachments
-                <small class="text-muted"><span class="text-danger">*</span>(Required for submission)</small>
+                Attachments <small class="text-muted">(Max size under {{MAX_ATTACHMENT_SIZE_MB}}MB)</small>
+                <!-- <small class="text-muted"><span class="text-danger">*</span>(Required for submission)</small> -->
               </label>
 
               <input type="file" id="attachments" class="form-control" (change)="onFileChange($event)" multiple
@@ -177,6 +177,13 @@
                 @if (attachmentFiles.length === 0) {
                 <div class="text-muted small">
                   No files attached
+                </div>
+                }
+
+                @if (attachmentFiles.length > 0) {
+                <div class="mt-2 small text-muted">
+                  <span>Total size: {{ formatBytes(totalAttachmentSize) }}</span> /
+                  <span>{{ MAX_ATTACHMENT_SIZE_MB }} MB</span>
                 </div>
                 }
 
