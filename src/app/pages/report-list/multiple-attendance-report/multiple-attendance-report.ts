@@ -7,11 +7,9 @@ import {
 import { CommonModule } from '@angular/common';
 import {
   AbstractControl,
-  AbstractControl,
   FormBuilder,
   FormGroup,
   ReactiveFormsModule,
-  ValidationErrors,
   ValidationErrors,
   Validators,
 } from '@angular/forms';
