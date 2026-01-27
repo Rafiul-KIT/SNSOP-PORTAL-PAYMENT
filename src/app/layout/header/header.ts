@@ -262,6 +262,22 @@ export class Header {
           
         ],
       },
+      {
+        label: 'Invoice',
+        icon: 'fas fa-file-alt',
+        items: [
+          {
+            label: 'Wage Paid Request Abstract With Invoice',
+            icon: 'fas fa-file-alt',
+            routerLink: 'invoice/wage-paid-request-abstract-with-invoice',
+          },
+          {
+            label: 'Paid Date Wise Payment Invoice',
+            icon: 'fas fa-file-alt',
+            routerLink: 'invoice/paid-date-wise-payment-invoice',
+          },
+        ]
+      }
     ];
   }
 

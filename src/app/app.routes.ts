@@ -35,6 +35,7 @@ import { ReconciliationMonitoring } from './pages/reconciliation-monitoring/reco
 import { ReconciliationMonitoringDetails } from './pages/reconciliation-monitoring-details/reconciliation-monitoring-details';
 import { WageRequestAbstract } from './pages/report-list/wage-request-abstract/wage-request-abstract';
 import { MultipleAttendanceReport } from './pages/report-list/multiple-attendance-report/multiple-attendance-report';
+import { WagePaidRequestAbstractWithInvoice } from './pages/invoice/wage-paid-request-abstract-with-invoice/wage-paid-request-abstract-with-invoice';
 
 
 export const routes: Routes = [
@@ -248,6 +249,17 @@ export const routes: Routes = [
         path: 'mobile-money-details/:requestId',
         component: MobileMoneyDetails,
         // canActivate: [routeGuard],
+      },
+    ],
+  },
+  {
+    path: 'invoice',
+    canActivate: [routeGuard],
+    children: [
+      {
+        path: 'wage-paid-request-abstract-with-invoice',
+        component: WagePaidRequestAbstractWithInvoice,
+        canActivate: [routeGuard],
       },
     ],
   },
