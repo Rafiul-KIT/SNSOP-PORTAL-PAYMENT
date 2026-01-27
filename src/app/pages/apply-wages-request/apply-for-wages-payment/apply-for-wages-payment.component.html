@@ -134,8 +134,7 @@
                 </div>
                    <!-- Attachment -->
                 <div class="col-md-3 col-lg-3 mb-3">
-                  <label for="attachment" class="form-label fw-semibold">Attachments <small class="text-muted"><span class="text-danger">*</span>(Required for
-                      submission)</small></label>
+                  <label for="attachment" class="form-label fw-semibold">Attachments <small class="text-muted"><span class="text-danger">*</span>(Max size under {{MAX_ATTACHMENT_SIZE_MB}}MB)</small></label>
                   <input type="file" id="attachment" class="form-control" (change)="onFileChange($event)" multiple
                     [class.is-invalid]="wagesForm.get('attachment')?.invalid && wagesForm.get('attachment')?.touched">
                   @if (wagesForm.get('attachment')?.hasError('required') && wagesForm.get('attachment')?.touched) {
@@ -143,7 +142,9 @@
                   }
                   <!-- Show selected attachments -->
                   <div class="mt-2">
-                    <label class="form-label fw-semibold">Attachments:</label>
+                    @if (attachments.length > 0) {
+                      <label class="form-label fw-semibold">Attachments:</label>
+                    }
                     <div class="list-group">
                       @for (file of attachments; track $index) {
                         <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
@@ -155,6 +156,12 @@
                         <div class="list-group-item list-group-item-action">No files attached</div>
                       }
                     </div>
+                    @if (attachments.length > 0) {
+                      <div class="mt-2 small text-muted">
+                        <span>Total size: {{ formatBytes(totalAttachmentSize) }}</span> /
+                        <span>{{ MAX_ATTACHMENT_SIZE_MB }} MB</span>
+                      </div>
+                    }
                   </div>
                 </div>
 
