@@ -158,7 +158,7 @@
           </tr>
           <tr>
               <th class="text-center">S.No</th>
-                <th class="text-center">View</th>
+                <!-- <th class="text-center">View</th> -->
               <th class="text-center">State</th>
               <th class="text-center">County</th>
               <th class="text-center">Payam</th>
@@ -180,7 +180,7 @@
       <ng-template pTemplate="body" let-item let-i="rowIndex">
           <tr>
               <td class="text-center">{{ (currentPage * pageSize) + i + 1 }}</td>
-              <td class="text-center">    <p-button 
+              <!-- <td class="text-center">    <p-button 
                     type="button" 
                    icon="fa-solid fa-eye fa-lg" pTooltip="view"
                     tooltipPosition="top"
@@ -189,7 +189,7 @@
                     size="small" 
                     outlined="true" 
                     severity="secondary"
-                    class="me-2 big-icon-btn"/></td>
+                    class="me-2 big-icon-btn"/></td> -->
               <td class="text-center">{{ item.state }}</td>
               <td class="text-center">{{ item.county }}</td>
               <td class="text-center">{{ item.payam }}</td>
