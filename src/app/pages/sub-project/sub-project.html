@@ -308,7 +308,7 @@
                             <div class="col-lg-6">
                               <div class="row g-3">
                                 <div class="col-12">
-                                  <label class="form-label text-secondary fw-semibold">Type of Equipment Required</label>
+                                  <label class="form-label text-secondary fw-semibold">Type of Equipment Required </label>
                                   @if (activity.get('equipmentPhotoUrl')?.value) {
                                   <div class="mb-2">
                                     <button type="button" (click)="viewAttachment(activity.get('equipmentPhotoUrl')?.value)"
@@ -333,7 +333,7 @@
                                 </div>
 
                                 <div class="col-12">
-                                  <label class="form-label text-secondary fw-semibold">Work Attachment</label>
+                                  <label class="form-label text-secondary fw-semibold">Work Attachment </label>
                                   @if (activity.get('workPhotoUrl')?.value) {
                                   <div class="mb-2">
                                     <button type="button" (click)="viewAttachment(activity.get('workPhotoUrl')?.value)"
@@ -456,7 +456,7 @@
                 </button>
                 }
               </div>
-            </div>
+            </div> <small class="text-muted">(Max size under {{MAX_ATTACHMENT_SIZE_MB}}MB)</small>
           </div>
         </div>
 

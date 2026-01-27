@@ -76,10 +76,20 @@ export class WorkReview implements OnInit, OnDestroy {
 
   isLoading = signal<boolean>(false);
   subprojectId = signal<number | null>(null);
+  readonly MAX_ATTACHMENT_SIZE_MB = 25;
 
   proposalForm!: FormGroup;
   roleId!: number | null;
   approvalForm!: FormGroup;
+  
+  formatBytes(bytes: number, decimals = 2): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+  }
 
   breadcrumbItems: MenuItem[] = [
     { label: 'Dashboard', routerLink: '/dashboard' },
@@ -110,7 +120,11 @@ export class WorkReview implements OnInit, OnDestroy {
   }
 
   onApprovalFileSelect(evt: Event) {
-    handleFileUpload(evt, this.approvalForm, 'attachment'); 
+    handleFileUpload(evt, this.approvalForm, 'attachment', this.MAX_ATTACHMENT_SIZE_MB);
+  }
+
+  removeAttachment(): void {
+    this.approvalForm.get('attachment')?.setValue(null);
   }
 
 async submitApproval(isApproved: boolean): Promise<void> {

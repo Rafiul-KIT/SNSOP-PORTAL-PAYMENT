@@ -131,6 +131,8 @@ export class WageRequestDetails implements OnInit {
   reviewMessage: any[] = [];
   attachmentHistory: AttachmentHistory[] = [];
   isHistoryLoading = false;
+  readonly MAX_ATTACHMENT_SIZE_MB = 25;
+  totalAttachmentSize = 0;
 
   rowsPerPageOptions: number[] = [10, 25, 50]; // Will be updated dynamically
   paginationOptions: { label: string; value: number }[] = [];
@@ -311,7 +313,7 @@ export class WageRequestDetails implements OnInit {
   }
 
   onFilesSelected(event: Event): void {
-    const result = handleMultipleFileUpload(event, this.selectedFiles, 25);
+    const result = handleMultipleFileUpload(event, this.selectedFiles, this.MAX_ATTACHMENT_SIZE_MB);
     
     if (result.error) {
       Swal.fire({
@@ -325,6 +327,7 @@ export class WageRequestDetails implements OnInit {
     
     // Update form control if needed, e.g., for validation state
     this.reviewForm.get('attachment')?.setValue(this.selectedFiles.length > 0 ? this.selectedFiles : null);
+    this.updateTotalAttachmentSize();
     this.cdr.detectChanges();
   }
   
@@ -332,7 +335,12 @@ export class WageRequestDetails implements OnInit {
     this.selectedFiles.splice(index, 1);
     // Update form control if needed
     this.reviewForm.get('attachment')?.setValue(this.selectedFiles.length > 0 ? this.selectedFiles : null);
+    this.updateTotalAttachmentSize();
     this.cdr.detectChanges();
+  }
+
+  updateTotalAttachmentSize(): void {
+    this.totalAttachmentSize = this.selectedFiles.reduce((total, file) => total + file.size, 0);
   }
 
   formatBytes(bytes: number, decimals = 2): string {
@@ -428,6 +436,7 @@ export class WageRequestDetails implements OnInit {
 
         this.reviewForm.reset();
         this.selectedFiles = [];
+        this.updateTotalAttachmentSize();
 
         // Clear the file input
         const fileInput = document.getElementById(

@@ -143,6 +143,8 @@ export class WageRequestApproval implements OnInit {
   displayAttachmentModal = false;
   currentWageRequestForAttachment: WageRequest | null = null;
   selectedFiles: File[] = [];
+  readonly MAX_ATTACHMENT_SIZE_MB = 25;
+  totalAttachmentSize = 0;
 
   constructor(
     private fb: FormBuilder,
@@ -152,6 +154,19 @@ export class WageRequestApproval implements OnInit {
     private lookup: LookupService,
     private cdr: ChangeDetectorRef
   ) {}
+
+  formatBytes(bytes: number, decimals = 2): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+  }
+
+  updateTotalAttachmentSize(): void {
+    this.totalAttachmentSize = this.selectedFiles.reduce((total, file) => total + file.size, 0);
+  }
 
   async ngOnInit() {
     this.roleId = this.api.getUserRole();
@@ -328,13 +343,15 @@ export class WageRequestApproval implements OnInit {
   openAttachmentModal(wageRequest: WageRequest) {
     this.currentWageRequestForAttachment = wageRequest;
     this.selectedFiles = [...(wageRequest.attachments || [])];
+    this.updateTotalAttachmentSize();
     this.displayAttachmentModal = true;
   }
 
   onFilesInModalSelect(event: any) {
-    const result = handleMultipleFileUpload(event, this.selectedFiles); 
+    const result = handleMultipleFileUpload(event, this.selectedFiles, this.MAX_ATTACHMENT_SIZE_MB); 
 
     this.selectedFiles = result.validFiles;
+    this.updateTotalAttachmentSize();
 
     if (result.error) {
       Swal.fire({
@@ -350,6 +367,7 @@ export class WageRequestApproval implements OnInit {
 
   removeSelectedFile(fileToRemove: File) {
     this.selectedFiles = this.selectedFiles.filter(file => file !== fileToRemove);
+    this.updateTotalAttachmentSize();
   }
 
   saveAttachments() {
@@ -364,6 +382,7 @@ export class WageRequestApproval implements OnInit {
     this.displayAttachmentModal = false;
     this.currentWageRequestForAttachment = null;
     this.selectedFiles = [];
+    this.totalAttachmentSize = 0;
   }
 
   async submitRowReview(wageRequest: WageRequest) {

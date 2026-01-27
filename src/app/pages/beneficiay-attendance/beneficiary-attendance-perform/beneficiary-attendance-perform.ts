@@ -343,10 +343,10 @@ export class BeneficiaryAttendancePerform implements OnInit {
     const payload = {
       subprojectId: this.subproject.id,
       status: true,
-      list: this.selectedBeneficiaries.map(b => ({
+      list: this.beneficiaries.map(b => ({
         beneficiaryId: b.beneficiaryId,
         attendanceDate: attendanceDateStr,
-        present: b.present ?? false, // Default null/undefined status to absent
+        present: this.selectedBeneficiaries.includes(b) ? (b.present ?? false) : false,
         finlitAttended: null,
         ecdAttended: null,
         washAttended: null,
