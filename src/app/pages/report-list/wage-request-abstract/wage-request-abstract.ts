@@ -542,7 +542,13 @@ export class WageRequestAbstract implements OnInit {
       this.cdr.detectChanges();
     }
   }
-
+viewWageRequest(wageId: number, subprojectId: number) {
+  this.router.navigate([
+    '/wage-request/details',
+    wageId,
+    subprojectId
+  ]);
+}
   viewBeneficiaries(item: WageAbstractRecord) {
     this.messageService.add({
       severity: 'info',
