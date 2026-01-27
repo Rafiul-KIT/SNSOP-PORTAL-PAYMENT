@@ -56,11 +56,7 @@ export function dateRangeValidator(group: AbstractControl): ValidationErrors | n
     }
 
     const diffTime = Math.abs(to.getTime() - from.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
-    if (diffDays > 75) {
-      return { dateRangeTooLarge: true };
-    }
   }
   return null;
 }
@@ -273,13 +269,10 @@ export class MultipleAttendanceReport implements OnInit {
   showReport() {
     if (this.searchForm.invalid) {
         let errorMessages = '';
-        if (this.searchForm.hasError('dateRangeTooLarge')) {
-            errorMessages += '<p>The date range cannot exceed 75 days.</p>';
-        }
+       
         if (this.searchForm.hasError('fromDateAfterToDate')) {
             errorMessages += '<p>From Date cannot be after To Date.</p>';
         }
-
         const fromDateControl = this.searchForm.get('fromDate');
         if (fromDateControl && fromDateControl.errors) {
             if (fromDateControl.errors['required']) {
