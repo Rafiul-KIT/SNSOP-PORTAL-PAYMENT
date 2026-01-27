@@ -56,9 +56,11 @@ export class SubProject implements OnInit {
 
   targets: any[] = [];  // List to hold targets
   selectedTargetId: number | null = null; // To store the selected target's ID
+  readonly MAX_ATTACHMENT_SIZE_MB = 25;
+  totalCombinedAttachmentSize = 0;
   
   private removedWorkActivities: any[] = [];
-
+  
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
@@ -388,17 +390,31 @@ export class SubProject implements OnInit {
 
   onWorkPhotoSelect(event: Event, index: number): void {
     const sizeControlNames = ['workPhotoSize', 'equipmentPhotoSize', 'materialPhotoSize'];
-    this.lookupService.handleFileUploadValidation(event, this.workActivities, index, 'workPhoto', 'workPhotoName', 'workPhotoSize', sizeControlNames);
+    this.lookupService.handleFileUploadValidation(event, this.workActivities, index, 'workPhoto', 'workPhotoName', 'workPhotoSize', sizeControlNames, this.MAX_ATTACHMENT_SIZE_MB);
+    this.updateTotalCombinedAttachmentSize();
   }
 
   onEquipmentPhotoSelect(event: Event, index: number): void {
     const sizeControlNames = ['workPhotoSize', 'equipmentPhotoSize', 'materialPhotoSize'];
-    this.lookupService.handleFileUploadValidation(event, this.workActivities, index, 'equipmentPhoto', 'equipmentPhotoName', 'equipmentPhotoSize', sizeControlNames);
+    this.lookupService.handleFileUploadValidation(event, this.workActivities, index, 'equipmentPhoto', 'equipmentPhotoName', 'equipmentPhotoSize', sizeControlNames, this.MAX_ATTACHMENT_SIZE_MB);
+    this.updateTotalCombinedAttachmentSize();
   }
 
   onMaterialsPhotoSelect(event: Event, index: number): void {
     const sizeControlNames = ['workPhotoSize', 'equipmentPhotoSize', 'materialPhotoSize'];
-    this.lookupService.handleFileUploadValidation(event, this.workActivities, index, 'materialPhoto', 'materialPhotoName', 'materialPhotoSize', sizeControlNames);
+    this.lookupService.handleFileUploadValidation(event, this.workActivities, index, 'materialPhoto', 'materialPhotoName', 'materialPhotoSize', sizeControlNames, this.MAX_ATTACHMENT_SIZE_MB);
+    this.updateTotalCombinedAttachmentSize();
+  }
+
+  updateTotalCombinedAttachmentSize(): void {
+    let totalSize = 0;
+    this.workActivities.controls.forEach((activityControl: any) => {
+      totalSize += activityControl.get('workPhotoSize')?.value || 0;
+      totalSize += activityControl.get('equipmentPhotoSize')?.value || 0;
+      totalSize += activityControl.get('materialPhotoSize')?.value || 0;
+    });
+    this.totalCombinedAttachmentSize = totalSize;
+    this.cdr.detectChanges(); // Trigger change detection to update the view
   }
 
   private formatBytes(bytes: number, decimals = 2): string {
@@ -464,6 +480,7 @@ export class SubProject implements OnInit {
         fileInput.value = ''; // Clear the input element's value
       }
     }
+    this.updateTotalCombinedAttachmentSize();
   }
 
   async viewAttachment(path: string): Promise<void> {
@@ -762,6 +779,7 @@ export class SubProject implements OnInit {
     this.selectedTargetId = null; // Clear selected target
     this.availablePayams = []; // Clear available payams
     this.availableBomas = []; // Clear available bomas
+    this.totalCombinedAttachmentSize = 0;
   }
 
   onCancel(): void {
