@@ -257,47 +257,45 @@
 
                         <ng-template pTemplate="header">
                             <tr>
-                                <th>House Hold Number</th>
-                                <th>Name</th>
-                                <th>Gender</th>
-                                <th>Age</th>
-                                <th>Phone</th>
-                                <th>Total Days</th>
-                                <th>Present Days</th>
-                                <th>Absent Days</th>
-                                <th>Payment Status</th>
-                                <th>Wage (USD)</th>
-                                @if(showSspColumns()){
-                                <th>Exchange Rate</th>
-                                <th>Wage (SSP)</th>
-                                }
-                                <th>Total (USD)</th>
-                                @if(showSspColumns()){
-                                <th>Total (SSP)</th>
-                                }
+                                                            <th class="text-center">House Hold Number</th>
+                                                            <th class="text-center">Name</th>
+                                                            <th class="text-center">Gender</th>
+                                                            <th class="text-center">Age</th>
+                                                            <th class="text-center">Phone</th>
+                                                            <th class="text-center">Total Days</th>
+                                                            <th class="text-center">Present Days</th>
+                                                            <th class="text-center">Absent Days</th>
+                                                            <th class="text-center">Payment Status</th>
+                                                            <th class="text-center">Wage (USD)</th>
+                                                            @if(showSspColumns()){
+                                                            <th class="text-center">Exchange Rate</th>
+                                                            <th class="text-center">Wage (SSP)</th>
+                                                            }
+                                                            <th class="text-center">Total (USD)</th>
+                                                            @if(showSspColumns()){
+                                                            <th class="text-center">Total (SSP)</th>                                }
                             </tr>
                         </ng-template>
 
                         <ng-template pTemplate="body" let-bene>
                             <tr>
-                                <td>{{ bene.householdNumber }}</td>
-                                <td>{{ bene.beneficiaryName }}</td>
-                                <td>{{ getGenderName(bene.gender) }}</td>
-                                <td>{{ bene.age }}</td>
-                                <td>{{ bene.phoneNo }}</td>
-                                <td>{{ bene.totalDays }}</td>
-                                <td>{{ bene.presentDays }}</td>
-                                <td>{{ bene.absentDays }}</td>
-                                <td>{{ bene.paymentStatus == 1 ? 'Paid' : 'Unpaid' }}</td>
-                                <td>{{ bene.wageRateUSD | number:'1.2-2' }}</td>
-                                @if(showSspColumns()){
-                                <td>{{ bene.exchangeRate | number:'1.2-2' }}</td>
-                                <td>{{ bene.wageRateSSP | number:'1.2-2' }}</td>
-                                }
-                                <td>{{ bene.wageUsdTotal | number:'1.2-2' }}</td>
-                                @if(showSspColumns()){
-                                <td>{{ bene.wageSspTotal | number:'1.2-2' }}</td>
-                                }
+                                                            <td class="text-center">{{ bene.householdNumber }}</td>
+                                                            <td class="text-center">{{ bene.beneficiaryName }}</td>
+                                                            <td class="text-center">{{ getGenderName(bene.gender) }}</td>
+                                                            <td class="text-center">{{ bene.age }}</td>
+                                                            <td class="text-center">{{ bene.phoneNo }}</td>
+                                                            <td class="text-center">{{ bene.totalDays }}</td>
+                                                            <td class="text-center">{{ bene.presentDays }}</td>
+                                                            <td class="text-center">{{ bene.absentDays }}</td>
+                                                            <td class="text-center">{{ bene.paymentStatus == 1 ? 'Paid' : 'Unpaid' }}</td>
+                                                            <td class="text-center">{{ bene.wageRateUSD | number:'1.2-2' }}</td>
+                                                            @if(showSspColumns()){
+                                                            <td class="text-center">{{ bene.exchangeRate | number:'1.2-2' }}</td>
+                                                            <td class="text-center">{{ bene.wageRateSSP | number:'1.2-2' }}</td>
+                                                            }
+                                                            <td class="text-center">{{ bene.wageUsdTotal | number:'1.2-2' }}</td>
+                                                            @if(showSspColumns()){
+                                                            <td class="text-center">{{ bene.wageSspTotal | number:'1.2-2' }}</td>                                }
                             </tr>
                         </ng-template>
 
