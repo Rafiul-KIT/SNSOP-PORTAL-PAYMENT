@@ -263,6 +263,8 @@
                                 <th>Age</th>
                                 <th>Phone</th>
                                 <th>Total Days</th>
+                                <th>Present Days</th>
+                                <th>Absent Days</th>
                                 <th>Payment Status</th>
                                 <th>Wage (USD)</th>
                                 @if(showSspColumns()){
@@ -284,6 +286,8 @@
                                 <td>{{ bene.age }}</td>
                                 <td>{{ bene.phoneNo }}</td>
                                 <td>{{ bene.totalDays }}</td>
+                                <td>{{ bene.presentDays }}</td>
+                                <td>{{ bene.absentDays }}</td>
                                 <td>{{ bene.paymentStatus == 1 ? 'Paid' : 'Unpaid' }}</td>
                                 <td>{{ bene.wageRateUSD | number:'1.2-2' }}</td>
                                 @if(showSspColumns()){
