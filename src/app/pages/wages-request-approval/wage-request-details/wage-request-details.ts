@@ -112,7 +112,7 @@ export class WageRequestDetails implements OnInit {
   beneficiaries: Beneficiary[] = [];
   totalBeneficiaries = 0;
   beneficiaryCurrentPage = 0;
-  beneficiaryPageSize = 10;
+  beneficiaryPageSize = 20;
   isBeneficiaryLoading = false;
   isLoading = false;
   apiError = '';
@@ -134,7 +134,7 @@ export class WageRequestDetails implements OnInit {
   readonly MAX_ATTACHMENT_SIZE_MB = 25;
   totalAttachmentSize = 0;
 
-  rowsPerPageOptions: number[] = [10, 25, 50]; // Will be updated dynamically
+  rowsPerPageOptions: number[] = [20, 50, 100]; // Will be updated dynamically
   paginationOptions: { label: string; value: number }[] = [];
   private readonly statusMap = new Map<number, StatusInfo>([
     [0, { value: 'Draft', label: 'Draft', class: 'bg-secondary' }],
@@ -643,7 +643,7 @@ export class WageRequestDetails implements OnInit {
   }
 
   private updateRowsPerPageOptions(): void {
-    const baseOptions = [10, 25, 50];
+    const baseOptions = [20, 50, 100];
     this.paginationOptions = [];
 
     // Add standard options

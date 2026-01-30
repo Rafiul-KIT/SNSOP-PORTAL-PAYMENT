@@ -257,12 +257,13 @@
 
                         <ng-template pTemplate="header">
                             <tr>
+                                <th>SL</th>
                                 <th>House Hold Number</th>
-                                <th>Name</th>
+                                <th pSortableColumn="beneficiaryName">Name <p-sortIcon field="beneficiaryName"></p-sortIcon></th>
                                 <th>Gender</th>
                                 <th>Age</th>
                                 <th>Phone</th>
-                                <th>Total Days</th>
+                                <th pSortableColumn="totalDays">Total Days <p-sortIcon field="totalDays"></p-sortIcon></th>
                                 <th>Payment Status</th>
                                 <th>Wage (USD)</th>
                                 @if(showSspColumns()){
@@ -276,8 +277,9 @@
                             </tr>
                         </ng-template>
 
-                        <ng-template pTemplate="body" let-bene>
+                        <ng-template pTemplate="body" let-bene let-rowIndex="rowIndex">
                             <tr>
+                                <td>{{ beneficiaryCurrentPage * beneficiaryPageSize + rowIndex + 1 }}</td>
                                 <td>{{ bene.householdNumber }}</td>
                                 <td>{{ bene.beneficiaryName }}</td>
                                 <td>{{ getGenderName(bene.gender) }}</td>
@@ -299,7 +301,7 @@
 
                         <ng-template pTemplate="emptymessage">
                             <tr>
-                                <td [attr.colspan]="showSspColumns() ? 12 : 9" class="text-center">
+                                <td [attr.colspan]="showSspColumns() ? 13 : 10" class="text-center">
                                     No beneficiaries found.
                                 </td>
                             </tr>
@@ -356,7 +358,7 @@
         <!-- Review History & Attachments section -->
 
         <!-- Review Form Card -->
-        @if (wageRequest && roleId === 14) {
+        @if (wageRequest && roleId === 14 ) {
         <p-card class="mt-4 shadow-sm border-0 position-relative">
             <!-- Loading Overlay -->
             @if (isReviewSubmitting) {

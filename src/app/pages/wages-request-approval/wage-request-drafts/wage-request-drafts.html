@@ -193,17 +193,25 @@
                 </span>
             </td>
             <td class="text-center">
-                <p-button 
-                    type="button" 
-                   icon="fa-solid fa-eye fa-lg" pTooltip="view"
+                <p-button
+                    type="button"
+                   icon="fa-solid fa-eye fa-lg" pTooltip="View"
                     tooltipPosition="top"
-                    appendTo="body" 
-                    (onClick)="viewWageRequest(item.id,item.subprojectId)" 
-                    size="small" 
-                    outlined="true" 
+                    appendTo="body"
+                    (onClick)="viewWageRequest(item.id,item.subprojectId)"
+                    size="small"
+                    outlined="true"
                     severity="secondary"
                     class="me-2 big-icon-btn"/>
-                
+                @if (roleId === 14 ) {
+                <!-- <p-button
+                    type="button"
+                    label="Review"
+                    (onClick)="openReviewDialog(item.id)"
+                    size="small"
+                    outlined="true"
+                    severity="success"/> -->
+                }
             </td>
         </tr>
     </ng-template>
@@ -217,14 +225,104 @@
     </ng-template>
 </p-table>
 
-<p-paginator 
-    class="paginator-sticky" 
-    [rows]="pageSize" 
+<p-paginator
+    class="paginator-sticky"
+    [rows]="pageSize"
     [totalRecords]="totalRecords"
-    [rowsPerPageOptions]="[10, 25, 50]" 
-    (onPageChange)="onPageChange($event)" 
+    [rowsPerPageOptions]="[10, 25, 50]"
+    (onPageChange)="onPageChange($event)"
     [first]="(currentPage) * pageSize"
     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
 </p-paginator>
+
+<!-- Review Dialog for Role 14 -->
+<p-dialog
+    header="Review Wage Request"
+    [(visible)]="reviewDialogVisible"
+    [modal]="true"
+    [style]="{ width: '550px' }"
+    [closable]="true"
+    (onHide)="closeReviewDialog()">
+
+    @if (isReviewSubmitting) {
+    <div class="text-center py-4">
+        <i class="pi pi-spin pi-spinner" style="font-size: 2.5rem; color: #198754;"></i>
+        <div class="mt-2 fw-semibold text-success">Submitting review...</div>
+    </div>
+    } @else {
+    <form [formGroup]="reviewForm" (ngSubmit)="onSubmitReview()">
+        <div class="mb-3">
+            <label for="reviewApproved" class="form-label fw-semibold">Approval Status <span class="text-danger">*</span></label>
+            <p-select
+                id="reviewApproved"
+                formControlName="approved"
+                [options]="approvedOptions"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Select Approval Status"
+                [style]="{ width: '100%' }"
+                [ngClass]="{ 'ng-invalid ng-dirty': reviewForm.get('approved')?.invalid && reviewForm.get('approved')?.touched }">
+            </p-select>
+            @if (reviewForm.get('approved')?.invalid && reviewForm.get('approved')?.touched) {
+            <small class="text-danger mt-1 d-block">Approval Status is required.</small>
+            }
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Attachments (Optional, 25MB Total Limit)</label>
+            <input
+                type="file"
+                class="form-control"
+                id="reviewAttachment"
+                (change)="onReviewFilesSelected($event)"
+                multiple>
+        </div>
+
+        @if (selectedFiles.length > 0) {
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Selected Files</label>
+            <ul class="list-group">
+                @for (file of selectedFiles; track $index) {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div class="text-muted text-truncate">
+                        <i class="fas fa-file me-2"></i>
+                        {{ file.name }}
+                        <span class="text-secondary">({{ formatFileBytes(file.size) }})</span>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-danger p-1" (click)="removeFile($index)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </li>
+                }
+            </ul>
+            <div class="mt-2 small text-muted">
+                <span>Total size: {{ formatFileBytes(totalAttachmentSize) }}</span> /
+                <span>{{ MAX_ATTACHMENT_SIZE_MB }} MB</span>
+            </div>
+        </div>
+        }
+
+        @for (msg of reviewMessage; track msg) {
+        <p-message [severity]="msg.severity" [text]="msg.detail" class="mb-2 d-block"></p-message>
+        }
+
+        <div class="d-flex justify-content-end gap-2 mt-3">
+            <p-button
+                label="Cancel"
+                icon="pi pi-times"
+                severity="secondary"
+                [outlined]="true"
+                (onClick)="closeReviewDialog()">
+            </p-button>
+            <p-button
+                type="submit"
+                [label]="isReviewSubmitting ? 'Submitting...' : 'Submit Review'"
+                [icon]="isReviewSubmitting ? 'pi pi-spin pi-spinner' : 'pi pi-send'"
+                [disabled]="reviewForm.invalid || isReviewSubmitting">
+            </p-button>
+        </div>
+    </form>
+    }
+</p-dialog>
 
 }

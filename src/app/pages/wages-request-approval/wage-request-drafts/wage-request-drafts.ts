@@ -10,6 +10,7 @@ import {
   FormGroup,
   FormsModule,
   ReactiveFormsModule,
+  Validators,
   ValidatorFn,
   AbstractControl,
 } from '@angular/forms';
@@ -22,7 +23,8 @@ import { TooltipModule } from 'primeng/tooltip';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { SelectModule } from 'primeng/select';
-
+import { DialogModule } from 'primeng/dialog';
+import { MessageModule } from 'primeng/message';
 import { DatePickerModule } from 'primeng/datepicker';
 import { InputTextModule } from 'primeng/inputtext';
 import { MessageService } from 'primeng/api';
@@ -33,6 +35,8 @@ import {
   PaymentCycleEnum,
 } from '../../../services/lookup.service';
 import { Loader } from '../../../components/loader/loader';
+import Swal from 'sweetalert2';
+import { formatBytes, handleMultipleFileUpload } from '../../../validators/file-validator';
 
 interface WageRequestDto {
   id: number;
@@ -85,6 +89,8 @@ const dateRangeValidator: ValidatorFn = (
     TooltipModule,
     DatePickerModule,
     InputTextModule,
+    DialogModule,
+    MessageModule,
     Loader,
   ],
   providers: [MessageService],
@@ -123,6 +129,21 @@ export class WageRequestDrafts implements OnInit {
   currentPage = 0;
   pageSize = 10;
   advanceSearchPanelVisible = false;
+  roleId!: number | null;
+
+  // Review dialog properties
+  reviewDialogVisible = false;
+  reviewForm!: FormGroup;
+  reviewWageId: number | null = null;
+  approvedOptions = [
+    { label: 'Approve', value: true },
+    { label: 'Reject', value: false },
+  ];
+  selectedFiles: File[] = [];
+  isReviewSubmitting = false;
+  reviewMessage: any[] = [];
+  readonly MAX_ATTACHMENT_SIZE_MB = 25;
+  totalAttachmentSize = 0;
 
   constructor(
     private fb: FormBuilder,
@@ -165,6 +186,7 @@ export class WageRequestDrafts implements OnInit {
   }
 
   async ngOnInit() {
+    this.roleId = this.api.getUserRole();
     this.statuses = StatusWageEnum.filter(
       (status) => Number(status.id) === 0 || Number(status.id) === 100
     ).map((status) => ({ id: Number(status.id), label: status.label }));
@@ -172,6 +194,7 @@ export class WageRequestDrafts implements OnInit {
     this.initBreadcrumb();
       await this.loadInitialLookups();
     this.initForm();
+    this.initReviewForm();
     this.fetchPage(this.currentPage, this.pageSize);
   }
 
@@ -358,6 +381,128 @@ getSubProjectName(id: number): string {
     : '';
 }
 
+
+  // Review dialog methods
+  initReviewForm(): void {
+    this.reviewForm = this.fb.group({
+      approved: [null, Validators.required],
+      attachment: [null],
+    });
+  }
+
+  openReviewDialog(wageId: number): void {
+    this.reviewWageId = wageId;
+    this.reviewDialogVisible = true;
+    this.reviewForm.reset();
+    this.selectedFiles = [];
+    this.totalAttachmentSize = 0;
+    this.reviewMessage = [];
+  }
+
+  closeReviewDialog(): void {
+    this.reviewDialogVisible = false;
+    this.reviewWageId = null;
+    this.reviewForm.reset();
+    this.selectedFiles = [];
+    this.totalAttachmentSize = 0;
+    this.reviewMessage = [];
+  }
+
+  onReviewFilesSelected(event: Event): void {
+    const result = handleMultipleFileUpload(event, this.selectedFiles, this.MAX_ATTACHMENT_SIZE_MB);
+
+    if (result.error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'File Upload Error',
+        text: result.error,
+      });
+    }
+
+    this.selectedFiles = result.validFiles;
+    this.reviewForm.get('attachment')?.setValue(this.selectedFiles.length > 0 ? this.selectedFiles : null);
+    this.updateTotalAttachmentSize();
+    this.cdr.markForCheck();
+  }
+
+  removeFile(index: number): void {
+    this.selectedFiles.splice(index, 1);
+    this.reviewForm.get('attachment')?.setValue(this.selectedFiles.length > 0 ? this.selectedFiles : null);
+    this.updateTotalAttachmentSize();
+    this.cdr.markForCheck();
+  }
+
+  updateTotalAttachmentSize(): void {
+    this.totalAttachmentSize = this.selectedFiles.reduce((total, file) => total + file.size, 0);
+  }
+
+  formatFileBytes(bytes: number, decimals = 2): string {
+    return formatBytes(bytes, decimals);
+  }
+
+  async onSubmitReview(): Promise<void> {
+    if (!this.reviewWageId) {
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Wage Request ID is missing.' });
+      return;
+    }
+
+    if (this.reviewForm.invalid) {
+      this.reviewForm.markAllAsTouched();
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Please select Approval Status.' });
+      return;
+    }
+
+    this.isReviewSubmitting = true;
+    this.reviewMessage = [];
+
+    const formData = new FormData();
+    formData.append('wageRequestId', this.reviewWageId.toString());
+
+    const approvedValue = this.reviewForm.get('approved')?.value;
+    formData.append('approved', approvedValue.toString());
+
+    if (this.selectedFiles.length > 0) {
+      this.selectedFiles.forEach(file => {
+        formData.append('attachments', file, file.name);
+      });
+    }
+
+    try {
+      const response: any = await this.api.POST_FORM_DATA(
+        '/api/wage-request-review/first',
+        formData,
+      );
+
+      const responseData = response.data;
+
+      if (responseData?.code === 200 || responseData?.status === 'OK') {
+        this.closeReviewDialog();
+        Swal.fire({
+          icon: 'success',
+          title: 'Submitted',
+          text: 'Wage request review submitted successfully.',
+        }).then(() => {
+          this.fetchPage(this.currentPage, this.pageSize);
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: responseData?.message || 'Failed to submit review.',
+        });
+      }
+    } catch (error: any) {
+      console.error('Error submitting review:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.response?.data?.message || 'An unexpected error occurred.',
+      });
+    } finally {
+      this.isReviewSubmitting = false;
+      this.cdr.markForCheck();
+    }
+  }
 
   trackById = (_: number, row: WageRequestDto) => row.id;
 }
