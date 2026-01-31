@@ -945,7 +945,7 @@ export class SubProject implements OnInit {
 
   async loadAvailableTypesOfWork(): Promise<void> {
     try {
-      const res: any = await this.api.GET('api/lookup/generic/area-of-work');
+      const res: any = await this.api.GET('api/subproject/lookup/generic/area-of-work');
       if (res.data && Array.isArray(res.data.content)) {
         this.availableTypesOfWork = res.data.content.map((item: any) => ({
           id: String(item.id),
@@ -970,7 +970,7 @@ export class SubProject implements OnInit {
     }
     try {
       const res: any = await this.api.GET(
-        `api/lookup/generic/work-activity?areaOfWorkId=${areaOfWorkId}`
+        `api/subproject/lookup/generic/work-activity?areaOfWorkId=${areaOfWorkId}`
       );
       if (res.data && Array.isArray(res.data.content)) {
         const activities = res.data.content.map((item: any) => ({
