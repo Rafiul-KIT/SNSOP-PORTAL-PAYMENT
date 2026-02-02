@@ -42,69 +42,64 @@
                                     <span>Basic Information</span>
                                 </h5>
 
-                                                                <div class="list-group list-group-flush">
+                                <div class="list-group list-group-flush">
 
-                                                                    <div
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
 
-                                                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                        <span class="text-muted">Project Name:</span>
 
-                                                                        <span class="text-muted">Project Name:</span>
+                                        <span class="fw-semibold text-dark">{{ wageRequest.projectName || '—' }}</span>
 
-                                                                        <span class="fw-semibold text-dark">{{ wageRequest.projectName || '—' }}</span>
+                                    </div>
 
-                                                                    </div>
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
 
-                                                                    <div
+                                        <span class="text-muted">Work Code:</span>
 
-                                                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                        <span class="fw-semibold text-dark">{{ wageRequest.subprojectName || '—'
+                                            }}</span>
 
-                                                                        <span class="text-muted">Work Code:</span>
+                                    </div>
 
-                                                                        <span class="fw-semibold text-dark">{{ wageRequest.subprojectName || '—' }}</span>
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
 
-                                                                    </div>
+                                        <span class="text-muted">State:</span>
 
-                                                                    <div
+                                        <span class="fw-semibold text-dark">{{ wageRequest.state || '—' }}</span>
 
-                                                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                    </div>
 
-                                                                        <span class="text-muted">State:</span>
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
 
-                                                                        <span class="fw-semibold text-dark">{{ wageRequest.state || '—' }}</span>
+                                        <span class="text-muted">County:</span>
 
-                                                                    </div>
+                                        <span class="fw-semibold text-dark">{{ wageRequest.county || '—' }}</span>
 
-                                                                    <div
+                                    </div>
 
-                                                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
 
-                                                                        <span class="text-muted">County:</span>
+                                        <span class="text-muted">Payam:</span>
 
-                                                                        <span class="fw-semibold text-dark">{{ wageRequest.county || '—' }}</span>
+                                        <span class="fw-semibold text-dark">{{ wageRequest.payam || '—' }}</span>
 
-                                                                    </div>
+                                    </div>
 
-                                                                    <div
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 py-2">
 
-                                                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                        <span class="text-muted">Boma:</span>
 
-                                                                        <span class="text-muted">Payam:</span>
+                                        <span class="fw-semibold text-dark">{{ wageRequest.boma || '—' }}</span>
 
-                                                                        <span class="fw-semibold text-dark">{{ wageRequest.payam || '—' }}</span>
+                                    </div>
 
-                                                                    </div>
-
-                                                                    <div
-
-                                                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 py-2">
-
-                                                                        <span class="text-muted">Boma:</span>
-
-                                                                        <span class="fw-semibold text-dark">{{ wageRequest.boma || '—' }}</span>
-
-                                                                    </div>
-
-                                                                </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -257,12 +252,17 @@
 
                         <ng-template pTemplate="header">
                             <tr>
+                                <th>SL</th>
                                 <th>House Hold Number</th>
-                                <th>Name</th>
+                                <th pSortableColumn="beneficiaryName">Name <p-sortIcon
+                                        field="beneficiaryName"></p-sortIcon></th>
                                 <th>Gender</th>
                                 <th>Age</th>
                                 <th>Phone</th>
-                                <th>Total Days</th>
+                                <th pSortableColumn="totalDays">Total Days <p-sortIcon field="totalDays"></p-sortIcon>
+                                </th>
+                                <th class="text-center">Present Days</th>
+                                <th class="text-center">Absent Days</th>
                                 <th>Payment Status</th>
                                 <th>Wage (USD)</th>
                                 @if(showSspColumns()){
@@ -276,14 +276,17 @@
                             </tr>
                         </ng-template>
 
-                        <ng-template pTemplate="body" let-bene>
+                        <ng-template pTemplate="body" let-bene let-rowIndex="rowIndex">
                             <tr>
+                                <td>{{ beneficiaryCurrentPage * beneficiaryPageSize + rowIndex + 1 }}</td>
                                 <td>{{ bene.householdNumber }}</td>
                                 <td>{{ bene.beneficiaryName }}</td>
                                 <td>{{ getGenderName(bene.gender) }}</td>
                                 <td>{{ bene.age }}</td>
                                 <td>{{ bene.phoneNo }}</td>
                                 <td>{{ bene.totalDays }}</td>
+                                <td class="text-center">{{ bene.presentDays }}</td>
+                                <td class="text-center">{{ bene.absentDays }}</td>
                                 <td>{{ bene.paymentStatus == 1 ? 'Paid' : 'Unpaid' }}</td>
                                 <td>{{ bene.wageRateUSD | number:'1.2-2' }}</td>
                                 @if(showSspColumns()){
@@ -299,7 +302,7 @@
 
                         <ng-template pTemplate="emptymessage">
                             <tr>
-                                <td [attr.colspan]="showSspColumns() ? 12 : 9" class="text-center">
+                                <td [attr.colspan]="showSspColumns() ? 13 : 10" class="text-center">
                                     No beneficiaries found.
                                 </td>
                             </tr>
@@ -317,7 +320,7 @@
                         </div>
 
                         <!-- Right: Page navigation -->
-                     <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-2">
                             <p-button icon="pi pi-angle-double-left" [disabled]="beneficiaryCurrentPage === 0"
                                 (onClick)="onPageChange(0)" [text]="true" severity="secondary" size="small">
                             </p-button>
@@ -339,73 +342,104 @@
                                 (onClick)="onPageChange(totalPages - 1)" [text]="true" severity="secondary"
                                 size="small">
                             </p-button>
-                    </div>
-                    <!-- Left: Rows per page selector -->
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="text-muted">Rows per page:</span>
-                        <p-select [options]="paginationOptions" [(ngModel)]="beneficiaryPageSize"
-                            (onChange)="onPageSizeChange($event.value)" optionLabel="label" optionValue="value"
-                            [style]="{'width': '140px'}">
-                        </p-select>
-                    </div>
-
-        </div>
-        }
-        </p-card>
-        }
-        <!-- Review History & Attachments section -->
-
-        <!-- Review Form Card -->
-        @if (wageRequest && roleId === 14) {
-        <p-card class="mt-4 shadow-sm border-0 position-relative">
-            <!-- Loading Overlay -->
-            @if (isReviewSubmitting) {
-            <div class="review-loading-overlay">
-                <div class="d-flex flex-column align-items-center">
-                    <i class="pi pi-spin pi-spinner" style="font-size: 2.5rem; color: #198754;"></i>
-                    <span class="mt-2 fw-semibold text-success">Submitting review...</span>
-                </div>
-            </div>
-            }
-            <h5 class="mb-3 text-success">
-                <i class="pi pi-check-circle me-2"></i>
-                Review Wage Request
-            </h5>
-            <form [formGroup]="reviewForm" (ngSubmit)="onSubmitReview()">
-                <div class="row g-3">
-                    <div class="col-12">
-                        <label for="approved" class="form-label fw-semibold">Approval Status</label> &nbsp;
-                        <p-select id="approved" formControlName="approved" [options]="approvedOptions"
-                            optionLabel="label" optionValue="value" placeholder="Select Approval Status"
-                            [ngClass]="{ 'ng-invalid ng-dirty border-danger': reviewForm.get('approved')?.invalid && reviewForm.get('approved')?.touched }">
-                        </p-select>
-                        @if (reviewForm.get('approved')?.invalid && reviewForm.get('approved')?.touched) {
-                        <small class="p-error text-danger mt-1 d-block">Approval Status is required.</small>
-                        }
-                    </div>
-
-                    <div class="row align-items-stretch mt-4">
-                        <div class="col-md-6 d-flex flex-column">
-                            <label class="form-label fw-semibold">
-                                Attachments (Optional, 25MB Total Limit)
-                            </label>
-
-                            <input type="file"
-                                class="form-control"
-                                id="attachment"
-                                (change)="onFilesSelected($event)"
-                                multiple>
-
-                            <!-- spacer to stretch -->
-                            <div class="flex-grow-1"></div>
+                        </div>
+                        <!-- Left: Rows per page selector -->
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-muted">Rows per page:</span>
+                            <p-select [options]="paginationOptions" [(ngModel)]="beneficiaryPageSize"
+                                (onChange)="onPageSizeChange($event.value)" optionLabel="label" optionValue="value"
+                                [style]="{'width': '140px'}">
+                            </p-select>
                         </div>
 
-                        <div class="col-md-6 d-flex flex-column">
-                            @if (selectedFiles.length > 0) {
-                                <label class="form-label fw-semibold">Selected Files</label>
+                    </div>
+                    }
+                </p-card>
+                }
+                <!-- Review History & Attachments section -->
 
-                                <ul class="list-group file-list flex-grow-1">
-                                    @for (file of selectedFiles; track $index) {
+                <!-- Review Form Card -->
+                @if (wageRequest && roleId === 14 ) {
+                <p-card class="mt-4 shadow-sm border-0 position-relative">
+                    <!-- Loading Overlay -->
+                    @if (isReviewSubmitting) {
+                    <div class="review-loading-overlay">
+                        <div class="d-flex flex-column align-items-center">
+                            <i class="pi pi-spin pi-spinner" style="font-size: 2.5rem; color: #198754;"></i>
+                            <span class="mt-2 fw-semibold text-success">Submitting review...</span>
+                        </div>
+                    </div>
+                    }
+                    <h5 class="mb-3 text-success">
+                        <i class="pi pi-check-circle me-2"></i>
+                        Review Wage Request
+                    </h5>
+                    <form [formGroup]="reviewForm" (ngSubmit)="onSubmitReview()">
+                        <div class="row g-3">
+                            <!-- Exchange Rate -->
+                            <div class="col-md-6">
+                                <label for="exchangeRate" class="form-label fw-semibold">
+                                    Exchange Rate <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" class="form-control" id="exchangeRate"
+                                    formControlName="exchangeRate" placeholder="Enter exchange rate"
+                                    [ngClass]="{ 'is-invalid': reviewForm.get('exchangeRate')?.invalid && reviewForm.get('exchangeRate')?.touched }">
+                                @if (reviewForm.get('exchangeRate')?.invalid && reviewForm.get('exchangeRate')?.touched) {
+                                <small class="text-danger mt-1 d-block">Exchange Rate is required.</small>
+                                }
+                            </div>
+
+                            <!-- Approval Status -->
+                            <div class="col-md-6">
+                                <label for="approved" class="form-label fw-semibold">
+                                    Approval <span class="text-danger">*</span>
+                                </label>
+                                <p-select id="approved" formControlName="approved" [options]="approvedOptions"
+                                    optionLabel="label" optionValue="value" placeholder="Select Approval Status"
+                                    [ngClass]="{ 'ng-invalid ng-dirty border-danger': reviewForm.get('approved')?.invalid && reviewForm.get('approved')?.touched }">
+                                </p-select>
+                                @if (reviewForm.get('approved')?.invalid && reviewForm.get('approved')?.touched) {
+                                <small class="p-error text-danger mt-1 d-block">Approval is required.</small>
+                                }
+                            </div>
+
+                            <!-- Remarks -->
+                            <div class="col-12">
+                                <label for="comments" class="form-label fw-semibold">
+                                    Remarks <span class="text-danger">*</span>
+                                </label>
+                                <textarea class="form-control" id="comments" formControlName="comments" rows="3"
+                                    placeholder="Enter remarks"
+                                    [ngClass]="{ 'is-invalid': reviewForm.get('comments')?.invalid && reviewForm.get('comments')?.touched }"></textarea>
+                                @if (reviewForm.get('comments')?.invalid && reviewForm.get('comments')?.touched) {
+                                <small class="text-danger mt-1 d-block">Remarks is required.</small>
+                                }
+                            </div>
+
+                            <!-- Attachment -->
+                            <div class="row align-items-stretch mt-4">
+                                <div class="col-md-6 d-flex flex-column">
+                                    <label class="form-label fw-semibold">
+                                        Attachment <span class="text-danger">*</span> (25MB Total Limit)
+                                    </label>
+
+                                    <input type="file" class="form-control" id="attachment"
+                                        (change)="onFilesSelected($event)" multiple
+                                        [ngClass]="{ 'is-invalid': reviewForm.get('attachment')?.invalid && reviewForm.get('attachment')?.touched }">
+                                    @if (reviewForm.get('attachment')?.invalid && reviewForm.get('attachment')?.touched) {
+                                    <small class="text-danger mt-1 d-block">Attachment is required.</small>
+                                    }
+
+                                    <!-- spacer to stretch -->
+                                    <div class="flex-grow-1"></div>
+                                </div>
+
+                                <div class="col-md-6 d-flex flex-column">
+                                    @if (selectedFiles.length > 0) {
+                                    <label class="form-label fw-semibold">Selected Files</label>
+
+                                    <ul class="list-group file-list flex-grow-1">
+                                        @for (file of selectedFiles; track $index) {
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             <div class="text-muted text-truncate">
                                                 <i class="fas fa-file me-2"></i>
@@ -414,46 +448,44 @@
                                                     ({{ formatBytes(file.size) }})
                                                 </span>
                                             </div>
-                                            <button type="button"
-                                                    class="btn btn-sm btn-outline-danger p-1"
-                                                    (click)="removeFile($index)">
+                                            <button type="button" class="btn btn-sm btn-outline-danger p-1"
+                                                (click)="removeFile($index)">
                                                 <i class="fas fa-times"></i>
                                             </button>
                                         </li>
+                                        }
+                                    </ul>
+                                    <div class="mt-2 small text-muted">
+                                        <span>Total size: {{ formatBytes(totalAttachmentSize) }}</span> /
+                                        <span>{{ MAX_ATTACHMENT_SIZE_MB }} MB</span>
+                                    </div>
                                     }
-                                </ul>
-                                <div class="mt-2 small text-muted">
-                                    <span>Total size: {{ formatBytes(totalAttachmentSize) }}</span> /
-                                    <span>{{ MAX_ATTACHMENT_SIZE_MB }} MB</span>
-                                  </div>
-                            }
+                                </div>
+                            </div>
+
+
+                            <div class="col-12">
+                                @for (msg of reviewMessage; track msg) {
+                                <p-message [severity]="msg.severity" [text]="msg.detail" class="mb-2 d-block">
+                                </p-message>
+                                }
+                            </div>
+
+                            <div class="col-12">
+                                <p-button type="submit" [label]="isReviewSubmitting ? 'Submitting...' : 'Submit Review'"
+                                    [icon]="isReviewSubmitting ? 'pi pi-spin pi-spinner' : 'pi pi-send'"
+                                    [disabled]="isReviewSubmitting"
+                                    [loading]="isReviewSubmitting">
+                                </p-button>
+                            </div>
                         </div>
-                    </div>
+                    </form>
+                </p-card>
+                }
 
-
-                    <div class="col-12">
-                        @for (msg of reviewMessage; track msg) {
-                        <p-message [severity]="msg.severity" [text]="msg.detail" class="mb-2 d-block">
-                        </p-message>
-                        }
-                    </div>
-
-                    <div class="col-12">
-                        <p-button type="submit"
-                            [label]="isReviewSubmitting ? 'Submitting...' : 'Submit Review'"
-                            [icon]="isReviewSubmitting ? 'pi pi-spin pi-spinner' : 'pi pi-send'"
-                            [disabled]="reviewForm.invalid || isReviewSubmitting"
-                            [loading]="isReviewSubmitting">
-                        </p-button>
-                    </div>
-                </div>
-            </form>
-        </p-card>
-        }
-
-        </p-card>
-        }
+            </p-card>
+            }
+        </div>
     </div>
-</div>
 </div>
 }

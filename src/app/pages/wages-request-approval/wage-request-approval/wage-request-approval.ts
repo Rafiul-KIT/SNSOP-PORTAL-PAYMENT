@@ -386,44 +386,32 @@ export class WageRequestApproval implements OnInit {
   }
 
   async submitRowReview(wageRequest: WageRequest) {
-    if (
-      wageRequest.selectedStatus === null ||
-      wageRequest.selectedStatus === undefined
-    ) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Validation Error',
-        text: 'Please select an approval status.',
-      });
-      return;
+    const missingFields: string[] = [];
+
+    if (wageRequest.selectedStatus === null || wageRequest.selectedStatus === undefined) {
+      missingFields.push('Approval');
     }
 
-    if (wageRequest.selectedStatus === false && !wageRequest.remarksText) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Validation Error',
-        text: 'Remarks are required for rejection.',
-      });
-      return;
+    if (!wageRequest.remarksText) {
+      missingFields.push('Remarks');
     }
 
-    if (Number(this.roleId) === 11 && wageRequest.selectedStatus === true) {
+    if (Number(this.roleId) === 11) {
       if (!wageRequest.exchangeRate) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Validation Error',
-          text: 'Exchange Rate is required for approval.',
-        });
-        return;
+        missingFields.push('Exchange Rate');
       }
       if (!wageRequest.attachments || wageRequest.attachments.length === 0) {
-        Swal.fire({
-          icon: 'warning',
-          title: 'Validation Error',
-          text: 'Attachment is required for approval.',
-        });
-        return;
+        missingFields.push('Attachment');
       }
+    }
+
+    if (missingFields.length > 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Required Fields Missing',
+        html: `Please fill in the following required fields:<ul style="text-align: left; margin-top: 10px;">${missingFields.map(f => `<li>${f}</li>`).join('')}</ul>`,
+      });
+      return;
     }
 
     wageRequest.isSubmitting = true;

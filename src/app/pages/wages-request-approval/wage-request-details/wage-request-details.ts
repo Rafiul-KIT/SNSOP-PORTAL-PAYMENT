@@ -112,7 +112,7 @@ export class WageRequestDetails implements OnInit {
   beneficiaries: Beneficiary[] = [];
   totalBeneficiaries = 0;
   beneficiaryCurrentPage = 0;
-  beneficiaryPageSize = 10;
+  beneficiaryPageSize = 20;
   isBeneficiaryLoading = false;
   isLoading = false;
   apiError = '';
@@ -134,7 +134,7 @@ export class WageRequestDetails implements OnInit {
   readonly MAX_ATTACHMENT_SIZE_MB = 25;
   totalAttachmentSize = 0;
 
-  rowsPerPageOptions: number[] = [10, 25, 50]; // Will be updated dynamically
+  rowsPerPageOptions: number[] = [20, 50, 100]; // Will be updated dynamically
   paginationOptions: { label: string; value: number }[] = [];
   private readonly statusMap = new Map<number, StatusInfo>([
     [0, { value: 'Draft', label: 'Draft', class: 'bg-secondary' }],
@@ -350,9 +350,9 @@ export class WageRequestDetails implements OnInit {
   initReviewForm(): void {
     this.reviewForm = this.fb.group({
       approved: [null, Validators.required],
-      exchangeRate: [null],
-      comments: [''],
-      attachment: [null],
+      exchangeRate: [null, Validators.required],
+      comments: ['', Validators.required],
+      attachment: [null, Validators.required],
     });
   }
 
@@ -376,19 +376,18 @@ export class WageRequestDetails implements OnInit {
     }
 
     if (this.reviewForm.invalid) {
-      this.reviewMessage = [
-        {
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Please fill all required fields.',
-        },
-      ];
       this.reviewForm.markAllAsTouched();
 
+      const missingFields: string[] = [];
+      if (this.reviewForm.get('exchangeRate')?.invalid) missingFields.push('Exchange Rate');
+      if (this.reviewForm.get('attachment')?.invalid) missingFields.push('Attachment');
+      if (this.reviewForm.get('approved')?.invalid) missingFields.push('Approval');
+      if (this.reviewForm.get('comments')?.invalid) missingFields.push('Remarks');
+
       Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Please fill all required fields.',
+        icon: 'warning',
+        title: 'Required Fields Missing',
+        html: `Please fill in the following required fields:<ul style="text-align: left; margin-top: 10px;">${missingFields.map(f => `<li>${f}</li>`).join('')}</ul>`,
       });
       return;
     }
@@ -401,6 +400,12 @@ export class WageRequestDetails implements OnInit {
 
     const approvedValue = this.reviewForm.get('approved')?.value;
     formData.append('approved', approvedValue.toString());
+
+    const exchangeRate = this.reviewForm.get('exchangeRate')?.value;
+    formData.append('exchangeRate', exchangeRate.toString());
+
+    const comments = this.reviewForm.get('comments')?.value;
+    formData.append('comments', comments);
 
     // Append all selected files
     if (this.selectedFiles.length > 0) {
@@ -643,7 +648,7 @@ export class WageRequestDetails implements OnInit {
   }
 
   private updateRowsPerPageOptions(): void {
-    const baseOptions = [10, 25, 50];
+    const baseOptions = [20, 50, 100];
     this.paginationOptions = [];
 
     // Add standard options
