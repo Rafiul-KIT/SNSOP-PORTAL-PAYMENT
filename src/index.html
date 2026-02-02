@@ -1,14 +1,306 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>SNSOP Portal Payment</title>
-    <base href="/" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/x-icon" href="logo_link.png" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  </head>
-  <body>
-    <app-root>Loading...</app-root>
-  </body>
+
+<head>
+  <meta charset="utf-8" />
+  <title>SNSOP Portal Payment</title>
+  <base href="/" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/x-icon" href="logo_link.png" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    body {
+      margin: 0;
+    }
+
+    .init-loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #e7f1ff;
+      z-index: 9999;
+      gap: 24px;
+    }
+
+    .init-loader-brand {
+      animation: init-fade-in 0.6s ease-out both;
+    }
+
+    .init-loader-brand img {
+      height: 56px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .init-spinner {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: init-fade-in 0.8s ease-out 0.2s both;
+    }
+
+    .init-orbit {
+      position: absolute;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      animation: init-orbit-spin linear infinite;
+    }
+
+    .init-dot {
+      position: absolute;
+      border-radius: 50%;
+      top: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .init-orbit-1 {
+      width: 140px;
+      height: 140px;
+      animation-duration: 2.5s;
+      border-top-color: rgba(7, 137, 48, 0.3);
+      border-right-color: rgba(7, 137, 48, 0.08);
+    }
+
+    .init-orbit-1 .init-dot {
+      width: 12px;
+      height: 12px;
+      background: #078930;
+      box-shadow: 0 0 10px rgba(7, 137, 48, 0.6), 0 0 20px rgba(7, 137, 48, 0.2);
+    }
+
+    .init-orbit-2 {
+      width: 104px;
+      height: 104px;
+      animation-duration: 2s;
+      animation-direction: reverse;
+      border-top-color: rgba(207, 9, 33, 0.3);
+      border-left-color: rgba(207, 9, 33, 0.08);
+    }
+
+    .init-orbit-2 .init-dot {
+      width: 10px;
+      height: 10px;
+      background: #CF0921;
+      box-shadow: 0 0 10px rgba(207, 9, 33, 0.6), 0 0 20px rgba(207, 9, 33, 0.2);
+    }
+
+    .init-orbit-3 {
+      width: 68px;
+      height: 68px;
+      animation-duration: 1.5s;
+      border-bottom-color: rgba(15, 71, 175, 0.3);
+      border-right-color: rgba(15, 71, 175, 0.08);
+    }
+
+    .init-orbit-3 .init-dot {
+      width: 8px;
+      height: 8px;
+      top: auto;
+      bottom: -4px;
+      background: #0F47AF;
+      box-shadow: 0 0 10px rgba(15, 71, 175, 0.6), 0 0 20px rgba(15, 71, 175, 0.2);
+    }
+
+    .init-core {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(252, 221, 9, 0.8) 0%, rgba(252, 221, 9, 0.2) 60%, transparent 70%);
+      animation: init-core-pulse 2s ease-in-out infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .init-core-inner {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #FCDD09 30%, #d4b800 100%);
+      box-shadow: 0 0 12px rgba(252, 221, 9, 0.8), 0 0 28px rgba(252, 221, 9, 0.35), 0 0 48px rgba(252, 221, 9, 0.15);
+      animation: init-core-inner-pulse 1.5s ease-in-out infinite alternate;
+    }
+
+    .init-pulse {
+      position: absolute;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(252, 221, 9, 0.4);
+      animation: init-pulse-expand 3s ease-out infinite;
+      pointer-events: none;
+    }
+
+    .init-pulse-1 {
+      animation-delay: 0s;
+    }
+
+    .init-pulse-2 {
+      animation-delay: 1s;
+    }
+
+    .init-pulse-3 {
+      animation-delay: 2s;
+    }
+
+    .init-text {
+      display: flex;
+      gap: 3px;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      animation: init-fade-in 0.8s ease-out 0.6s both;
+    }
+
+    .init-text span {
+      color: rgba(26, 26, 46, 0.25);
+      animation: init-text-wave 2.5s ease-in-out infinite;
+      animation-delay: calc(var(--i) * 0.12s);
+    }
+
+    @keyframes init-orbit-spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes init-core-pulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 0.85;
+      }
+
+      50% {
+        transform: scale(1.12);
+        opacity: 1;
+      }
+    }
+
+    @keyframes init-core-inner-pulse {
+      0% {
+        transform: scale(0.9);
+        box-shadow: 0 0 10px rgba(252, 221, 9, 0.7), 0 0 22px rgba(252, 221, 9, 0.3), 0 0 40px rgba(252, 221, 9, 0.1);
+      }
+
+      100% {
+        transform: scale(1.1);
+        box-shadow: 0 0 16px rgba(252, 221, 9, 0.9), 0 0 36px rgba(252, 221, 9, 0.45), 0 0 60px rgba(252, 221, 9, 0.2);
+      }
+    }
+
+    @keyframes init-pulse-expand {
+      0% {
+        transform: scale(1);
+        opacity: 0.6;
+        border-color: rgba(252, 221, 9, 0.4);
+      }
+
+      100% {
+        transform: scale(4.5);
+        opacity: 0;
+        border-color: rgba(252, 221, 9, 0);
+      }
+    }
+
+    @keyframes init-text-wave {
+
+      0%,
+      100% {
+        color: rgba(26, 26, 46, 0.25);
+        transform: translateY(0);
+        text-shadow: none;
+      }
+
+      25% {
+        color: #078930;
+        transform: translateY(-3px);
+        text-shadow: 0 0 8px rgba(7, 137, 48, 0.3);
+      }
+
+      50% {
+        color: #CF0921;
+        transform: translateY(-2px);
+        text-shadow: 0 0 8px rgba(207, 9, 33, 0.3);
+      }
+
+      75% {
+        color: #0F47AF;
+        transform: translateY(-3px);
+        text-shadow: 0 0 8px rgba(15, 71, 175, 0.3);
+      }
+    }
+
+    @keyframes init-fade-in {
+      0% {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <app-root>
+    <div class="init-loader">
+      <div class="init-loader-brand">
+        <img src="SNSOP_logo.png" alt="SNSOP Logo" />
+      </div>
+      <div class="init-spinner">
+        <div class="init-orbit init-orbit-1">
+          <div class="init-dot"></div>
+        </div>
+        <div class="init-orbit init-orbit-2">
+          <div class="init-dot"></div>
+        </div>
+        <div class="init-orbit init-orbit-3">
+          <div class="init-dot"></div>
+        </div>
+        <div class="init-core">
+          <div class="init-core-inner"></div>
+        </div>
+        <div class="init-pulse init-pulse-1"></div>
+        <div class="init-pulse init-pulse-2"></div>
+        <div class="init-pulse init-pulse-3"></div>
+      </div>
+      <div class="init-text">
+        <span style="--i:0">W</span>
+        <span style="--i:1">E</span>
+        <span style="--i:2">L</span>
+        <span style="--i:3">C</span>
+        <span style="--i:4">O</span>
+        <span style="--i:5">M</span>
+        <span style="--i:6">E</span>
+        <span style="--i:7">.</span>
+        <span style="--i:8">.</span>
+        <span style="--i:9">.</span>
+      </div>
+    </div>
+  </app-root>
+</body>
+
 </html>
