@@ -70,8 +70,10 @@
                                                     class="p-button-primary" label="Search" (click)="onSearch()"
                                                     [disabled]="isAttendanceDateInvalid()"></button>
                                             </div>
-                                            @if (isAttendanceDateInvalid() && attendanceDateTouched) {
+                                            @if (attendanceDateTouched && !attendanceDate) {
                                             <div class="text-danger mt-1">Attendance Date is required.</div>
+                                            } @else if (attendanceDateTouched && minAttendanceDate && attendanceDate < minAttendanceDate) {
+                                            <div class="text-danger mt-1">Attendance date cannot be earlier than the approved date ({{minAttendanceDate | date: 'dd/MM/yyyy'}}).</div>
                                             }
                                         </div>
                                     </div>

@@ -276,7 +276,13 @@ export class BeneficiaryAttendancePerform implements OnInit {
   }
 
   isAttendanceDateInvalid(): boolean {
-    return !this.attendanceDate;
+    if (!this.attendanceDate) {
+      return true; // Date is required
+    }
+    if (this.minAttendanceDate && this.attendanceDate < this.minAttendanceDate) {
+      return true; // Date cannot be earlier than minAttendanceDate
+    }
+    return false;
   }
 
   formatDate(date: string | null): string {
@@ -356,7 +362,7 @@ export class BeneficiaryAttendancePerform implements OnInit {
 
     this.api.POST('api/attendance/save', payload)
       .then((res: any) => {
-        if (res && res.data.code === 200) {
+        if (res && res.data && res.data.code === 200) {
                     Swal.fire({
                       icon: 'success',
                       title: 'Success',
@@ -373,16 +379,20 @@ export class BeneficiaryAttendancePerform implements OnInit {
                     Swal.fire({
                       icon: 'error',
                       title: 'Save Failed',
-                      text: res.message || 'An unknown error occurred while saving.',
+                      text: res.data.message || 'An unknown error occurred while saving.', // Corrected to res.data.message
                     });
         }
       })
       .catch(err => {
         console.error('Error saving attendance:', err);
+                let errorMessage = 'Failed to save attendance. Please check the console for details.';
+                if (err.response && err.response.data && err.response.data.message) {
+                  errorMessage = err.response.data.message;
+                }
                 Swal.fire({
                   icon: 'error',
                   title: 'API Error',
-                  text: 'Failed to save attendance. Please check the console for details.',
+                  text: errorMessage,
                 });
       })
       .finally(() => {
