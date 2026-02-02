@@ -45,6 +45,7 @@ export class SubProject implements OnInit {
   breadcrumbHome: any;
   subprojectId: string | null = null;
   workCode: string | null =null;
+  subProjectStatus: string | null = null;
 
   availableProjects: { id: number; name: string }[] = [];
   availableTypesOfWork: { id: string; description: string }[] = [];
@@ -227,6 +228,8 @@ export class SubProject implements OnInit {
       const activities = Array.isArray(workDetailsData)
         ? workDetailsData
         : workDetailsData?.content ?? [];
+
+      this.subProjectStatus = subProjectData.status;
 
       if (!subProjectData) {
         console.error(`Sub-project with id ${id} not found.`);
@@ -780,6 +783,7 @@ export class SubProject implements OnInit {
     this.availablePayams = []; // Clear available payams
     this.availableBomas = []; // Clear available bomas
     this.totalCombinedAttachmentSize = 0;
+    this.subProjectStatus = null;
   }
 
   onCancel(): void {
