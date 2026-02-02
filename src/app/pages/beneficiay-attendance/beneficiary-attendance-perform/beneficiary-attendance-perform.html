@@ -63,7 +63,8 @@
                                                 <p-datepicker [(ngModel)]="attendanceDate"
                                                     (ngModelChange)="onAttendanceDateChange($event)" [showIcon]="true"
                                                     dateFormat="dd/mm/yy" placeholder="Select date"
-                                                    [minDate]="minAttendanceDate"
+                                                    [minDate]="minAttendanceDate"  
+                                                    [maxDate]="maxAttendanceDate"
                                                     [ngClass]="{'ng-invalid ng-dirty': isAttendanceDateInvalid() && attendanceDateTouched}"></p-datepicker>
                                                 &nbsp; &nbsp; &nbsp;
                                                 <button pButton type="button" icon="fas fa-search"

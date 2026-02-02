@@ -97,7 +97,8 @@ export class BeneficiaryAttendancePerform implements OnInit {
   currentPage = 0;
     pageSize = 10;
     minAttendanceDate: Date | undefined;
-  
+    maxAttendanceDate: Date = new Date();
+
     attendanceDate: Date | null = null;
   attendanceDateTouched: boolean = false;
 
