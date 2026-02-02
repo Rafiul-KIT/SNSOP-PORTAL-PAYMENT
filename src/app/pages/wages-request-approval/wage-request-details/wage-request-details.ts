@@ -17,6 +17,7 @@ import { SelectModule } from 'primeng/select';
 import { FileUploadModule } from 'primeng/fileupload';
 import { MessageModule } from 'primeng/message';
 import { ButtonModule } from 'primeng/button';
+import { ProgressBarModule } from 'primeng/progressbar';
 import { Loader } from '../../../components/loader/loader';
 import { ApiService } from '../../../services/api.service';
 import { LookupService } from '../../../services/lookup.service';
@@ -101,6 +102,7 @@ interface StatusInfo {
     MessageModule,
     ButtonModule,
     FileUploadModule,
+    ProgressBarModule,
     Loader,
   ],
   templateUrl: './wage-request-details.html',
@@ -133,6 +135,7 @@ export class WageRequestDetails implements OnInit {
   isHistoryLoading = false;
   readonly MAX_ATTACHMENT_SIZE_MB = 25;
   totalAttachmentSize = 0;
+  downloadProgress: Map<string, number> = new Map();
 
   rowsPerPageOptions: number[] = [20, 50, 100]; // Will be updated dynamically
   paginationOptions: { label: string; value: number }[] = [];
@@ -574,22 +577,39 @@ export class WageRequestDetails implements OnInit {
   }
 
   async handleAttachmentClick(history: AttachmentHistory): Promise<void> {
-    if (history.attachmentUrl &&  history.attachmentUrl.startsWith('https://')) {
-
+    if (history.attachmentUrl && history.attachmentUrl.startsWith('https://')) {
       window.open(history.attachmentUrl, '_blank');
     } else if (history.filePath) {
-    
+      const key = history.filePath;
+      this.downloadProgress.set(key, 0);
+      this.cdr.detectChanges();
+
       try {
         const response: any = await this.apiService.GET_CONFIG(
           `/api/wage-request-review/wageRequest/attachment/get?filePath=${history.filePath}`,
-          { responseType: 'blob' } 
+          {
+            responseType: 'blob',
+            onDownloadProgress: (progressEvent: any) => {
+              if (progressEvent.total) {
+                const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                this.downloadProgress.set(key, percent);
+              } else {
+                // If total is unknown, show indeterminate-style progress
+                this.downloadProgress.set(key, -1);
+              }
+              this.cdr.detectChanges();
+            },
+          }
         );
+
+        this.downloadProgress.set(key, 100);
+        this.cdr.detectChanges();
 
         const blob = new Blob([response.data], { type: response.headers.get('Content-Type') });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = history.fileName || 'download'; 
+        a.download = history.fileName || 'download';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -601,6 +621,9 @@ export class WageRequestDetails implements OnInit {
           title: 'Download Failed',
           text: 'Could not download the attachment. Please try again.',
         });
+      } finally {
+        this.downloadProgress.delete(key);
+        this.cdr.detectChanges();
       }
     } else {
       console.warn('No attachment URL or file path available for download.');
