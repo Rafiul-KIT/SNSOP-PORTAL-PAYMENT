@@ -200,10 +200,22 @@
                                 <td class="text-center">{{ history.comments }}</td>
                                 <td class="text-center">
                                     @if (history.attachmentUrl) {
-                                    <a (click)="handleAttachmentClick(history)"
-                                        class="btn btn-sm btn-outline-primary cursor-pointer">
-                                        <i class="pi pi-download me-1"></i> {{ history.fileName }}
-                                    </a>
+                                        @if (downloadProgress.has(history.filePath)) {
+                                        <div class="d-flex flex-column align-items-center gap-1" style="min-width: 150px;">
+                                            <small class="text-muted">Downloading...</small>
+                                            @if (downloadProgress.get(history.filePath) === -1) {
+                                            <p-progressBar mode="indeterminate" [style]="{ height: '6px', width: '100%' }"></p-progressBar>
+                                            } @else {
+                                            <p-progressBar [value]="downloadProgress.get(history.filePath) ?? 0" [style]="{ height: '6px', width: '100%' }" [showValue]="false"></p-progressBar>
+                                            <small class="text-muted">{{ downloadProgress.get(history.filePath) }}%</small>
+                                            }
+                                        </div>
+                                        } @else {
+                                        <a (click)="handleAttachmentClick(history)"
+                                            class="btn btn-sm btn-outline-primary cursor-pointer">
+                                            <i class="pi pi-download me-1"></i> {{ history.fileName }}
+                                        </a>
+                                        }
                                     } @else {
                                     <span>—</span>
                                     }
