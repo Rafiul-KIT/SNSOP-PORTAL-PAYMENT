@@ -36,7 +36,7 @@
       <tr>
         <td>
           <p-tableCheckbox [value]="beneficiary"
-            [disabled]="beneficiary.status !== 'PAYROLL_GENERATED'"></p-tableCheckbox>
+            [disabled]="!isSelectable(beneficiary.status)"></p-tableCheckbox>
         </td>
         <td>{{ beneficiary.transactionId }}</td>
         <td>{{ beneficiary.recipientFullName }}</td>

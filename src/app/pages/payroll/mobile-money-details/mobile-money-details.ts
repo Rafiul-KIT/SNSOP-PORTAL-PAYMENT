@@ -202,4 +202,10 @@ export class MobileMoneyDetails implements OnInit {
       detail: `Name: ${event.data.recipientFullName}`,
     });
   }
+
+  isSelectable(status: string): boolean {
+    return ['PAYROLL_GENERATED', 'RECONCILED_AS_UNPAID', 'ABANDONED'].includes(
+      status
+    );
+  }
 }
