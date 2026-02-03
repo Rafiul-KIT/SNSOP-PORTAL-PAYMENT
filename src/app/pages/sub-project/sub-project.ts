@@ -627,7 +627,7 @@ export class SubProject implements OnInit {
         typeOfMeeting: formValue.typeOfMeeting,
         meetingDate: formValue.meetingDate ? this.formatDateForApi(formValue.meetingDate) : null,
         screeningStatus: formValue.paperScreeningStatus ? parseInt(formValue.paperScreeningStatus, 10) : null,
-        status: '',
+        status: this.subprojectId ? this.subProjectStatus : '',
       };
 
       const subProjectResponse = await this.api.POST('api/subproject/save', subProjectPayload);
