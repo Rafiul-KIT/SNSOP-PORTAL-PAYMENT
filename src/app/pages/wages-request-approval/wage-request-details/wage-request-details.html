@@ -387,9 +387,9 @@
                         Review Wage Request
                     </h5>
                     <form [formGroup]="reviewForm" (ngSubmit)="onSubmitReview()">
-                        <div class="row g-3">
+                        <div class="col gap-3">
                             <!-- Exchange Rate -->
-                            <div class="col-md-6">
+                            <!-- <div class="col-md-6">
                                 <label for="exchangeRate" class="form-label fw-semibold">
                                     Exchange Rate <span class="text-danger">*</span>
                                 </label>
@@ -399,10 +399,10 @@
                                 @if (reviewForm.get('exchangeRate')?.invalid && reviewForm.get('exchangeRate')?.touched) {
                                 <small class="text-danger mt-1 d-block">Exchange Rate is required.</small>
                                 }
-                            </div>
+                            </div> -->
 
                             <!-- Approval Status -->
-                            <div class="col-md-6">
+                            <div class=" col-2 d-flex flex-column">
                                 <label for="approved" class="form-label fw-semibold">
                                     Approval <span class="text-danger">*</span>
                                 </label>
@@ -416,7 +416,7 @@
                             </div>
 
                             <!-- Remarks -->
-                            <div class="col-12">
+                            <div class="col-6">
                                 <label for="comments" class="form-label fw-semibold">
                                     Remarks <span class="text-danger">*</span>
                                 </label>
@@ -483,7 +483,7 @@
                                 }
                             </div>
 
-                            <div class="col-12">
+                            <div class="col-12 mt-4">
                                 <p-button type="submit" [label]="isReviewSubmitting ? 'Submitting...' : 'Submit Review'"
                                     [icon]="isReviewSubmitting ? 'pi pi-spin pi-spinner' : 'pi pi-send'"
                                     [disabled]="isReviewSubmitting"
