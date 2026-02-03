@@ -353,7 +353,7 @@ export class WageRequestDetails implements OnInit {
   initReviewForm(): void {
     this.reviewForm = this.fb.group({
       approved: [null, Validators.required],
-      exchangeRate: [null, Validators.required],
+    
       comments: ['', Validators.required],
       attachment: [null, Validators.required],
     });
@@ -382,7 +382,6 @@ export class WageRequestDetails implements OnInit {
       this.reviewForm.markAllAsTouched();
 
       const missingFields: string[] = [];
-      if (this.reviewForm.get('exchangeRate')?.invalid) missingFields.push('Exchange Rate');
       if (this.reviewForm.get('attachment')?.invalid) missingFields.push('Attachment');
       if (this.reviewForm.get('approved')?.invalid) missingFields.push('Approval');
       if (this.reviewForm.get('comments')?.invalid) missingFields.push('Remarks');
@@ -404,8 +403,7 @@ export class WageRequestDetails implements OnInit {
     const approvedValue = this.reviewForm.get('approved')?.value;
     formData.append('approved', approvedValue.toString());
 
-    const exchangeRate = this.reviewForm.get('exchangeRate')?.value;
-    formData.append('exchangeRate', exchangeRate.toString());
+
 
     const comments = this.reviewForm.get('comments')?.value;
     formData.append('comments', comments);

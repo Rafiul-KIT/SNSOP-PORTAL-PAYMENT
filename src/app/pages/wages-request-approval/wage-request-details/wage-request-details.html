@@ -484,10 +484,11 @@
                             </div>
 
                             <div class="col-12 mt-4">
-                                <p-button type="submit" [label]="isReviewSubmitting ? 'Submitting...' : 'Submit Review'"
+                                <p-button type="button" [label]="isReviewSubmitting ? 'Submitting...' : 'Submit Review'"
                                     [icon]="isReviewSubmitting ? 'pi pi-spin pi-spinner' : 'pi pi-send'"
                                     [disabled]="isReviewSubmitting"
-                                    [loading]="isReviewSubmitting">
+                                    [loading]="isReviewSubmitting"
+                                    (click)="onSubmitReview()">
                                 </p-button>
                             </div>
                         </div>
