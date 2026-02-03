@@ -353,9 +353,8 @@ export class WageRequestDetails implements OnInit {
   initReviewForm(): void {
     this.reviewForm = this.fb.group({
       approved: [null, Validators.required],
-    
       comments: ['', Validators.required],
-      attachment: [null, Validators.required],
+      attachment: [null ],
     });
   }
 

@@ -416,7 +416,7 @@
                             </div>
 
                             <!-- Remarks -->
-                            <div class="col-6">
+                            <div class="col-4">
                                 <label for="comments" class="form-label fw-semibold">
                                     Remarks <span class="text-danger">*</span>
                                 </label>
@@ -430,17 +430,15 @@
 
                             <!-- Attachment -->
                             <div class="row align-items-stretch mt-4">
-                                <div class="col-md-6 d-flex flex-column">
+                                <div class="col-md-4 d-flex flex-column">
                                     <label class="form-label fw-semibold">
-                                        Attachment <span class="text-danger">*</span> (25MB Total Limit)
+                                        Attachments  (25MB Total Limit)
                                     </label>
 
                                     <input type="file" class="form-control" id="attachment"
                                         (change)="onFilesSelected($event)" multiple
                                         [ngClass]="{ 'is-invalid': reviewForm.get('attachment')?.invalid && reviewForm.get('attachment')?.touched }">
-                                    @if (reviewForm.get('attachment')?.invalid && reviewForm.get('attachment')?.touched) {
-                                    <small class="text-danger mt-1 d-block">Attachment is required.</small>
-                                    }
+                                
 
                                     <!-- spacer to stretch -->
                                     <div class="flex-grow-1"></div>
