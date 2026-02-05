@@ -167,6 +167,11 @@ export class Header {
         routerLink: 'attendance',
       },
       {
+        label: 'Training Attendance',
+        icon: 'fas fa-user-clock',
+        routerLink: 'training-attendance',
+      },
+      {
         label: 'Wage Request',
         icon: 'fas fa-receipt',
         items: [
@@ -277,7 +282,8 @@ export class Header {
             routerLink: 'invoice/paid-date-wise-payment-invoice',
           },
         ]
-      }
+      },
+      
     ];
   }
 
