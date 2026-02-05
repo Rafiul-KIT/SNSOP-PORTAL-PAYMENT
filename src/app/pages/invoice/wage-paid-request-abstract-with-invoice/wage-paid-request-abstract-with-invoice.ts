@@ -20,6 +20,7 @@ import {
   LookupService,
   PaymentCycleEnum,
 } from '../../../services/lookup.service';
+import { InputText } from "primeng/inputtext";
 
 @Component({
   selector: 'app-wage-paid-request-abstract-with-invoice',
@@ -36,7 +37,8 @@ import {
     PaginatorModule,
     ToastModule,
     MultiSelectModule,
-  ],
+    InputText
+],
   templateUrl: './wage-paid-request-abstract-with-invoice.html',
   styleUrl: './wage-paid-request-abstract-with-invoice.scss',
   providers: [MessageService],
@@ -79,7 +81,6 @@ export class WagePaidRequestAbstractWithInvoice implements OnInit {
     this.initBreadcrumb();
     this.initForm();
     this.loadStates();
-    this.search();
     return Promise.resolve();
   }
 
@@ -104,6 +105,8 @@ export class WagePaidRequestAbstractWithInvoice implements OnInit {
       county: [{ value: null, disabled: true }],
       payam: [{ value: null, disabled: true }],
       boma: [{ value: null, disabled: true }],
+      workCode: [''],
+      reqNo: [''],
     });
   }
 
@@ -196,6 +199,8 @@ export class WagePaidRequestAbstractWithInvoice implements OnInit {
       county: null,
       payam: null,
       boma: null,
+      workCode: null,
+      reqNo: null,
     });
     this.searchForm.get('county')?.disable();
     this.searchForm.get('payam')?.disable();
@@ -205,36 +210,66 @@ export class WagePaidRequestAbstractWithInvoice implements OnInit {
     this.fetchPage(this.currentPage, this.pageSize, true);
   }
 
-  fetchPage(
+  async fetchPage(
     page: number,
     size: number,
     isInitialLoad: boolean = false
-  ): Promise<void> {
-    this.isShow = false;
+  ): Promise <void>{
+    this.isLoading = true;
+    this.isShow = false; // Initially hide the table area
     this.cdr.markForCheck();
 
-    // Mock data for now
-    this.records = [
-      {
-        state: 'State 1',
-        county: 'County 1',
-        payam: 'Payam 1',
-        boma: 'Boma 1',
-        paymentCycle: 1,
-      },
-      {
-        state: 'State 2',
-        county: 'County 2',
-        payam: 'Payam 2',
-        boma: 'Boma 2',
-        paymentCycle: 2,
-      },
-    ];
-    this.totalRecords = this.records.length;
-    this.isShow = true;
-    this.cdr.markForCheck();
+    const formValues = this.searchForm.value;
+    const payload = {
+      fromDate: '2026-02-05', // TODO: Replace with dynamic date from form
+      toDate: '2026-02-05', // TODO: Replace with dynamic date from form
+      workCode: formValues.workCode || 'string', // Assuming workCode might be added to form later
+      stateId: formValues.state?.id || 0,
+      countyId: formValues.county?.id || 0,
+      payamId: formValues.payam?.id || 0,
+      bomaId: formValues.boma?.id || 0,
+      projectId: formValues.project?.id || 0, // Assuming project might be added to form later
+      reqNo: formValues.reqNo || 'string', // Assuming reqNo might be added to form later
+      page: page,
+      size: size,
+    };
 
-    return Promise.resolve();
+    try {
+      const axiosResponse: any = await this.apiService.POST(
+        '/api/wage-invoice/paid/abstract-list',
+        payload
+      );
+      // Access the actual API response data from axiosResponse.data
+      const apiResponse = axiosResponse.data;
+
+      if (apiResponse.success && apiResponse.data && apiResponse.data.length > 0) {
+        this.records = apiResponse.data; // Correctly access the data array
+        this.totalRecords = apiResponse.pagination.totalElements;
+        this.isShow = true; // Show table only if data is successfully fetched
+      } else {
+        this.records = [];
+        this.totalRecords = 0;
+        this.messageService.add({
+          severity: 'info',
+          summary: 'Info',
+          detail: apiResponse.message || 'No data found.',
+        });
+        this.isShow = false; // Keep table hidden if no data or unsuccessful response
+      }
+    } catch (error: any) { // Catch as 'any' to access error.response
+      console.error('Error fetching data:', error);
+      this.records = [];
+      this.totalRecords = 0;
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: error.response?.data?.message || 'An error occurred while fetching data.',
+      });
+      this.isShow = false; // Keep table hidden on error
+    } finally {
+      this.isLoading = false; // Always stop loader
+      this.cdr.markForCheck();
+    }
   }
 
   onPageChange(event: any): void {
