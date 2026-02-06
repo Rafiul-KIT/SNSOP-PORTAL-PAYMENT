@@ -200,6 +200,7 @@ export class ReportComponent implements OnInit {
           bomaId: new FormControl('', Validators.required),
           criteria: new FormControl('ALL', Validators.required),
           paymentStatus: new FormControl('ALL', Validators.required),
+          paymentMethod: new FormControl(null),
           size: new FormControl(1000, Validators.required),
           paymentCycle: new FormControl('1', Validators.required),
         });
@@ -211,6 +212,7 @@ export class ReportComponent implements OnInit {
           payamId: new FormControl('', Validators.required),
           bomaId: new FormControl(''),
           paymentCycle: new FormControl('1', Validators.required),
+          paymentMethod: new FormControl(null),
         });
         break;
       case 11:
@@ -441,6 +443,7 @@ export class ReportComponent implements OnInit {
         boma: parseInt(this.reportForm.value.bomaId) || null,
         criteria: this.reportForm.value.criteria || null,
         paymentStatus: this.reportForm.value.paymentStatus || null,
+        paymentMethod: this.reportForm.value.paymentMethod || null,
         size: this.reportForm.value.size || null,
         paymentCycle: this.reportForm.value.paymentCycle
           ? parseInt(this.reportForm.value.paymentCycle, 10)
@@ -471,6 +474,7 @@ export class ReportComponent implements OnInit {
                 paymentCycle: beneficiary.paymentCycle,
                 paymentCenter: beneficiary.paymentCenter ?? 'N/A',
                 status: beneficiary.paymentStatus,
+                paymentMethod: beneficiary.paymentMethod ?? 'N/A',
                 exchangeRate: beneficiary.exchangeRate,
                 paymentDate: beneficiary.paymentDate
                   ? beneficiary.paymentDate
@@ -615,6 +619,7 @@ export class ReportComponent implements OnInit {
         county: parseInt(this.reportForm.value.countyId) || null,
         payam: parseInt(this.reportForm.value.payamId) || null,
         boma: parseInt(this.reportForm.value.bomaId) || null,
+        paymentMethod: this.reportForm.value.paymentMethod || null,
         paymentCycle: this.reportForm.value.paymentCycle
           ? parseInt(this.reportForm.value.paymentCycle, 10)
           : null,
@@ -638,6 +643,7 @@ export class ReportComponent implements OnInit {
                 totalDISUnpaid: dataList.totalDISUnpaid,
                 totalLIPWPaid: dataList.totalLIPWPaid,
                 totalLIPWUnpaid: dataList.totalLIPWUnpaid,
+                paymentMethod: dataList.paymentMethod ?? 'N/A',
                 state: data.state,
                 county: data.county,
                 payam: data.payam,
