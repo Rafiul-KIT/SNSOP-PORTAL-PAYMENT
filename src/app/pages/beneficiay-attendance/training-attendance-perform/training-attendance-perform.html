@@ -142,12 +142,16 @@
                         </div>
                     </div>
 
-                    <div class="col-md-3 d-flex align-items-end">
-                        <button pButton type="button" label="Search" icon="fas fa-search" class="p-button-primary px-5"
-                            [disabled]="isAttendanceDateInvalid() || isPaymentCycleInvalid() || loading"
-                            [loading]="loading" (click)="onSearch()"></button>
-                    </div>
+                   
                 </div>
+             <div class="col-md-6 d-flex align-items-center justify-content-center">
+    <button pButton type="button" label="Search" icon="fas fa-search" 
+        class="p-button-primary px-5"
+        [disabled]="isAttendanceDateInvalid() || isPaymentCycleInvalid() || loading"
+        [loading]="loading" (click)="onSearch()">
+    </button>
+</div>
+
 
                 <!-- Loading indicator -->
                 @if (loading) {
@@ -162,22 +166,24 @@
                 <p-divider></p-divider>
 
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div class="d-flex flex-column">
+                    <div class="d-flex flex-column gap-1">
                         <span class="fw-semibold text-secondary">
                             Total Beneficiaries: <kbd class="bg-primary">{{ totalRecords }}</kbd>
                         </span>
-                    </div>
-                    <div class="d-flex align-items-center gap-2">
-                        <span class="text-muted">Page Size:</span>
-                        <p-select [options]="pageSizeOptions" [(ngModel)]="pageSize"
-                            (onChange)="onPageSizeChange($event)" optionLabel="label" optionValue="value"
-                            [style]="{'width': '100px'}"></p-select>
+                        <span class="fw-semibold text-secondary">
+                            Selected Beneficiaries: <kbd class="bg-success">{{ getSelectedBeneficiaries().length }}</kbd>
+                        </span>
                     </div>
                 </div>
 
                 <p-table [value]="beneficiaries" [tableStyle]="{'min-width': '60rem'}">
                     <ng-template pTemplate="header">
                         <tr>
+                            <th class="text-left"> 
+                                <p-checkbox [(ngModel)]="selectAll" [binary]="true"
+                                    (onChange)="onSelectAllChange($event)" inputId="selectAll"></p-checkbox>
+                                    Select All
+                            </th>
                             <th class="text-center">S.No</th>
                             <th class="text-center">Household No.</th>
                             <th class="text-center">Beneficiary Name</th>
@@ -192,7 +198,11 @@
                     </ng-template>
                     <ng-template pTemplate="body" let-beneficiary let-i="rowIndex">
                         <tr>
-                            <td class="text-center">{{ (currentPage * pageSize) + i + 1 }}</td>
+                            <td class="text-left">
+                                <p-checkbox [(ngModel)]="beneficiary.selected" [binary]="true"
+                                    (onChange)="onRowSelectChange()" inputId="select_{{beneficiary.beneficiaryId}}"></p-checkbox>
+                            </td>
+                            <td class="text-center">{{ i + 1 }}</td>
                             <td class="text-center">{{ beneficiary.householdNumber }}</td>
                             <td class="text-center">{{ beneficiary.beneficiaryName }}</td>
                             <td class="text-center">{{ beneficiary.gender }}</td>
@@ -200,41 +210,37 @@
                             <td class="text-center">{{ beneficiary.phoneNo }}</td>
                             <td class="text-center">
                                 <p-checkbox [(ngModel)]="beneficiary.finlitAttended" [binary]="true"
+                                    [disabled]="!beneficiary.selected"
                                     inputId="finlit_{{beneficiary.beneficiaryId}}"></p-checkbox>
                             </td>
                             <td class="text-center">
                                 <p-checkbox [(ngModel)]="beneficiary.ecdAttended" [binary]="true"
+                                    [disabled]="!beneficiary.selected"
                                     inputId="ecd_{{beneficiary.beneficiaryId}}"></p-checkbox>
                             </td>
                             <td class="text-center">
                                 <p-checkbox [(ngModel)]="beneficiary.washAttended" [binary]="true"
+                                    [disabled]="!beneficiary.selected"
                                     inputId="wash_{{beneficiary.beneficiaryId}}"></p-checkbox>
                             </td>
                             <td class="text-center">
                                 <p-checkbox [(ngModel)]="beneficiary.gbvAttended" [binary]="true"
+                                    [disabled]="!beneficiary.selected"
                                     inputId="gbv_{{beneficiary.beneficiaryId}}"></p-checkbox>
                             </td>
                         </tr>
                     </ng-template>
                     <ng-template pTemplate="emptymessage">
                         <tr>
-                            <td colspan="10" class="text-center">No records found.</td>
+                            <td colspan="11" class="text-center">No records found.</td>
                         </tr>
                     </ng-template>
                 </p-table>
 
-                <!-- Pagination -->
-                @if (pageSize !== -1 && totalRecords > pageSize) {
-                <p-paginator [rows]="pageSize" [totalRecords]="totalRecords" [first]="currentPage * pageSize"
-                    (onPageChange)="onPageChange($event)" [showCurrentPageReport]="true"
-                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
-                </p-paginator>
-                }
-
                 <!-- Save Button -->
                 <div class="d-flex justify-content-end mt-3">
                     <button pButton type="button" label="Save Training Attendance" icon="pi pi-save"
-                        class="p-button-success px-5" [disabled]="saving || beneficiaries.length === 0"
+                        class="p-button-success px-5" [disabled]="saving || !hasSelectedBeneficiaries()"
                         [loading]="saving" (click)="saveTrainingAttendance()"></button>
                 </div>
                 }

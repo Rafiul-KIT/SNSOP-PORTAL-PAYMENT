@@ -11,7 +11,6 @@ import { ButtonModule } from 'primeng/button';
 import { DividerModule } from 'primeng/divider';
 import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
-import { PaginatorModule } from 'primeng/paginator';
 import { CheckboxModule } from 'primeng/checkbox';
 import { ApiService } from '../../../services/api.service';
 import { Loader } from '../../../components/loader/loader';
@@ -55,6 +54,7 @@ interface TrainingAttendanceRecord {
   ecdAttended: boolean;
   washAttended: boolean;
   gbvAttended: boolean;
+  selected?: boolean;
 }
 
 @Component({
@@ -73,7 +73,6 @@ interface TrainingAttendanceRecord {
     DividerModule,
     SelectModule,
     TableModule,
-    PaginatorModule,
     CheckboxModule,
     Loader,
     BreadcrumbModule,
@@ -102,17 +101,7 @@ export class TrainingAttendancePerform implements OnInit {
   // Training attendance data
   beneficiaries: TrainingAttendanceRecord[] = [];
   totalRecords = 0;
-  currentPage = 0;
-  pageSize = 10;
-
-  // Page size options
-  pageSizeOptions = [
-    { label: '10', value: 10 },
-    { label: '25', value: 25 },
-    { label: '50', value: 50 },
-    { label: '100', value: 100 },
-    { label: 'All', value: -1 },
-  ];
+  selectAll = false;
 
   constructor(
     private api: ApiService,
@@ -173,7 +162,6 @@ export class TrainingAttendancePerform implements OnInit {
     // Reset table when date changes
     this.beneficiaries = [];
     this.totalRecords = 0;
-    this.currentPage = 0;
   }
 
   onPaymentCycleChange(event: any) {
@@ -182,7 +170,6 @@ export class TrainingAttendancePerform implements OnInit {
     // Reset table when payment cycle changes
     this.beneficiaries = [];
     this.totalRecords = 0;
-    this.currentPage = 0;
   }
 
   isAttendanceDateInvalid(): boolean {
@@ -219,7 +206,6 @@ export class TrainingAttendancePerform implements OnInit {
       return;
     }
 
-    this.currentPage = 0;
     this.fetchTrainingAttendance();
   }
 
@@ -243,18 +229,20 @@ export class TrainingAttendancePerform implements OnInit {
 
     const subprojectId = this.subproject.id;
     const paymentCycle = this.selectedPaymentCycle.value;
-    const page = this.currentPage;
-    const size = this.pageSize;
 
     this.api
       .GET(
-        `api/training-attendance/get?subprojectId=${subprojectId}&paymentCycle=${paymentCycle}&attendanceDate=${dateStr}&page=${page}&size=${size}`,
+        `api/training-attendance/get?subprojectId=${subprojectId}&paymentCycle=${paymentCycle}&attendanceDate=${dateStr}&page=0&size=-1`,
       )
       .then((res: any) => {
         const data = res.data || res;
         if (data && data.code === 200) {
-          this.beneficiaries = data.content || [];
+          this.beneficiaries = (data.content || []).map((b: TrainingAttendanceRecord) => ({
+            ...b,
+            selected: b.finlitAttended || b.ecdAttended || b.washAttended || b.gbvAttended || false,
+          }));
           this.totalRecords = data.totalElements || 0;
+          this.selectAll = this.beneficiaries.length > 0 && this.beneficiaries.every((b) => b.selected);
 
           if (this.beneficiaries.length === 0) {
             Swal.fire({
@@ -289,16 +277,21 @@ export class TrainingAttendancePerform implements OnInit {
       });
   }
 
-  onPageChange(event: any) {
-    this.currentPage = event.page;
-    this.pageSize = event.rows;
-    this.fetchTrainingAttendance();
+  onSelectAllChange(event: any) {
+    this.selectAll = event.checked;
+    this.beneficiaries.forEach((b) => (b.selected = this.selectAll));
   }
 
-  onPageSizeChange(event: any) {
-    this.pageSize = event.value;
-    this.currentPage = 0;
-    this.fetchTrainingAttendance();
+  onRowSelectChange() {
+    this.selectAll = this.beneficiaries.every((b) => b.selected);
+  }
+
+  getSelectedBeneficiaries(): TrainingAttendanceRecord[] {
+    return this.beneficiaries.filter((b) => b.selected);
+  }
+
+  hasSelectedBeneficiaries(): boolean {
+    return this.beneficiaries.some((b) => b.selected);
   }
 
   saveTrainingAttendance() {
@@ -311,11 +304,13 @@ export class TrainingAttendancePerform implements OnInit {
       return;
     }
 
-    if (this.beneficiaries.length === 0) {
+    const selectedBeneficiaries = this.getSelectedBeneficiaries();
+
+    if (selectedBeneficiaries.length === 0) {
       Swal.fire({
         icon: 'warning',
-        title: 'No Data',
-        text: 'No beneficiaries to save attendance for.',
+        title: 'No Selection',
+        text: 'Please select at least one beneficiary to save attendance for.',
       });
       return;
     }
@@ -333,7 +328,7 @@ export class TrainingAttendancePerform implements OnInit {
       subprojectId: this.subproject.id,
       paymentCycle: this.selectedPaymentCycle.value,
       attendanceDate: attendanceDateStr,
-      list: this.beneficiaries.map((b) => ({
+      list: selectedBeneficiaries.map((b) => ({
         beneficiaryId: b.beneficiaryId,
         finlitAttended: b.finlitAttended || false,
         ecdAttended: b.ecdAttended || false,
@@ -350,7 +345,7 @@ export class TrainingAttendancePerform implements OnInit {
           Swal.fire({
             icon: 'success',
             title: 'Success',
-            text: 'Training attendance saved successfully!',
+            text: data.message || 'Training attendance saved successfully!',
           });
           // Refresh the data after save
           this.fetchTrainingAttendance();
