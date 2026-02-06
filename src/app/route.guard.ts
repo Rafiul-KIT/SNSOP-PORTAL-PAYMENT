@@ -6,6 +6,11 @@ import { environment } from '../environments/environment';
 import { ApiService } from './services/api.service';
 
 export const routeGuard: CanActivateFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+  // If auth is disabled, allow all routes
+  if (!environment.enableAuth) {
+    return true;
+  }
+
   const cookieService = inject(CookieService);
   const router = inject(Router);
   const apiService = inject(ApiService);

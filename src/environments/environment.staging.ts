@@ -1,5 +1,6 @@
 export const environment = {
   production: false,
+  enableAuth: true,
   env: 'dev',
   useHash: true,
   domain: 'https://newmis.southsudansafetynet.info',
