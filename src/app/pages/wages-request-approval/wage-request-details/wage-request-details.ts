@@ -53,6 +53,8 @@ interface Beneficiary {
   age: number;
   phoneNo: string;
   totalDays: number;
+  presentDays?: number;
+  absentDays?: number;
   paymentStatus: number;
   paymentDoneAt: string;
   wageRateUSD: number;
@@ -752,5 +754,24 @@ export class WageRequestDetails implements OnInit {
       this.beneficiaryPageSize,
     );
   }
-  
+
+  // Helper methods for days calculation based on subprojectId
+  getTotalDays(bene: Beneficiary): number {
+    if (this.wageRequest?.subprojectId === 999) {
+      return bene.totalDays;
+    }
+    return 18; // Static value for non-999 subprojects
+  }
+
+  getPresentDays(bene: Beneficiary): number {
+    // totalDays from API represents present days
+    return bene.totalDays;
+  }
+
+  getAbsentDays(bene: Beneficiary): number {
+    if (this.wageRequest?.subprojectId === 999) {
+      return bene.absentDays ?? 0; // Use API value for subprojectId 999
+    }
+    return 18 - this.getPresentDays(bene); // 18 - present days for non-999 subprojects
+  }
 }

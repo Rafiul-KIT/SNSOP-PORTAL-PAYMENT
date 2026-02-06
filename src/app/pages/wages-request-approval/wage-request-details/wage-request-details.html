@@ -296,9 +296,9 @@
                                 <td>{{ getGenderName(bene.gender) }}</td>
                                 <td>{{ bene.age }}</td>
                                 <td>{{ bene.phoneNo }}</td>
-                                <td>{{ bene.totalDays }}</td>
-                                <td class="text-center">{{ bene.presentDays }}</td>
-                                <td class="text-center">{{ bene.absentDays }}</td>
+                                <td>{{ getTotalDays(bene) }}</td>
+                                <td class="text-center">{{ getPresentDays(bene) }}</td>
+                                <td class="text-center">{{ getAbsentDays(bene) }}</td>
                                 <td>{{ bene.paymentStatus == 1 ? 'Paid' : 'Unpaid' }}</td>
                                 <td>{{ bene.wageRateUSD | number:'1.2-2' }}</td>
                                 @if(showSspColumns()){
