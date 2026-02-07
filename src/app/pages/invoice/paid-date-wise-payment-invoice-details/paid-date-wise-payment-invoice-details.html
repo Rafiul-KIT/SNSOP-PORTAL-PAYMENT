@@ -107,12 +107,12 @@
                 <tr>
                   <td class="text-muted fw-medium" style="width: 50%">Amount Paid(USD)</td>
                   <td class="fw-semibold" style="width: 10%">:</td>
-                  <td class="text-primary fw-bold" style="width: 40%">{{ paymentDetails.paidAmountUSD?.toFixed(2) || '0.00' }}</td>
+                  <td class="text-primary fw-bold" style="width: 40%">{{ paymentDetails.paidAmountUSD.toFixed(2) || '0.00' }}</td>
                 </tr>
                 <tr>
                   <td class="text-muted fw-medium">Amount Paid(SSP)</td>
                   <td class="fw-semibold">:</td>
-                  <td class="text-primary fw-bold">{{ paymentDetails.paidAmountSSP?.toFixed(2) || '0.00' }}</td>
+                  <td class="text-primary fw-bold">{{ paymentDetails.paidAmountSSP.toFixed(2) || '0.00' }}</td>
                 </tr>
               </table>
             </div>
@@ -126,28 +126,28 @@
 
         <!-- Table -->
         <div class="table-responsive">
-          <p-table [value]="paymentDetailsByCycle" [scrollable]="true" scrollHeight="400px"
+          <p-table [value]="paymentDetailsByCycle" [scrollable]="false"
             dataKey="beneficiaryId" size="small"
-            class="p-datatable custom-table p-datatable-striped p-datatable-gridlines"
+            class="p-datatable custom-table p-datatable-striped p-datatable-gridlines compact-table"
             [tableStyle]="{ 'min-width': '100%' }">
 
             <ng-template pTemplate="header">
               <tr>
-                <th class="text-center" style="min-width: 60px">S.No</th>
-                <th class="text-center" style="min-width: 150px">Enrollment No</th>
-                <th class="text-center" style="min-width: 150px">Name Of Household</th>
-                <th class="text-center" style="min-width: 150px">Household Code</th>
-                <th class="text-center" style="min-width: 100px">No Of Days Present</th>
-                <th class="text-center" style="min-width: 120px">Wage Rate In USD</th>
-                <th class="text-center" style="min-width: 120px">Amount Paid In USD</th>
-                <th class="text-center" style="min-width: 120px">Exchange In SSP</th>
-                <th class="text-center" style="min-width: 150px">Amount Paid In SSP</th>
-                <th class="text-center" style="min-width: 150px">Paid To Beneficiary Type</th>
-                <th class="text-center" style="min-width: 100px">Status</th>
-                <th class="text-center" style="min-width: 150px">Paid To Name</th>
-                <th class="text-center" style="min-width: 180px">Paid To Person Household Code</th>
-                <th class="text-center" style="min-width: 150px">Request No</th>
-                <th class="text-center" style="min-width: 120px">Paid Date</th>
+                <th class="text-center" style="width: 40px">No</th>
+                <th class="text-center" style="width: 100px">Enroll No</th>
+                <th class="text-start" style="width: 120px">Household Name</th>
+                <th class="text-center" style="width: 100px">HH Code</th>
+                <th class="text-center" style="width: 50px">Days</th>
+                <th class="text-end" style="width: 70px">Rate USD</th>
+                <th class="text-end" style="width: 80px">Amt USD</th>
+                <th class="text-end" style="width: 70px">Exch SSP</th>
+                <th class="text-end" style="width: 90px">Amt SSP</th>
+                <th class="text-center" style="width: 90px">Paid To Type</th>
+                <th class="text-center" style="width: 70px">Status</th>
+                <th class="text-start" style="width: 110px">Paid To Name</th>
+                <th class="text-center" style="width: 100px">Paid HH Code</th>
+                <th class="text-center" style="width: 100px">Req No</th>
+                <th class="text-center" style="width: 85px">Paid Date</th>
               </tr>
             </ng-template>
 
@@ -156,14 +156,14 @@
                 <td class="text-center">{{ rowIndex + 1 }}</td>
                 <td class="text-center">{{ detail.householdNumber || '-' }}</td>
                 <td class="text-start">{{ detail.householdName || '-' }}</td>
-                <td class="text-center text-primary fw-medium">{{ detail.paidTo || '-' }}</td>
+                <td class="text-center text-primary">{{ detail.paidTo || '-' }}</td>
                 <td class="text-center">{{ detail.totalDays || 0 }}</td>
-                <td class="text-end">{{ detail.wageRateUsd?.toFixed(2) || '0.00' }}</td>
-                <td class="text-end fw-semibold text-success">{{ detail.wageUsdTotal?.toFixed(2) || '0.00' }}</td>
-                <td class="text-end">{{ detail.exchangeRate?.toFixed(2) || '0.00' }}</td>
-                <td class="text-end fw-semibold text-success">{{ detail.wageSspTotal?.toFixed(2) || '0.00' }}</td>
+                <td class="text-end">{{ detail.wageRateUsd.toFixed(2) }}</td>
+                <td class="text-end fw-semibold text-success">{{ detail.wageUsdTotal.toFixed(2) }}</td>
+                <td class="text-end">{{ detail.exchangeRate.toFixed(2) }}</td>
+                <td class="text-end fw-semibold text-success">{{ detail.wageSspTotal.toFixed(2) }}</td>
                 <td class="text-center">
-                  <span class="badge bg-info bg-opacity-10 text-info fw-medium">
+                  <span class="badge bg-info bg-opacity-10 text-info">
                     {{ detail.paidToType || '-' }}
                   </span>
                 </td>
@@ -173,7 +173,7 @@
                     {{ detail.payStatus || '-' }}
                   </span>
                 </td>
-                <td class="text-start text-primary fw-medium">{{ detail.paidToName || '-' }}</td>
+                <td class="text-start text-primary">{{ detail.paidToName || '-' }}</td>
                 <td class="text-center text-primary">{{ detail.paidTo || '-' }}</td>
                 <td class="text-center">{{ detail.requestNumber || '-' }}</td>
                 <td class="text-center">{{ detail.payDate || '-' }}</td>
