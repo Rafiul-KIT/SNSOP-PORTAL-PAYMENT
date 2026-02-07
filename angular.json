@@ -66,6 +66,14 @@
                   "with": "src/environments/environment.staging.ts"
                 }
               ]
+            },
+            "qa": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.qa.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -81,6 +89,9 @@
             },
             "staging": {
               "buildTarget": "snsop-mf-portal-payment:build:staging"
+            },
+            "qa": {
+              "buildTarget": "snsop-mf-portal-payment:build:qa"
             }
           },
           "defaultConfiguration": "development"
