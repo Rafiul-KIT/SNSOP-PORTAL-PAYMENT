@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MenuItem, MessageService } from 'primeng/api';
 import { Badge } from 'primeng/badge';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { MultiSelectModule } from 'primeng/multiselect';
-import { PaginatorModule } from 'primeng/paginator';
+
 import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { Tag } from 'primeng/tag';
@@ -34,7 +34,7 @@ import { InputText } from "primeng/inputtext";
     SelectModule,
     FloatLabelModule,
     Tooltip,
-    PaginatorModule,
+
     ToastModule,
     MultiSelectModule,
     InputText
@@ -55,8 +55,15 @@ export class WagePaidRequestAbstractWithInvoice implements OnInit {
 
   // Pagination
   currentPage = 0;
-  pageSize = 10;
+  pageSizeControl!: FormControl<number>;
   totalRecords = 0;
+  totalPages = 0; // Added for custom pagination
+  rowsPerPageOptions = [ // Added for custom pagination
+    { label: '10', value: 10 },
+    { label: '25', value: 25 },
+    { label: '50', value: 50 },
+    { label: 'All', value: -1 } // Using -1 to represent 'All'
+  ];
 
   // Lookup data
   states: LookupItem[] = [];
@@ -100,13 +107,18 @@ export class WagePaidRequestAbstractWithInvoice implements OnInit {
 
   private initForm(): void {
     this.searchForm = this.fb.group({
-
       state: [null],
       county: [{ value: null, disabled: true }],
       payam: [{ value: null, disabled: true }],
       boma: [{ value: null, disabled: true }],
       workCode: [''],
       reqNo: [''],
+    });
+    this.pageSizeControl = this.fb.control(10, { nonNullable: true });
+    this.pageSizeControl.valueChanges.subscribe((newValue) => {
+      if (newValue !== null) {
+        this.onPageSizeChange({ value: newValue });
+      }
     });
   }
 
@@ -187,8 +199,7 @@ export class WagePaidRequestAbstractWithInvoice implements OnInit {
 
   // Search button handler
   search(): void {
-    this.currentPage = 0;
-    this.fetchPage(this.currentPage, this.pageSize);
+    this.goToPage(0); // Reset to first page on search
   }
 
   // Reset button handler
@@ -206,14 +217,12 @@ export class WagePaidRequestAbstractWithInvoice implements OnInit {
     this.searchForm.get('payam')?.disable();
     this.searchForm.get('boma')?.disable();
 
-    this.currentPage = 0;
-    this.fetchPage(this.currentPage, this.pageSize, true);
+    this.goToPage(0); // Reset to first page on reset
   }
 
   async fetchPage(
     page: number,
-    size: number,
-    isInitialLoad: boolean = false
+    size: number
   ): Promise <void>{
     this.isLoading = true;
     this.isShow = false; // Initially hide the table area
@@ -232,7 +241,14 @@ export class WagePaidRequestAbstractWithInvoice implements OnInit {
       reqNo: formValues.reqNo || null,
     };
 
-    const endpoint = `/api/wage-invoice/paid/abstract-list?page=${page}&size=${size}`;
+    let actualSize = size;
+    if (size === -1) {
+      page = 0; // When 'All' is selected, reset to first page
+      actualSize = this.totalRecords; // Use totalRecords directly
+    }
+    this.currentPage = page; // Update currentPage before API call
+
+    const endpoint = `/api/wage-invoice/paid/abstract-list?page=${page}&size=${actualSize}`;
     try {
       const axiosResponse: any = await this.apiService.POST(
         endpoint,
@@ -244,10 +260,12 @@ export class WagePaidRequestAbstractWithInvoice implements OnInit {
       if (apiResponse.success && apiResponse.data && apiResponse.data.length > 0) {
         this.records = apiResponse.data; // Correctly access the data array
         this.totalRecords = apiResponse.pagination.totalElements;
+        this.totalPages = Math.ceil(this.totalRecords / this.pageSizeControl.value); // Calculate totalPages
         this.isShow = true; // Show table only if data is successfully fetched
       } else {
         this.records = [];
         this.totalRecords = 0;
+        this.totalPages = 0; // Reset totalPages if no data
         this.messageService.add({
           severity: 'info',
           summary: 'Info',
@@ -259,6 +277,7 @@ export class WagePaidRequestAbstractWithInvoice implements OnInit {
       console.error('Error fetching data:', error);
       this.records = [];
       this.totalRecords = 0;
+      this.totalPages = 0; // Reset totalPages on error
       this.messageService.add({
         severity: 'error',
         summary: 'Error',
@@ -271,10 +290,24 @@ export class WagePaidRequestAbstractWithInvoice implements OnInit {
     }
   }
 
-  onPageChange(event: any): void {
-    this.currentPage = event.page;
-    this.pageSize = event.rows;
-    this.fetchPage(this.currentPage, this.pageSize);
+  // New method to handle page changes from custom controls
+  goToPage(page: number): void {
+    if (page >= 0 && page < this.totalPages) {
+      this.currentPage = page;
+      this.fetchPage(this.currentPage, this.pageSizeControl.value);
+    } else if (page === 0 && this.totalPages === 0) {
+      // Allow fetching first page when there's no data yet, or if totalPages is 0
+      this.currentPage = 0;
+      this.fetchPage(this.currentPage, this.pageSizeControl.value);
+    }
+  }
+
+  // New method to handle page size changes from dropdown
+  onPageSizeChange(event: { value: number }): void {
+    const newSize = event.value;
+    this.pageSizeControl.setValue(newSize === -1 ? this.totalRecords : newSize, { emitEvent: false }); // Update FormControl value
+    this.currentPage = 0; // Reset to first page when page size changes
+    this.fetchPage(this.currentPage, this.pageSizeControl.value);
   }
 
   viewDetails(record: any): void {
