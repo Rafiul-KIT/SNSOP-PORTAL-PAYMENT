@@ -23,7 +23,11 @@
     <ng-template pTemplate="header">
       <tr>
         <th style="width: 4rem">
-          All<p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+          All<p-checkbox
+            [binary]="true"
+            [ngModel]="isAllEnabledSelected()"
+            (onChange)="onHeaderCheckboxToggle($event)">
+          </p-checkbox>
         </th>
         <th>Transaction ID</th>
         <th>Beneficiary Name</th>
@@ -36,7 +40,7 @@
       <tr>
         <td>
           <p-tableCheckbox [value]="beneficiary"
-            [disabled]="beneficiary.status !== 'PAYROLL_GENERATED'"></p-tableCheckbox>
+            [disabled]="beneficiary.isDisabled"></p-tableCheckbox>
         </td>
         <td>{{ beneficiary.transactionId }}</td>
         <td>{{ beneficiary.recipientFullName }}</td>
