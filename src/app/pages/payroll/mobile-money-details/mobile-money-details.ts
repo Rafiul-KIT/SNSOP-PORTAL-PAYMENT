@@ -26,6 +26,8 @@ interface MobileMoneyBeneficiary {
   amount: number;
   paymentCycle: number;
   status: string;
+  isInitiated?: boolean;
+  isDisabled?: boolean;
 }
 
 @Component({
@@ -100,7 +102,18 @@ export class MobileMoneyDetails implements OnInit {
         {}
       );
       if (response.data.success) {
-        this.beneficiaries = response.data.data;
+        // Mark previously initiated transactions as disabled
+        this.beneficiaries = response.data.data.map((beneficiary: MobileMoneyBeneficiary) => {
+          const isInitiated = beneficiary.status !== 'PAYROLL_GENERATED';
+          return {
+            ...beneficiary,
+            isInitiated,
+            isDisabled: isInitiated
+          };
+        });
+
+        // Auto-select previously initiated transactions
+        this.selectedBeneficiaries = this.beneficiaries.filter(b => b.isInitiated);
       } else {
         this.beneficiaries = [];
         Swal.fire({
@@ -125,25 +138,29 @@ export class MobileMoneyDetails implements OnInit {
   }
 
   initiatePayment() {
-    if (this.selectedBeneficiaries.length === 0) {
+    // Filter out disabled/initiated transactions
+    const enabledBeneficiaries = this.selectedBeneficiaries.filter(b => !b.isDisabled && !b.isInitiated);
+
+    if (enabledBeneficiaries.length === 0) {
       this.messageService.add({
         severity: 'warn',
         summary: 'No Selection',
-        detail: 'Please select at least one beneficiary to proceed.',
+        detail: 'Please select at least one non-initiated beneficiary to proceed.',
       });
       return;
     }
 
     this.confirmationService.confirm({
       key: 'confirm',
-      message: `Are you sure you want to initiate payment for ${this.selectedBeneficiaries.length} selected beneficiaries?`,
+      message: `Are you sure you want to initiate payment for ${enabledBeneficiaries.length} selected beneficiaries?`,
       header: 'Confirm Payment Initiation',
       icon: 'pi pi-exclamation-triangle',
       accept: async () => {
         this.isLoading = true;
         this.cdr.markForCheck();
 
-        const transactionIds = this.selectedBeneficiaries.map(
+        // Only send enabled transaction IDs (exclude previously initiated)
+        const transactionIds = enabledBeneficiaries.map(
           (b) => b.transactionId
         );
         const payload = { transactionIds };
@@ -203,9 +220,35 @@ export class MobileMoneyDetails implements OnInit {
     });
   }
 
-  isSelectable(status: string): boolean {
-    return ['PAYROLL_GENERATED', 'RECONCILED_AS_UNPAID', 'ABANDONED'].includes(
-      status
-    );
+  onHeaderCheckboxToggle(event: any) {
+    // Get all enabled (non-disabled) beneficiaries
+    const enabledBeneficiaries = this.beneficiaries.filter(b => !b.isDisabled);
+
+    // Get previously initiated beneficiaries (always keep them selected)
+    const initiatedBeneficiaries = this.beneficiaries.filter(b => b.isInitiated);
+
+    if (event.checked) {
+      // Select all enabled + keep initiated selected
+      this.selectedBeneficiaries = [...initiatedBeneficiaries, ...enabledBeneficiaries];
+    } else {
+      // Unselect all enabled, but keep initiated selected
+      this.selectedBeneficiaries = [...initiatedBeneficiaries];
+    }
+
+    this.cdr.markForCheck();
+  }
+
+  isAllEnabledSelected(): boolean {
+    const enabledBeneficiaries = this.beneficiaries.filter(b => !b.isDisabled);
+    return enabledBeneficiaries.length > 0 &&
+           enabledBeneficiaries.every(b => this.selectedBeneficiaries.includes(b));
+  }
+
+  hasEnabledBeneficiaries(): boolean {
+    return this.beneficiaries.some(b => !b.isDisabled);
+  }
+
+  hasSelectedEnabledBeneficiaries(): boolean {
+    return this.selectedBeneficiaries.some(b => !b.isDisabled && !b.isInitiated);
   }
 }

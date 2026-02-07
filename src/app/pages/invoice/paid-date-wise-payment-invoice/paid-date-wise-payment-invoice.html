@@ -59,17 +59,29 @@
         <div class="col-md-3">
           <p-floatlabel variant="on" class="w-100">
             <p-datepicker formControlName="fromDate" showIcon="true" [style]="{ width: '100%' }" inputId="from-date"
-              dateFormat="yy-mm-dd"></p-datepicker>
-            <label for="from-date">From Date</label>
+              dateFormat="yy-mm-dd" [class.ng-invalid]="searchForm.get('fromDate')?.invalid && searchForm.get('fromDate')?.touched"></p-datepicker>
+            <label for="from-date">From Date <span class="text-danger">*</span></label>
           </p-floatlabel>
+          @if(searchForm.get('fromDate')?.invalid && searchForm.get('fromDate')?.touched) {
+            <small class="text-danger">From Date is required</small>
+          }
         </div>
 
         <div class="col-md-3">
           <p-floatlabel variant="on" class="w-100">
             <p-datepicker formControlName="toDate" showIcon="true" [style]="{ width: '100%' }" inputId="to-date"
-              dateFormat="yy-mm-dd"></p-datepicker>
-            <label for="to-date">To Date</label>
+              dateFormat="yy-mm-dd" [class.ng-invalid]="searchForm.get('toDate')?.invalid && searchForm.get('toDate')?.touched"></p-datepicker>
+            <label for="to-date">To Date <span class="text-danger">*</span></label>
           </p-floatlabel>
+          @if(searchForm.get('toDate')?.invalid && searchForm.get('toDate')?.touched) {
+            <small class="text-danger">To Date is required</small>
+          }
+          @if(searchForm.errors?.['dateRangeInvalid'] && searchForm.get('toDate')?.touched) {
+            <small class="text-danger">From Date must be less than or equal to To Date</small>
+          }
+          @if(searchForm.errors?.['futureDateInvalid'] && searchForm.get('toDate')?.touched) {
+            <small class="text-danger">To Date cannot be a future date</small>
+          }
         </div>
 
         <div class="col-12 text-end">
