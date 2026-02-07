@@ -41,6 +41,24 @@
   }
 }
 
+.compact-table {
+  ::ng-deep {
+    .p-datatable-thead > tr > th {
+      padding: 0.35rem 0.25rem;
+      font-size: 0.7rem;
+      white-space: nowrap;
+    }
+
+    .p-datatable-tbody > tr > td {
+      padding: 0.3rem 0.25rem;
+      font-size: 0.7rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}
+
 .shadow-sm {
   box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
 }
