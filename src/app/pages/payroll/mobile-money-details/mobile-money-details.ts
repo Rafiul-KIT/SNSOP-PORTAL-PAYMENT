@@ -243,4 +243,12 @@ export class MobileMoneyDetails implements OnInit {
     return enabledBeneficiaries.length > 0 &&
            enabledBeneficiaries.every(b => this.selectedBeneficiaries.includes(b));
   }
+
+  hasEnabledBeneficiaries(): boolean {
+    return this.beneficiaries.some(b => !b.isDisabled);
+  }
+
+  hasSelectedEnabledBeneficiaries(): boolean {
+    return this.selectedBeneficiaries.some(b => !b.isDisabled && !b.isInitiated);
+  }
 }
