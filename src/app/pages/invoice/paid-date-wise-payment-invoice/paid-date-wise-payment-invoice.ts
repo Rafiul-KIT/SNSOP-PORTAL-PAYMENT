@@ -80,7 +80,7 @@ export class PaidDateWisePaymentInvoice implements OnInit {
   payamList: LookupItem[] = [];
   bomaList: LookupItem[] = [];
 
-  paymentCycleOptions = PaymentCycleEnum;
+
 
   constructor(
     private fb: FormBuilder,
@@ -120,7 +120,7 @@ export class PaidDateWisePaymentInvoice implements OnInit {
       {
         fromDate: [formattedToday, Validators.required],
         toDate: [formattedToday, Validators.required],
-        paymentCycle: [null],
+
         state: [null],
         county: [{ value: null, disabled: true }],
         payam: [{ value: null, disabled: true }],
@@ -237,7 +237,7 @@ export class PaidDateWisePaymentInvoice implements OnInit {
     this.searchForm.reset({
       fromDate: formattedToday,
       toDate: formattedToday,
-      paymentCycle: null,
+
       state: null,
       county: null,
       payam: null,
@@ -266,20 +266,19 @@ export class PaidDateWisePaymentInvoice implements OnInit {
     const payload = {
       fromDate: formValues.fromDate,
       toDate: formValues.toDate,
-      workCode: formValues.workCode || 'string', // Adjust default if needed
-      stateId: formValues.state?.id || 0,
-      countyId: formValues.county?.id || 0,
-      payamId: formValues.payam?.id || 0,
-      bomaId: formValues.boma?.id || 0,
-      projectId: formValues.project?.id || 0, // Assuming project might be added to form later
-      reqNo: formValues.reqNo || 'string', // Adjust default if needed
-      page: page,
-      size: size,
+      workCode: formValues.workCode || null,
+      stateId: formValues.state?.id ? parseInt(formValues.state.id, 10) : null,
+      countyId: formValues.county?.id ? parseInt(formValues.county.id, 10) : null,
+      payamId: formValues.payam?.id ? parseInt(formValues.payam.id, 10) : null,
+      bomaId: formValues.boma?.id ? parseInt(formValues.boma.id, 10) : null,
+      projectId: formValues.projectId || null,
+      reqNo: formValues.reqNo || null,
     };
 
+    const endpoint = `/api/wage-invoice/paid/date-range/list?page=${page}&size=${size}`;
     try {
       const axiosResponse: any = await this.apiService.POST(
-        '/api/wage-invoice/paid/date-range/list',
+        endpoint,
         payload
       );
       // Access the actual API response data from axiosResponse.data

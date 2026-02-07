@@ -40,12 +40,7 @@
           </p-floatlabel>
         </div>
 
-        <div class="col-md-3">
-          <p-floatlabel variant="on" class="w-100">
-            <p-select [options]="paymentCycleOptions" optionLabel="label" formControlName="paymentCycle" />
-            <label>Payment Cycle</label>
-          </p-floatlabel>
-        </div>
+
 
         <div class="col-md-3">
           <p-floatlabel variant="on" class="w-100">
@@ -97,7 +92,7 @@
       <!-- HEADER -->
       <ng-template pTemplate="header">
         <tr>
-          <th colspan="11" class="text-end">
+          <th colspan="12" class="text-end">
             <p class="fw-bold mb-2">
               Showing <kbd>{{ records.length }}</kbd> of
               <kbd>{{ totalRecords }}</kbd> records
@@ -107,17 +102,17 @@
 
         <tr>
           <th class="text-center">Serial</th>
-          <th class="text-center">Request No</th>
+          <!-- <th class="text-center">Request No</th>
           <th class="text-center">Project Name</th>
-          <th class="text-center">Payment Cycle</th>
+          <th class="text-center">Payment Cycle</th> -->
           <th class="text-center">State</th>
           <th class="text-center">County</th>
           <th class="text-center">Payam</th>
           <th class="text-center">Boma</th>
           <th class="text-center">Work Code</th>
-          <th class="text-center">From Date</th>
-          <th class="text-center">To Date</th>
-          <th class="text-center" style="width: 90px">Action</th>
+          <!-- <th class="text-center">From Date</th>
+          <th class="text-center">To Date</th> -->
+          <th class="text-center" style="width: 90px">View Invoice</th>
         </tr>
       </ng-template>
 
@@ -127,20 +122,20 @@
           <td class="text-center">
             {{ (currentPage * pageSize) + rowIndex + 1 }}
           </td>
-          <td class="text-center">{{ record.reqNo || '-' }}</td>
+          <!-- <td class="text-center">{{ record.reqNo || '-' }}</td>
           <td class="text-center">{{ record.projectName || '-' }}</td>
           <td class="text-center  fw-semibold">
             <span class="badge bg-secondary rounded-pill bg-opacity-10  text-dark fw-medium">
               {{ record.wagePaymentCycle }}
             </span>
-          </td>
+          </td> -->
           <td class="text-center">{{ record.stateName || '-' }}</td>
           <td class="text-center">{{ record.countieName || '-' }}</td>
           <td class="text-center">{{ record.payamName || '-' }}</td>
           <td class="text-center">{{ record.bomaName || '-' }}</td>
           <td class="text-center">{{ record.workCode || '-' }}</td>
-          <td class="text-center">{{ record.fromDate || '-' }}</td>
-          <td class="text-center">{{ record.toDate || '-' }}</td>
+          <!-- <td class="text-center">{{ record.fromDate || '-' }}</td>
+          <td class="text-center">{{ record.toDate || '-' }}</td> -->
           <!-- ACTION -->
           <td class="text-center">
             <button class="btn btn-outline-info btn-sm" pTooltip="View Details" tooltipPosition="top"
@@ -163,7 +158,7 @@
     </p-table>
 
     <p-paginator class="paginator-sticky" [rows]="pageSize" [totalRecords]="totalRecords"
-      [rowsPerPageOptions]="[10, 25, 50]" (onPageChange)="onPageChange($event)" [first]="currentPage * pageSize"
+      [rowsPerPageOptions]="[10, 25, 50, -1]" (onPageChange)="onPageChange($event)" [first]="currentPage * pageSize"
       [currentPageReportTemplate]="'Showing {first} to {last} of {totalRecords} entries'">
     </p-paginator>
     </div>

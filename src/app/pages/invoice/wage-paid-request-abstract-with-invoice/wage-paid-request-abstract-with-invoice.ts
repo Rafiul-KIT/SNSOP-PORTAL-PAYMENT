@@ -66,7 +66,7 @@ export class WagePaidRequestAbstractWithInvoice implements OnInit {
   payamList: LookupItem[] = [];
   bomaList: LookupItem[] = [];
 
-  paymentCycleOptions = PaymentCycleEnum;
+
 
   constructor(
     private fb: FormBuilder,
@@ -100,7 +100,7 @@ export class WagePaidRequestAbstractWithInvoice implements OnInit {
 
   private initForm(): void {
     this.searchForm = this.fb.group({
-      paymentCycle: [null],
+
       state: [null],
       county: [{ value: null, disabled: true }],
       payam: [{ value: null, disabled: true }],
@@ -194,7 +194,7 @@ export class WagePaidRequestAbstractWithInvoice implements OnInit {
   // Reset button handler
   reset(): void {
     this.searchForm.reset({
-      paymentCycle: null,
+
       state: null,
       county: null,
       payam: null,
@@ -221,22 +221,21 @@ export class WagePaidRequestAbstractWithInvoice implements OnInit {
 
     const formValues = this.searchForm.value;
     const payload = {
-      fromDate: '2026-02-05', // TODO: Replace with dynamic date from form
-      toDate: '2026-02-05', // TODO: Replace with dynamic date from form
-      workCode: formValues.workCode || 'string', // Assuming workCode might be added to form later
-      stateId: formValues.state?.id || 0,
-      countyId: formValues.county?.id || 0,
-      payamId: formValues.payam?.id || 0,
-      bomaId: formValues.boma?.id || 0,
-      projectId: formValues.project?.id || 0, // Assuming project might be added to form later
-      reqNo: formValues.reqNo || 'string', // Assuming reqNo might be added to form later
-      page: page,
-      size: size,
+      fromDate: null,
+      toDate: null,
+      workCode: formValues.workCode || null,
+      stateId: formValues.state?.id ? parseInt(formValues.state.id, 10) : null,
+      countyId: formValues.county?.id ? parseInt(formValues.county.id, 10) : null,
+      payamId: formValues.payam?.id ? parseInt(formValues.payam.id, 10) : null,
+      bomaId: formValues.boma?.id ? parseInt(formValues.boma.id, 10) : null,
+      projectId: formValues.project || null,
+      reqNo: formValues.reqNo || null,
     };
 
+    const endpoint = `/api/wage-invoice/paid/abstract-list?page=${page}&size=${size}`;
     try {
       const axiosResponse: any = await this.apiService.POST(
-        '/api/wage-invoice/paid/abstract-list',
+        endpoint,
         payload
       );
       // Access the actual API response data from axiosResponse.data
