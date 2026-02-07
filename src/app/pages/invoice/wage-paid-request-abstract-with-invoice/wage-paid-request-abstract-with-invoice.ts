@@ -20,6 +20,7 @@ import {
   LookupService,
   PaymentCycleEnum,
 } from '../../../services/lookup.service';
+import { InputText } from "primeng/inputtext";
 
 @Component({
   selector: 'app-wage-paid-request-abstract-with-invoice',
@@ -36,7 +37,8 @@ import {
     PaginatorModule,
     ToastModule,
     MultiSelectModule,
-  ],
+    InputText
+],
   templateUrl: './wage-paid-request-abstract-with-invoice.html',
   styleUrl: './wage-paid-request-abstract-with-invoice.scss',
   providers: [MessageService],
@@ -64,7 +66,7 @@ export class WagePaidRequestAbstractWithInvoice implements OnInit {
   payamList: LookupItem[] = [];
   bomaList: LookupItem[] = [];
 
-  paymentCycleOptions = PaymentCycleEnum;
+
 
   constructor(
     private fb: FormBuilder,
@@ -79,7 +81,6 @@ export class WagePaidRequestAbstractWithInvoice implements OnInit {
     this.initBreadcrumb();
     this.initForm();
     this.loadStates();
-    this.search();
     return Promise.resolve();
   }
 
@@ -99,11 +100,13 @@ export class WagePaidRequestAbstractWithInvoice implements OnInit {
 
   private initForm(): void {
     this.searchForm = this.fb.group({
-      paymentCycle: [null],
+
       state: [null],
       county: [{ value: null, disabled: true }],
       payam: [{ value: null, disabled: true }],
       boma: [{ value: null, disabled: true }],
+      workCode: [''],
+      reqNo: [''],
     });
   }
 
@@ -191,11 +194,13 @@ export class WagePaidRequestAbstractWithInvoice implements OnInit {
   // Reset button handler
   reset(): void {
     this.searchForm.reset({
-      paymentCycle: null,
+
       state: null,
       county: null,
       payam: null,
       boma: null,
+      workCode: null,
+      reqNo: null,
     });
     this.searchForm.get('county')?.disable();
     this.searchForm.get('payam')?.disable();
@@ -205,36 +210,65 @@ export class WagePaidRequestAbstractWithInvoice implements OnInit {
     this.fetchPage(this.currentPage, this.pageSize, true);
   }
 
-  fetchPage(
+  async fetchPage(
     page: number,
     size: number,
     isInitialLoad: boolean = false
-  ): Promise<void> {
-    this.isShow = false;
+  ): Promise <void>{
+    this.isLoading = true;
+    this.isShow = false; // Initially hide the table area
     this.cdr.markForCheck();
 
-    // Mock data for now
-    this.records = [
-      {
-        state: 'State 1',
-        county: 'County 1',
-        payam: 'Payam 1',
-        boma: 'Boma 1',
-        paymentCycle: 1,
-      },
-      {
-        state: 'State 2',
-        county: 'County 2',
-        payam: 'Payam 2',
-        boma: 'Boma 2',
-        paymentCycle: 2,
-      },
-    ];
-    this.totalRecords = this.records.length;
-    this.isShow = true;
-    this.cdr.markForCheck();
+    const formValues = this.searchForm.value;
+    const payload = {
+      fromDate: null,
+      toDate: null,
+      workCode: formValues.workCode || null,
+      stateId: formValues.state?.id ? parseInt(formValues.state.id, 10) : null,
+      countyId: formValues.county?.id ? parseInt(formValues.county.id, 10) : null,
+      payamId: formValues.payam?.id ? parseInt(formValues.payam.id, 10) : null,
+      bomaId: formValues.boma?.id ? parseInt(formValues.boma.id, 10) : null,
+      projectId: formValues.project || null,
+      reqNo: formValues.reqNo || null,
+    };
 
-    return Promise.resolve();
+    const endpoint = `/api/wage-invoice/paid/abstract-list?page=${page}&size=${size}`;
+    try {
+      const axiosResponse: any = await this.apiService.POST(
+        endpoint,
+        payload
+      );
+      // Access the actual API response data from axiosResponse.data
+      const apiResponse = axiosResponse.data;
+
+      if (apiResponse.success && apiResponse.data && apiResponse.data.length > 0) {
+        this.records = apiResponse.data; // Correctly access the data array
+        this.totalRecords = apiResponse.pagination.totalElements;
+        this.isShow = true; // Show table only if data is successfully fetched
+      } else {
+        this.records = [];
+        this.totalRecords = 0;
+        this.messageService.add({
+          severity: 'info',
+          summary: 'Info',
+          detail: apiResponse.message || 'No data found.',
+        });
+        this.isShow = false; // Keep table hidden if no data or unsuccessful response
+      }
+    } catch (error: any) { // Catch as 'any' to access error.response
+      console.error('Error fetching data:', error);
+      this.records = [];
+      this.totalRecords = 0;
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: error.response?.data?.message || 'An error occurred while fetching data.',
+      });
+      this.isShow = false; // Keep table hidden on error
+    } finally {
+      this.isLoading = false; // Always stop loader
+      this.cdr.markForCheck();
+    }
   }
 
   onPageChange(event: any): void {

@@ -1,1 +1,174 @@
-<p>paid-date-wise-payment-invoice works!</p>
+@if (isLoading) {
+<app-loader></app-loader>
+} @else {
+<div class="breadcrumb-wrapper">
+  <p-breadcrumb class="max-w-full" [model]="items" [home]="home"></p-breadcrumb>
+</div>
+
+<div class="wrapper-scroller">
+  <div class="row justify-content-center mt-4">
+    <div class="card p-3 mb-3">
+      <form [formGroup]="searchForm" novalidate class="row g-2">
+        <div class="col-md-3">
+          <p-floatlabel variant="on" class="w-100">
+            <p-select [options]="states" optionLabel="name" formControlName="state"
+              (onChange)="onStateChange($event.value)" />
+            <label>State Name</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="col-md-3">
+          <p-floatlabel variant="on" class="w-100">
+            <p-select [options]="countyList" optionLabel="name" formControlName="county"
+              (onChange)="onCountyChange($event.value)" />
+            <label>County Name</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="col-md-3">
+          <p-floatlabel variant="on" class="w-100">
+            <p-select [options]="payamList" optionLabel="name" formControlName="payam"
+              (onChange)="onPayamChange($event.value)" />
+            <label>Payam Name</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="col-md-3">
+          <p-floatlabel variant="on" class="w-100">
+            <p-select [options]="bomaList" optionLabel="name" formControlName="boma" />
+            <label>Boma Name</label>
+          </p-floatlabel>
+        </div>
+
+
+
+        <div class="col-md-3">
+          <p-floatlabel variant="on" class="w-100">
+            <input type="text" pInputText formControlName="workCode" />
+            <label>Work Code</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="col-md-3">
+          <p-floatlabel variant="on" class="w-100">
+            <input type="text" pInputText formControlName="reqNo" />
+            <label>Request No</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="col-md-3">
+          <p-floatlabel variant="on" class="w-100">
+            <p-datepicker formControlName="fromDate" showIcon="true" [style]="{ width: '100%' }" inputId="from-date"
+              dateFormat="yy-mm-dd"></p-datepicker>
+            <label for="from-date">From Date</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="col-md-3">
+          <p-floatlabel variant="on" class="w-100">
+            <p-datepicker formControlName="toDate" showIcon="true" [style]="{ width: '100%' }" inputId="to-date"
+              dateFormat="yy-mm-dd"></p-datepicker>
+            <label for="to-date">To Date</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="col-12 text-end">
+          <button class="btn btn-secondary me-2" (click)="reset()">
+            <i class="fas fa-redo me-2"></i>Reset
+          </button>
+          <button class="btn btn-success" (click)="search()">
+            <i class="fas fa-search me-2"></i>Search
+          </button>
+        </div>
+      </form>
+      <br>
+    </div>
+    @if(isShow){
+    <div class="col-12">
+    <p-table [value]="records" [scrollable]="true" scrollHeight="64vh" size="small" dataKey="stateId"
+      class="p-datatable custom-table -sm p-datatable-striped p-datatable-gridlines"
+      [tableStyle]="{ 'min-width': '100%' }">
+
+      <!-- HEADER -->
+      <ng-template pTemplate="header">
+        <tr>
+          <th colspan="12" class="text-end">
+            <p class="fw-bold mb-2">
+              Showing <kbd>{{ records.length }}</kbd> of
+              <kbd>{{ totalRecords }}</kbd> records
+            </p>
+          </th>
+        </tr>
+
+        <tr>
+          <th class="text-center">Serial</th>
+          <!-- <th class="text-center">Request No</th>
+          <th class="text-center">Project Name</th>
+          <th class="text-center">Payment Cycle</th> -->
+          <th class="text-center">State</th>
+          <th class="text-center">County</th>
+          <th class="text-center">Payam</th>
+          <th class="text-center">Boma</th>
+          <th class="text-center">Work Code</th>
+          <!-- <th class="text-center">From Date</th>
+          <th class="text-center">To Date</th> -->
+          <th class="text-center" style="width: 90px">View Invoice</th>
+        </tr>
+      </ng-template>
+
+      <!-- BODY -->
+      <ng-template pTemplate="body" let-record let-rowIndex="rowIndex">
+        <tr>
+          <td class="text-center">
+            {{ (currentPage * pageSize) + rowIndex + 1 }}
+          </td>
+          <!-- <td class="text-center">{{ record.reqNo || '-' }}</td>
+          <td class="text-center">{{ record.projectName || '-' }}</td>
+          <td class="text-center  fw-semibold">
+            <span class="badge bg-secondary rounded-pill bg-opacity-10  text-dark fw-medium">
+              {{ record.wagePaymentCycle }}
+            </span>
+          </td> -->
+          <td class="text-center">{{ record.stateName || '-' }}</td>
+          <td class="text-center">{{ record.countieName || '-' }}</td>
+          <td class="text-center">{{ record.payamName || '-' }}</td>
+          <td class="text-center">{{ record.bomaName || '-' }}</td>
+          <td class="text-center">{{ record.workCode || '-' }}</td>
+          <!-- <td class="text-center">{{ record.fromDate || '-' }}</td>
+          <td class="text-center">{{ record.toDate || '-' }}</td> -->
+          <!-- ACTION -->
+          <td class="text-center">
+            <button class="btn btn-outline-info btn-sm" pTooltip="View Details" tooltipPosition="top"
+              (click)="viewDetails(record)">
+              <i class="fas fa-eye"></i>
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+
+      <!-- EMPTY -->
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="12" class="text-center text-danger fw-semibold">
+            No data found!
+          </td>
+        </tr>
+      </ng-template>
+
+    </p-table>
+
+    <p-paginator class="paginator-sticky" [rows]="pageSize" [totalRecords]="totalRecords"
+      [rowsPerPageOptions]="[10, 25, 50, -1]" (onPageChange)="onPageChange($event)" [first]="currentPage * pageSize"
+      [currentPageReportTemplate]="'Showing {first} to {last} of {totalRecords} entries'">
+    </p-paginator>
+    </div>
+    } @else {
+    <div class="col-12 text-center p-5">
+      <p class="text-muted fs-5">No data to display. Please use the search filters above.</p>
+    </div>
+    }
+  </div>
+</div>
+}
+
+<p-toast position="bottom-right"></p-toast>
