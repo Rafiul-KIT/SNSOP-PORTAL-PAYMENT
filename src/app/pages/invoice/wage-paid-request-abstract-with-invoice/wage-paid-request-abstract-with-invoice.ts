@@ -311,6 +311,20 @@ export class WagePaidRequestAbstractWithInvoice implements OnInit {
   }
 
   viewDetails(record: any): void {
-    // Implement view details logic
+    const wagePaymentRequestId = record.wagePaymentRequestId;
+    const subprojectId = record.subprojectId;
+
+    if (wagePaymentRequestId !== undefined && subprojectId !== undefined) {
+      this.router.navigate(
+        ['/invoice/wage-paid-reqiest-abstract-with-invoice-details'],
+        { queryParams: { wagePaymentRequestId: wagePaymentRequestId, subprojectId: subprojectId } }
+      );
+    } else {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Missing wagePaymentRequestId or subprojectId for details.',
+      });
+    }
   }
 }

@@ -1,1 +1,413 @@
-<p>wage-paid-reqiest-abstract-with-invoice-details works!</p>
+<div class="breadcrumb-wrapper">
+  <p-breadcrumb class="max-w-full" [model]="items" [home]="home"></p-breadcrumb>
+</div>
+
+@if (isLoading) {
+<app-loader></app-loader>
+} @else {
+<div class="wrapper-scroller">
+  <div class="container-fluid mt-2">
+    @if (wagePaymentRequestDetails) {
+    <!-- Invoice Card -->
+    <div class="card shadow-sm">
+      <div class="card-body p-3">
+        <!-- Header -->
+        <div class="text-center mb-2 pb-2 border-bottom">
+          <h5 class="fw-bold text-primary mb-0">Wage Paid Request Details</h5>
+        </div>
+
+        <!-- Payment Invoice Full Details Section -->
+        <div class="mb-2">
+          <h6 class="fw-bold mb-2 text-dark">Payment Invoice Full Details</h6>
+          <div class="row">
+            <div class="col-md-6">
+              <table class="table table-borderless info-table">
+                <tr>
+                  <td class="text-muted fw-medium" style="width: 40%">Request Number</td>
+                  <td class="fw-semibold" style="width: 10%">:</td>
+                  <td style="width: 50%">{{ wagePaymentRequestDetails.paymentInvoiceFullDetails?.requestNumber || '-' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Subproject ID</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.paymentInvoiceFullDetails?.subprojectId || '-' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Wage Rate USD</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.paymentInvoiceFullDetails?.wageRateUsd || '-' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">From Date</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.paymentInvoiceFullDetails?.fromDate || '-' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">To Date</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.paymentInvoiceFullDetails?.toDate || '-' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Payment Cycle</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.paymentInvoiceFullDetails?.paymentCycle || '-' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Total Count</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.paymentInvoiceFullDetails?.totalCount || '-' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Paid Count</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.paymentInvoiceFullDetails?.paidCount || '-' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Unpaid Count</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.paymentInvoiceFullDetails?.unpaidCount || '-' }}</td>
+                </tr>
+              </table>
+            </div>
+            <div class="col-md-6">
+              <table class="table table-borderless info-table">
+                <tr>
+                  <td class="text-muted fw-medium" style="width: 40%">Status</td>
+                  <td class="fw-semibold" style="width: 10%">:</td>
+                  <td style="width: 50%">{{ wagePaymentRequestDetails.paymentInvoiceFullDetails?.status || '-' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Coordinator</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.paymentInvoiceFullDetails?.coordinatorName || '-' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Manager</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.paymentInvoiceFullDetails?.managerName || '-' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Total Amount USD</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.paymentInvoiceFullDetails?.totalAmountUsd || '-' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Paid Amount USD</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.paymentInvoiceFullDetails?.paidAmountUsd || '-' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Paid Amount DIS USD</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.paymentInvoiceFullDetails?.paidAmountDisUsd || '-' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Paid Amount Public Works USD</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.paymentInvoiceFullDetails?.paidAmountPublicWorksUsd || '-' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Unpaid Amount USD</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.paymentInvoiceFullDetails?.unpaidAmountUsd || '-' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Paid Amount SSP</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.paymentInvoiceFullDetails?.paidAmountSsp || '-' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Paid Amount DIS SSP</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.paymentInvoiceFullDetails?.paidAmountDisSsp || '-' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Paid Amount Public Works SSP</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.paymentInvoiceFullDetails?.paidAmountPublicWorksSsp || '-' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Paid Actual Households</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.paymentInvoiceFullDetails?.paidActualHouseholds || '-' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Paid Alternate Households</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.paymentInvoiceFullDetails?.paidAlternateHouseholds || '-' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Paid Date</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.paymentInvoiceFullDetails?.paidDate || '-' }}</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Work Proposal For Progress DIS Section -->
+        @if (wagePaymentRequestDetails.paymentInvoiceFullDetails?.component === "Component 1 (Direct Income Support)" && wagePaymentRequestDetails.workProposalForProgressDIS) {
+        <div class="mb-2 border-top pt-2">
+          <h6 class="fw-bold mb-2 text-dark">Work Proposal For Progress DIS Details</h6>
+          <div class="row">
+            <div class="col-md-6">
+              <table class="table table-borderless info-table">
+                <tr>
+                  <td class="text-muted fw-medium" style="width: 40%">Project Name</td>
+                  <td class="fw-semibold" style="width: 10%">:</td>
+                  <td style="width: 50%">{{ wagePaymentRequestDetails.workProposalForProgressDIS?.projectName || 'N/A' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Work Code</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.workProposalForProgressDIS?.workCode || 'N/A' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">IP Name</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.workProposalForProgressDIS?.ipName || 'N/A' }}</td>
+                </tr>
+              </table>
+            </div>
+            <div class="col-md-6">
+              <table class="table table-borderless info-table">
+                <tr>
+                  <td class="text-muted fw-medium" style="width: 40%">Type of Meeting</td>
+                  <td class="fw-semibold" style="width: 10%">:</td>
+                  <td style="width: 50%">{{ wagePaymentRequestDetails.workProposalForProgressDIS?.typeOfMeeting || 'N/A' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Meeting Date</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.workProposalForProgressDIS?.meetingDate || 'N/A' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Status</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.workProposalForProgressDIS?.status || 'N/A' }}</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+        } @else if (wagePaymentRequestDetails.workProposalForProgress) {
+        <!-- Work Proposal For Progress Section -->
+        <div class="mb-2 border-top pt-2">
+          <h6 class="fw-bold mb-2 text-dark">Work Proposal For Progress Details</h6>
+          <div class="row">
+            <div class="col-md-6">
+              <table class="table table-borderless info-table">
+                <tr>
+                  <td class="text-muted fw-medium" style="width: 40%">Project Name</td>
+                  <td class="fw-semibold" style="width: 10%">:</td>
+                  <td style="width: 50%">{{ wagePaymentRequestDetails.workProposalForProgress?.projectName || 'N/A' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">State</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.workProposalForProgress?.stateName || 'N/A' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">County</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.workProposalForProgress?.countieName || 'N/A' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Payam</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.workProposalForProgress?.payamName || 'N/A' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Boma Name</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.workProposalForProgress?.bomaName || 'N/A' }}</td>
+                </tr>
+              </table>
+            </div>
+            <div class="col-md-6">
+              <table class="table table-borderless info-table">
+                <tr>
+                  <td class="text-muted fw-medium" style="width: 40%">Work Name</td>
+                  <td class="fw-semibold" style="width: 10%">:</td>
+                  <td style="width: 50%">{{ wagePaymentRequestDetails.workProposalForProgress?.workName || 'N/A' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Work Code</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.workProposalForProgress?.workCode || 'N/A' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Est. Start Date</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.workProposalForProgress?.estWorkStartDate || 'N/A' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Est. End Date</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.workProposalForProgress?.estWorkEndDate || 'N/A' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Status</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.workProposalForProgress?.status || 'N/A' }}</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+        } @else {
+        <div class="mb-2 border-top pt-2">
+          <h6 class="fw-bold mb-2 text-dark">Work Proposal Details</h6>
+          <p class="text-muted">No Work Proposal Details available.</p>
+        </div>
+        }
+
+        <!-- Wages Table -->
+        @if (wagePaymentRequestDetails.wages && wagePaymentRequestDetails.wages.length > 0) {
+        <div class="mb-2 border-top pt-2">
+          <h6 class="fw-bold mb-2 text-dark">Wages</h6>
+          <div class="table-responsive">
+            <p-table [value]="wagePaymentRequestDetails.wages"
+              class="p-datatable custom-table p-datatable-striped p-datatable-gridlines"
+              [tableStyle]="{ 'min-width': '100%' }">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th class="text-center">Image ID</th>
+                  <th class="text-center">Description</th>
+                  <th class="text-center">Photo File Name</th>
+                  <th class="text-center">Uploaded By</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-wage>
+                <tr>
+                  <td class="text-center">{{ wage.imageId }}</td>
+                  <td class="text-center">{{ wage.description || 'N/A' }}</td>
+                  <td class="text-center">{{ wage.photoFileName || 'N/A' }}</td>
+                  <td class="text-center">{{ wage.uploadedBy || 'N/A' }}</td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="emptyMessage">
+                <tr>
+                  <td colspan="4" class="text-center text-danger fw-semibold">No wages found.</td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+        </div>
+        }
+
+        <!-- First Step Payments Table -->
+        @if (wagePaymentRequestDetails.firstStepPayments && wagePaymentRequestDetails.firstStepPayments.length > 0) {
+        <div class="mb-2 border-top pt-2">
+          <h6 class="fw-bold mb-2 text-dark">First Step Payments</h6>
+          <div class="table-responsive">
+            <p-table [value]="wagePaymentRequestDetails.firstStepPayments"
+              class="p-datatable custom-table p-datatable-striped p-datatable-gridlines"
+              [tableStyle]="{ 'min-width': '100%' }">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th class="text-center">Beneficiary ID</th>
+                  <th class="text-center">Household Name</th>
+                  <th class="text-center">Household Number</th>
+                  <th class="text-center">Contact No</th>
+                  <th class="text-center">Present Days</th>
+                  <th class="text-center">Absent Days</th>
+                  <th class="text-center">Paid To</th>
+                  <th class="text-center">Paid To Type</th>
+                  <th class="text-center">USD Total</th>
+                  <th class="text-center">SSP Total</th>
+                  <th class="text-center">Pay Status</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-payment>
+                <tr>
+                  <td class="text-center">{{ payment.benId || 'N/A' }}</td>
+                  <td class="text-start">{{ payment.householdName }}</td>
+                  <td class="text-start">{{ payment.householdNumber }}</td>
+                  <td class="text-center">{{ payment.contactNo || 'N/A' }}</td>
+                  <td class="text-center">{{ payment.presentDays }}</td>
+                  <td class="text-center">{{ payment.absentDays }}</td>
+                  <td class="text-start">{{ payment.paidToName }}</td>
+                  <td class="text-start">{{ payment.paidToType }}</td>
+                  <td class="text-end">{{ payment.usdTotal }}</td>
+                  <td class="text-end">{{ payment.sspTotal }}</td>
+                  <td class="text-center">{{ payment.payStatus }}</td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="emptyMessage">
+                <tr>
+                  <td colspan="8" class="text-center text-danger fw-semibold">No first step payments found.</td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+        </div>
+        }
+
+        <!-- Mop Up Payments Table -->
+        @if (wagePaymentRequestDetails.mopUpPayments && wagePaymentRequestDetails.mopUpPayments.length > 0) {
+        <div class="mb-2 border-top pt-2">
+          <h6 class="fw-bold mb-2 text-dark">Mop Up Payments</h6>
+          <div class="table-responsive">
+            <p-table [value]="wagePaymentRequestDetails.mopUpPayments"
+              class="p-datatable custom-table p-datatable-striped p-datatable-gridlines"
+              [tableStyle]="{ 'min-width': '100%' }">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th class="text-center">Beneficiary ID</th>
+                  <th class="text-center">Household Name</th>
+                  <th class="text-center">Household Number</th>
+                  <th class="text-center">Contact No</th>
+                  <th class="text-center">Present Days</th>
+                  <th class="text-center">Absent Days</th>
+                  <th class="text-center">Paid To</th>
+                  <th class="text-center">Paid To Type</th>
+                  <th class="text-center">USD Total</th>
+                  <th class="text-center">SSP Total</th>
+                  <th class="text-center">Pay Status</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-payment>
+                <tr>
+                  <td class="text-center">{{ payment.benId || 'N/A' }}</td>
+                  <td class="text-start">{{ payment.householdName }}</td>
+                  <td class="text-start">{{ payment.householdNumber }}</td>
+                  <td class="text-center">{{ payment.contactNo || 'N/A' }}</td>
+                  <td class="text-center">{{ payment.presentDays }}</td>
+                  <td class="text-center">{{ payment.absentDays }}</td>
+                  <td class="text-start">{{ payment.paidToName }}</td>
+                  <td class="text-start">{{ payment.paidToType }}</td>
+                  <td class="text-end">{{ payment.usdTotal }}</td>
+                  <td class="text-end">{{ payment.sspTotal }}</td>
+                  <td class="text-center">{{ payment.payStatus }}</td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="emptyMessage">
+                <tr>
+                  <td colspan="8" class="text-center text-danger fw-semibold">No mop up payments found.</td>
+                </tr>
+              </ng-template>
+            </p-table>
+          </div>
+        </div>
+        } @else {
+        <div class="text-center p-4">
+          <p class="text-muted">No details available for this wage payment request.</p>
+        </div>
+        }
+      </div>
+    </div>
+    } @else {
+    <div class="card">
+      <div class="card-body text-center p-5">
+        <i class="fas fa-exclamation-circle fa-3x text-muted mb-3"></i>
+        <p class="text-muted fs-5">No payment details available.</p>
+      </div>
+    </div>
+    }
+  </div>
+</div>
+}
+
+<p-toast position="bottom-right"></p-toast>
