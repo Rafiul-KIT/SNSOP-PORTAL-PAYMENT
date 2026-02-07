@@ -22,14 +22,27 @@ import {
   PaymentCycleEnum,
 } from '../../../services/lookup.service';
 
-// Custom validator to check if fromDate is not after toDate
+// Custom validator to check if fromDate is not after toDate and toDate is not in future
 function dateRangeValidator(formGroup: FormGroup) {
   const fromDate = formGroup.get('fromDate')?.value;
   const toDate = formGroup.get('toDate')?.value;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Reset time to compare only dates
 
+  // Check if fromDate is after toDate
   if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
     return { dateRangeInvalid: true };
   }
+
+  // Check if toDate is in the future
+  if (toDate) {
+    const toDateObj = new Date(toDate);
+    toDateObj.setHours(0, 0, 0, 0);
+    if (toDateObj > today) {
+      return { futureDateInvalid: true };
+    }
+  }
+
   return null;
 }
 
@@ -113,14 +126,10 @@ export class PaidDateWisePaymentInvoice implements OnInit {
   }
 
   private initForm(): void {
-    const today = new Date();
-    const formattedToday = today.toISOString().slice(0, 10); // YYYY-MM-DD
-
     this.searchForm = this.fb.group(
       {
-        fromDate: [formattedToday, Validators.required],
-        toDate: [formattedToday, Validators.required],
-
+        fromDate: [null, Validators.required],
+        toDate: [null, Validators.required],
         state: [null],
         county: [{ value: null, disabled: true }],
         payam: [{ value: null, disabled: true }],
@@ -216,6 +225,12 @@ export class PaidDateWisePaymentInvoice implements OnInit {
           title: 'Validation Error',
           text: 'From Date cannot be after To Date.',
         });
+      } else if (this.searchForm.errors?.['futureDateInvalid']) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Validation Error',
+          text: 'To Date cannot be a future date.',
+        });
       } else {
         Swal.fire({
           icon: 'warning',
@@ -231,47 +246,55 @@ export class PaidDateWisePaymentInvoice implements OnInit {
 
   // Reset button handler
   reset(): void {
-    const today = new Date();
-    const formattedToday = today.toISOString().slice(0, 10); // YYYY-MM-DD
-
     this.searchForm.reset({
-      fromDate: formattedToday,
-      toDate: formattedToday,
-
+      fromDate: null,
+      toDate: null,
       state: null,
       county: null,
       payam: null,
       boma: null,
-      workCode: null,
-      reqNo: null,
+      workCode: '',
+      reqNo: '',
     });
     this.searchForm.get('county')?.disable();
     this.searchForm.get('payam')?.disable();
     this.searchForm.get('boma')?.disable();
 
+    this.records = [];
+    this.totalRecords = 0;
     this.currentPage = 0;
-    this.fetchPage(this.currentPage, this.pageSize, true);
+    this.isShow = false;
+    this.cdr.markForCheck();
   }
 
   async fetchPage(
     page: number,
-    size: number,
-    isInitialLoad: boolean = false
+    size: number
   ): Promise<void> {
     this.isLoading = true;
-    this.isShow = false; // Initially hide the table area
+    this.isShow = false;
     this.cdr.markForCheck();
 
     const formValues = this.searchForm.value;
+
+    // Format dates to YYYY-MM-DD format
+    const formatDate = (date: any): string | null => {
+      if (!date) return null;
+      if (date instanceof Date) {
+        return date.toISOString().split('T')[0];
+      }
+      return date;
+    };
+
     const payload = {
-      fromDate: formValues.fromDate,
-      toDate: formValues.toDate,
+      fromDate: formatDate(formValues.fromDate),
+      toDate: formatDate(formValues.toDate),
       workCode: formValues.workCode || null,
       stateId: formValues.state?.id ? parseInt(formValues.state.id, 10) : null,
       countyId: formValues.county?.id ? parseInt(formValues.county.id, 10) : null,
       payamId: formValues.payam?.id ? parseInt(formValues.payam.id, 10) : null,
       bomaId: formValues.boma?.id ? parseInt(formValues.boma.id, 10) : null,
-      projectId: formValues.projectId || null,
+      projectId: null,
       reqNo: formValues.reqNo || null,
     };
 
@@ -281,13 +304,12 @@ export class PaidDateWisePaymentInvoice implements OnInit {
         endpoint,
         payload
       );
-      // Access the actual API response data from axiosResponse.data
       const apiResponse = axiosResponse.data;
 
       if (apiResponse.success && apiResponse.data && apiResponse.data.length > 0) {
-        this.records = apiResponse.data; // Correctly access the data array
+        this.records = apiResponse.data;
         this.totalRecords = apiResponse.pagination.totalElements;
-        this.isShow = true; // Show table only if data is successfully fetched
+        this.isShow = true;
       } else {
         this.records = [];
         this.totalRecords = 0;
@@ -296,9 +318,9 @@ export class PaidDateWisePaymentInvoice implements OnInit {
           summary: 'Info',
           detail: apiResponse.message || 'No data found.',
         });
-        this.isShow = false; // Keep table hidden if no data or unsuccessful response
+        this.isShow = false;
       }
-    } catch (error: any) { // Catch as 'any' to access error.response
+    } catch (error: any) {
       console.error('Error fetching data:', error);
       this.records = [];
       this.totalRecords = 0;
@@ -307,9 +329,9 @@ export class PaidDateWisePaymentInvoice implements OnInit {
         summary: 'Error',
         detail: error.response?.data?.message || 'An error occurred while fetching data.',
       });
-      this.isShow = false; // Keep table hidden on error
+      this.isShow = false;
     } finally {
-      this.isLoading = false; // Always stop loader
+      this.isLoading = false;
       this.cdr.markForCheck();
     }
   }
@@ -317,10 +339,32 @@ export class PaidDateWisePaymentInvoice implements OnInit {
   onPageChange(event: any): void {
     this.currentPage = event.page;
     this.pageSize = event.rows;
-    this.fetchPage(this.currentPage, this.pageSize);
+
+    // Handle "Show All" case when rows is -1
+    const size = this.pageSize === -1 ? -1 : this.pageSize;
+    const page = this.pageSize === -1 ? 0 : this.currentPage;
+
+    this.fetchPage(page, size);
   }
 
   viewDetails(record: any): void {
-    // Implement view details logic
+    const fromDate = this.formatDateForNavigation(this.searchForm.value.fromDate);
+    const toDate = this.formatDateForNavigation(this.searchForm.value.toDate);
+
+    this.router.navigate(['/invoice/paid-date-wise-payment-invoice-details'], {
+      queryParams: {
+        subprojectId: record.subprojectId,
+        fromDate: fromDate,
+        toDate: toDate
+      }
+    });
+  }
+
+  private formatDateForNavigation(date: any): string {
+    if (!date) return '';
+    if (date instanceof Date) {
+      return date.toISOString().split('T')[0];
+    }
+    return date;
   }
 }

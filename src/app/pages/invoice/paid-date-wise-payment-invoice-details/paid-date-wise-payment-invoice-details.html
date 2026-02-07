@@ -1,1 +1,206 @@
-<p>paid-date-wise-payment-invoice-details works!</p>
+@if (isLoading) {
+<app-loader></app-loader>
+} @else {
+<div class="breadcrumb-wrapper">
+  <p-breadcrumb class="max-w-full" [model]="items" [home]="home"></p-breadcrumb>
+</div>
+
+<div class="wrapper-scroller">
+  <div class="container-fluid mt-2">
+
+
+    @if (paymentDetails) {
+    <!-- Invoice Card -->
+    <div class="card shadow-sm">
+      <div class="card-body p-3">
+        <!-- Header -->
+        <div class="text-center mb-2 pb-2 border-bottom">
+          <h5 class="fw-bold text-primary mb-0">Payment Cycle wise Invoice Details</h5>
+        </div>
+    <!-- Action Buttons -->
+    <div class="row mb-2">
+      <div class="col-12 text-end">
+       
+        <button class="btn btn-primary btn-sm" (click)="printInvoice()" [disabled]="isPrinting">
+          <i class="fas fa-print me-1"></i>
+          {{ isPrinting ? 'Generating...' : 'Print' }}
+        </button>
+      </div>
+    </div>
+        <!-- Project Information -->
+        <div class="row mb-2">
+          <div class="col-md-6">
+            <table class="table table-borderless info-table">
+              <tr>
+                <td class="text-muted fw-medium" style="width: 40%">Project Name</td>
+                <td class="fw-semibold" style="width: 10%">:</td>
+                <td style="width: 50%">{{ paymentDetails.projectName || '-' }}</td>
+              </tr>
+              <tr>
+                <td class="text-muted fw-medium">Work Code</td>
+                <td class="fw-semibold">:</td>
+                <td>{{ paymentDetails.workCode || '-' }}</td>
+              </tr>
+              <tr>
+                <td class="text-muted fw-medium">From Date</td>
+                <td class="fw-semibold">:</td>
+                <td>{{ fromDate || '-' }}</td>
+              </tr>
+              <tr>
+                <td class="text-muted fw-medium">To Date</td>
+                <td class="fw-semibold">:</td>
+                <td>{{ toDate || '-' }}</td>
+              </tr>
+            </table>
+          </div>
+          <div class="col-md-6">
+            <table class="table table-borderless info-table">
+              <tr>
+                <td class="text-muted fw-medium" style="width: 40%">State</td>
+                <td class="fw-semibold" style="width: 10%">:</td>
+                <td style="width: 50%">{{ paymentDetails.stateName || '-' }}</td>
+              </tr>
+              <tr>
+                <td class="text-muted fw-medium">County</td>
+                <td class="fw-semibold">:</td>
+                <td>{{ paymentDetails.countyName || '-' }}</td>
+              </tr>
+              <tr>
+                <td class="text-muted fw-medium">Payam</td>
+                <td class="fw-semibold">:</td>
+                <td>{{ paymentDetails.payamName || '-' }}</td>
+              </tr>
+              <tr>
+                <td class="text-muted fw-medium">Boma Name</td>
+                <td class="fw-semibold">:</td>
+                <td>{{ paymentDetails.bomaName || '-' }}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- Payment Summary -->
+        <div class="mb-2">
+          <h6 class="fw-bold mb-2 text-dark">Payment Summary</h6>
+          <div class="row">
+            <div class="col-md-6">
+              <table class="table table-borderless info-table">
+                <tr>
+                  <td class="text-muted fw-medium" style="width: 50%">Number of Paid Beneficiaries</td>
+                  <td class="fw-semibold" style="width: 10%">:</td>
+                  <td class="text-success fw-bold" style="width: 40%">{{ paymentDetails.paidBeneficiaryCount || 0 }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Payment Made to Alternates</td>
+                  <td class="fw-semibold">:</td>
+                  <td class="fw-bold">{{ paymentDetails.paidAlternateHouseholds || 0 }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Payment Made to Households</td>
+                  <td class="fw-semibold">:</td>
+                  <td class="fw-bold">{{ paymentDetails.paidActualHouseholds || 0 }}</td>
+                </tr>
+              </table>
+            </div>
+            <div class="col-md-6">
+              <table class="table table-borderless info-table">
+                <tr>
+                  <td class="text-muted fw-medium" style="width: 50%">Amount Paid(USD)</td>
+                  <td class="fw-semibold" style="width: 10%">:</td>
+                  <td class="text-primary fw-bold" style="width: 40%">{{ paymentDetails.paidAmountUSD?.toFixed(2) || '0.00' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Amount Paid(SSP)</td>
+                  <td class="fw-semibold">:</td>
+                  <td class="text-primary fw-bold">{{ paymentDetails.paidAmountSSP?.toFixed(2) || '0.00' }}</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Beneficiary Details -->
+        <div class="mb-2">
+          <h6 class="fw-bold mb-2 text-dark">Beneficiary Details</h6>
+        </div>
+
+        <!-- Table -->
+        <div class="table-responsive">
+          <p-table [value]="paymentDetailsByCycle" [scrollable]="true" scrollHeight="400px"
+            dataKey="beneficiaryId" size="small"
+            class="p-datatable custom-table p-datatable-striped p-datatable-gridlines"
+            [tableStyle]="{ 'min-width': '100%' }">
+
+            <ng-template pTemplate="header">
+              <tr>
+                <th class="text-center" style="min-width: 60px">S.No</th>
+                <th class="text-center" style="min-width: 150px">Enrollment No</th>
+                <th class="text-center" style="min-width: 150px">Name Of Household</th>
+                <th class="text-center" style="min-width: 150px">Household Code</th>
+                <th class="text-center" style="min-width: 100px">No Of Days Present</th>
+                <th class="text-center" style="min-width: 120px">Wage Rate In USD</th>
+                <th class="text-center" style="min-width: 120px">Amount Paid In USD</th>
+                <th class="text-center" style="min-width: 120px">Exchange In SSP</th>
+                <th class="text-center" style="min-width: 150px">Amount Paid In SSP</th>
+                <th class="text-center" style="min-width: 150px">Paid To Beneficiary Type</th>
+                <th class="text-center" style="min-width: 100px">Status</th>
+                <th class="text-center" style="min-width: 150px">Paid To Name</th>
+                <th class="text-center" style="min-width: 180px">Paid To Person Household Code</th>
+                <th class="text-center" style="min-width: 150px">Request No</th>
+                <th class="text-center" style="min-width: 120px">Paid Date</th>
+              </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-detail let-rowIndex="rowIndex">
+              <tr>
+                <td class="text-center">{{ rowIndex + 1 }}</td>
+                <td class="text-center">{{ detail.householdNumber || '-' }}</td>
+                <td class="text-start">{{ detail.householdName || '-' }}</td>
+                <td class="text-center text-primary fw-medium">{{ detail.paidTo || '-' }}</td>
+                <td class="text-center">{{ detail.totalDays || 0 }}</td>
+                <td class="text-end">{{ detail.wageRateUsd?.toFixed(2) || '0.00' }}</td>
+                <td class="text-end fw-semibold text-success">{{ detail.wageUsdTotal?.toFixed(2) || '0.00' }}</td>
+                <td class="text-end">{{ detail.exchangeRate?.toFixed(2) || '0.00' }}</td>
+                <td class="text-end fw-semibold text-success">{{ detail.wageSspTotal?.toFixed(2) || '0.00' }}</td>
+                <td class="text-center">
+                  <span class="badge bg-info bg-opacity-10 text-info fw-medium">
+                    {{ detail.paidToType || '-' }}
+                  </span>
+                </td>
+                <td class="text-center">
+                  <span class="badge"
+                    [ngClass]="detail.payStatus === 'PAID' ? 'bg-success' : 'bg-warning'">
+                    {{ detail.payStatus || '-' }}
+                  </span>
+                </td>
+                <td class="text-start text-primary fw-medium">{{ detail.paidToName || '-' }}</td>
+                <td class="text-center text-primary">{{ detail.paidTo || '-' }}</td>
+                <td class="text-center">{{ detail.requestNumber || '-' }}</td>
+                <td class="text-center">{{ detail.payDate || '-' }}</td>
+              </tr>
+            </ng-template>
+
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="15" class="text-center text-danger fw-semibold">
+                  No beneficiary details found!
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </div>
+    </div>
+    } @else {
+    <div class="card">
+      <div class="card-body text-center p-5">
+        <i class="fas fa-exclamation-circle fa-3x text-muted mb-3"></i>
+        <p class="text-muted fs-5">No payment details available.</p>
+      </div>
+    </div>
+    }
+  </div>
+</div>
+}
+
+<p-toast position="bottom-right"></p-toast>

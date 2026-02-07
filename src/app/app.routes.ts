@@ -37,6 +37,7 @@ import { WageRequestAbstract } from './pages/report-list/wage-request-abstract/w
 import { MultipleAttendanceReport } from './pages/report-list/multiple-attendance-report/multiple-attendance-report';
 import { WagePaidRequestAbstractWithInvoice } from './pages/invoice/wage-paid-request-abstract-with-invoice/wage-paid-request-abstract-with-invoice';
 import { PaidDateWisePaymentInvoice } from './pages/invoice/paid-date-wise-payment-invoice/paid-date-wise-payment-invoice';
+import { PaidDateWisePaymentInvoiceDetails } from './pages/invoice/paid-date-wise-payment-invoice-details/paid-date-wise-payment-invoice-details';
 
 
 export const routes: Routes = [
@@ -265,6 +266,11 @@ export const routes: Routes = [
       {
         path: 'paid-date-wise-payment-invoice',
         component: PaidDateWisePaymentInvoice,
+        canActivate: [routeGuard],
+      },
+      {
+        path: 'paid-date-wise-payment-invoice-details',
+        component: PaidDateWisePaymentInvoiceDetails,
         canActivate: [routeGuard],
       },
     ],
