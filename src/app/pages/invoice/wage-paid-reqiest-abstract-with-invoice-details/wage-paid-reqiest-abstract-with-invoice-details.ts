@@ -7,6 +7,7 @@ import { TableModule } from 'primeng/table';
 import { ToastModule } from 'primeng/toast';
 import { ApiService } from '../../../services/api.service';
 import { Loader } from '../../../components/loader/loader';
+import { saveAs } from 'file-saver';
 
 @Component({
   selector: 'app-wage-paid-reqiest-abstract-with-invoice-details',
@@ -101,6 +102,43 @@ export class WagePaidReqiestAbstractWithInvoiceDetails implements OnInit {
     } finally {
       this.isLoading = false;
       this.cdr.markForCheck(); // Mark for check when loading finishes
+    }
+  }
+
+  async printInvoice(): Promise<void> {
+    const url = `/api/wage-invoice/paid/abstract-summary/pdf?wagePaymentRequestId=${this.wagePaymentRequestId}&subprojectId=${this.subprojectId}`;
+    try {
+      const axiosResponse: any = await this.apiService.GET_CONFIG(url, { responseType: 'blob' });
+      const blob = new Blob([axiosResponse.data], { type: 'application/pdf' });
+      saveAs(blob, 'wage_payment_invoice.pdf');
+    } catch (error: any) {
+      console.error('Error while printing invoice:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to generate the PDF. Please try again.',
+      });
+    }
+  }
+
+  async downloadWageAttachment(filePath: string, fileName: string): Promise<void> {
+    const downloadUrl = `/api/wage-request-review/wageRequest/attachment/get?filePath=${encodeURIComponent(filePath)}`;
+    try {
+      const axiosResponse: any = await this.apiService.GET_CONFIG(downloadUrl, { responseType: 'blob' });
+      const blob = new Blob([axiosResponse.data], { type: axiosResponse.headers['content-type'] || 'application/octet-stream' });
+      saveAs(blob, fileName || 'download');
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'File downloaded successfully.',
+      });
+    } catch (error: any) {
+      console.error('Error downloading attachment:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: error.message || 'Failed to download the attachment. Please try again.',
+      });
     }
   }
 }
