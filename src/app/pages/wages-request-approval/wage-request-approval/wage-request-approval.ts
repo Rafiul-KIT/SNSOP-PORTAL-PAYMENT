@@ -301,8 +301,29 @@ export class WageRequestApproval implements OnInit {
     }
     const body = this.buildSearchBody();
 
+    let apiUrl = `api/wage-request/get`; // Default URL
+
+    switch (Number(this.roleId)) {
+      case 1: // Explicitly use default URL for role 1
+        apiUrl = `api/wage-request/get`;
+        break;
+      case 2: // Initial Reviewer
+        apiUrl = `api/wage-request/get/for-init-reviewer`;
+        break;
+      case 11: // Financial Approver
+        apiUrl = `api/wage-request/get/for-fin-approver`;
+        break;
+      case 6: // Final Payment Authorizer
+        apiUrl = `api/wage-request/get/for-fin-pay-auth`;
+        break;
+      default:
+        // Keep the default `api/wage-request/get` if roleId doesn't match
+        console.warn(`Unknown roleId: ${this.roleId}. Using default API endpoint.`);
+        break;
+    }
+
     this.api
-      .POST(`api/wage-request/get?page=${page}&size=${size}`, body)
+      .POST(`${apiUrl}?page=${page}&size=${size}`, body)
       .then((res: any) => {
         if (!res) throw new Error('Empty response');
 

@@ -68,7 +68,7 @@
       <br>
     </div>
     @if(isShow){
-    <p-table [value]="records" [scrollable]="true" scrollHeight="64vh" size="small" dataKey="stateId"
+    <p-table [value]="records" size="small" dataKey="stateId"
       class="p-datatable custom-table -sm p-datatable-striped p-datatable-gridlines"
       [tableStyle]="{ 'min-width': '100%' }">
 
@@ -85,16 +85,19 @@
 
         <tr>
           <th class="text-center">Serial</th>
-          <th class="text-center">Request No</th>
-          <th class="text-center">Project Name</th>
-          <th class="text-center">Payment Cycle</th>
+          
+          
+          
           <th class="text-center">State</th>
           <th class="text-center">County</th>
           <th class="text-center">Payam</th>
           <th class="text-center">Boma</th>
+          <th class="text-center">Project Name</th>
           <th class="text-center">Work Code</th>
+          <th class="text-center">Request No</th>
           <th class="text-center">From Date</th>
           <th class="text-center">To Date</th>
+          <th class="text-center">Payment Cycle</th>
           <th class="text-center" style="width: 90px">Action</th>
         </tr>
       </ng-template>
@@ -103,22 +106,26 @@
       <ng-template pTemplate="body" let-record let-rowIndex="rowIndex">
         <tr>
           <td class="text-center">
-            {{ (currentPage * pageSize) + rowIndex + 1 }}
+            {{ (currentPage * pageSizeControl.value) + rowIndex + 1 }}
           </td>
-          <td class="text-center">{{ record.reqNo || '-' }}</td>
+          
+          
+          
+          <td class="text-center">{{ record.stateName || '-' }}</td>
+          <td class="text-center">{{ record.countieName || '-' }}</td>
+          <td class="text-center">{{ record.payamName || '-' }}</td>
+          <td class="text-center">{{ record.bomaName || '-' }}</td>
           <td class="text-center">{{ record.projectName || '-' }}</td>
+          <td class="text-center">{{ record.workCode || '-' }}</td>
+          <td class="text-center">{{ record.reqNo || '-' }}</td>
+          <td class="text-center">{{ record.fromDate || '-' }}</td>
+          <td class="text-center">{{ record.toDate || '-' }}</td>
           <td class="text-center  fw-semibold">
             <span class="badge bg-secondary rounded-pill bg-opacity-10  text-dark fw-medium">
               {{ record.wagePaymentCycle }}
             </span>
           </td>
-          <td class="text-center">{{ record.stateName || '-' }}</td>
-          <td class="text-center">{{ record.countieName || '-' }}</td>
-          <td class="text-center">{{ record.payamName || '-' }}</td>
-          <td class="text-center">{{ record.bomaName || '-' }}</td>
-          <td class="text-center">{{ record.workCode || '-' }}</td>
-          <td class="text-center">{{ record.fromDate || '-' }}</td>
-          <td class="text-center">{{ record.toDate || '-' }}</td>
+          
           <!-- ACTION -->
           <td class="text-center">
             <button class="btn btn-outline-info btn-sm" pTooltip="View Details" tooltipPosition="top"
@@ -140,10 +147,34 @@
 
     </p-table>
 
-    <p-paginator class="paginator-sticky" [rows]="pageSize" [totalRecords]="totalRecords"
-      [rowsPerPageOptions]="[10, 25, 50]" (onPageChange)="onPageChange($event)" [first]="currentPage * pageSize"
-      [currentPageReportTemplate]="'Showing {first} to {last} of {totalRecords} entries'">
-    </p-paginator>
+    <!-- Custom Pagination Controls -->
+    <div class="d-flex justify-content-center p-3" style="background-color: white;">
+      <div class="p-paginator custom-paginator paginator-sticky" *ngIf="isShow && totalRecords > 0">
+        <!-- <div class="p-paginator-left">
+          <span class="p-paginator-page-report">
+            Showing {{ (currentPage * pageSizeControl.value) + 1 }} to {{ (currentPage * pageSizeControl.value) + records.length }} of {{ totalRecords }} entries
+          </span>
+        </div> -->
+        <div class="p-paginator-right">
+          <span class="p-paginator-pages-dropdown-label">Rows per page:</span>
+          <p-select [options]="rowsPerPageOptions" [formControl]="pageSizeControl"
+            optionLabel="label" optionValue="value" styleClass="p-dropdown-sm"></p-select>
+
+          <button type="button" class="p-paginator-prev p-paginator-element p-link" (click)="goToPage(currentPage - 1)"
+            [disabled]="currentPage === 0">
+            <i class="pi pi-angle-left"></i>
+          </button>
+          <span class="p-paginator-current-page-report">Page {{ currentPage + 1 }} of {{ totalPages }}</span>
+          <button type="button" class="p-paginator-next p-paginator-element p-link" (click)="goToPage(currentPage + 1)"
+            [disabled]="currentPage === totalPages - 1 || totalPages === 0">
+            <i class="pi pi-angle-right"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- End Custom Pagination Controls -->
+
+
     }@else {
     <div class="col-12 text-center p-5">
       <p class="text-muted fs-5">No data to display. Please use the search filters above.</p>

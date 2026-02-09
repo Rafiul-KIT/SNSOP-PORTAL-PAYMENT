@@ -275,7 +275,7 @@ export class WageRequestDrafts implements OnInit {
     const body = this.buildSearchBody(page, size);
 
     this.api
-      .POST(`api/wage-request/get?page=${page}&size=${size}`, body)
+      .POST(`api/wage-request/get/for-ip-approver?page=${page}&size=${size}`, body)
       .then((res: any) => {
         if (!res) throw new Error('Empty response');
 

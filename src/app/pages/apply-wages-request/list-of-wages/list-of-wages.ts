@@ -252,8 +252,31 @@ export class ListOfWages implements OnInit {
     }
     const body = this.buildSearchBody(page, size);
 
+    let apiUrl = `api/wage-request/get`; // Default URL
+
+    switch (Number(this.roleId)) {
+      case 1: // Explicitly use default URL for role 1
+        apiUrl = `api/wage-request/get`;
+        break;
+      case 5:
+        apiUrl = `api/wage-request/get/for-ip`;
+        break;
+      case 2:
+        apiUrl = `api/wage-request/get/for-init-reviewer`;
+        break;
+      case 11:
+        apiUrl = `api/wage-request/get/for-fin-approver`;
+        break;
+      case 6:
+        apiUrl = `api/wage-request/get/for-fin-pay-auth`;
+        break;
+      default:
+        console.warn(`Unknown roleId: ${this.roleId}. Using default API endpoint.`);
+        break;
+    }
+
     this.api
-      .POST(`api/wage-request/get?page=${page}&size=${size}`, body)
+      .POST(`${apiUrl}?page=${page}&size=${size}`, body)
       .then((res: any) => {
         if (!res) throw new Error('Empty response');
 

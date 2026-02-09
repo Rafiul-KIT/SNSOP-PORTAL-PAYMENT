@@ -276,8 +276,21 @@ export class SubProjectList implements OnInit {
     this.isLoading = true;
     const body = this.buildSearchBody(page, size);
 
+    let apiUrl = `api/subproject/get`; // Default URL
+
+    switch (Number(this.roleId)) {
+      case 5:
+        apiUrl = `api/subproject/get/for-ip`;
+        break;
+      case 1: // Explicitly use default URL for role 1
+      default:
+        // Use default apiUrl for other roles not explicitly handled
+        console.warn(`roleId: ${this.roleId}. Using default API endpoint.`);
+        break;
+    }
+
     this.api
-      .POST(`api/subproject/get?page=${page}&size=${size}`, body)
+      .POST(`${apiUrl}?page=${page}&size=${size}`, body)
       .then((res: any) => {
       
 

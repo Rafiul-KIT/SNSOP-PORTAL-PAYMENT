@@ -97,6 +97,7 @@ export class WorkApproval implements OnInit {
 
   subProjects: SubProjectDto[] = [];
   totalRecords = 0;
+  userRole: number | null = null; // Declare userRole here
 
   breadcrumbItems: any[] = [];
   breadcrumbHome: any;
@@ -133,8 +134,8 @@ export class WorkApproval implements OnInit {
     this.cdr.markForCheck();
     this.workTypes = TypeOfMeetingEnum;
 
-    const userRole = this.api.getUserRole();
-    switch (userRole) {
+    this.userRole = this.api.getUserRole();
+    switch (this.userRole) {
       case 9:
         this.statuses = StatusEnum.filter(
           (status) =>
@@ -272,8 +273,25 @@ export class WorkApproval implements OnInit {
     this.isLoading = true;
     const body = this.buildSearchBody(page, size);
 
+    let apiUrl = `api/subproject/get`; // Default URL
+
+    switch (Number(this.userRole)) {
+      case 9:
+        apiUrl = `api/subproject/get/for-qe`;
+        break;
+      case 3:
+        apiUrl = `api/subproject/get/for-es`;
+        break;
+      case 12:
+        apiUrl = `api/subproject/get/for-tst`;
+        break;
+      default:
+        console.warn(`Unknown userRole: ${this.userRole}. Using default API endpoint.`);
+        break;
+    }
+
     this.api
-      .POST(`api/subproject/get?page=${page}&size=${size}`, body)
+      .POST(`${apiUrl}?page=${page}&size=${size}`, body)
       .then((res: any) => {
       
 
