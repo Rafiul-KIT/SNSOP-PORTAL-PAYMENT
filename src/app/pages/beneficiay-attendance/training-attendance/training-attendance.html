@@ -1,0 +1,186 @@
+@if (isLoading) {
+<app-loader></app-loader>
+} @else {
+<div class="breadcrumb-wrapper">
+    <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
+</div>
+
+<div class="card p-3 mb-2">
+    <form [formGroup]="searchForm" class="row g-3">
+      
+        <!-- Implementing Partner -->
+
+
+        <!-- State -->
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="states" optionLabel="name" formControlName="state"
+                    (onChange)="onStateChange($event.value)" />
+                <label>State Name</label>
+            </p-floatlabel>
+        </div>
+
+        <!-- County -->
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="counties" optionLabel="name" formControlName="county"
+                    (onChange)="onCountyChange($event.value)" />
+                <label>County Name</label>
+            </p-floatlabel>
+        </div>
+                <!-- Payam -->
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="payams" optionLabel="name" formControlName="payam"
+                    (onChange)="onPayamChange($event.value)" />
+                <label>Payam Name</label>
+            </p-floatlabel>
+        </div>
+        <!-- Boma -->
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="bomas" optionLabel="name" formControlName="boma" />
+                <label>Boma Name</label>
+            </p-floatlabel>
+        </div>
+          @if (advanceSearchPanelVisible) {
+            <!-- Work Code -->
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <input pInputText class="form-control" formControlName="workCode" />
+                <label>Sub-Project Code</label>
+            </p-floatlabel>
+        </div>
+        <!-- Project Name -->
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="projects" optionLabel="projectName" optionValue="id"
+                    formControlName="projectId"></p-select>
+                <label>Project Name</label>
+            </p-floatlabel>
+        </div>
+              <!-- Type of Work -->
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="workTypes" optionLabel="label" optionValue="value"
+                    formControlName="typeOfMeeting"></p-select>
+                <label>Type of Meeting</label>
+            </p-floatlabel>
+        </div>
+        <!-- Status -->
+        <!-- <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="statuses" optionLabel="label" optionValue="value"
+                    formControlName="status"></p-select>
+                <label>Status</label>
+            </p-floatlabel>
+        </div> -->
+
+
+        <!-- Screening Status -->
+        <!-- <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="screeningStatuses" optionLabel="label" optionValue="id"
+                    formControlName="screeningStatus"></p-select>
+                <label>Screening Status</label>
+            </p-floatlabel>
+        </div> -->
+
+  
+        }
+
+        <div class="col-12">
+            <!-- Mobile: stacked full width; ≥sm: right-aligned row -->
+            <div class="d-grid d-sm-flex justify-content-end align-items-center gap-2">
+                <p-button [label]="advanceSearchPanelVisible ? 'Close ' : 'Advance Search'" icon="fas fa-filter"
+                    severity="warn" size="small" [outlined]="true"
+                    (onClick)="toggleAdvanceSearch()">
+                </p-button>
+
+                <p-button label="Reset" icon="fas fa-refresh" severity="danger" size="small" [outlined]="true"
+                    (onClick)="resetForm()">
+                </p-button>
+
+                <p-button label="Search" icon="fas fa-search" severity="primary" size="small"
+                    (onClick)="searchBeneficiaries()">
+                </p-button>
+
+          
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<p-table [value]="subProjects" [scrollable]="true" [scrollHeight]="advanceSearchPanelVisible ? '52vh' : '64vh'"
+    [tableStyle]="{ 'min-width': '100%', 'margin-bottom': '5px' }" dataKey="id" [rowTrackBy]="trackById" size="small">
+
+    <ng-template pTemplate="header">
+        <tr>
+            <th colspan="14" class="text-end">
+                <p class="fw-bold mb-2">
+                    Showing <kbd>{{ subProjects.length }}</kbd> of
+                    <kbd>{{ totalRecords }}</kbd> sub-projects
+                </p>
+            </th>
+        </tr>
+        <tr>
+            <th class="text-center">Serial</th>
+            <th class="text-center">Sub-Project Code</th>
+            <th class="text-center">Project Name</th>
+            <th class="text-center">State</th>
+            <th class="text-center">County</th>
+            <th class="text-center">Payam</th>
+            <th class="text-center">Boma</th>
+            <!-- <th class="text-center">Type of Meeting</th>
+            <th class="text-center">Meeting Date</th>
+            <th class="text-center">Screening Status</th> -->
+            <th class="text-center">Status</th>
+            <th class="text-center" [style]="{ width: '185px' }">Action</th>
+        </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
+        <tr>
+             <td class="text-center">{{ rowIndex + 1 }}</td>
+            <td class="text-center">{{ item.workCode }}</td>
+            <td class="text-center">{{ item.projectName }}</td>
+            <td class="text-center">{{ item.stateName }}</td>
+            <td class="text-center">{{ item.countyName }}</td>
+            <td class="text-center">{{ item.payamName }}</td>
+            <td class="text-center">{{ item.bomaName }}</td>
+            <!-- <td class="text-center">{{ getTypeOfMeetingLabel(item.typeOfMeeting) }}</td>
+            <td class="text-center">{{ item.meetingDate | date: 'dd/MM/yyyy' }}</td>
+            <td class="text-center">{{ getScreeningStatusLabel(item.screeningStatus) }}</td> -->
+            <td class="text-center">
+                <span
+                    [class]="'badge ' + (item.status === 'Approved' ? 'bg-success' : item.status === 'Rejected' ? 'bg-danger' : 'bg-warning')">
+                    {{ item.status }}
+                </span>
+            </td>
+            <td class="text-center">
+                <p-button type="button" icon="fa-solid fa-circle-arrow-right fa-lg" pTooltip="Give Attendance" tooltipPosition="top"
+                appendTo="body" (onClick)="editSubProject(item.id)" size = "small" outlined="true" severity="secondary" class="me-2 big-icon-btn"/>
+               
+
+            </td>
+        </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+        <tr>
+            <td colspan="12" class="text-center text-danger">
+                <b>No sub-projects found!</b>
+            </td>
+        </tr>
+    </ng-template>
+</p-table>
+
+<p-paginator class="paginator-sticky" [rows]="pageSize" [totalRecords]="totalRecords"
+    [rowsPerPageOptions]="[10, 25, 50]" (onPageChange)="onPageChange($event)" [first]="(currentPage) * pageSize"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
+</p-paginator>
+
+}
+
+<p-toast position="bottom-right"></p-toast>

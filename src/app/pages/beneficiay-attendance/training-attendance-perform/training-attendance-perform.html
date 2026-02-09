@@ -1,0 +1,252 @@
+@if (isLoading) {
+<app-loader></app-loader>
+} @else {
+<div class="breadcrumb-wrapper">
+    <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
+</div>
+
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-11">
+
+            <!-- Header -->
+            <p-card class="shadow-sm border-0 mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0 fw-semibold text-success">
+                        <i class="pi pi-wallet me-2"></i>
+                        Training Attendance
+                    </h3>
+                </div>
+            </p-card>
+
+            <!-- Main -->
+            <p-card class="shadow-sm border-0">
+                @if (!subproject) {
+                <app-loader></app-loader>
+                } @else {
+                <div class="row g-4 mb-4">
+                    <!-- Left: Project Information -->
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-secondary mb-3 d-flex align-items-center">
+                                    <i class="pi pi-info-circle me-2"></i>
+                                    <span>Basic Information</span>
+                                </h5>
+
+                                <div class="list-group list-group-flush">
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                        <span class="text-muted">Project Name:</span>
+                                        <span class="fw-semibold text-dark">{{ subproject.projectName || '—' }}</span>
+                                    </div>
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                        <span class="text-muted">Work Code:</span>
+                                        <span class="fw-semibold text-dark">{{ subproject.workCode || '—' }}</span>
+                                    </div>
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                        <span class="text-muted">Approved Date:</span>
+                                        <span class="fw-semibold text-dark">{{subproject.tstApprovedAt | date:
+                                            'dd/MM/yyyy'}}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Location -->
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-secondary mb-4 d-flex align-items-center">
+                                    <i class="pi pi-map-marker me-2"></i>
+                                    <span>Location</span>
+                                </h5>
+
+                                <div class="row g-3">
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-2">
+                                        <span class="text-muted">State:</span>
+                                        <span class="fw-semibold text-dark">{{ subproject.stateName || '—' }}</span>
+                                    </div>
+                                    <div
+                                        class="list-group-item d-flex justify-content-between border-bottom align-items-center px-0 border-0 py-2">
+                                        <span class="text-muted">County:</span>
+                                        <span class="fw-semibold text-dark">{{ subproject.countyName || '—' }}</span>
+                                    </div>
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom py-1">
+                                        <span class="text-muted">Payam:</span>
+                                        <span class="fw-semibold text-dark">{{ subproject.payamName || '—' }}</span>
+                                    </div>
+                                    <div
+                                        class="list-group-item d-flex justify-content-between align-items-center px-0 border-0 border-bottom">
+                                        <span class="text-muted">Boma Name:</span>
+                                        <span class="fw-semibold text-dark">{{ subproject.bomaName || '—' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <p-divider></p-divider>
+
+                <!-- Attendance Date and Payment Cycle Selection -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-secondary mb-3 d-flex align-items-center">
+                                    <i class="pi pi-calendar me-2"></i>
+                                    <span>Attendance Date</span>
+                                </h5>
+                                <div class="p-inputgroup">
+                                    <p-datepicker [(ngModel)]="attendanceDate"
+                                        (ngModelChange)="onAttendanceDateChange($event)" [showIcon]="true"
+                                        dateFormat="dd/mm/yy" placeholder="Select attendance date"
+                                        [minDate]="minAttendanceDate" [maxDate]="maxAttendanceDate"
+                                        [ngClass]="{'ng-invalid ng-dirty': isAttendanceDateInvalid() && attendanceDateTouched}"
+                                        class="w-100"></p-datepicker>
+                                </div>
+                                @if (attendanceDateTouched && !attendanceDate) {
+                                <div class="text-danger mt-1">Attendance Date is required.</div>
+                                } @else if (attendanceDateTouched && minAttendanceDate && attendanceDate &&
+                                attendanceDate < minAttendanceDate) {
+                                <div class="text-danger mt-1">Attendance date cannot be earlier than the approved date
+                                    ({{minAttendanceDate | date: 'dd/MM/yyyy'}}).
+                                </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-secondary mb-3 d-flex align-items-center">
+                                    <i class="pi pi-sync me-2"></i>
+                                    <span>Payment Cycle</span>
+                                </h5>
+                                <p-select [options]="paymentCycles" [(ngModel)]="selectedPaymentCycle"
+                                    (onChange)="onPaymentCycleChange($event)" optionLabel="label"
+                                    placeholder="Select payment cycle"
+                                    [ngClass]="{'ng-invalid ng-dirty': isPaymentCycleInvalid() && paymentCycleTouched}"
+                                    class="w-100" [style]="{'width': '100%'}"></p-select>
+                                @if (paymentCycleTouched && !selectedPaymentCycle) {
+                                <div class="text-danger mt-1">Payment Cycle is required.</div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                   
+                </div>
+             <div class="col-md-6 d-flex align-items-center justify-content-center">
+    <button pButton type="button" label="Search" icon="fas fa-search" 
+        class="p-button-primary px-5"
+        [disabled]="isAttendanceDateInvalid() || isPaymentCycleInvalid() || loading"
+        [loading]="loading" (click)="onSearch()">
+    </button>
+</div>
+
+
+                <!-- Loading indicator -->
+                @if (loading) {
+                <div class="text-center py-4">
+                    <i class="pi pi-spin pi-spinner" style="font-size: 2rem;"></i>
+                    <p class="mt-2">Loading training attendance data...</p>
+                </div>
+                }
+
+                <!-- Results Table -->
+                @if (!loading && beneficiaries.length > 0) {
+                <p-divider></p-divider>
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex flex-column gap-1">
+                        <span class="fw-semibold text-secondary">
+                            Total Beneficiaries: <kbd class="bg-primary">{{ totalRecords }}</kbd>
+                        </span>
+                        <span class="fw-semibold text-secondary">
+                            Selected Beneficiaries: <kbd class="bg-success">{{ getSelectedBeneficiaries().length }}</kbd>
+                        </span>
+                    </div>
+                </div>
+
+                <p-table [value]="beneficiaries" [tableStyle]="{'min-width': '60rem'}">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th class="text-left"> 
+                                <p-checkbox [(ngModel)]="selectAll" [binary]="true"
+                                    (onChange)="onSelectAllChange($event)" inputId="selectAll"></p-checkbox>
+                                    Select All
+                            </th>
+                            <th class="text-center">S.No</th>
+                            <th class="text-center">Household No.</th>
+                            <th class="text-center">Beneficiary Name</th>
+                            <th class="text-center">Gender</th>
+                            <th class="text-center">Age</th>
+                            <th class="text-center">Phone No.</th>
+                            <th class="text-center">FINLIT</th>
+                            <th class="text-center">ECD</th>
+                            <th class="text-center">WASH</th>
+                            <th class="text-center">GBV</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-beneficiary let-i="rowIndex">
+                        <tr>
+                            <td class="text-left">
+                                <p-checkbox [(ngModel)]="beneficiary.selected" [binary]="true"
+                                    (onChange)="onRowSelectChange()" inputId="select_{{beneficiary.beneficiaryId}}"></p-checkbox>
+                            </td>
+                            <td class="text-center">{{ i + 1 }}</td>
+                            <td class="text-center">{{ beneficiary.householdNumber }}</td>
+                            <td class="text-center">{{ beneficiary.beneficiaryName }}</td>
+                            <td class="text-center">{{ beneficiary.gender }}</td>
+                            <td class="text-center">{{ beneficiary.age }}</td>
+                            <td class="text-center">{{ beneficiary.phoneNo }}</td>
+                            <td class="text-center">
+                                <p-checkbox [(ngModel)]="beneficiary.finlitAttended" [binary]="true"
+                                    [disabled]="!beneficiary.selected"
+                                    inputId="finlit_{{beneficiary.beneficiaryId}}"></p-checkbox>
+                            </td>
+                            <td class="text-center">
+                                <p-checkbox [(ngModel)]="beneficiary.ecdAttended" [binary]="true"
+                                    [disabled]="!beneficiary.selected"
+                                    inputId="ecd_{{beneficiary.beneficiaryId}}"></p-checkbox>
+                            </td>
+                            <td class="text-center">
+                                <p-checkbox [(ngModel)]="beneficiary.washAttended" [binary]="true"
+                                    [disabled]="!beneficiary.selected"
+                                    inputId="wash_{{beneficiary.beneficiaryId}}"></p-checkbox>
+                            </td>
+                            <td class="text-center">
+                                <p-checkbox [(ngModel)]="beneficiary.gbvAttended" [binary]="true"
+                                    [disabled]="!beneficiary.selected"
+                                    inputId="gbv_{{beneficiary.beneficiaryId}}"></p-checkbox>
+                            </td>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="emptymessage">
+                        <tr>
+                            <td colspan="11" class="text-center">No records found.</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+
+                <!-- Save Button -->
+                <div class="d-flex justify-content-end mt-3">
+                    <button pButton type="button" label="Save Training Attendance" icon="pi pi-save"
+                        class="p-button-success px-5" [disabled]="saving || !hasSelectedBeneficiaries()"
+                        [loading]="saving" (click)="saveTrainingAttendance()"></button>
+                </div>
+                }
+                }
+            </p-card>
+        </div>
+    </div>
+</div>
+}

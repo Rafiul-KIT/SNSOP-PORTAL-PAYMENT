@@ -36,6 +36,8 @@ import { ReconciliationMonitoringDetails } from './pages/reconciliation-monitori
 import { WageRequestAbstract } from './pages/report-list/wage-request-abstract/wage-request-abstract';
 import { MultipleAttendanceReport } from './pages/report-list/multiple-attendance-report/multiple-attendance-report';
 import { WagePaidRequestAbstractWithInvoice } from './pages/invoice/wage-paid-request-abstract-with-invoice/wage-paid-request-abstract-with-invoice';
+import { TrainingAttendance } from './pages/beneficiay-attendance/training-attendance/training-attendance';
+import { TrainingAttendancePerform } from './pages/beneficiay-attendance/training-attendance-perform/training-attendance-perform';
 
 
 export const routes: Routes = [
@@ -103,6 +105,16 @@ export const routes: Routes = [
   {
     path: 'attendance',
     component: BeneficiaryAttendance,
+    canActivate: [routeGuard],
+  },
+    {
+    path: 'training-attendance',
+    component: TrainingAttendance,
+    canActivate: [routeGuard],
+  },
+    {
+    path: 'training-attendance/view/:id',
+    component: TrainingAttendancePerform,
     canActivate: [routeGuard],
   },
   {
