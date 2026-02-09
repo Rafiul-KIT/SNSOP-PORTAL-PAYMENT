@@ -7,20 +7,14 @@
 
 <div class="card p-3 mb-2">
     <form [formGroup]="searchForm" class="row g-3">
-     
-        
+
+
 
         <!-- Sub-Project -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
-                <p-select 
-                    [options]="subProjects" 
-                    optionLabel="workCode" 
-                    optionValue="id"
-                    formControlName="subprojectId"
-                    [filter]="true"
-                    filterPlaceholder="Search sub-project"
-                  >
+                <p-select [options]="subProjects" optionLabel="workCode" optionValue="id" formControlName="subprojectId"
+                    [filter]="true" filterPlaceholder="Search sub-project">
                     <ng-template let-item pTemplate="item">
                         <div>{{ item.workCode }} - {{ item.projectName }}</div>
                     </ng-template>
@@ -32,13 +26,9 @@
         <!-- From Date -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
-                <p-datepicker 
-                    formControlName="fromDate" 
-                    dateFormat="dd/mm/yy"
-                    [showIcon]="true"
-                    appendTo="body"
+                <p-datepicker formControlName="fromDate" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body"
                     class="w-100">
-                </p-datepicker >
+                </p-datepicker>
                 <label>From Date</label>
             </p-floatlabel>
         </div>
@@ -46,13 +36,9 @@
         <!-- To Date -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
-                <p-datepicker  
-                    formControlName="toDate" 
-                    dateFormat="dd/mm/yy"
-                    [showIcon]="true"
-                    appendTo="body"
+                <p-datepicker formControlName="toDate" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body"
                     class="w-100">
-                </p-datepicker >
+                </p-datepicker>
                 <label>To Date</label>
             </p-floatlabel>
             @if(searchForm.hasError('dateRangeInvalid')) {
@@ -65,24 +51,23 @@
         <!-- Payment Cycle -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
-                <p-select 
-                    [options]="paymentCycles" 
-                    optionLabel="label" 
-                    optionValue="value"
+                <p-select [options]="paymentCycles" optionLabel="label" optionValue="value"
                     formControlName="paymentCycle">
                 </p-select>
                 <label>Payment Cycle</label>
             </p-floatlabel>
         </div>
-           @if (advanceSearchPanelVisible) {
+        @if (advanceSearchPanelVisible) {
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <input pInputText formControlName="requestNumber" class="w-100" />
+                <label>Request Number</label>
+            </p-floatlabel>
+        </div>
         <!-- Request Year -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
-                <p-select 
-                    [options]="years" 
-                    optionLabel="label" 
-                    optionValue="value"
-                    formControlName="requestYear">
+                <p-select [options]="years" optionLabel="label" optionValue="value" formControlName="requestYear">
                 </p-select>
                 <label>Request Year</label>
             </p-floatlabel>
@@ -91,10 +76,7 @@
         <!-- Request Month -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
-                <p-select 
-                    [options]="months" 
-                    optionLabel="label" 
-                    optionValue="value"
+                <p-select [options]="months" optionLabel="label" optionValue="value"
                     formControlName="requestMonthIndex">
                 </p-select>
                 <label>Request Month</label>
@@ -105,11 +87,7 @@
         <!-- Status -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
-                <p-select 
-                    [options]="statuses" 
-                    optionLabel="label" 
-                    optionValue="id"
-                    formControlName="status">
+                <p-select [options]="statuses" optionLabel="label" optionValue="id" formControlName="status">
                 </p-select>
                 <label>Status</label>
             </p-floatlabel>
@@ -119,40 +97,25 @@
 
         <div class="col-12">
             <div class="d-grid d-sm-flex justify-content-end align-items-center gap-2">
-                <p-button 
-                    [label]="advanceSearchPanelVisible ? 'Close' : 'Advance Search'" 
-                    icon="fas fa-filter"
-                    severity="warn" 
-                    size="small" 
-                    [outlined]="true"
-                    (onClick)="toggleAdvanceSearch()">
+                <p-button [label]="advanceSearchPanelVisible ? 'Close' : 'Advance Search'" icon="fas fa-filter"
+                    severity="warn" size="small" [outlined]="true" (onClick)="toggleAdvanceSearch()">
                 </p-button>
 
-                <p-button 
-                    label="Reset" 
-                    icon="fas fa-refresh" 
-                    severity="danger" 
-                    size="small" 
-                    [outlined]="true"
+                <p-button label="Reset" icon="fas fa-refresh" severity="danger" size="small" [outlined]="true"
                     (onClick)="resetForm()">
                 </p-button>
 
-                <p-button 
-                    label="Search" 
-                    icon="fas fa-search" 
-                    severity="primary" 
-                    size="small"
+                <p-button label="Search" icon="fas fa-search" severity="primary" size="small"
                     (onClick)="searchWageRequests()">
-                </p-button>            
+                </p-button>
             </div>
         </div>
 
     </form>
 </div>
 
-  <p-table [value]="wageRequests" [scrollable]="true" [scrollHeight]="advanceSearchPanelVisible ? '52vh' : '64vh'"
-        [tableStyle]="{ 'min-width': '100%', 'margin-bottom': '5px' }" dataKey="id" [rowTrackBy]="trackById"
-        size="small">
+<p-table [value]="wageRequests" [scrollable]="true" [scrollHeight]="advanceSearchPanelVisible ? '52vh' : '64vh'"
+    [tableStyle]="{ 'min-width': '100%', 'margin-bottom': '5px' }" dataKey="id" [rowTrackBy]="trackById" size="small">
 
     <ng-template pTemplate="header">
         <tr>
@@ -187,22 +150,15 @@
             <td class="text-center">{{ item.requestYear }}</td>
             <td class="text-center">{{ getMonthLabel(item.requestMonthIndex) }}</td>
             <td class="text-center">Payment Cycle {{ item.paymentCycle }}</td>
-            <td class="text-center"> 
+            <td class="text-center">
                 <span [class]="'badge ' + getStatusClass(item.status)">
                     {{ getStatusLabel(item.status) }}
                 </span>
             </td>
             <td class="text-center">
-                <p-button
-                    type="button"
-                   icon="fa-solid fa-eye fa-lg" pTooltip="View"
-                    tooltipPosition="top"
-                    appendTo="body"
-                    (onClick)="viewWageRequest(item.id,item.subprojectId)"
-                    size="small"
-                    outlined="true"
-                    severity="secondary"
-                    class="me-2 big-icon-btn"/>
+                <p-button type="button" icon="fa-solid fa-eye fa-lg" pTooltip="View" tooltipPosition="top"
+                    appendTo="body" (onClick)="viewWageRequest(item.id,item.subprojectId)" size="small" outlined="true"
+                    severity="secondary" class="me-2 big-icon-btn" />
                 @if (roleId === 14 ) {
                 <!-- <p-button
                     type="button"
@@ -225,24 +181,14 @@
     </ng-template>
 </p-table>
 
-<p-paginator
-    class="paginator-sticky"
-    [rows]="pageSize"
-    [totalRecords]="totalRecords"
-    [rowsPerPageOptions]="[10, 25, 50]"
-    (onPageChange)="onPageChange($event)"
-    [first]="(currentPage) * pageSize"
+<p-paginator class="paginator-sticky" [rows]="pageSize" [totalRecords]="totalRecords"
+    [rowsPerPageOptions]="[10, 25, 50]" (onPageChange)="onPageChange($event)" [first]="(currentPage) * pageSize"
     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
 </p-paginator>
 
 <!-- Review Dialog for Role 14 -->
-<p-dialog
-    header="Review Wage Request"
-    [(visible)]="reviewDialogVisible"
-    [modal]="true"
-    [style]="{ width: '550px' }"
-    [closable]="true"
-    (onHide)="closeReviewDialog()">
+<p-dialog header="Review Wage Request" [(visible)]="reviewDialogVisible" [modal]="true" [style]="{ width: '550px' }"
+    [closable]="true" (onHide)="closeReviewDialog()">
 
     @if (isReviewSubmitting) {
     <div class="text-center py-4">
@@ -252,15 +198,10 @@
     } @else {
     <form [formGroup]="reviewForm" (ngSubmit)="onSubmitReview()">
         <div class="mb-3">
-            <label for="reviewApproved" class="form-label fw-semibold">Approval Status <span class="text-danger">*</span></label>
-            <p-select
-                id="reviewApproved"
-                formControlName="approved"
-                [options]="approvedOptions"
-                optionLabel="label"
-                optionValue="value"
-                placeholder="Select Approval Status"
-                [style]="{ width: '100%' }"
+            <label for="reviewApproved" class="form-label fw-semibold">Approval Status <span
+                    class="text-danger">*</span></label>
+            <p-select id="reviewApproved" formControlName="approved" [options]="approvedOptions" optionLabel="label"
+                optionValue="value" placeholder="Select Approval Status" [style]="{ width: '100%' }"
                 [ngClass]="{ 'ng-invalid ng-dirty': reviewForm.get('approved')?.invalid && reviewForm.get('approved')?.touched }">
             </p-select>
             @if (reviewForm.get('approved')?.invalid && reviewForm.get('approved')?.touched) {
@@ -270,11 +211,7 @@
 
         <div class="mb-3">
             <label class="form-label fw-semibold">Attachments (Optional, 25MB Total Limit)</label>
-            <input
-                type="file"
-                class="form-control"
-                id="reviewAttachment"
-                (change)="onReviewFilesSelected($event)"
+            <input type="file" class="form-control" id="reviewAttachment" (change)="onReviewFilesSelected($event)"
                 multiple>
         </div>
 
@@ -307,16 +244,10 @@
         }
 
         <div class="d-flex justify-content-end gap-2 mt-3">
-            <p-button
-                label="Cancel"
-                icon="pi pi-times"
-                severity="secondary"
-                [outlined]="true"
+            <p-button label="Cancel" icon="pi pi-times" severity="secondary" [outlined]="true"
                 (onClick)="closeReviewDialog()">
             </p-button>
-            <p-button
-                type="submit"
-                [label]="isReviewSubmitting ? 'Submitting...' : 'Submit Review'"
+            <p-button type="submit" [label]="isReviewSubmitting ? 'Submitting...' : 'Submit Review'"
                 [icon]="isReviewSubmitting ? 'pi pi-spin pi-spinner' : 'pi pi-send'"
                 [disabled]="reviewForm.invalid || isReviewSubmitting">
             </p-button>
