@@ -154,7 +154,13 @@
                 </td>
                 @if (roleId === 11) {
                 <td class="text-center">
-                    <input type="number" pInputText [(ngModel)]="item.exchangeRate" class="w-100" />
+                    <input type="number" pInputText [(ngModel)]="item.exchangeRate"
+                           class="w-100" [class.ng-invalid]="item.exchangeRate !== undefined && !isExchangeRateValid(item.exchangeRate)"
+                           min="4000" max="6000" step="1"
+                           (keydown)="preventDecimalInput($event)" />
+                    @if (item.exchangeRate !== undefined && !isExchangeRateValid(item.exchangeRate)) {
+                        <small class="text-danger d-block">Must be integer 4000-6000</small>
+                    }
                 </td>
                 <td class="text-center">
                     <p-button type="button" icon="fa-solid fa-paperclip" (onClick)="openAttachmentModal(item)" [label]="'Attach (' + (item.attachments?.length || 0) + ')'" size="small" />

@@ -420,6 +420,8 @@ export class WageRequestApproval implements OnInit {
     if (Number(this.roleId) === 11) {
       if (!wageRequest.exchangeRate) {
         missingFields.push('Exchange Rate');
+      } else if (!this.isExchangeRateValid(wageRequest.exchangeRate)) {
+        missingFields.push('Exchange Rate (must be integer between 4000 and 6000)');
       }
       if (!wageRequest.attachments || wageRequest.attachments.length === 0) {
         missingFields.push('Attachment');
@@ -570,4 +572,15 @@ getSubProjectName(id: number): string {
   }
 
   trackById = (_: number, row: WageRequest) => row.id;
+
+  isExchangeRateValid(rate: number | undefined): boolean {
+    if (rate === undefined || rate === null) return false;
+    return Number.isInteger(rate) && rate >= 4000 && rate <= 6000;
+  }
+
+  preventDecimalInput(event: KeyboardEvent): void {
+    if (event.key === '.' || event.key === ',' || event.key === 'e' || event.key === 'E') {
+      event.preventDefault();
+    }
+  }
 }
