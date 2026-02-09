@@ -65,16 +65,29 @@
         <!-- Payment Cycle -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
-                <p-select 
-                    [options]="paymentCycles" 
-                    optionLabel="label" 
+                <p-select
+                    [options]="paymentCycles"
+                    optionLabel="label"
                     optionValue="value"
                     formControlName="paymentCycle">
                 </p-select>
                 <label>Payment Cycle</label>
             </p-floatlabel>
         </div>
+
+  
+
            @if (advanceSearchPanelVisible) {
+                  <!-- Request Number -->
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <input
+                    pInputText
+                    formControlName="requestNumber"
+                    class="w-100" />
+                <label>Request Number</label>
+            </p-floatlabel>
+        </div>
         <!-- Request Year -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
