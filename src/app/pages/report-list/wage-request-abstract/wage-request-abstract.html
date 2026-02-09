@@ -146,15 +146,27 @@
             </th>
         </tr>
           <tr>
-              <th colspan="18" class="text-start">
-                  <p-button label="Export CSV" icon="fas fa-file-csv" severity="success" size="small"
-                      [outlined]="true" (onClick)="exportCsv()">
-                  </p-button>
+           <th colspan="18" class="text-start">
+    <p-button
+        label="Export CSV"
+        icon="fas fa-file-csv"
+        severity="success"
+        size="small"
+        [outlined]="true"
+        class="me-2"
+        (onClick)="exportCsv()">
+    </p-button>
 
-                  <p-button label="Export PDF" icon="fas fa-file-pdf" severity="danger" size="small"
-                      [outlined]="true" (onClick)="exportPdf()">
-                  </p-button>
-              </th>
+    <p-button
+        label="Export PDF"
+        icon="fas fa-file-pdf"
+        severity="danger"
+        size="small"
+        [outlined]="true"
+        (onClick)="exportPdf()">
+    </p-button>
+</th>
+
           </tr>
           <tr>
               <th class="text-center">S.No</th>

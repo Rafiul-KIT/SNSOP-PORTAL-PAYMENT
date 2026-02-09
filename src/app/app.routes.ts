@@ -19,8 +19,6 @@ import { BeneficiaryRemove } from './pages/beneficiary-assignment/beneficiary-re
 import { BeneficiarySubprojectRemove } from './pages/beneficiary-assignment/beneficiary-subproject-remove/beneficiary-subproject-remove';
 import { BeneficiarySubprojectList } from './pages/beneficiary-assignment/beneficiary-subproject-list/beneficiary-subproject-list';
 import { WageRequestDrafts } from './pages/wages-request-approval/wage-request-drafts/wage-request-drafts';
-import { WageDashboard } from './pages/wages-request-approval/wage-dashboard-lipw/wage-dashboard';
-import { WageDashboardDis } from './pages/wages-request-approval/wage-dashboard-dis/wage-dashboard-dis';
 import { WageRequestDetails } from './pages/wages-request-approval/wage-request-details/wage-request-details';
 import { WageRequestApproval } from './pages/wages-request-approval/wage-request-approval/wage-request-approval';
 import { PayrollDownload } from './pages/payroll/payroll-download/payroll-download';
@@ -36,6 +34,8 @@ import { ReconciliationMonitoringDetails } from './pages/reconciliation-monitori
 import { WageRequestAbstract } from './pages/report-list/wage-request-abstract/wage-request-abstract';
 import { MultipleAttendanceReport } from './pages/report-list/multiple-attendance-report/multiple-attendance-report';
 import { WagePaidRequestAbstractWithInvoice } from './pages/invoice/wage-paid-request-abstract-with-invoice/wage-paid-request-abstract-with-invoice';
+import { PaidDateWisePaymentInvoice } from './pages/invoice/paid-date-wise-payment-invoice/paid-date-wise-payment-invoice';
+import { PaidDateWisePaymentInvoiceDetails } from './pages/invoice/paid-date-wise-payment-invoice-details/paid-date-wise-payment-invoice-details';
 import { TrainingAttendance } from './pages/beneficiay-attendance/training-attendance/training-attendance';
 import { TrainingAttendancePerform } from './pages/beneficiay-attendance/training-attendance-perform/training-attendance-perform';
 
@@ -271,6 +271,16 @@ export const routes: Routes = [
       {
         path: 'wage-paid-request-abstract-with-invoice',
         component: WagePaidRequestAbstractWithInvoice,
+        canActivate: [routeGuard],
+      },
+      {
+        path: 'paid-date-wise-payment-invoice',
+        component: PaidDateWisePaymentInvoice,
+        canActivate: [routeGuard],
+      },
+      {
+        path: 'paid-date-wise-payment-invoice-details',
+        component: PaidDateWisePaymentInvoiceDetails,
         canActivate: [routeGuard],
       },
     ],
