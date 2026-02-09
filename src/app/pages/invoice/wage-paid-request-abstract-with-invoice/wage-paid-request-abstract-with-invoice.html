@@ -6,7 +6,7 @@
 </div>
 
 <div class="wrapper-scroller">
-  <div class="row justify-content-center mt-4">
+  <div class="row justify-content-center ">
     <div class="card p-3 mb-3">
       <form [formGroup]="searchForm" novalidate class="row g-2">
         <div class="col-md-3">
@@ -56,13 +56,25 @@
           </p-floatlabel>
         </div>
 
-        <div class="col-12 text-end">
-          <button class="btn btn-secondary me-2" (click)="reset()">
-            <i class="fas fa-redo me-2"></i>Reset
-          </button>
-          <button class="btn btn-success" (click)="search()">
-            <i class="fas fa-search me-2"></i>Search
-          </button>
+        <div class="col-12 d-flex margin-button justify-content-between">
+          <div>
+            @if(isShow) {
+              <button class="btn btn-primary me-2" (click)="exportToCSV()" [disabled]="isExporting">
+                <i class="fas fa-file-csv me-2"></i>Export
+              </button>
+              <button class="btn btn-info" (click)="exportToPDF()" [disabled]="isExporting">
+                <i class="fas fa-print me-2"></i>Print
+              </button>
+            }
+          </div>
+          <div>
+            <button class="btn btn-secondary me-2" (click)="reset()" [disabled]="isExporting">
+              <i class="fas fa-redo me-2"></i>Reset
+            </button>
+            <button class="btn btn-success" (click)="search()" [disabled]="isExporting">
+              <i class="fas fa-search me-2"></i>Search
+            </button>
+          </div>
         </div>
       </form>
       <br>
@@ -77,8 +89,7 @@
         <tr>
           <th colspan="12" class="text-end">
             <p class="fw-bold mb-2">
-              Showing <kbd>{{ records.length }}</kbd> of
-              <kbd>{{ totalRecords }}</kbd> records
+              Total <kbd>{{ records.length }}</kbd> records
             </p>
           </th>
         </tr>
@@ -106,7 +117,7 @@
       <ng-template pTemplate="body" let-record let-rowIndex="rowIndex">
         <tr>
           <td class="text-center">
-            {{ (currentPage * pageSizeControl.value) + rowIndex + 1 }}
+            {{ rowIndex + 1 }}
           </td>
           
           
@@ -146,36 +157,7 @@
       </ng-template>
 
     </p-table>
-
-    <!-- Custom Pagination Controls -->
-    <div class="d-flex justify-content-center p-3" style="background-color: white;">
-      <div class="p-paginator custom-paginator paginator-sticky" *ngIf="isShow && totalRecords > 0">
-        <!-- <div class="p-paginator-left">
-          <span class="p-paginator-page-report">
-            Showing {{ (currentPage * pageSizeControl.value) + 1 }} to {{ (currentPage * pageSizeControl.value) + records.length }} of {{ totalRecords }} entries
-          </span>
-        </div> -->
-        <div class="p-paginator-right">
-          <span class="p-paginator-pages-dropdown-label">Rows per page:</span>
-          <p-select [options]="rowsPerPageOptions" [formControl]="pageSizeControl"
-            optionLabel="label" optionValue="value" styleClass="p-dropdown-sm"></p-select>
-
-          <button type="button" class="p-paginator-prev p-paginator-element p-link" (click)="goToPage(currentPage - 1)"
-            [disabled]="currentPage === 0">
-            <i class="pi pi-angle-left"></i>
-          </button>
-          <span class="p-paginator-current-page-report">Page {{ currentPage + 1 }} of {{ totalPages }}</span>
-          <button type="button" class="p-paginator-next p-paginator-element p-link" (click)="goToPage(currentPage + 1)"
-            [disabled]="currentPage === totalPages - 1 || totalPages === 0">
-            <i class="pi pi-angle-right"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-    <!-- End Custom Pagination Controls -->
-
-
-    }@else {
+    } @else {
     <div class="col-12 text-center p-5">
       <p class="text-muted fs-5">No data to display. Please use the search filters above.</p>
     </div>
@@ -183,5 +165,19 @@
   </div>
 </div>
 }
+
+<!-- Export Progress Dialog -->
+<p-dialog
+  header="Preparing Download"
+  [(visible)]="isExporting"
+  [modal]="true"
+  [closable]="false"
+  [style]="{ width: '400px' }">
+  <div class="text-center p-3">
+    <i class="fas fa-file-download fa-3x text-primary mb-3"></i>
+    <p class="mb-3">Please wait while we prepare your file...</p>
+    <p-progressbar mode="indeterminate" [style]="{ height: '8px' }"></p-progressbar>
+  </div>
+</p-dialog>
 
 <p-toast position="bottom-right"></p-toast>

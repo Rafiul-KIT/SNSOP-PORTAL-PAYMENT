@@ -1,24 +1,22 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, FormControl } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MenuItem, MessageService } from 'primeng/api';
-import { Badge } from 'primeng/badge';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { FloatLabelModule } from 'primeng/floatlabel';
-import { MultiSelectModule } from 'primeng/multiselect';
-
 import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
-import { Tag } from 'primeng/tag';
 import { ToastModule } from 'primeng/toast';
 import { Tooltip } from 'primeng/tooltip';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { DialogModule } from 'primeng/dialog';
+import { saveAs } from 'file-saver';
 import { Loader } from '../../../components/loader/loader';
 import { ApiService } from '../../../services/api.service';
 import {
   LookupItem,
   LookupService,
-  PaymentCycleEnum,
 } from '../../../services/lookup.service';
 import { InputText } from "primeng/inputtext";
 
@@ -34,11 +32,11 @@ import { InputText } from "primeng/inputtext";
     SelectModule,
     FloatLabelModule,
     Tooltip,
-
     ToastModule,
-    MultiSelectModule,
-    InputText
-],
+    InputText,
+    ProgressBarModule,
+    DialogModule,
+  ],
   templateUrl: './wage-paid-request-abstract-with-invoice.html',
   styleUrl: './wage-paid-request-abstract-with-invoice.scss',
   providers: [MessageService],
@@ -46,24 +44,14 @@ import { InputText } from "primeng/inputtext";
 export class WagePaidRequestAbstractWithInvoice implements OnInit {
   isLoading = false;
   isShow = false;
+  isExporting = false;
 
   items: MenuItem[] | undefined;
   home: MenuItem | undefined;
 
   searchForm!: FormGroup;
   records: any[] = [];
-
-  // Pagination
-  currentPage = 0;
-  pageSizeControl!: FormControl<number>;
   totalRecords = 0;
-  totalPages = 0; // Added for custom pagination
-  rowsPerPageOptions = [ // Added for custom pagination
-    { label: '10', value: 10 },
-    { label: '25', value: 25 },
-    { label: '50', value: 50 },
-    { label: 'All', value: -1 } // Using -1 to represent 'All'
-  ];
 
   // Lookup data
   states: LookupItem[] = [];
@@ -113,12 +101,6 @@ export class WagePaidRequestAbstractWithInvoice implements OnInit {
       boma: [{ value: null, disabled: true }],
       workCode: [''],
       reqNo: [''],
-    });
-    this.pageSizeControl = this.fb.control(10, { nonNullable: true });
-    this.pageSizeControl.valueChanges.subscribe((newValue) => {
-      if (newValue !== null) {
-        this.onPageSizeChange({ value: newValue });
-      }
     });
   }
 
@@ -199,13 +181,12 @@ export class WagePaidRequestAbstractWithInvoice implements OnInit {
 
   // Search button handler
   search(): void {
-    this.goToPage(0); // Reset to first page on search
+    this.fetchAllRecords();
   }
 
   // Reset button handler
   reset(): void {
     this.searchForm.reset({
-
       state: null,
       county: null,
       payam: null,
@@ -217,15 +198,15 @@ export class WagePaidRequestAbstractWithInvoice implements OnInit {
     this.searchForm.get('payam')?.disable();
     this.searchForm.get('boma')?.disable();
 
-    this.goToPage(0); // Reset to first page on reset
+    this.records = [];
+    this.totalRecords = 0;
+    this.isShow = false;
+    this.cdr.markForCheck();
   }
 
-  async fetchPage(
-    page: number,
-    size: number
-  ): Promise <void>{
+  async fetchAllRecords(): Promise<void> {
     this.isLoading = true;
-    this.isShow = false; // Initially hide the table area
+    this.isShow = false;
     this.cdr.markForCheck();
 
     const formValues = this.searchForm.value;
@@ -241,73 +222,170 @@ export class WagePaidRequestAbstractWithInvoice implements OnInit {
       reqNo: formValues.reqNo || null,
     };
 
-    let actualSize = size;
-    if (size === -1) {
-      page = 0; // When 'All' is selected, reset to first page
-      actualSize = this.totalRecords; // Use totalRecords directly
-    }
-    this.currentPage = page; // Update currentPage before API call
-
-    const endpoint = `/api/wage-invoice/paid/abstract-list?page=${page}&size=${actualSize}`;
+    const endpoint = `/api/wage-invoice/paid/abstract-list?page=0&size=-1`;
     try {
       const axiosResponse: any = await this.apiService.POST(
         endpoint,
         payload
       );
-      // Access the actual API response data from axiosResponse.data
       const apiResponse = axiosResponse.data;
 
       if (apiResponse.success && apiResponse.data && apiResponse.data.length > 0) {
-        this.records = apiResponse.data; // Correctly access the data array
-        this.totalRecords = apiResponse.pagination.totalElements;
-        this.totalPages = Math.ceil(this.totalRecords / this.pageSizeControl.value); // Calculate totalPages
-        this.isShow = true; // Show table only if data is successfully fetched
+        this.records = apiResponse.data;
+        this.totalRecords = apiResponse.data.length;
+        this.isShow = true;
       } else {
         this.records = [];
         this.totalRecords = 0;
-        this.totalPages = 0; // Reset totalPages if no data
         this.messageService.add({
           severity: 'info',
           summary: 'Info',
           detail: apiResponse.message || 'No data found.',
         });
-        this.isShow = false; // Keep table hidden if no data or unsuccessful response
+        this.isShow = false;
       }
-    } catch (error: any) { // Catch as 'any' to access error.response
+    } catch (error: any) {
       console.error('Error fetching data:', error);
       this.records = [];
       this.totalRecords = 0;
-      this.totalPages = 0; // Reset totalPages on error
       this.messageService.add({
         severity: 'error',
         summary: 'Error',
         detail: error.response?.data?.message || 'An error occurred while fetching data.',
       });
-      this.isShow = false; // Keep table hidden on error
+      this.isShow = false;
     } finally {
-      this.isLoading = false; // Always stop loader
+      this.isLoading = false;
       this.cdr.markForCheck();
     }
   }
 
-  // New method to handle page changes from custom controls
-  goToPage(page: number): void {
-    if (page >= 0 && page < this.totalPages) {
-      this.currentPage = page;
-      this.fetchPage(this.currentPage, this.pageSizeControl.value);
-    } else if (page === 0 && this.totalPages === 0) {
-      // Allow fetching first page when there's no data yet, or if totalPages is 0
-      this.currentPage = 0;
-      this.fetchPage(this.currentPage, this.pageSizeControl.value);
+  // Export to CSV
+  async exportToCSV(): Promise<void> {
+    if (!this.records || this.records.length === 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Warning',
+        detail: 'No data to export.',
+      });
+      return;
+    }
+
+    this.isExporting = true;
+    this.cdr.markForCheck();
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const headers = ['Serial', 'State', 'County', 'Payam', 'Boma', 'Project Name', 'Work Code', 'Request No', 'From Date', 'To Date', 'Payment Cycle'];
+      const csvRows = [headers.join(',')];
+
+      this.records.forEach((record, index) => {
+        const row = [
+          index + 1,
+          `"${record.stateName || '-'}"`,
+          `"${record.countieName || '-'}"`,
+          `"${record.payamName || '-'}"`,
+          `"${record.bomaName || '-'}"`,
+          `"${record.projectName || '-'}"`,
+          `"${record.workCode || '-'}"`,
+          `"${record.reqNo || '-'}"`,
+          `"${record.fromDate || '-'}"`,
+          `"${record.toDate || '-'}"`,
+          `"${record.wagePaymentCycle || '-'}"`,
+        ];
+        csvRows.push(row.join(','));
+      });
+
+      const csvContent = csvRows.join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      saveAs(blob, `wage_paid_request_abstract_${Date.now()}.csv`);
+
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'CSV exported successfully.',
+      });
+    } catch (error) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to export CSV.',
+      });
+    } finally {
+      this.isExporting = false;
+      this.cdr.markForCheck();
     }
   }
 
-  // New method to handle page size changes from dropdown
-  onPageSizeChange(event: { value: number }): void {
-    const newSize = event.value;
-    this.pageSizeControl.setValue(newSize === -1 ? this.totalRecords : newSize, { emitEvent: false }); // Update FormControl value
-    this.currentPage = 0; // Reset to first page when page size changes
-    this.fetchPage(this.currentPage, this.pageSizeControl.value);
+  // Export to PDF (Print)
+  async exportToPDF(): Promise<void> {
+    if (!this.records || this.records.length === 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Warning',
+        detail: 'No data to print.',
+      });
+      return;
+    }
+
+    this.isExporting = true;
+    this.cdr.markForCheck();
+
+    try {
+      const jsPDF = await import('jspdf');
+      const { default: autoTable } = await import('jspdf-autotable');
+
+      const doc = new jsPDF.default('l', 'pt', 'a4');
+      doc.setFontSize(14);
+      doc.text('Wage Paid Request Abstract With Invoice', 40, 40);
+
+      const head = [['Serial', 'State', 'County', 'Payam', 'Boma', 'Project', 'Work Code', 'Req No', 'From', 'To', 'Cycle']];
+      const body: any[] = [];
+
+      this.records.forEach((record, index) => {
+        body.push([
+          index + 1,
+          record.stateName || '-',
+          record.countieName || '-',
+          record.payamName || '-',
+          record.bomaName || '-',
+          record.projectName || '-',
+          record.workCode || '-',
+          record.reqNo || '-',
+          record.fromDate || '-',
+          record.toDate || '-',
+          record.wagePaymentCycle || '-',
+        ]);
+      });
+
+      autoTable(doc, {
+        head: head,
+        body: body,
+        startY: 60,
+        theme: 'grid',
+        headStyles: { fillColor: [41, 128, 185], fontSize: 8 },
+        bodyStyles: { fontSize: 7 },
+      });
+
+      doc.save(`wage_paid_request_abstract_${Date.now()}.pdf`);
+
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'PDF exported successfully.',
+      });
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to export PDF.',
+      });
+    } finally {
+      this.isExporting = false;
+      this.cdr.markForCheck();
+    }
   }
 
   viewDetails(record: any): void {

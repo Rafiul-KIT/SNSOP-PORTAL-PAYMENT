@@ -5,13 +5,15 @@ import { Router } from '@angular/router';
 import { MenuItem, MessageService } from 'primeng/api';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { FloatLabelModule } from 'primeng/floatlabel';
-import { PaginatorModule } from 'primeng/paginator';
 import { SelectModule } from 'primeng/select';
 import { TableModule } from 'primeng/table';
 import { ToastModule } from 'primeng/toast';
 import { TooltipModule } from 'primeng/tooltip';
 import { DatePickerModule } from 'primeng/datepicker';
 import { InputTextModule } from 'primeng/inputtext';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { DialogModule } from 'primeng/dialog';
+import { saveAs } from 'file-saver';
 import Swal from 'sweetalert2';
 
 import { Loader } from '../../../components/loader/loader';
@@ -59,11 +61,11 @@ function dateRangeValidator(formGroup: FormGroup) {
     SelectModule,
     FloatLabelModule,
     TooltipModule,
-    PaginatorModule,
     ToastModule,
     DatePickerModule,
     InputTextModule,
-
+    ProgressBarModule,
+    DialogModule,
   ],
   templateUrl: './paid-date-wise-payment-invoice.html',
   styleUrl: './paid-date-wise-payment-invoice.scss',
@@ -73,16 +75,13 @@ function dateRangeValidator(formGroup: FormGroup) {
 export class PaidDateWisePaymentInvoice implements OnInit {
   isLoading = false;
   isShow = false;
+  isExporting = false;
 
   items: MenuItem[] | undefined;
   home: MenuItem | undefined;
 
   searchForm!: FormGroup;
   records: any[] = [];
-
-  // Pagination
-  currentPage = 0;
-  pageSize = 10;
   totalRecords = 0;
 
   // Lookup data
@@ -240,8 +239,7 @@ export class PaidDateWisePaymentInvoice implements OnInit {
       }
       return;
     }
-    this.currentPage = 0;
-    this.fetchPage(this.currentPage, this.pageSize);
+    this.fetchAllRecords();
   }
 
   // Reset button handler
@@ -262,15 +260,11 @@ export class PaidDateWisePaymentInvoice implements OnInit {
 
     this.records = [];
     this.totalRecords = 0;
-    this.currentPage = 0;
     this.isShow = false;
     this.cdr.markForCheck();
   }
 
-  async fetchPage(
-    page: number,
-    size: number
-  ): Promise<void> {
+  async fetchAllRecords(): Promise<void> {
     this.isLoading = true;
     this.isShow = false;
     this.cdr.markForCheck();
@@ -298,7 +292,7 @@ export class PaidDateWisePaymentInvoice implements OnInit {
       reqNo: formValues.reqNo || null,
     };
 
-    const endpoint = `/api/wage-invoice/paid/date-range/list?page=${page}&size=${size}`;
+    const endpoint = `/api/wage-invoice/paid/date-range/list?page=0&size=-1`;
     try {
       const axiosResponse: any = await this.apiService.POST(
         endpoint,
@@ -308,7 +302,7 @@ export class PaidDateWisePaymentInvoice implements OnInit {
 
       if (apiResponse.success && apiResponse.data && apiResponse.data.length > 0) {
         this.records = apiResponse.data;
-        this.totalRecords = apiResponse.pagination.totalElements;
+        this.totalRecords = apiResponse.data.length;
         this.isShow = true;
       } else {
         this.records = [];
@@ -336,15 +330,121 @@ export class PaidDateWisePaymentInvoice implements OnInit {
     }
   }
 
-  onPageChange(event: any): void {
-    this.currentPage = event.page;
-    this.pageSize = event.rows;
+  // Export to CSV
+  async exportToCSV(): Promise<void> {
+    if (!this.records || this.records.length === 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Warning',
+        detail: 'No data to export.',
+      });
+      return;
+    }
 
-    // Handle "Show All" case when rows is -1
-    const size = this.pageSize === -1 ? -1 : this.pageSize;
-    const page = this.pageSize === -1 ? 0 : this.currentPage;
+    this.isExporting = true;
+    this.cdr.markForCheck();
 
-    this.fetchPage(page, size);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const headers = ['Serial', 'State', 'County', 'Payam', 'Boma', 'Work Code'];
+      const csvRows = [headers.join(',')];
+
+      this.records.forEach((record, index) => {
+        const row = [
+          index + 1,
+          `"${record.stateName || '-'}"`,
+          `"${record.countieName || '-'}"`,
+          `"${record.payamName || '-'}"`,
+          `"${record.bomaName || '-'}"`,
+          `"${record.workCode || '-'}"`,
+        ];
+        csvRows.push(row.join(','));
+      });
+
+      const csvContent = csvRows.join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      saveAs(blob, `paid_date_wise_payment_invoice_${Date.now()}.csv`);
+
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'CSV exported successfully.',
+      });
+    } catch (error) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to export CSV.',
+      });
+    } finally {
+      this.isExporting = false;
+      this.cdr.markForCheck();
+    }
+  }
+
+  // Export to PDF (Print)
+  async exportToPDF(): Promise<void> {
+    if (!this.records || this.records.length === 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Warning',
+        detail: 'No data to print.',
+      });
+      return;
+    }
+
+    this.isExporting = true;
+    this.cdr.markForCheck();
+
+    try {
+      const jsPDF = await import('jspdf');
+      const { default: autoTable } = await import('jspdf-autotable');
+
+      const doc = new jsPDF.default('l', 'pt', 'a4');
+      doc.setFontSize(16);
+      doc.text('Paid Date Wise Payment Invoice', 40, 40);
+
+      const head = [['Serial', 'State', 'County', 'Payam', 'Boma', 'Work Code']];
+      const body: any[] = [];
+
+      this.records.forEach((record, index) => {
+        body.push([
+          index + 1,
+          record.stateName || '-',
+          record.countieName || '-',
+          record.payamName || '-',
+          record.bomaName || '-',
+          record.workCode || '-',
+        ]);
+      });
+
+      autoTable(doc, {
+        head: head,
+        body: body,
+        startY: 60,
+        theme: 'grid',
+        headStyles: { fillColor: [41, 128, 185] },
+      });
+
+      doc.save(`paid_date_wise_payment_invoice_${Date.now()}.pdf`);
+
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Success',
+        detail: 'PDF exported successfully.',
+      });
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to export PDF.',
+      });
+    } finally {
+      this.isExporting = false;
+      this.cdr.markForCheck();
+    }
   }
 
   viewDetails(record: any): void {
