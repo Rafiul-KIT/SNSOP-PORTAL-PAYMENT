@@ -166,11 +166,11 @@ export class Header {
         icon: 'fas fa-user-edit',
         routerLink: 'attendance',
       },
-      {
-        label: 'Training Attendance',
-        icon: 'fas fa-user-clock',
-        routerLink: 'training-attendance',
-      },
+      // {
+      //   label: 'Training Attendance',
+      //   icon: 'fas fa-user-clock',
+      //   routerLink: 'training-attendance',
+      // },
       {
         label: 'Wage Request',
         icon: 'fas fa-receipt',
