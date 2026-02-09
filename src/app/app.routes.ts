@@ -39,6 +39,8 @@ import { PaidDateWisePaymentInvoiceDetails } from './pages/invoice/paid-date-wis
 import { WagePaidReqiestAbstractWithInvoiceDetails } from './pages/invoice/wage-paid-reqiest-abstract-with-invoice-details/wage-paid-reqiest-abstract-with-invoice-details';
 import { TrainingAttendance } from './pages/beneficiay-attendance/training-attendance/training-attendance';
 import { TrainingAttendancePerform } from './pages/beneficiay-attendance/training-attendance-perform/training-attendance-perform';
+import { TrainingAttendanceAndParticipantSummaryReport } from './pages/report-list/training-attendance-and-participant-summary-report/training-attendance-and-participant-summary-report';
+import { ComplementarySocialMeasuresProgressReport } from './pages/report-list/complementary-social-measures-progress-report/complementary-social-measures-progress-report';
 
 
 export const routes: Routes = [
@@ -234,6 +236,16 @@ export const routes: Routes = [
        {
         path: 'multiple-attendance',
         component: MultipleAttendanceReport,
+        canActivate: [routeGuard],
+       },
+           {
+        path: 'training-attendance-and-participant-summary-report',
+        component: TrainingAttendanceAndParticipantSummaryReport,
+        canActivate: [routeGuard],
+       },
+           {
+        path: 'complementary-social-measures-progress-report',
+        component: ComplementarySocialMeasuresProgressReport,
         canActivate: [routeGuard],
        }
       ,
