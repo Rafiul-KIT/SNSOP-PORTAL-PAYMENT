@@ -1,1 +1,149 @@
-<p>complementary-social-measures-progress-report works!</p>
+@if (isLoading) {
+<app-loader></app-loader>
+} @else {
+<div class="breadcrumb-wrapper">
+  <p-breadcrumb class="max-w-full" [model]="items" [home]="home"></p-breadcrumb>
+</div>
+
+<div class="wrapper-scroller">
+  <div class="row justify-content-center mt-4">
+    <div class="card p-3 mb-3">
+      <form [formGroup]="searchForm" novalidate class="row g-2">
+        <div class="col-md-3">
+          <p-floatlabel variant="on" class="w-100">
+            <p-select [options]="states" optionLabel="name" formControlName="state"
+              (onChange)="onStateChange($event.value)" />
+            <label>State Name <span class="text-danger">*</span></label>
+          </p-floatlabel>
+        </div>
+
+        <div class="col-md-3">
+          <p-floatlabel variant="on" class="w-100">
+            <p-select [options]="countyList" optionLabel="name" formControlName="county"
+              (onChange)="onCountyChange($event.value)" />
+            <label>County Name <span class="text-danger">*</span></label>
+          </p-floatlabel>
+        </div>
+
+        <div class="col-md-3">
+          <p-floatlabel variant="on" class="w-100">
+            <p-select [options]="payamList" optionLabel="name" formControlName="payam"
+              (onChange)="onPayamChange($event.value)" />
+            <label>Payam Name <span class="text-danger">*</span></label>
+          </p-floatlabel>
+        </div>
+
+        <div class="col-md-3">
+          <p-floatlabel variant="on" class="w-100">
+            <p-select [options]="bomaList" optionLabel="name" formControlName="boma" />
+            <label>Boma Name <span class="text-danger">*</span></label>
+          </p-floatlabel>
+        </div>
+
+        <div class="col-12 text-end">
+          <button class="btn btn-secondary me-2" (click)="reset()">
+            <i class="fas fa-redo me-2"></i>Reset
+          </button>
+          <button class="btn btn-success" (click)="search()">
+            <i class="fas fa-search me-2"></i>Search
+          </button>
+        </div>
+      </form>
+      <br>
+    </div>
+
+    @if(isShow && reportData){
+    <div class="col-12">
+      <!-- Location Info -->
+      <div class="alert alert-info mb-3">
+        <strong>Location:</strong> {{ reportData.stateName }} &gt; {{ reportData.countyName }} &gt; {{ reportData.payamName }} &gt; {{ reportData.bomaName }}
+      </div>
+
+      <p-table [value]="reportData.cycles" size="small"
+        class="p-datatable custom-table p-datatable-sm p-datatable-striped p-datatable-gridlines"
+        [tableStyle]="{ 'min-width': '100%' }">
+
+        <!-- HEADER -->
+        <ng-template pTemplate="header">
+          <tr>
+            <th rowspan="2" class="text-center align-middle">Cycle</th>
+            <th colspan="3" class="text-center bg-primary text-white">FINLIT</th>
+            <th colspan="3" class="text-center bg-success text-white">WASH</th>
+            <th colspan="3" class="text-center bg-info text-white">ECD</th>
+            <th colspan="3" class="text-center bg-warning">GBV</th>
+          </tr>
+          <tr>
+            <th class="text-center">Male</th>
+            <th class="text-center">Female</th>
+            <th class="text-center">Total</th>
+            <th class="text-center">Male</th>
+            <th class="text-center">Female</th>
+            <th class="text-center">Total</th>
+            <th class="text-center">Male</th>
+            <th class="text-center">Female</th>
+            <th class="text-center">Total</th>
+            <th class="text-center">Male</th>
+            <th class="text-center">Female</th>
+            <th class="text-center">Total</th>
+          </tr>
+        </ng-template>
+
+        <!-- BODY -->
+        <ng-template pTemplate="body" let-cycle>
+          <tr>
+            <td class="text-center fw-semibold">{{ cycle.cycleName }}</td>
+            <td class="text-center">{{ cycle.finlitMale }}</td>
+            <td class="text-center">{{ cycle.finlitFemale }}</td>
+            <td class="text-center fw-bold">{{ cycle.finlitTotal }}</td>
+            <td class="text-center">{{ cycle.washMale }}</td>
+            <td class="text-center">{{ cycle.washFemale }}</td>
+            <td class="text-center fw-bold">{{ cycle.washTotal }}</td>
+            <td class="text-center">{{ cycle.ecdMale }}</td>
+            <td class="text-center">{{ cycle.ecdFemale }}</td>
+            <td class="text-center fw-bold">{{ cycle.ecdTotal }}</td>
+            <td class="text-center">{{ cycle.gbvMale }}</td>
+            <td class="text-center">{{ cycle.gbvFemale }}</td>
+            <td class="text-center fw-bold">{{ cycle.gbvTotal }}</td>
+          </tr>
+        </ng-template>
+
+        <!-- FOOTER (TOTALS) -->
+        <ng-template pTemplate="footer">
+          <tr class="bg-light fw-bold">
+            <td class="text-center">Total</td>
+            <td class="text-center">{{ reportData.totalFinlitMale }}</td>
+            <td class="text-center">{{ reportData.totalFinlitFemale }}</td>
+            <td class="text-center text-primary">{{ reportData.totalFinlitTotal }}</td>
+            <td class="text-center">{{ reportData.totalWashMale }}</td>
+            <td class="text-center">{{ reportData.totalWashFemale }}</td>
+            <td class="text-center text-success">{{ reportData.totalWashTotal }}</td>
+            <td class="text-center">{{ reportData.totalEcdMale }}</td>
+            <td class="text-center">{{ reportData.totalEcdFemale }}</td>
+            <td class="text-center text-info">{{ reportData.totalEcdTotal }}</td>
+            <td class="text-center">{{ reportData.totalGbvMale }}</td>
+            <td class="text-center">{{ reportData.totalGbvFemale }}</td>
+            <td class="text-center text-warning">{{ reportData.totalGbvTotal }}</td>
+          </tr>
+        </ng-template>
+
+        <!-- EMPTY -->
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="13" class="text-center text-danger fw-semibold">
+              No data found!
+            </td>
+          </tr>
+        </ng-template>
+
+      </p-table>
+    </div>
+    } @else {
+    <div class="col-12 text-center p-5">
+      <p class="text-muted fs-5">No data to display. Please use the search filters above.</p>
+    </div>
+    }
+  </div>
+</div>
+}
+
+<p-toast position="bottom-right"></p-toast>
