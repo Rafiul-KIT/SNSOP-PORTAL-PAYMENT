@@ -1,1 +1,187 @@
-<p>training-attendance-and-participant-summary-report works!</p>
+@if (isLoading) {
+<app-loader></app-loader>
+} @else {
+<div class="breadcrumb-wrapper">
+  <p-breadcrumb class="max-w-full" [model]="items" [home]="home"></p-breadcrumb>
+</div>
+
+<div class="wrapper-scroller">
+  <div class="row justify-content-center mt-4">
+    <div class="card p-3 mb-3">
+      <form [formGroup]="searchForm" novalidate class="row g-2">
+        <div class="col-md-3">
+          <p-floatlabel variant="on" class="w-100">
+            <p-select [options]="states" optionLabel="name" formControlName="state"
+              (onChange)="onStateChange($event.value)"
+              [class.ng-invalid]="searchForm.get('state')?.invalid && searchForm.get('state')?.touched" />
+            <label>State Name <span class="text-danger">*</span></label>
+          </p-floatlabel>
+          @if(searchForm.get('state')?.invalid && searchForm.get('state')?.touched) {
+            <small class="text-danger">State is required</small>
+          }
+        </div>
+
+        <div class="col-md-3">
+          <p-floatlabel variant="on" class="w-100">
+            <p-select [options]="countyList" optionLabel="name" formControlName="county"
+              (onChange)="onCountyChange($event.value)"
+              [class.ng-invalid]="searchForm.get('county')?.invalid && searchForm.get('county')?.touched" />
+            <label>County Name <span class="text-danger">*</span></label>
+          </p-floatlabel>
+          @if(searchForm.get('county')?.invalid && searchForm.get('county')?.touched) {
+            <small class="text-danger">County is required</small>
+          }
+        </div>
+
+        <div class="col-md-3">
+          <p-floatlabel variant="on" class="w-100">
+            <p-select [options]="payamList" optionLabel="name" formControlName="payam"
+              (onChange)="onPayamChange($event.value)" />
+            <label>Payam Name</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="col-md-3">
+          <p-floatlabel variant="on" class="w-100">
+            <p-select [options]="bomaList" optionLabel="name" formControlName="boma" />
+            <label>Boma Name</label>
+          </p-floatlabel>
+        </div>
+
+        <div class="col-md-3">
+          <p-floatlabel variant="on" class="w-100">
+            <p-datepicker formControlName="fromDate" showIcon="true" [style]="{ width: '100%' }" inputId="from-date"
+              dateFormat="yy-mm-dd" [class.ng-invalid]="searchForm.get('fromDate')?.invalid && searchForm.get('fromDate')?.touched"></p-datepicker>
+            <label for="from-date">From Date <span class="text-danger">*</span></label>
+          </p-floatlabel>
+          @if(searchForm.get('fromDate')?.invalid && searchForm.get('fromDate')?.touched) {
+            <small class="text-danger">From Date is required</small>
+          }
+        </div>
+
+        <div class="col-md-3">
+          <p-floatlabel variant="on" class="w-100">
+            <p-datepicker formControlName="toDate" showIcon="true" [style]="{ width: '100%' }" inputId="to-date"
+              dateFormat="yy-mm-dd" [class.ng-invalid]="searchForm.get('toDate')?.invalid && searchForm.get('toDate')?.touched"></p-datepicker>
+            <label for="to-date">To Date <span class="text-danger">*</span></label>
+          </p-floatlabel>
+          @if(searchForm.get('toDate')?.invalid && searchForm.get('toDate')?.touched) {
+            <small class="text-danger">To Date is required</small>
+          }
+          @if(searchForm.errors?.['dateRangeInvalid'] && searchForm.get('toDate')?.touched) {
+            <small class="text-danger">From Date must be less than or equal to To Date</small>
+          }
+          @if(searchForm.errors?.['futureDateInvalid'] && searchForm.get('toDate')?.touched) {
+            <small class="text-danger">To Date cannot be a future date</small>
+          }
+        </div>
+
+        <div class="col-12 text-end">
+          <button class="btn btn-secondary me-2" (click)="reset()">
+            <i class="fas fa-redo me-2"></i>Reset
+          </button>
+          <button class="btn btn-success" (click)="search()">
+            <i class="fas fa-search me-2"></i>Search
+          </button>
+        </div>
+      </form>
+      <br>
+    </div>
+
+    @if(isShow){
+    <div class="col-12">
+      <p-table [value]="records" [scrollable]="true" scrollHeight="64vh" size="small"
+        class="p-datatable custom-table -sm p-datatable-striped p-datatable-gridlines"
+        [tableStyle]="{ 'min-width': '100%' }">
+
+        <!-- HEADER -->
+        <ng-template pTemplate="header">
+          <tr>
+            <th colspan="19" class="text-end">
+              <p class="fw-bold mb-2">
+                Showing <kbd>{{ records.length }}</kbd> of
+                <kbd>{{ totalRecords }}</kbd> records
+              </p>
+            </th>
+          </tr>
+
+          <tr>
+            <th rowspan="2" class="text-center align-middle">Serial</th>
+            <th rowspan="2" class="text-center align-middle">State</th>
+            <th rowspan="2" class="text-center align-middle">County</th>
+            <th rowspan="2" class="text-center align-middle">Payam</th>
+            <th rowspan="2" class="text-center align-middle">Boma</th>
+            <th rowspan="2" class="text-center align-middle">From Date</th>
+            <th rowspan="2" class="text-center align-middle">To Date</th>
+            <th colspan="3" class="text-center bg-primary text-white">FINLIT</th>
+            <th colspan="3" class="text-center bg-success text-white">WASH</th>
+            <th colspan="3" class="text-center bg-info text-white">ECD</th>
+            <th colspan="3" class="text-center bg-warning">GBV</th>
+          </tr>
+          <tr>
+            <th class="text-center bg-primary text-white">Male</th>
+            <th class="text-center bg-primary text-white">Female</th>
+            <th class="text-center bg-primary text-white">Total</th>
+            <th class="text-center bg-success text-white">Male</th>
+            <th class="text-center bg-success text-white">Female</th>
+            <th class="text-center bg-success text-white">Total</th>
+            <th class="text-center bg-info text-white">Male</th>
+            <th class="text-center bg-info text-white">Female</th>
+            <th class="text-center bg-info text-white">Total</th>
+            <th class="text-center bg-warning">Male</th>
+            <th class="text-center bg-warning">Female</th>
+            <th class="text-center bg-warning">Total</th>
+          </tr>
+        </ng-template>
+
+        <!-- BODY -->
+        <ng-template pTemplate="body" let-record let-rowIndex="rowIndex">
+          <tr>
+            <td class="text-center">{{ record.serialNo || (currentPage * pageSize) + rowIndex + 1 }}</td>
+            <td class="text-center">{{ record.state || '-' }}</td>
+            <td class="text-center">{{ record.county || '-' }}</td>
+            <td class="text-center">{{ record.payam || '-' }}</td>
+            <td class="text-center">{{ record.boma || '-' }}</td>
+            <td class="text-center">{{ record.fromDate || '-' }}</td>
+            <td class="text-center">{{ record.toDate || '-' }}</td>
+            <td class="text-center">{{ record.finlitMale ?? 0 }}</td>
+            <td class="text-center">{{ record.finlitFemale ?? 0 }}</td>
+            <td class="text-center fw-bold">{{ record.finlitTotal ?? 0 }}</td>
+            <td class="text-center">{{ record.washMale ?? 0 }}</td>
+            <td class="text-center">{{ record.washFemale ?? 0 }}</td>
+            <td class="text-center fw-bold">{{ record.washTotal ?? 0 }}</td>
+            <td class="text-center">{{ record.ecdMale ?? 0 }}</td>
+            <td class="text-center">{{ record.ecdFemale ?? 0 }}</td>
+            <td class="text-center fw-bold">{{ record.ecdTotal ?? 0 }}</td>
+            <td class="text-center">{{ record.gbvMale ?? 0 }}</td>
+            <td class="text-center">{{ record.gbvFemale ?? 0 }}</td>
+            <td class="text-center fw-bold">{{ record.gbvTotal ?? 0 }}</td>
+          </tr>
+        </ng-template>
+
+        <!-- EMPTY -->
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="19" class="text-center text-danger fw-semibold">
+              No data found!
+            </td>
+          </tr>
+        </ng-template>
+
+      </p-table>
+
+      <p-paginator class="paginator-sticky" [rows]="pageSize" [totalRecords]="totalRecords"
+        [rowsPerPageOptions]="[10, 25, 50, -1]" (onPageChange)="onPageChange($event)" [first]="currentPage * pageSize"
+        [currentPageReportTemplate]="'Showing {first} to {last} of {totalRecords} entries'">
+      </p-paginator>
+    </div>
+    } @else {
+    <div class="col-12 text-center p-5">
+      <p class="text-muted fs-5">No data to display. Please use the search filters above.</p>
+    </div>
+    }
+  </div>
+</div>
+}
+
+<p-toast position="bottom-right"></p-toast>
