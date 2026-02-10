@@ -285,8 +285,8 @@
                   <td class="text-center">{{ wage.imageId }}</td>
                   <td class="text-center">{{ wage.description || 'N/A' }}</td>
                   <td class="text-center">
-                    @if (wage.photoFilePath) {
-                    <a href="javascript:void(0);" (click)="downloadWageAttachment(wage.photoFilePath, wage.photoFileName)">{{ wage.photoFileName }}</a>
+                    @if (wage.attachmentPath) {
+                    <a href="javascript:void(0);" (click)="downloadWageAttachment(wage.attachmentPath, wage.fileName)">{{ wage.fileName }}</a>
                     } @else {
                     N/A
                     }
