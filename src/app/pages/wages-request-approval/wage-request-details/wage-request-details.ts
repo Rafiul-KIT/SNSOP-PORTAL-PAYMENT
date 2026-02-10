@@ -648,7 +648,13 @@ export class WageRequestDetails implements OnInit {
       );
 
       if (response?.data?.content && Array.isArray(response.data.content)) {
-        this.beneficiaries = response.data.content;
+        // Pre-compute absentDays for sorting
+        this.beneficiaries = response.data.content.map((bene: Beneficiary) => ({
+          ...bene,
+          absentDays: this.wageRequest?.subprojectId === 999
+            ? (bene.absentDays ?? 0)
+            : (18 - bene.totalDays)
+        }));
         this.totalBeneficiaries = response.data.totalElements || 0;
 
         if (this.totalBeneficiaries > 0) {

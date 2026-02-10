@@ -266,15 +266,13 @@
                             <tr>
                                 <th>SL</th>
                                 <th>House Hold Number</th>
-                                <th pSortableColumn="beneficiaryName">Name <p-sortIcon
-                                        field="beneficiaryName"></p-sortIcon></th>
+                                <th>Name</th>
                                 <th>Gender</th>
                                 <th>Age</th>
                                 <th>Phone</th>
-                                <th pSortableColumn="totalDays">Total Days <p-sortIcon field="totalDays"></p-sortIcon>
-                                </th>
-                                <th class="text-center">Present Days</th>
-                                <th class="text-center">Absent Days</th>
+                                <th>Total Days</th>
+                                <th pSortableColumn="totalDays" class="text-center">Present Days <p-sortIcon field="totalDays"></p-sortIcon></th>
+                                <th pSortableColumn="absentDays" class="text-center">Absent Days <p-sortIcon field="absentDays"></p-sortIcon></th>
                                 <th>Payment Status</th>
                                 <th>Wage (USD)</th>
                                 @if(showSspColumns()){
