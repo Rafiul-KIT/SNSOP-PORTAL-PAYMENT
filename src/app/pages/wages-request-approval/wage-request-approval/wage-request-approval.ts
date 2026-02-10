@@ -1,6 +1,7 @@
 import {
   Component,
   OnInit,
+  OnDestroy,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
 } from '@angular/core';
@@ -29,7 +30,7 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { InputTextModule } from 'primeng/inputtext';
-import { LookupService, StatusWageEnum } from '../../../services/lookup.service';
+import { LookupService, LookupItem, StatusWageEnum } from '../../../services/lookup.service';
 import Swal from 'sweetalert2';
 import { handleMultipleFileUpload } from '../../../validators/file-validator';
 import { DialogModule } from 'primeng/dialog';
@@ -99,9 +100,15 @@ const dateRangeValidator: ValidatorFn = (
   providers: [MessageService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class WageRequestApproval implements OnInit {
+export class WageRequestApproval implements OnInit, OnDestroy {
   isLoading = true;
   searchForm!: FormGroup;
+
+  // Geo lookup lists
+  states: LookupItem[] = [];
+  counties: LookupItem[] = [];
+  payams: LookupItem[] = [];
+  bomas: LookupItem[] = [];
 
   years: any[] = [];
   months: any[] = [
@@ -126,6 +133,8 @@ export class WageRequestApproval implements OnInit {
   subProjects: SubProjectLookup[] = [];
   wageRequests: WageRequest[] = [];
   totalRecords = 0;
+
+  private readonly FILTER_STORAGE_KEY = 'wage_request_approval_filters';
 
   breadcrumbItems: any[] = [];
   breadcrumbHome: any;
@@ -173,11 +182,20 @@ export class WageRequestApproval implements OnInit {
     this.initForm();
     this.initBreadcrumb();
     await this.loadInitialLookups();
+    await this.restoreFiltersFromStorage();
     this.fetchPage(this.currentPage, this.pageSize);
+  }
+
+  ngOnDestroy() {
+    this.saveFiltersToStorage();
   }
 
   initForm() {
     this.searchForm = this.fb.group({
+      state: [null],
+      county: [{ value: null, disabled: true }],
+      payam: [{ value: null, disabled: true }],
+      boma: [{ value: null, disabled: true }],
       subprojectId: [null],
       fromDate: [null],
       toDate: [null],
@@ -198,10 +216,132 @@ export class WageRequestApproval implements OnInit {
     this.advanceSearchPanelVisible = !this.advanceSearchPanelVisible;
   }
 
+  // ---------- Dependent dropdowns ----------
+  async onStateChange(state: LookupItem | null) {
+    this.searchForm.get('county')?.reset({ value: null, disabled: true });
+    this.searchForm.get('payam')?.reset({ value: null, disabled: true });
+    this.searchForm.get('boma')?.reset({ value: null, disabled: true });
+    this.counties = [];
+    this.payams = [];
+    this.bomas = [];
+
+    if (state?.id) {
+      this.counties = await this.lookup.getCountyListByStateId(state.id);
+      this.searchForm.get('county')?.enable();
+    }
+    this.cdr.markForCheck();
+  }
+
+  async onCountyChange(county: LookupItem | null) {
+    this.searchForm.get('payam')?.reset({ value: null, disabled: true });
+    this.searchForm.get('boma')?.reset({ value: null, disabled: true });
+    this.payams = [];
+    this.bomas = [];
+
+    if (county?.id) {
+      this.payams = await this.lookup.getPayamListByCountyId(county.id);
+      this.searchForm.get('payam')?.enable();
+    }
+    this.cdr.markForCheck();
+  }
+
+  async onPayamChange(payam: LookupItem | null) {
+    this.searchForm.get('boma')?.reset({ value: null, disabled: true });
+    this.bomas = [];
+
+    if (payam?.id) {
+      this.bomas = await this.lookup.getBomaListByPayamId(payam.id);
+      this.searchForm.get('boma')?.enable();
+    }
+    this.cdr.markForCheck();
+  }
+
+  // ---------- Filter persistence ----------
+  private saveFiltersToStorage() {
+    const f = this.searchForm.getRawValue();
+    const filterData = {
+      state: f.state,
+      county: f.county,
+      payam: f.payam,
+      boma: f.boma,
+      subprojectId: f.subprojectId,
+      fromDate: f.fromDate,
+      toDate: f.toDate,
+      requestYear: f.requestYear,
+      requestMonthIndex: f.requestMonthIndex,
+      paymentCycle: f.paymentCycle,
+      status: f.status,
+      requestNumber: f.requestNumber,
+      currentPage: this.currentPage,
+      pageSize: this.pageSize,
+      advanceSearchPanelVisible: this.advanceSearchPanelVisible,
+      counties: this.counties,
+      payams: this.payams,
+      bomas: this.bomas,
+    };
+    sessionStorage.setItem(this.FILTER_STORAGE_KEY, JSON.stringify(filterData));
+  }
+
+  private async restoreFiltersFromStorage() {
+    const stored = sessionStorage.getItem(this.FILTER_STORAGE_KEY);
+    if (!stored) return;
+
+    try {
+      const filterData = JSON.parse(stored);
+
+      // Restore geo dropdown lists
+      if (filterData.counties) this.counties = filterData.counties;
+      if (filterData.payams) this.payams = filterData.payams;
+      if (filterData.bomas) this.bomas = filterData.bomas;
+
+      // Restore form values
+      if (filterData.state) {
+        this.searchForm.patchValue({ state: filterData.state });
+        this.searchForm.get('county')?.enable();
+      }
+      if (filterData.county) {
+        this.searchForm.patchValue({ county: filterData.county });
+        this.searchForm.get('payam')?.enable();
+      }
+      if (filterData.payam) {
+        this.searchForm.patchValue({ payam: filterData.payam });
+        this.searchForm.get('boma')?.enable();
+      }
+      if (filterData.boma) {
+        this.searchForm.patchValue({ boma: filterData.boma });
+      }
+
+      
+      this.searchForm.patchValue({
+        subprojectId: filterData.subprojectId,
+        fromDate: filterData.fromDate ? new Date(filterData.fromDate) : null,
+        toDate: filterData.toDate ? new Date(filterData.toDate) : null,
+        requestYear: filterData.requestYear,
+        requestMonthIndex: filterData.requestMonthIndex,
+        paymentCycle: filterData.paymentCycle,
+        status: filterData.status,
+        requestNumber: filterData.requestNumber || '',
+      });
+
+      this.currentPage = filterData.currentPage || 0;
+      this.pageSize = filterData.pageSize || 10;
+      this.advanceSearchPanelVisible = filterData.advanceSearchPanelVisible || false;
+
+      this.cdr.markForCheck();
+    } catch (e) {
+      console.error('Error restoring filters:', e);
+      sessionStorage.removeItem(this.FILTER_STORAGE_KEY);
+    }
+  }
+
   private async loadInitialLookups() {
     this.isLoading = true;
     this.cdr.markForCheck();
     try {
+      // Load states
+      await this.lookup.getOrFetchStateList();
+      this.states = this.lookup.getStateList();
+
       const subProjectRes: any = await this.api.POST(
         'api/subproject/get?page=0&size=10000',
         {}
@@ -279,9 +419,12 @@ export class WageRequestApproval implements OnInit {
     }
   }
   private buildSearchBody() {
-   
-    const f = this.searchForm.value;
+    const f = this.searchForm.getRawValue();
     const body: any = {
+      state: f.state?.id ? String(f.state.id) : null,
+      county: f.county?.id ? String(f.county.id) : null,
+      payam: f.payam?.id ? String(f.payam.id) : null,
+      boma: f.boma?.id ? String(f.boma.id) : null,
       subprojectId: f.subprojectId || null,
       fromDate: f.fromDate ? this.formatDate(f.fromDate) : null,
       toDate: f.toDate ? this.formatDate(f.toDate) : null,
@@ -496,21 +639,33 @@ export class WageRequestApproval implements OnInit {
       return;
     }
     this.currentPage = 0;
+    this.saveFiltersToStorage();
     this.fetchPage(this.currentPage, this.pageSize);
   }
 
   resetForm() {
     this.searchForm.reset();
-    this.searchWageRequests();
+    this.searchForm.get('county')?.disable();
+    this.searchForm.get('payam')?.disable();
+    this.searchForm.get('boma')?.disable();
+    this.counties = [];
+    this.payams = [];
+    this.bomas = [];
+    sessionStorage.removeItem(this.FILTER_STORAGE_KEY);
+    this.currentPage = 0;
+    this.fetchPage(this.currentPage, this.pageSize);
+    this.cdr.markForCheck();
   }
 
   onPageChange(event: any) {
     this.currentPage = event.page;
     this.pageSize = event.rows;
+    this.saveFiltersToStorage();
     this.fetchPage(this.currentPage, this.pageSize);
   }
 
   viewWageRequest(wageId: number, subprojectId: number) {
+    this.saveFiltersToStorage();
     this.router.navigate([
       '/wage-request-approval/details',
       wageId,
