@@ -1,7 +1,6 @@
 import {
   Component,
   OnInit,
-  OnDestroy,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
 } from '@angular/core';
@@ -100,7 +99,7 @@ const dateRangeValidator: ValidatorFn = (
   providers: [MessageService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class WageRequestApproval implements OnInit, OnDestroy {
+export class WageRequestApproval implements OnInit {
   isLoading = true;
   searchForm!: FormGroup;
 
@@ -184,10 +183,6 @@ export class WageRequestApproval implements OnInit, OnDestroy {
     await this.loadInitialLookups();
     await this.restoreFiltersFromStorage();
     this.fetchPage(this.currentPage, this.pageSize);
-  }
-
-  ngOnDestroy() {
-    this.saveFiltersToStorage();
   }
 
   initForm() {
@@ -282,9 +277,13 @@ export class WageRequestApproval implements OnInit, OnDestroy {
     sessionStorage.setItem(this.FILTER_STORAGE_KEY, JSON.stringify(filterData));
   }
 
+
   private async restoreFiltersFromStorage() {
     const stored = sessionStorage.getItem(this.FILTER_STORAGE_KEY);
     if (!stored) return;
+
+    // Remove immediately after reading - this ensures refresh resets filters
+    sessionStorage.removeItem(this.FILTER_STORAGE_KEY);
 
     try {
       const filterData = JSON.parse(stored);
@@ -639,7 +638,6 @@ export class WageRequestApproval implements OnInit, OnDestroy {
       return;
     }
     this.currentPage = 0;
-    this.saveFiltersToStorage();
     this.fetchPage(this.currentPage, this.pageSize);
   }
 
@@ -660,7 +658,6 @@ export class WageRequestApproval implements OnInit, OnDestroy {
   onPageChange(event: any) {
     this.currentPage = event.page;
     this.pageSize = event.rows;
-    this.saveFiltersToStorage();
     this.fetchPage(this.currentPage, this.pageSize);
   }
 
