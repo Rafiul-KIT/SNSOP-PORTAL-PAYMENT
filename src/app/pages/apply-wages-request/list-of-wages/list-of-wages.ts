@@ -97,6 +97,8 @@ const dateRangeValidator: ValidatorFn = (
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ListOfWages implements OnInit {
+  private readonly FILTER_STORAGE_KEY = 'listOfWages_filters';
+
   isLoading = true;
   lookupsLoaded = false;
   searchForm!: FormGroup;
@@ -120,6 +122,10 @@ export class ListOfWages implements OnInit {
   ];
   paymentCycles: any[] = [];
   statuses: any[] = [];
+  states: any[] = [];
+  countyList: any[] = [];
+  payamList: any[] = [];
+  bomaList: any[] = [];
   wageRequests: WageRequestDto[] = [];
   totalRecords = 0;
 
@@ -176,9 +182,11 @@ export class ListOfWages implements OnInit {
     this.roleId = this.api.getUserRole();
     this.statuses = this.getRoleSpecificStatuses();;
     this.paymentCycles = this.lookup.getPaymentCycleEnum();
-      await this.loadInitialLookups();
+    await this.loadInitialLookups();
+    await this.loadStates();
     this.initBreadcrumb();
     this.initForm();
+    await this.restoreFiltersFromStorage();
     this.fetchPage(this.currentPage, this.pageSize);
   }
 
@@ -192,12 +200,77 @@ export class ListOfWages implements OnInit {
       paymentCycle: [null],
       status: [null],
       requestNumber: [''],
+      state: [null],
+      county: [{ value: null, disabled: true }],
+      payam: [{ value: null, disabled: true }],
+      boma: [{ value: null, disabled: true }],
     }, { validators: dateRangeValidator });
   }
 
   initBreadcrumb() {
     this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
     this.breadcrumbItems = [{ label: 'Wage Request Drafts' }];
+  }
+
+  private async loadStates(): Promise<void> {
+    try {
+      await this.lookup.getOrFetchStateList();
+      this.states = this.lookup.getStateList();
+      this.cdr.markForCheck();
+    } catch (error) {
+      console.error('Error loading states:', error);
+    }
+  }
+
+  async onStateChange(state: any): Promise<void> {
+    this.searchForm.get('county')?.reset({ value: null, disabled: true });
+    this.searchForm.get('payam')?.reset({ value: null, disabled: true });
+    this.searchForm.get('boma')?.reset({ value: null, disabled: true });
+    this.countyList = [];
+    this.payamList = [];
+    this.bomaList = [];
+
+    if (state?.id) {
+      try {
+        this.countyList = await this.lookup.getCountyListByStateId(String(state.id));
+        this.searchForm.get('county')?.enable();
+      } catch (error) {
+        console.error('Error loading counties:', error);
+      }
+    }
+    this.cdr.markForCheck();
+  }
+
+  async onCountyChange(county: any): Promise<void> {
+    this.searchForm.get('payam')?.reset({ value: null, disabled: true });
+    this.searchForm.get('boma')?.reset({ value: null, disabled: true });
+    this.payamList = [];
+    this.bomaList = [];
+
+    if (county?.id) {
+      try {
+        this.payamList = await this.lookup.getPayamListByCountyId(String(county.id));
+        this.searchForm.get('payam')?.enable();
+      } catch (error) {
+        console.error('Error loading payams:', error);
+      }
+    }
+    this.cdr.markForCheck();
+  }
+
+  async onPayamChange(payam: any): Promise<void> {
+    this.searchForm.get('boma')?.reset({ value: null, disabled: true });
+    this.bomaList = [];
+
+    if (payam?.id) {
+      try {
+        this.bomaList = await this.lookup.getBomaListByPayamId(String(payam.id));
+        this.searchForm.get('boma')?.enable();
+      } catch (error) {
+        console.error('Error loading bomas:', error);
+      }
+    }
+    this.cdr.markForCheck();
   }
 
   async toggleAdvanceSearch() {
@@ -235,6 +308,10 @@ export class ListOfWages implements OnInit {
       status: f.status !== null ? f.status : null,
       requestNumber: f.requestNumber ? f.requestNumber.trim() : null,
       remarks: null,
+      state: f.state ? f.state.id : null,
+      county: f.county ? f.county.id : null,
+      payam: f.payam ? f.payam.id : null,
+      boma: f.boma ? f.boma.id : null,
     };
   }
 
@@ -330,12 +407,19 @@ export class ListOfWages implements OnInit {
 
   resetForm() {
     this.searchForm.reset();
+    this.searchForm.get('county')?.disable();
+    this.searchForm.get('payam')?.disable();
+    this.searchForm.get('boma')?.disable();
+    this.countyList = [];
+    this.payamList = [];
+    this.bomaList = [];
     this.currentPage = 0;
     this.fetchPage(this.currentPage, this.pageSize);
     this.cdr.markForCheck();
   }
 
 viewWageRequest(wageId: number, subprojectId: number) {
+  this.saveFiltersToStorage();
   this.router.navigate([
     '/wage-request/details',
     wageId,
@@ -458,6 +542,86 @@ private getRoleSpecificStatuses(): { id: number; label: string }[] {
   }
     const found = this.subProjects.find((sp) => sp.id === id);
     return found ? `${found.workCode}` : id.toString();
+  }
+
+  private saveFiltersToStorage(): void {
+    const state = {
+      filters: this.searchForm.getRawValue(),
+      currentPage: this.currentPage,
+      pageSize: this.pageSize,
+      advanceSearchPanelVisible: this.advanceSearchPanelVisible,
+    };
+    sessionStorage.setItem(this.FILTER_STORAGE_KEY, JSON.stringify(state));
+  }
+
+  private async restoreFiltersFromStorage(): Promise<boolean> {
+    const stored = sessionStorage.getItem(this.FILTER_STORAGE_KEY);
+    if (!stored) return false;
+
+    sessionStorage.removeItem(this.FILTER_STORAGE_KEY);
+
+    try {
+      const savedState = JSON.parse(stored);
+      const filters = savedState.filters;
+
+      // Restore date fields as Date objects
+      if (filters.fromDate) filters.fromDate = new Date(filters.fromDate);
+      if (filters.toDate) filters.toDate = new Date(filters.toDate);
+
+      // Restore non-geo fields first
+      this.searchForm.patchValue({
+        subprojectId: filters.subprojectId,
+        fromDate: filters.fromDate,
+        toDate: filters.toDate,
+        requestYear: filters.requestYear,
+        requestMonthIndex: filters.requestMonthIndex,
+        paymentCycle: filters.paymentCycle,
+        status: filters.status,
+        requestNumber: filters.requestNumber,
+      });
+
+      this.currentPage = savedState.currentPage ?? 0;
+      this.pageSize = savedState.pageSize ?? 10;
+      this.advanceSearchPanelVisible = savedState.advanceSearchPanelVisible ?? false;
+
+      if (this.advanceSearchPanelVisible) {
+        this.lookupsLoaded = true;
+      }
+
+      // Restore geo fields with cascading
+      if (filters.state) {
+        const stateObj = this.states.find((s: any) => s.id === filters.state.id);
+        if (stateObj) {
+          this.searchForm.patchValue({ state: stateObj });
+          await this.onStateChange(stateObj);
+        }
+      }
+      if (filters.county && this.countyList.length > 0) {
+        const countyObj = this.countyList.find((c: any) => c.id === filters.county.id);
+        if (countyObj) {
+          this.searchForm.patchValue({ county: countyObj });
+          await this.onCountyChange(countyObj);
+        }
+      }
+      if (filters.payam && this.payamList.length > 0) {
+        const payamObj = this.payamList.find((p: any) => p.id === filters.payam.id);
+        if (payamObj) {
+          this.searchForm.patchValue({ payam: payamObj });
+          await this.onPayamChange(payamObj);
+        }
+      }
+      if (filters.boma && this.bomaList.length > 0) {
+        const bomaObj = this.bomaList.find((b: any) => b.id === filters.boma.id);
+        if (bomaObj) {
+          this.searchForm.patchValue({ boma: bomaObj });
+        }
+      }
+
+      this.cdr.markForCheck();
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   trackById = (_: number, row: WageRequestDto) => row.id;

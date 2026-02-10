@@ -266,17 +266,13 @@
                             <tr>
                                 <th>SL</th>
                                 <th>House Hold Number</th>
-                                <th pSortableColumn="beneficiaryName">Name <p-sortIcon
-                                        field="beneficiaryName"></p-sortIcon></th>
+                                <th>Name</th>
                                 <th>Gender</th>
                                 <th>Age</th>
                                 <th>Phone</th>
-                                <th >Total Days  </th>
-                               
-                                <th class="text-center"  pSortableColumn="presentDays">Present Days<p-sortIcon
-                                        field="presentDays"></p-sortIcon></th>
-                                <th class="text-center" pSortableColumn="absentDays">Absent Days <p-sortIcon
-                                        field="absentDays"></p-sortIcon></th>
+                                <th>Total Days</th>
+                                <th pSortableColumn="totalDays" class="text-center">Present Days <p-sortIcon field="totalDays"></p-sortIcon></th>
+                                <th pSortableColumn="absentDays" class="text-center">Absent Days <p-sortIcon field="absentDays"></p-sortIcon></th>
                                 <th>Payment Status</th>
                                 <th>Wage (USD)</th>
                                 @if(showSspColumns()){
@@ -440,7 +436,7 @@
                                     <input type="file" class="form-control" id="attachment"
                                         (change)="onFilesSelected($event)" multiple
                                         [ngClass]="{ 'is-invalid': reviewForm.get('attachment')?.invalid && reviewForm.get('attachment')?.touched }">
-                                
+
 
                                     <!-- spacer to stretch -->
                                     <div class="flex-grow-1"></div>
