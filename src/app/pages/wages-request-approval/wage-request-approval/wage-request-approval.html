@@ -10,44 +10,7 @@
   <div class="card p-3 mb-2">
         <form [formGroup]="searchForm" class="row g-3">
 
-                <!-- State -->
-                <div class="col-md-3">
-                    <p-floatlabel variant="on" class="w-100">
-                        <p-select [options]="states" optionLabel="name" formControlName="state"
-                            (onChange)="onStateChange($event.value)" [filter]="true" filterPlaceholder="Search state">
-                        </p-select>
-                        <label>State Name</label>
-                    </p-floatlabel>
-                </div>
-
-                <!-- County -->
-                <div class="col-md-3">
-                    <p-floatlabel variant="on" class="w-100">
-                        <p-select [options]="counties" optionLabel="name" formControlName="county"
-                            (onChange)="onCountyChange($event.value)" [filter]="true" filterPlaceholder="Search county">
-                        </p-select>
-                        <label>County Name</label>
-                    </p-floatlabel>
-                </div>
-
-                <!-- Payam -->
-                <div class="col-md-3">
-                    <p-floatlabel variant="on" class="w-100">
-                        <p-select [options]="payams" optionLabel="name" formControlName="payam"
-                            (onChange)="onPayamChange($event.value)" [filter]="true" filterPlaceholder="Search payam">
-                        </p-select>
-                        <label>Payam Name</label>
-                    </p-floatlabel>
-                </div>
-
-                <!-- Boma -->
-                <div class="col-md-3">
-                    <p-floatlabel variant="on" class="w-100">
-                        <p-select [options]="bomas" optionLabel="name" formControlName="boma" [filter]="true" filterPlaceholder="Search boma">
-                        </p-select>
-                        <label>Boma Name</label>
-                    </p-floatlabel>
-                </div>
+        
 
                 <!-- Sub-Project -->
                 <div class="col-md-3">
@@ -95,6 +58,44 @@
                     }
                 </div>
     @if (advanceSearchPanelVisible) {
+                <!-- State -->
+                <div class="col-md-3">
+                    <p-floatlabel variant="on" class="w-100">
+                        <p-select [options]="states" optionLabel="name" formControlName="state"
+                            (onChange)="onStateChange($event.value)" [filter]="true" filterPlaceholder="Search state">
+                        </p-select>
+                        <label>State Name</label>
+                    </p-floatlabel>
+                </div>
+
+                <!-- County -->
+                <div class="col-md-3">
+                    <p-floatlabel variant="on" class="w-100">
+                        <p-select [options]="counties" optionLabel="name" formControlName="county"
+                            (onChange)="onCountyChange($event.value)" [filter]="true" filterPlaceholder="Search county">
+                        </p-select>
+                        <label>County Name</label>
+                    </p-floatlabel>
+                </div>
+
+                <!-- Payam -->
+                <div class="col-md-3">
+                    <p-floatlabel variant="on" class="w-100">
+                        <p-select [options]="payams" optionLabel="name" formControlName="payam"
+                            (onChange)="onPayamChange($event.value)" [filter]="true" filterPlaceholder="Search payam">
+                        </p-select>
+                        <label>Payam Name</label>
+                    </p-floatlabel>
+                </div>
+
+                <!-- Boma -->
+                <div class="col-md-3">
+                    <p-floatlabel variant="on" class="w-100">
+                        <p-select [options]="bomas" optionLabel="name" formControlName="boma" [filter]="true" filterPlaceholder="Search boma">
+                        </p-select>
+                        <label>Boma Name</label>
+                    </p-floatlabel>
+                </div>
                 <!-- Payment Cycle -->
                 <div class="col-md-3">
                     <p-floatlabel variant="on" class="w-100">
