@@ -629,6 +629,7 @@ export class WageRequestApproval implements OnInit {
           title: 'Submitted',
           text: 'Wage request review submitted successfully.',
         });
+        this.saveFiltersToStorage();
         this.fetchPage(this.currentPage, this.pageSize, false); // Pass false to not show full-page loader
       } else {
         Swal.fire({
