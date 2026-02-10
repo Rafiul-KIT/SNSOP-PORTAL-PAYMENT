@@ -319,7 +319,7 @@ export class WageRequestDetails implements OnInit {
 
   onFilesSelected(event: Event): void {
     const result = handleMultipleFileUpload(event, this.selectedFiles, this.MAX_ATTACHMENT_SIZE_MB);
-    
+
     if (result.error) {
       Swal.fire({
         icon: 'error',
@@ -327,15 +327,15 @@ export class WageRequestDetails implements OnInit {
         text: result.error,
       });
     }
-    
+
     this.selectedFiles = result.validFiles;
-    
+
     // Update form control if needed, e.g., for validation state
     this.reviewForm.get('attachment')?.setValue(this.selectedFiles.length > 0 ? this.selectedFiles : null);
     this.updateTotalAttachmentSize();
     this.cdr.detectChanges();
   }
-  
+
   removeFile(index: number): void {
     this.selectedFiles.splice(index, 1);
     // Update form control if needed
@@ -438,7 +438,7 @@ export class WageRequestDetails implements OnInit {
           title: 'Submitted',
           text: 'Wage request review submitted successfully.',
         }).then(() => {
-          this.router.navigate(['/wage-request-approval/drafts']);
+          // this.router.navigate(['/wage-request-approval/drafts']);
         });
 
         this.reviewForm.reset();
