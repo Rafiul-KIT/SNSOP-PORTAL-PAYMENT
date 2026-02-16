@@ -53,6 +53,14 @@
     </div>
 
     @if(isShow && reportData){
+          <div class="col-12 d-flex justify-content-end mb-3">
+      <button class="btn btn-danger me-2" (click)="download('pdf')" pTooltip="Download as PDF" tooltipPosition="top">
+        <i class="fas fa-file-pdf me-2"></i>Download PDF
+      </button>
+      <button class="btn btn-success" (click)="download('csv')" pTooltip="Download as CSV" tooltipPosition="top">
+        <i class="fas fa-file-csv me-2"></i>Download CSV
+      </button>
+    </div>
     <div class="col-12">
       <!-- Location Info -->
       <div class="alert alert-info mb-3">
