@@ -19,7 +19,7 @@ interface ReconciledSummaryRow {
   exchangeRate: string;
   paymentDate: string;
   paymentCycle: string;
-  paymentMethod: string;
+  // paymentMethod: string;
   paymentCenter: string;
   status: string;
 }
@@ -97,7 +97,7 @@ export class ReportReconciledSummaryResult implements OnInit, OnChanges {
       'Supp Type',
       'Req No',
       'Pay Cycle',
-      'Payment Method',
+      // 'Payment Method',
       'Pay Center',
       'Status',
     ];
@@ -112,7 +112,7 @@ export class ReportReconciledSummaryResult implements OnInit, OnChanges {
         row.supportType,
         row.reqNo,
         `Payment Cycle ${row.paymentCycle}`,
-        row.paymentMethod || 'N/A',
+        // row.paymentMethod || 'N/A',
         row.paymentCenter || 'N/A',
         row.status,
       ]
