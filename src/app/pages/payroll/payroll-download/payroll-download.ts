@@ -251,7 +251,7 @@ export class PayrollDownload implements OnInit {
       params.set('status', formValues.status);
     }
 
-    params.set('payrollType', 'CASH_PAYMENT');
+    params.set('payrollType', 'CASH');
 
     try {
       const response = await this.api.GET(
