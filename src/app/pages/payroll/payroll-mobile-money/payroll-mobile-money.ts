@@ -249,7 +249,7 @@ export class PayrollMobileMoney implements OnInit {
       params.set('status', formValues.status);
     }
 
-    params.set('payrollType', 'MOBILE_PAYMENT');
+    params.set('payrollType', 'MOBILE_WALLET');
 
     try {
       const response = await this.api.GET(

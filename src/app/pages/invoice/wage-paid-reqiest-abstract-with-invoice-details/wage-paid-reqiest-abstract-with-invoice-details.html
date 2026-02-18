@@ -35,6 +35,11 @@
                   <td>{{ wagePaymentRequestDetails.workProposalForProgressDIS?.workCode || '-' }}</td>
                 </tr>
                 <tr>
+                  <td class="text-muted fw-medium">Wage Rate (USD)</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.paymentInvoiceFullDetails?.wageRateUsd || '-' }}</td>
+                </tr>
+                <tr>
                   <td class="text-muted fw-medium">First Payment Date</td>
                   <td class="fw-semibold">:</td>
                   <td>{{ wagePaymentRequestDetails.paymentInvoiceFullDetails?.paidDate | date:'dd MMM yyyy' }}</td>
@@ -94,6 +99,11 @@
                   <td class="text-muted fw-medium">Work Code</td>
                   <td class="fw-semibold">:</td>
                   <td>{{ wagePaymentRequestDetails.workProposalForProgress?.workCode || '-' }}</td>
+                </tr>
+                <tr>
+                  <td class="text-muted fw-medium">Wage Rate (USD)</td>
+                  <td class="fw-semibold">:</td>
+                  <td>{{ wagePaymentRequestDetails.paymentInvoiceFullDetails?.wageRateUsd || '-' }}</td>
                 </tr>
                 <tr>
                   <td class="text-muted fw-medium">Approved Date</td>
