@@ -134,9 +134,9 @@
             <ng-template pTemplate="header">
               <tr>
                 <th class="text-center" style="width: 40px">No</th>
-                <th class="text-center" style="width: 100px">Enroll No</th>
+                <th class="text-center" style="width: 100px">Household Number</th>
                 <th class="text-start" style="width: 120px">Household Name</th>
-                <th class="text-center" style="width: 100px">HH Code</th>
+                <!-- <th class="text-center" style="width: 100px">HH Code</th> -->
                 <th class="text-center" style="width: 50px">Days</th>
                 <th class="text-end" style="width: 70px">Rate USD</th>
                 <th class="text-end" style="width: 80px">Amt USD</th>
@@ -156,7 +156,7 @@
                 <td class="text-center">{{ rowIndex + 1 }}</td>
                 <td class="text-center">{{ detail.householdNumber || '-' }}</td>
                 <td class="text-start">{{ detail.householdName || '-' }}</td>
-                <td class="text-center text-primary">{{ detail.paidTo || '-' }}</td>
+                <!-- <td class="text-center text-primary">{{ detail.paidTo || '-' }}</td> -->
                 <td class="text-center">{{ detail.totalDays || 0 }}</td>
                 <td class="text-end">{{ detail.wageRateUsd.toFixed(2) }}</td>
                 <td class="text-end fw-semibold text-success">{{ detail.wageUsdTotal.toFixed(2) }}</td>
