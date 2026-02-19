@@ -20,6 +20,7 @@ export class Header {
   menuList: any[] = [];
   userInfo: any = null;
   menusLoaded = false; // ✅ controls when to render
+// showMobileMenu = false;
 
   portalList = [
     {
