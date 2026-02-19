@@ -86,6 +86,59 @@
     }
   }
 
+  .help-desk-text {
+    font-size: 0.8em !important; /* Smaller text for Help Desk label */
+  }
+
+  .helpdesk-btn .p-button-label {
+    font-size: 0.6rem !important; // Further reduced font size
+  }
+
+  .helpdesk-btn .p-button-icon {
+    font-size: 0.9rem !important;
+  }
+
+  .help-desk-menu-container {
+    position: relative;
+    display: inline-block;
+  }
+
+  .help-desk-menu {
+    position: absolute;
+    top: calc(100% + 5px);
+    right: 0;
+    z-index: 9998;
+    padding: 10px;
+    min-width: 180px;
+    height: auto;
+    background: #ffffff;
+    box-shadow: 0px 24px 48px -12px rgba(16, 24, 40, 0.18);
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    color: #202020;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    opacity: 0;
+    visibility: hidden;
+
+    &.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .item {
+      width: 100%;
+      padding: 5px 10px;
+      white-space: nowrap;
+
+      &:hover {
+        cursor: pointer;
+        background-color: #b7cfe7;
+      }
+    }
+  }
+
   .portals-option-wrapper {
     position: fixed;
     top: 60px;

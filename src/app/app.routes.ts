@@ -41,6 +41,8 @@ import { TrainingAttendance } from './pages/beneficiay-attendance/training-atten
 import { TrainingAttendancePerform } from './pages/beneficiay-attendance/training-attendance-perform/training-attendance-perform';
 import { TrainingAttendanceAndParticipantSummaryReport } from './pages/report-list/training-attendance-and-participant-summary-report/training-attendance-and-participant-summary-report';
 import { ComplementarySocialMeasuresProgressReport } from './pages/report-list/complementary-social-measures-progress-report/complementary-social-measures-progress-report';
+import { HelpDeskComponent } from './pages/help-desk/help-desk.component';
+
 
 
 export const routes: Routes = [
@@ -320,7 +322,11 @@ export const routes: Routes = [
     ],
   },
   { path: 'unauthorized', component: Unauthorized },
-
+  {
+    path: 'help-desk',
+    component: HelpDeskComponent,
+    canActivate: [routeGuard],
+  },
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
   {
     component: NotFound,

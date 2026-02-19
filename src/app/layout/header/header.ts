@@ -19,7 +19,10 @@ export class Header {
   showUsermenu = false;
   menuList: any[] = [];
   userInfo: any = null;
-  menusLoaded = false; // ✅ controls when to render
+  menusLoaded = false;
+  canAccessHelpDesk: boolean = false;
+  showHelpDeskDropdown: boolean = false; // Reintroduce showHelpDeskDropdown
+  helpDeskChildren: any[] = [];
 
   portalList = [
     {
@@ -81,10 +84,25 @@ export class Header {
         }
 
         const allowedNames = responseData.map((menu: any) => menu.name);
+        // Check for 'Help Desk' access
+        this.canAccessHelpDesk = allowedNames.includes('Help Desk'); // Use canAccessHelpDesk
+
         const allMenus = this.getStaticMenus();
 
         // ✅ Update safely and trigger view refresh
         this.menuList = this.filterMenusByAccess(allMenus, allowedNames);
+
+        // Extract Help Desk menu items if accessible
+        const helpDeskMenu = this.menuList.find(menu => menu.label === 'Help Desk');
+        this.menuList = this.removeHelpDesk(this.menuList);
+        if (helpDeskMenu && helpDeskMenu.items) {
+          this.canAccessHelpDesk = true;
+          this.helpDeskChildren = helpDeskMenu.items;
+        } else {
+          this.canAccessHelpDesk = false;
+          this.helpDeskChildren = [];
+        }
+
         this.menusLoaded = true;
         this.cdRef.detectChanges();
       } else {
@@ -99,7 +117,16 @@ export class Header {
       this.cdRef.detectChanges();
     }
   }
-
+removeHelpDesk(menus: any[]): any[] {
+  return menus
+    .filter(menu => menu.label !== 'Help Desk') // remove parent if direct
+    .map(menu => {
+      if (menu.items) {
+        menu.items = this.removeHelpDesk(menu.items); // remove from children
+      }
+      return menu;
+    });
+}
   getStaticMenus(): any[] {
     return [
       {
@@ -109,6 +136,7 @@ export class Header {
       },
 
       {
+        
         label: 'Project',
         icon: 'fas fa-project-diagram',
         items: [
@@ -293,6 +321,14 @@ export class Header {
           },
         ]
       },
+      {
+        label: 'Help Desk',
+        icon: 'fas fa-question-circle',
+        items: [
+          { label: 'View Tickets', routerLink: '/help-desk/tickets', icon: 'fas fa-ticket-alt' },
+          { label: 'Create Ticket', routerLink: '/help-desk/create', icon: 'fas fa-plus' }
+        ]
+      },
       
     ];
   }
@@ -316,5 +352,13 @@ export class Header {
   }
   goToProfile = () => {
     this.router.navigateByUrl('/profile');
+  };
+
+  toggleHelpDeskDropdown = () => {
+    this.showHelpDeskDropdown = !this.showHelpDeskDropdown;
+  };
+
+  hideHelpDeskDropdown = () => {
+    this.showHelpDeskDropdown = false;
   };
 }
