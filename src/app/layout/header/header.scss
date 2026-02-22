@@ -217,6 +217,30 @@
     justify-content: flex-start;
     width: 100%;
   }
+  
+  .help-desk-desktop {
+    @media (max-width: 767px) { // Hide on mobile
+      display: none;
+    }
+  }
+
+  .user-menu {
+    .help-desk-mobile-header,
+    .help-desk-mobile-item {
+      display: none; // Hidden on desktop by default
+      @media (max-width: 767px) { // Show on mobile
+        display: flex; // or block, depending on desired layout
+        align-items: center; // For help-desk-mobile-item
+        padding: 5px 10px; // Match other menu items
+      }
+    }
+    .help-desk-mobile-header {
+        padding: 0; // Remove padding for the header item itself
+        span {
+            font-size: 0.9em; // Adjust font size for the header
+        }
+    }
+  }
 }
 // Add this inside your .header styles
 
