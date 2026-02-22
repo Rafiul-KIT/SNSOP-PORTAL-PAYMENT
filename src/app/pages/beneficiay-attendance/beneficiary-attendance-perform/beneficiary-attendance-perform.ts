@@ -95,12 +95,23 @@ export class BeneficiaryAttendancePerform implements OnInit {
   selectedBeneficiaries: BeneficiaryAttendanceRecord[] = [];
   totalRecords = 0;
   currentPage = 0;
-    pageSize = 10;
-    minAttendanceDate: Date | undefined;
-    maxAttendanceDate: Date = new Date();
+  pageSize = 10;
+  minAttendanceDate: Date | undefined;
+  maxAttendanceDate: Date = new Date();
 
-    attendanceDate: Date | null = null;
+  attendanceDate: Date | null = null;
   attendanceDateTouched: boolean = false;
+
+  householdNumberFilter: string = '';
+  beneficiaryNameFilter: string = '';
+  genderFilter: string = '';
+  ageFilter: number | null = null;
+  phoneNoFilter: string = '';
+
+  sortField: string = '';
+  sortOrder: number = 1; // 1 for ascending, -1 for descending
+
+  filteredBeneficiaries: BeneficiaryAttendanceRecord[] = [];
 
   statusOptions = [
     { label: '--select--', value: null },
@@ -131,44 +142,45 @@ export class BeneficiaryAttendancePerform implements OnInit {
     }
   }
 
-  fetchSubProject(id: number) {
-    this.isLoading = true;
-    const body = { id: id };
-    this.api.POST('api/subproject/get?page=0&size=1', body)
-      .then((res: any) => {
-        const data = res.data || res;
-                if (data && data.content && data.content.length > 0) {
-                            this.subproject = data.content[0];
-                            if (this.subproject && this.subproject.tstApprovedAt) {
-                              this.minAttendanceDate = new Date(this.subproject.tstApprovedAt);
-                            }
-                } else {
-          console.error('Subproject not found');
-        }
-      })
-      .catch(err => {
-        console.error('Error fetching subproject:', err);
-      })
-      .finally(() => {
-        this.isLoading = false;
-        this.cdr.markForCheck();
-      });
-  }
-
-
-  initBreadcrumb() {
-    this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
-    this.breadcrumbItems = [{ label: 'Beneficiary Attendance' }];
-  }
-
+    fetchSubProject(id: number) {
+      this.isLoading = true;
+      const body = { id: id };
+      this.api.POST('api/subproject/get?page=0&size=1', body)
+        .then((res: any) => {
+          const data = res.data || res;
+          if (data && data.content && data.content.length > 0) {
+            this.subproject = data.content[0];
+            if (this.subproject && this.subproject.tstApprovedAt) {
+              this.minAttendanceDate = new Date(this.subproject.tstApprovedAt);
+            }
+          } else {
+            console.error('Subproject not found');
+          }
+        })
+        .catch(err => {
+          console.error('Error fetching subproject:', err);
+        })
+        .finally(() => {
+          this.isLoading = false;
+          this.cdr.markForCheck();
+        });
+    }
+  
+  
+    initBreadcrumb() {
+      this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
+      this.breadcrumbItems = [{ label: 'Beneficiary Attendance' }];
+    }
+  
     onAttendanceDateChange(event: Date) {
       this.attendanceDate = event;
       this.beneficiaries = [];
       this.selectedBeneficiaries = [];
       this.totalRecords = 0;
       this.currentPage = 0;
+      this.applyFiltersAndSorting(); // Clear filters when date changes
     }
-
+  
     onSearch() {
       this.attendanceDateTouched = true; // Ensure validation message shows if needed
       if (this.isAttendanceDateInvalid()) {
@@ -178,481 +190,560 @@ export class BeneficiaryAttendancePerform implements OnInit {
       this.currentPage = 0;
       this.fetchBeneficiaries(this.currentPage, this.pageSize);
     }
-
+  
     fetchBeneficiaries(page: number, size: number) {
       if (!this.subproject || !this.attendanceDate) {
         return;
       }
       this.isLoading = true;
-    // Format date to YYYY-MM-DD, avoiding timezone conversion issues from toISOString()
-    const dt = this.attendanceDate;
-    const year = dt.getFullYear();
-    const month = (dt.getMonth() + 1).toString().padStart(2, '0');
-    const day = dt.getDate().toString().padStart(2, '0');
-    const date = `${year}-${month}-${day}`;
-    const subprojectId = this.subproject.id;
-
-    this.api.GET(`api/attendance/get?subprojectId=${subprojectId}&attendanceDate=${date}&page=${page}&size=10000`)
-      .then((res: any) => {
-        const data = res.data || res;
-        if (data && data.content && data.content.length > 0) {
-          this.beneficiaries = data.content;
-          this.selectedBeneficiaries = this.beneficiaries.filter(b => b.present);
-                    this.totalRecords = data.totalElements || 0;
-                    this.isLoading = false;
-                    this.cdr.markForCheck();
-        } else {
-          // If no records found, fetch available beneficiaries for attendance
-          this.fetchAvailableBeneficiaries(page, size);
-        }
-      })
-      .catch(err => {
-        console.error('Error fetching beneficiaries:', err);
-                this.beneficiaries = [];
-                this.totalRecords = 0;
-                this.isLoading = false;
-                this.cdr.markForCheck();
-      });
-  }
-
+      // Format date to YYYY-MM-DD, avoiding timezone conversion issues from toISOString()
+      const dt = this.attendanceDate;
+      const year = dt.getFullYear();
+      const month = (dt.getMonth() + 1).toString().padStart(2, '0');
+      const day = dt.getDate().toString().padStart(2, '0');
+      const date = `${year}-${month}-${day}`;
+      const subprojectId = this.subproject.id;
+  
+      this.api.GET(`api/attendance/get?subprojectId=${subprojectId}&attendanceDate=${date}&page=${page}&size=10000`)
+        .then((res: any) => {
+          const data = res.data || res;
+          if (data && data.content && data.content.length > 0) {
+            this.beneficiaries = data.content;
+            this.selectedBeneficiaries = this.beneficiaries.filter(b => b.present);
+            this.totalRecords = data.totalElements || 0;
+            this.applyFiltersAndSorting(); // Apply filters and sorting after fetching
+            this.isLoading = false;
+            this.cdr.markForCheck();
+          } else {
+            // If no records found, fetch available beneficiaries for attendance
+            this.fetchAvailableBeneficiaries(page, size);
+          }
+        })
+        .catch(err => {
+          console.error('Error fetching beneficiaries:', err);
+          this.beneficiaries = [];
+          this.totalRecords = 0;
+          this.applyFiltersAndSorting(); // Clear filters if no beneficiaries
+          this.isLoading = false;
+          this.cdr.markForCheck();
+        });
+    }
+  
     fetchAvailableBeneficiaries(page: number, size: number) {
       if (!this.subproject) {
         this.isLoading = false;
         return;
       }
-    const subprojectId = this.subproject.id;
-
-    this.api.GET(`api/subproject/assign/progress/beneficiary/existing?subprojectId=${subprojectId}&page=${page}&size=10000`)
-      .then((res: any) => {
-        const data = res.data || res;
-                if (data && data.content) {
-                  this.beneficiaries = data.content.map((b: any) => ({
-                    beneficiaryId: b.id,
-                    householdNumber: b.householdNumber,
-                    beneficiaryName: b.beneficiaryName,
-                    gender: b.gender,
-                    age: b.age,
-                    phoneNo: b.phoneNo,
-                    present: null, // Default to unselected
-                    finlitAttended: null,
-                    ecdAttended: null,
-                    washAttended: null,
-                    gbvAttended: null,
-                  }));
-                  this.totalRecords = data.totalElements || 0;
-                } else {
-                  this.beneficiaries = [];
-                  this.totalRecords = 0;
-                }
-        
-                if (this.totalRecords === 0) { // Show message if no beneficiaries found
-                  Swal.fire({
-                    icon: 'info',
-                    title: 'No Beneficiaries Found',
-                    text: 'No beneficiaries match the selected criteria or are available for attendance.'
-                  });
-                }
-              })
-              .catch(err => {
-                console.error('Error fetching available beneficiaries:', err);
-                this.beneficiaries = [];
-                this.totalRecords = 0;
-                Swal.fire({ // Show error message
-                  icon: 'error',
-                  title: 'Error',
-                  text: 'Failed to fetch available beneficiaries. Please try again.'
-                });
-              })
-            .finally(() => {
-              this.isLoading = false;
-              this.cdr.markForCheck();
-            });
-  }
-
-  onSelectAllStatus(event: any) {
-    const status = event.value;
-    this.selectedBeneficiaries.forEach(b => {
-      b.present = status;
-    });
-  }
-
-  isAttendanceDateInvalid(): boolean {
-    if (!this.attendanceDate) {
-      return true; // Date is required
-    }
-    if (this.minAttendanceDate && this.attendanceDate < this.minAttendanceDate) {
-      return true; // Date cannot be earlier than minAttendanceDate
-    }
-    return false;
-  }
-
-  formatDate(date: string | null): string {
-    if (!date) return '—';
-    try {
-      return new Date(date).toLocaleDateString('en-GB');
-    } catch {
-      return '—';
-    }
-  }
-
-  saveAttendance() {
-    this.attendanceDateTouched = true;
-
-    // --- Start Validation ---
-    if (!this.subproject || this.isAttendanceDateInvalid()) {
+      const subprojectId = this.subproject.id;
+  
+      this.api.GET(`api/subproject/assign/progress/beneficiary/existing?subprojectId=${subprojectId}&page=${page}&size=10000`)
+        .then((res: any) => {
+          const data = res.data || res;
+          if (data && data.content) {
+            this.beneficiaries = data.content.map((b: any) => ({
+              beneficiaryId: b.id,
+              householdNumber: b.householdNumber,
+              beneficiaryName: b.beneficiaryName,
+              gender: b.gender,
+              age: b.age,
+              phoneNo: b.phoneNo,
+              present: null, // Default to unselected
+              finlitAttended: null,
+              ecdAttended: null,
+              washAttended: null,
+              gbvAttended: null,
+            }));
+            this.totalRecords = data.totalElements || 0;
+          } else {
+            this.beneficiaries = [];
+            this.totalRecords = 0;
+          }
+  
+          if (this.totalRecords === 0) { // Show message if no beneficiaries found
             Swal.fire({
-              icon: 'warning',
-              title: 'Validation Error',
-              text: 'Please select a subproject and a valid attendance date.',
+              icon: 'info',
+              title: 'No Beneficiaries Found',
+              text: 'No beneficiaries match the selected criteria or are available for attendance.'
             });
-      return;
+          }
+          this.applyFiltersAndSorting(); // Apply filters and sorting after fetching
+        })
+        .catch(err => {
+          console.error('Error fetching available beneficiaries:', err);
+          this.beneficiaries = [];
+          this.totalRecords = 0;
+          Swal.fire({ // Show error message
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to fetch available beneficiaries. Please try again.'
+          });
+          this.applyFiltersAndSorting(); // Clear filters on error
+        })
+        .finally(() => {
+          this.isLoading = false;
+          this.cdr.markForCheck();
+        });
     }
-
-    if (!this.selectedBeneficiaries || this.selectedBeneficiaries.length === 0) {
+  
+    onFilterChange() {
+      this.applyFiltersAndSorting();
+    }
+  
+    sortOnClient(field: string) {
+      if (this.sortField === field) {
+        this.sortOrder = this.sortOrder * -1;
+      } else {
+        this.sortField = field;
+        this.sortOrder = 1;
+      }
+      this.applyFiltersAndSorting();
+    }
+  
+    getSortIcon(field: string): string {
+      if (this.sortField === field) {
+        return this.sortOrder === 1 ? 'pi-sort-amount-up-alt' : 'pi-sort-amount-down';
+      }
+      return 'pi-sort-alt';
+    }
+  
+    clearFilters() {
+      this.householdNumberFilter = '';
+      this.beneficiaryNameFilter = '';
+      this.genderFilter = '';
+      this.ageFilter = null;
+      this.phoneNoFilter = '';
+      this.sortField = '';
+      this.sortOrder = 1;
+      this.applyFiltersAndSorting();
+    }
+  
+    applyFiltersAndSorting() {
+      let tempBeneficiaries = [...this.beneficiaries];
+  
+      // Apply filters
+      if (this.householdNumberFilter) {
+        tempBeneficiaries = tempBeneficiaries.filter(b => b.householdNumber.toLowerCase().includes(this.householdNumberFilter.toLowerCase()));
+      }
+      if (this.beneficiaryNameFilter) {
+        tempBeneficiaries = tempBeneficiaries.filter(b => b.beneficiaryName.toLowerCase().includes(this.beneficiaryNameFilter.toLowerCase()));
+      }
+      if (this.genderFilter) {
+        tempBeneficiaries = tempBeneficiaries.filter(b => b.gender.toLowerCase().includes(this.genderFilter.toLowerCase()));
+      }
+      if (this.ageFilter !== null) {
+        tempBeneficiaries = tempBeneficiaries.filter(b => b.age === this.ageFilter);
+      }
+      if (this.phoneNoFilter) {
+        tempBeneficiaries = tempBeneficiaries.filter(b => b.phoneNo && b.phoneNo.toLowerCase().includes(this.phoneNoFilter.toLowerCase()));
+      }
+  
+      // Apply sorting
+      if (this.sortField) {
+        tempBeneficiaries.sort((a, b) => {
+          const valueA = (a as any)[this.sortField];
+          const valueB = (b as any)[this.sortField];
+  
+          let result = 0;
+          if (valueA === null && valueB !== null) result = -1;
+          else if (valueA !== null && valueB === null) result = 1;
+          else if (valueA === null && valueB === null) result = 0;
+          else if (typeof valueA === 'string' && typeof valueB === 'string') {
+            result = valueA.localeCompare(valueB);
+          } else {
+            result = (valueA < valueB ? -1 : valueA > valueB ? 1 : 0);
+          }
+  
+          return result * this.sortOrder;
+        });
+      }
+  
+      this.filteredBeneficiaries = tempBeneficiaries;
+      this.cdr.markForCheck();
+    }
+  
+    onSelectAllStatus(event: any) {
+      const status = event.value;
+      this.selectedBeneficiaries.forEach(b => {
+        b.present = status;
+      });
+    }
+  
+    isAttendanceDateInvalid(): boolean {
+      if (!this.attendanceDate) {
+        return true; // Date is required
+      }
+      if (this.minAttendanceDate && this.attendanceDate < this.minAttendanceDate) {
+        return true; // Date cannot be earlier than minAttendanceDate
+      }
+      return false;
+    }
+  
+    formatDate(date: string | null): string {
+      if (!date) return '—';
+      try {
+        return new Date(date).toLocaleDateString('en-GB');
+      } catch {
+        return '—';
+      }
+    }
+  
+    saveAttendance() {
+      this.attendanceDateTouched = true;
+  
+      // --- Start Validation ---
+      if (!this.subproject || this.isAttendanceDateInvalid()) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Validation Error',
+          text: 'Please select a subproject and a valid attendance date.',
+        });
+        return;
+      }
+  
+      if (!this.selectedBeneficiaries || this.selectedBeneficiaries.length === 0) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Validation Error',
+          text: 'Please select at least one beneficiary.',
+        });
+        return;
+      }
+  
+      const beneficiaryWithNoStatus = this.selectedBeneficiaries.find(b => b.present === null);
+      if (beneficiaryWithNoStatus) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Validation Error',
+          text: `Please set a status for selected beneficiary: ${beneficiaryWithNoStatus.beneficiaryName}.`,
+        });
+        return;
+      }
+      // --- End Validation ---
+  
+      this.loading = true;
+  
+      // Add a guard clause to ensure attendanceDate is not null for the compiler
+      if (!this.attendanceDate) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Internal Error',
+          text: 'Date is missing after validation.',
+        });
+        this.loading = false;
+        return;
+      }
+  
+      const dt = this.attendanceDate;
+      const year = dt.getFullYear();
+      const month = (dt.getMonth() + 1).toString().padStart(2, '0');
+      const day = dt.getDate().toString().padStart(2, '0');
+      const attendanceDateStr = `${year}-${month}-${day}`;
+  
+      const payload = {
+        subprojectId: this.subproject.id,
+        status: true,
+        list: this.beneficiaries.map(b => ({
+          beneficiaryId: b.beneficiaryId,
+          attendanceDate: attendanceDateStr,
+          present: this.selectedBeneficiaries.includes(b) ? (b.present ?? false) : false,
+          finlitAttended: null,
+          ecdAttended: null,
+          washAttended: null,
+          gbvAttended: null,
+        })),
+      };
+  
+      this.api.POST('api/attendance/save', payload)
+        .then((res: any) => {
+          if (res && res.data && res.data.code === 200) {
             Swal.fire({
-              icon: 'warning',
-              title: 'Validation Error',
-              text: 'Please select at least one beneficiary.',
+              icon: 'success',
+              title: 'Success',
+              text: 'Attendance saved successfully!',
             });
-      return;
-    }
-
-    const beneficiaryWithNoStatus = this.selectedBeneficiaries.find(b => b.present === null);
-    if (beneficiaryWithNoStatus) {
-            Swal.fire({
-              icon: 'warning',
-              title: 'Validation Error',
-              text: `Please set a status for selected beneficiary: ${beneficiaryWithNoStatus.beneficiaryName}.`,
-            });
-      return;
-    }
-    // --- End Validation ---
-
-    this.loading = true;
-
-    // Add a guard clause to ensure attendanceDate is not null for the compiler
-    if (!this.attendanceDate) {
+            // After success, clear the fields and table
+            this.attendanceDate = null;
+            this.beneficiaries = [];
+            this.selectedBeneficiaries = [];
+            this.totalRecords = 0;
+            this.attendanceDateTouched = false;
+            this.cdr.markForCheck(); // Trigger change detection
+          } else {
             Swal.fire({
               icon: 'error',
-              title: 'Internal Error',
-              text: 'Date is missing after validation.',
+              title: 'Save Failed',
+              text: res.data.message || 'An unknown error occurred while saving.', // Corrected to res.data.message
             });
-      this.loading = false;
-      return;
+          }
+        })
+        .catch(err => {
+          console.error('Error saving attendance:', err);
+          let errorMessage = 'Failed to save attendance. Please check the console for details.';
+          if (err.response && err.response.data && err.response.data.message) {
+            errorMessage = err.response.data.message;
+          }
+          Swal.fire({
+            icon: 'error',
+            title: 'API Error',
+            text: errorMessage,
+          });
+        })
+        .finally(() => {
+          this.loading = false;
+          this.cdr.markForCheck();
+        });
     }
-
-    const dt = this.attendanceDate;
-    const year = dt.getFullYear();
-    const month = (dt.getMonth() + 1).toString().padStart(2, '0');
-    const day = dt.getDate().toString().padStart(2, '0');
-    const attendanceDateStr = `${year}-${month}-${day}`;
-
-    const payload = {
-      subprojectId: this.subproject.id,
-      status: true,
-      list: this.beneficiaries.map(b => ({
-        beneficiaryId: b.beneficiaryId,
-        attendanceDate: attendanceDateStr,
-        present: this.selectedBeneficiaries.includes(b) ? (b.present ?? false) : false,
-        finlitAttended: null,
-        ecdAttended: null,
-        washAttended: null,
-        gbvAttended: null,
-      })),
-    };
-
-    this.api.POST('api/attendance/save', payload)
-      .then((res: any) => {
-        if (res && res.data && res.data.code === 200) {
-                    Swal.fire({
-                      icon: 'success',
-                      title: 'Success',
-                      text: 'Attendance saved successfully!',
-                    });
-          // After success, clear the fields and table
-          this.attendanceDate = null;
-          this.beneficiaries = [];
-          this.selectedBeneficiaries = [];
-          this.totalRecords = 0;
-          this.attendanceDateTouched = false;
-          this.cdr.markForCheck(); // Trigger change detection
+  
+    onFileSelect(event: any): void {
+      const file = event.target.files[0];
+      if (file) {
+        if (file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || file.type === 'application/vnd.ms-excel') {
+          this.selectedFile = file;
         } else {
-                    Swal.fire({
-                      icon: 'error',
-                      title: 'Save Failed',
-                      text: res.data.message || 'An unknown error occurred while saving.', // Corrected to res.data.message
-                    });
-        }
-      })
-      .catch(err => {
-        console.error('Error saving attendance:', err);
-                let errorMessage = 'Failed to save attendance. Please check the console for details.';
-                if (err.response && err.response.data && err.response.data.message) {
-                  errorMessage = err.response.data.message;
-                }
-                Swal.fire({
-                  icon: 'error',
-                  title: 'API Error',
-                  text: errorMessage,
-                });
-      })
-      .finally(() => {
-        this.loading = false;
-        this.cdr.markForCheck();
-      });
-  }
-
-  onFileSelect(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      if (file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || file.type === 'application/vnd.ms-excel') {
-        this.selectedFile = file;
-      } else {
-        Swal.fire('Invalid File Type', 'Please upload a valid Excel file (.xlsx or .xls).', 'warning');
-        this.selectedFile = null;
-      }
-    }
-    this.cdr.markForCheck();
-  }
-
-  downloadTemplate(): void {
-    if (!this.subproject) {
-      Swal.fire({
-        title: 'Error',
-        text: 'Subproject details not loaded.',
-        icon: 'error',
-        customClass: { container: 'high-z-index-swal' }
-      });
-      return;
-    }
-
-    Swal.fire({
-      title: 'Downloading Template...',
-      html: `
-        <div class="text-center">
-          <p>Please wait...</p>
-          <div class="progress" style="height: 20px;">
-            <div id="download-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-              style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-          </div>
-          <p id="download-progress-text">0%</p>
-        </div>
-      `,
-      allowOutsideClick: false,
-      customClass: { container: 'high-z-index-swal' },
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
-
-    const subprojectId = this.subproject.id;
-    this.api.axiosInstance.get(`api/attendance/download/template/${subprojectId}`, {
-      responseType: 'blob',
-      onDownloadProgress: (progressEvent) => {
-        const percentCompleted = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 1));
-        const progressBar = document.getElementById('download-progress-bar');
-        const progressText = document.getElementById('download-progress-text');
-        if (progressBar && progressText) {
-          progressBar.style.width = `${percentCompleted}%`;
-          progressBar.setAttribute('aria-valuenow', percentCompleted.toString());
-          progressText.innerText = `${percentCompleted}%`;
+          Swal.fire('Invalid File Type', 'Please upload a valid Excel file (.xlsx or .xls).', 'warning');
+          this.selectedFile = null;
         }
       }
-    })
-      .then((response: any) => {
-        Swal.close();
-        const blob = new Blob([response.data], { type: response.headers['content-type'] });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `attendance_template_subproject_${subprojectId}.xls`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        a.remove();
+      this.cdr.markForCheck();
+    }
+  
+    downloadTemplate(): void {
+      if (!this.subproject) {
         Swal.fire({
-          title: 'Success',
-          text: 'Template downloaded successfully!',
-          icon: 'success',
+          title: 'Error',
+          text: 'Subproject details not loaded.',
+          icon: 'error',
           customClass: { container: 'high-z-index-swal' }
         });
-      }).catch(err => {
-        Swal.close();
-        const defaultErrorMessage = 'Could not download the template file. Please try again later.';
-        let errorMessage = defaultErrorMessage;
-
-        if (err.response && err.response.status === 400) {
+        return;
+      }
+  
+      Swal.fire({
+        title: 'Downloading Template...',
+        html: `
+          <div class="text-center">
+            <p>Please wait...</p>
+            <div class="progress" style="height: 20px;">
+              <div id="download-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <p id="download-progress-text">0%</p>
+          </div>
+        `,
+        allowOutsideClick: false,
+        customClass: { container: 'high-z-index-swal' },
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+  
+      const subprojectId = this.subproject.id;
+      this.api.axiosInstance.get(`api/attendance/download/template/${subprojectId}`, {
+        responseType: 'blob',
+        onDownloadProgress: (progressEvent) => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 1));
+          const progressBar = document.getElementById('download-progress-bar');
+          const progressText = document.getElementById('download-progress-text');
+          if (progressBar && progressText) {
+            progressBar.style.width = `${percentCompleted}%`;
+            progressBar.setAttribute('aria-valuenow', percentCompleted.toString());
+            progressText.innerText = `${percentCompleted}%`;
+          }
+        }
+      })
+        .then((response: any) => {
+          Swal.close();
+          const blob = new Blob([response.data], { type: response.headers['content-type'] });
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `attendance_template_subproject_${subprojectId}.xls`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          a.remove();
+          Swal.fire({
+            title: 'Success',
+            text: 'Template downloaded successfully!',
+            icon: 'success',
+            customClass: { container: 'high-z-index-swal' }
+          });
+        }).catch(err => {
+          Swal.close();
+          const defaultErrorMessage = 'Could not download the template file. Please try again later.';
+          let errorMessage = defaultErrorMessage;
+  
+          if (err.response && err.response.status === 400) {
             const reader = new FileReader();
             reader.onload = () => {
-                try {
-                    const errorData = JSON.parse(reader.result as string);
-                    errorMessage = errorData.message || defaultErrorMessage;
-                } catch (e) {
-                    errorMessage = defaultErrorMessage;
-                }
-                Swal.fire({
-                  title: 'Download Failed',
-                  text: errorMessage,
-                  icon: 'error',
-                  customClass: { container: 'high-z-index-swal' }
-                });
+              try {
+                const errorData = JSON.parse(reader.result as string);
+                errorMessage = errorData.message || defaultErrorMessage;
+              } catch (e) {
+                errorMessage = defaultErrorMessage;
+              }
+              Swal.fire({
+                title: 'Download Failed',
+                text: errorMessage,
+                icon: 'error',
+                customClass: { container: 'high-z-index-swal' }
+              });
             };
             reader.onerror = () => {
-                Swal.fire({
-                  title: 'Download Failed',
-                  text: defaultErrorMessage,
-                  icon: 'error',
-                  customClass: { container: 'high-z-index-swal' }
-                });
+              Swal.fire({
+                title: 'Download Failed',
+                text: defaultErrorMessage,
+                icon: 'error',
+                customClass: { container: 'high-z-index-swal' }
+              });
             };
             reader.readAsText(err.response.data);
-        } else {
+          } else {
             Swal.fire({
               title: 'Download Failed',
               text: errorMessage,
               icon: 'error',
               customClass: { container: 'high-z-index-swal' }
             });
-        }
-        console.error('Template download error:', err);
-      });
-  }
-
-  uploadAttendanceFile(): void {
-    if (!this.selectedFile) {
-      Swal.fire({
-        title: 'No File Selected',
-        text: 'Please choose a file to upload.',
-        icon: 'warning',
-        customClass: { container: 'high-z-index-swal' }
-      });
-      return;
-    }
-
-    if (!this.subproject) {
-      Swal.fire({
-        title: 'Error',
-        text: 'Subproject not loaded. Cannot upload file.',
-        icon: 'error',
-        customClass: { container: 'high-z-index-swal' }
-      });
-      return;
-    }
-
-    this.uploadInProgress = true;
-    Swal.fire({
-      title: 'Uploading Attendance File...',
-      html: `
-        <div class="text-center">
-          <p>Please wait while the file is being uploaded...</p>
-          <div class="progress" style="height: 20px;">
-            <div id="upload-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-              style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-          </div>
-          <p id="upload-progress-text">0%</p>
-        </div>
-      `,
-      allowOutsideClick: false,
-      customClass: { container: 'high-z-index-swal' },
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
-
-    const formData = new FormData();
-    formData.append('file', this.selectedFile);
-    formData.append('subprojectId', this.subproject.id.toString());
-
-    this.api.axiosInstance.post('api/attendance/upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      onUploadProgress: (progressEvent) => {
-        const percentCompleted = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 1));
-        const progressBar = document.getElementById('upload-progress-bar');
-        const progressText = document.getElementById('upload-progress-text');
-        if (progressBar && progressText) {
-          progressBar.style.width = `${percentCompleted}%`;
-          progressBar.setAttribute('aria-valuenow', percentCompleted.toString());
-          progressText.innerText = `${percentCompleted}%`;
-        }
-      }
-    })
-      .then((res: any) => {
-        Swal.close();
-        if (res.data && res.data.code === 200 || res.data.code === 202) {
-          Swal.fire({
-            title: 'Success',
-            text: 'Attendance file uploaded successfully!',
-            icon: 'success',
-            customClass: { container: 'high-z-index-swal' }
-          });
-          this.showUploadModal = false;
-          this.selectedFile = null;
-          if (this.attendanceDate) {
-            this.onSearch();
           }
-        } else {
-          Swal.fire({
-            title: 'Upload Failed',
-            text: res.data.message || 'An unknown error occurred.',
-            icon: 'error',
-            customClass: { container: 'high-z-index-swal' }
-          });
+          console.error('Template download error:', err);
+        });
+    }
+  
+    uploadAttendanceFile(): void {
+      if (!this.selectedFile) {
+        Swal.fire({
+          title: 'No File Selected',
+          text: 'Please choose a file to upload.',
+          icon: 'warning',
+          customClass: { container: 'high-z-index-swal' }
+        });
+        return;
+      }
+  
+      if (!this.subproject) {
+        Swal.fire({
+          title: 'Error',
+          text: 'Subproject not loaded. Cannot upload file.',
+          icon: 'error',
+          customClass: { container: 'high-z-index-swal' }
+        });
+        return;
+      }
+  
+      this.uploadInProgress = true;
+      Swal.fire({
+        title: 'Uploading Attendance File...',
+        html: `
+          <div class="text-center">
+            <p>Please wait while the file is being uploaded...</p>
+            <div class="progress" style="height: 20px;">
+              <div id="upload-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <p id="upload-progress-text">0%</p>
+          </div>
+        `,
+        allowOutsideClick: false,
+        customClass: { container: 'high-z-index-swal' },
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+  
+      const formData = new FormData();
+      formData.append('file', this.selectedFile);
+      formData.append('subprojectId', this.subproject.id.toString());
+  
+      this.api.axiosInstance.post('api/attendance/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-type' },
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 1));
+          const progressBar = document.getElementById('upload-progress-bar');
+          const progressText = document.getElementById('upload-progress-text');
+          if (progressBar && progressText) {
+            progressBar.style.width = `${percentCompleted}%`;
+            progressBar.setAttribute('aria-valuenow', percentCompleted.toString());
+            progressText.innerText = `${percentCompleted}%`;
+          }
         }
       })
-      .catch(err => {
-        Swal.close();
-        console.error(err);
-        const defaultErrorMessage = 'An error occurred while uploading the file.';
-        let errorMessage = defaultErrorMessage;
-
-        if (err.response && err.response.status === 400 && err.response.data) {
+        .then((res: any) => {
+          Swal.close();
+          if (res.data && res.data.code === 200 || res.data.code === 202) {
+            Swal.fire({
+              title: 'Success',
+              text: 'Attendance file uploaded successfully!',
+              icon: 'success',
+              customClass: { container: 'high-z-index-swal' }
+            });
+            this.showUploadModal = false;
+            this.selectedFile = null;
+            if (this.attendanceDate) {
+              this.onSearch();
+            }
+          } else {
+            Swal.fire({
+              title: 'Upload Failed',
+              text: res.data.message || 'An unknown error occurred.',
+              icon: 'error',
+              customClass: { container: 'high-z-index-swal' }
+            });
+          }
+        })
+        .catch(err => {
+          Swal.close();
+          console.error(err);
+          const defaultErrorMessage = 'An error occurred while uploading the file.';
+          let errorMessage = defaultErrorMessage;
+  
+          if (err.response && err.response.status === 400 && err.response.data) {
             // If the error response is a blob, it needs to be read
             if (err.response.data instanceof Blob) {
-                const reader = new FileReader();
-                reader.onload = () => {
-                    try {
-                        const errorData = JSON.parse(reader.result as string);
-                        errorMessage = errorData.message || defaultErrorMessage;
-                    } catch (e) {
-                        errorMessage = defaultErrorMessage;
-                    }
-                    Swal.fire({
-                      title: 'Upload Failed',
-                      text: errorMessage,
-                      icon: 'error',
-                      customClass: { container: 'high-z-index-swal' }
-                    });
-                };
-                reader.onerror = () => {
-                    Swal.fire({
-                      title: 'Upload Failed',
-                      text: defaultErrorMessage,
-                      icon: 'error',
-                      customClass: { container: 'high-z-index-swal' }
-                    });
-                };
-                reader.readAsText(err.response.data);
-            } else if (err.response.data.message) {
-                errorMessage = err.response.data.message;
+              const reader = new FileReader();
+              reader.onload = () => {
+                try {
+                  const errorData = JSON.parse(reader.result as string);
+                  errorMessage = errorData.message || defaultErrorMessage;
+                } catch (e) {
+                  errorMessage = defaultErrorMessage;
+                }
                 Swal.fire({
                   title: 'Upload Failed',
                   text: errorMessage,
                   icon: 'error',
                   customClass: { container: 'high-z-index-swal' }
                 });
+              };
+              reader.onerror = () => {
+                Swal.fire({
+                  title: 'Upload Failed',
+                  text: defaultErrorMessage,
+                  icon: 'error',
+                  customClass: { container: 'high-z-index-swal' }
+                });
+              };
+              reader.readAsText(err.response.data);
+            } else if (err.response.data.message) {
+              errorMessage = err.response.data.message;
+              Swal.fire({
+                title: 'Upload Failed',
+                text: errorMessage,
+                icon: 'error',
+                customClass: { container: 'high-z-index-swal' }
+              });
             }
-        } else {
+          } else {
             Swal.fire({
               title: 'API Error',
               text: errorMessage,
               icon: 'error',
               customClass: { container: 'high-z-index-swal' }
             });
-        }
-      })
-      .finally(() => {
-        this.uploadInProgress = false;
-        this.cdr.markForCheck();
-      });
-  }
-}
+          }
+        })
+        .finally(() => {
+          this.uploadInProgress = false;
+          this.cdr.markForCheck();
+        });
+    }}
