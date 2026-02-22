@@ -17,6 +17,7 @@ import {
   PaymentCycleEnum,
   LookupItem,
 } from '../../services/lookup.service';
+import { ReconciliationMonitoringStateService } from './reconciliation-monitoring-state.service';
 import { Loader } from '../../components/loader/loader';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { CommonModule } from '@angular/common';
@@ -85,27 +86,63 @@ export class ReconciliationMonitoring implements OnInit {
     public lookupService: LookupService,
     private messageService: MessageService,
     private cdr: ChangeDetectorRef,
-    private router: Router
+    private router: Router,
+    private stateService: ReconciliationMonitoringStateService
   ) {}
 
   async ngOnInit(): Promise<void> {
     this.isLoading = true;
-
-    // Load only states initially
     await this.loadStates();
     this.initBreadcrumb();
     this.initForm();
+    this.restoreState();
 
-    // Check for navigation state and restore if available
-    const hasRestoredState = await this.checkAndRestoreState();
-
-    // Load initial data with default parameters only if no state was restored
-    if (!hasRestoredState) {
+    if (!this.stateService.getState()) { // Only fetch if no state was restored
       await this.fetchPage(this.currentPage, this.pageSize, true);
     }
 
     this.isLoading = false;
     this.cdr.markForCheck();
+  }
+
+  // Restore form from our state service
+  private async restoreState(): Promise<void> {
+    const savedState = this.stateService.getState();
+    if (savedState) {
+      this.records = savedState.records;
+      this.totalRecords = savedState.totalRecords;
+      this.currentPage = savedState.currentPage;
+      this.pageSize = savedState.pageSize;
+      this.isShow = savedState.isShow;
+      this.isLoading = savedState.isLoading;
+      this.countyList = savedState.countyList;
+      this.payamList = savedState.payamList;
+      this.bomaList = savedState.bomaList;
+
+      // Enable dependent fields if they have data
+      if (this.countyList.length > 0) this.reconciliationForm.get('county')?.enable();
+      if (this.payamList.length > 0) this.reconciliationForm.get('payam')?.enable();
+      if (this.bomaList.length > 0) this.reconciliationForm.get('boma')?.enable();
+
+      this.reconciliationForm.patchValue(savedState.reconciliationFormValue);
+      this.cdr.markForCheck();
+    }
+  }
+
+  // Save current state to our state service
+  private saveCurrentState(): void {
+    this.stateService.saveState({
+      reconciliationFormValue: this.reconciliationForm.value,
+      records: this.records,
+      totalRecords: this.totalRecords,
+      currentPage: this.currentPage,
+      pageSize: this.pageSize,
+      countyList: this.countyList,
+      payamList: this.payamList,
+      bomaList: this.bomaList,
+      isShow: this.isShow,
+      isLoading: this.isLoading,
+    });
   }
 
   private initBreadcrumb(): void {
@@ -147,89 +184,9 @@ export class ReconciliationMonitoring implements OnInit {
     }
   }
 
-  // Check for navigation state and restore form
+  // Check for navigation state and restore form (DISABLED, USING STATE SERVICE INSTEAD)
   private async checkAndRestoreState(): Promise<boolean> {
-    const navigation = this.router.getCurrentNavigation();
-    const navigationState = navigation?.extras?.state || history.state;
-
-    if (
-      navigationState &&
-      Object.keys(navigationState).length > 0 &&
-      navigationState.state !== undefined
-    ) {
-      await this.restoreFormFromState(navigationState);
-      return true;
-    }
-    return false;
-  }
-
-  // Restore form from navigation state
-  private async restoreFormFromState(state: any): Promise<void> {
-    try {
-      // Restore state
-      if (state.state) {
-        const stateObj = this.states.find((s) => Number(s.id) === state.state);
-        if (stateObj) {
-          this.reconciliationForm.patchValue({ state: stateObj });
-          await this.onStateChange(stateObj);
-        }
-      }
-
-      // Restore county
-      if (state.county && this.countyList.length > 0) {
-        const countyObj = this.countyList.find(
-          (c) => Number(c.id) === state.county
-        );
-        if (countyObj) {
-          this.reconciliationForm.patchValue({ county: countyObj });
-          await this.onCountyChange(countyObj);
-        }
-      }
-
-      // Restore payam
-      if (state.payam && this.payamList.length > 0) {
-        const payamObj = this.payamList.find((p) => Number(p.id) === state.payam);
-        if (payamObj) {
-          this.reconciliationForm.patchValue({ payam: payamObj });
-          await this.onPayamChange(payamObj);
-        }
-      }
-
-      // Restore boma
-      if (state.boma && this.bomaList.length > 0) {
-        const bomaObj = this.bomaList.find((b) => Number(b.id) === state.boma);
-        if (bomaObj) {
-          this.reconciliationForm.patchValue({ boma: bomaObj });
-        }
-      }
-
-      // Restore payment cycles
-      if (state.paymentCycles && state.paymentCycles.length > 0) {
-        if (state.paymentCycles.length === 1) {
-          const cycleOption = this.paymentCycleOptions.find(
-            (opt: any) => opt.value === state.paymentCycles[0]
-          );
-          if (cycleOption) {
-            this.reconciliationForm.patchValue({
-              paymentCycleType: 'single',
-              paymentCycle: cycleOption,
-            });
-          }
-        } else {
-          this.reconciliationForm.patchValue({
-            paymentCycleType: 'multiple',
-            multiplePaymentCycles: state.paymentCycles || []
-          });
-        }
-      }
-
-      // Load data after restoration
-      await this.fetchPage(this.currentPage, this.pageSize);
-
-      this.cdr.markForCheck();
-    } catch (error) {
-      console.error('Error restoring form state:', error);
-    }
+    return false; // Always return false as we are now using the state service
   }
 
   // Load counties when state is selected
@@ -375,6 +332,8 @@ export class ReconciliationMonitoring implements OnInit {
         })
         .finally(() => {
           this.isShow = true;
+          this.isLoading = false; // Ensure loading is false even on error
+          this.saveCurrentState(); // Save state after fetch completes
           this.cdr.detectChanges();
         });
     });
@@ -390,6 +349,7 @@ export class ReconciliationMonitoring implements OnInit {
   // Search button handler
   searchReconciliation(): void {
     this.currentPage = 0;
+    this.saveCurrentState(); // Save current form state before search
     this.fetchPage(this.currentPage, this.pageSize);
   }
 
@@ -404,6 +364,7 @@ export class ReconciliationMonitoring implements OnInit {
       payam: null,
       boma: null
     });
+    this.stateService.clearState(); // Clear state when resetting form
     this.reconciliationForm.get('county')?.disable();
     this.reconciliationForm.get('payam')?.disable();
     this.reconciliationForm.get('boma')?.disable();
@@ -417,6 +378,7 @@ export class ReconciliationMonitoring implements OnInit {
     this.isLoading = true;
     this.cdr.markForCheck();
     try {
+      this.saveCurrentState(); // Save current state before navigating away
       const payload = {
         state: record.stateId || 0,
         county: record.countyId || 0,
