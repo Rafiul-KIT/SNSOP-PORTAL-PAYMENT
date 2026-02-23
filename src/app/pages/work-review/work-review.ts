@@ -93,7 +93,7 @@ export class WorkReview implements OnInit, OnDestroy {
 
   breadcrumbItems: MenuItem[] = [
     { label: 'Dashboard', routerLink: '/dashboard' },
-    { label: 'Work Proposals', routerLink: '/work-proposals' },
+    { label: 'Work Proposals', routerLink: '/sub-project/approval' },
     { label: 'View Proposal' },
   ];
   breadcrumbHome: MenuItem = { icon: 'pi pi-home', routerLink: '/' };
