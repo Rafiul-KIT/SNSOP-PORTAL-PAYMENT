@@ -101,7 +101,7 @@
                             <div class="card-body">
                                 <h5 class="card-title text-secondary mb-3 d-flex align-items-center">
                                     <i class="pi pi-calendar me-2"></i>
-                                    <span>Attendance Date</span>
+                                    <span>Attendance Date <span class="text-danger">*</span></span>
                                 </h5>
                                 <div class="p-inputgroup">
                                     <p-datepicker [(ngModel)]="attendanceDate"
@@ -128,7 +128,7 @@
                             <div class="card-body">
                                 <h5 class="card-title text-secondary mb-3 d-flex align-items-center">
                                     <i class="pi pi-sync me-2"></i>
-                                    <span>Payment Cycle</span>
+                                    <span>Payment Cycle <span class="text-danger">*</span></span>
                                 </h5>
                                 <p-select [options]="paymentCycles" [(ngModel)]="selectedPaymentCycle"
                                     (onChange)="onPaymentCycleChange($event)" optionLabel="label"
