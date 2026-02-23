@@ -20,6 +20,7 @@ export class Header {
   menuList: any[] = [];
   userInfo: any = null;
   menusLoaded = false; // ✅ controls when to render
+// showMobileMenu = false;
 
   portalList = [
     {
@@ -166,11 +167,11 @@ export class Header {
         icon: 'fas fa-user-edit',
         routerLink: 'attendance',
       },
-      // {
-      //   label: 'Training Attendance',
-      //   icon: 'fas fa-user-clock',
-      //   routerLink: 'training-attendance',
-      // },
+      {
+        label: 'Training Attendance',
+        icon: 'fas fa-user-clock',
+        routerLink: 'training-attendance',
+      },
       {
         label: 'Wage Request',
         icon: 'fas fa-receipt',
@@ -263,16 +264,16 @@ export class Header {
             icon: 'fas fa-file-alt',
             routerLink: 'report/multiple-attendance',
           },
-          // {
-          //   label: 'Training Attendance and Participant Summary Report',
-          //   icon: 'fas fa-file-alt',
-          //   routerLink: 'report/training-attendance-and-participant-summary-report',
-          // },
-          // {
-          //   label: 'Complementary Social Measures Progress Report',
-          //   icon: 'fas fa-file-alt',
-          //   routerLink: 'report/complementary-social-measures-progress-report',
-          // }
+          {
+            label: 'Training Attendance and Participant Summary Report',
+            icon: 'fas fa-file-alt',
+            routerLink: 'report/training-attendance-and-participant-summary-report',
+          },
+          {
+            label: 'Complementary Social Measures Progress Report',
+            icon: 'fas fa-file-alt',
+            routerLink: 'report/complementary-social-measures-progress-report',
+          }
 
 
         ],

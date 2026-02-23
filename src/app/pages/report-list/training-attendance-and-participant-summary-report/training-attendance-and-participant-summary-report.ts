@@ -1,6 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+} from '@angular/core';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { MenuItem, MessageService } from 'primeng/api';
 import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { FloatLabelModule } from 'primeng/floatlabel';
@@ -14,10 +24,7 @@ import Swal from 'sweetalert2';
 
 import { Loader } from '../../../components/loader/loader';
 import { ApiService } from '../../../services/api.service';
-import {
-  LookupItem,
-  LookupService,
-} from '../../../services/lookup.service';
+import { LookupItem, LookupService } from '../../../services/lookup.service';
 
 // Custom validator to check if fromDate is not after toDate and toDate is not in future
 function dateRangeValidator(formGroup: FormGroup) {
@@ -110,7 +117,7 @@ export class TrainingAttendanceAndParticipantSummaryReport implements OnInit {
     private apiService: ApiService,
     public lookupService: LookupService,
     private messageService: MessageService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): Promise<void> {
@@ -144,7 +151,7 @@ export class TrainingAttendanceAndParticipantSummaryReport implements OnInit {
         fromDate: [null, Validators.required],
         toDate: [null, Validators.required],
       },
-      { validators: dateRangeValidator }
+      { validators: dateRangeValidator },
     );
   }
 
@@ -174,7 +181,7 @@ export class TrainingAttendanceAndParticipantSummaryReport implements OnInit {
     if (state?.id) {
       try {
         this.countyList = await this.lookupService.getCountyListByStateId(
-          String(state.id)
+          String(state.id),
         );
         this.searchForm.get('county')?.enable();
       } catch (error) {
@@ -193,7 +200,7 @@ export class TrainingAttendanceAndParticipantSummaryReport implements OnInit {
     if (county?.id) {
       try {
         this.payamList = await this.lookupService.getPayamListByCountyId(
-          String(county.id)
+          String(county.id),
         );
         this.searchForm.get('payam')?.enable();
       } catch (error) {
@@ -210,7 +217,7 @@ export class TrainingAttendanceAndParticipantSummaryReport implements OnInit {
     if (payam?.id) {
       try {
         this.bomaList = await this.lookupService.getBomaListByPayamId(
-          String(payam.id)
+          String(payam.id),
         );
         this.searchForm.get('boma')?.enable();
       } catch (error) {
@@ -288,8 +295,12 @@ export class TrainingAttendanceAndParticipantSummaryReport implements OnInit {
       return date;
     };
 
-    const stateId = formValues.state?.id ? parseInt(formValues.state.id, 10) : null;
-    const countyId = formValues.county?.id ? parseInt(formValues.county.id, 10) : null;
+    const stateId = formValues.state?.id
+      ? parseInt(formValues.state.id, 10)
+      : null;
+    const countyId = formValues.county?.id
+      ? parseInt(formValues.county.id, 10)
+      : null;
     const fromDate = formatDate(formValues.fromDate);
     const toDate = formatDate(formValues.toDate);
 
@@ -299,7 +310,11 @@ export class TrainingAttendanceAndParticipantSummaryReport implements OnInit {
       const axiosResponse: any = await this.apiService.GET(endpoint);
       const apiResponse = axiosResponse.data;
 
-      if (apiResponse && apiResponse.content && apiResponse.content.length > 0) {
+      if (
+        apiResponse &&
+        apiResponse.content &&
+        apiResponse.content.length > 0
+      ) {
         this.records = apiResponse.content;
         this.totalRecords = apiResponse.totalElements || 0;
         this.isShow = true;
@@ -320,7 +335,9 @@ export class TrainingAttendanceAndParticipantSummaryReport implements OnInit {
       this.messageService.add({
         severity: 'error',
         summary: 'Error',
-        detail: error.response?.data?.message || 'An error occurred while fetching data.',
+        detail:
+          error.response?.data?.message ||
+          'An error occurred while fetching data.',
       });
       this.isShow = false;
     } finally {
@@ -337,5 +354,153 @@ export class TrainingAttendanceAndParticipantSummaryReport implements OnInit {
     const page = this.pageSize === -1 ? 0 : this.currentPage;
 
     this.fetchPage(page, size);
+  }
+
+  async download(format: 'pdf' | 'csv'): Promise<void> {
+    if (this.searchForm.invalid) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation Error',
+        text: 'Please perform a valid search first before downloading.',
+      });
+      return;
+    }
+
+    const formValues = this.searchForm.value;
+
+    const formatDate = (date: any): string => {
+      if (!date) return '';
+      if (date instanceof Date) {
+        return date.toISOString().split('T')[0];
+      }
+      return date;
+    };
+
+    const stateId = formValues.state?.id
+      ? parseInt(formValues.state.id, 10)
+      : null;
+    const countyId = formValues.county?.id
+      ? parseInt(formValues.county.id, 10)
+      : null;
+    const fromDate = formatDate(formValues.fromDate);
+    const toDate = formatDate(formValues.toDate);
+
+    const endpoint = `/api/training-attendance-report/get/${format}?stateId=${stateId}&countyId=${countyId}&fromDate=${fromDate}&toDate=${toDate}`;
+
+    // Show progress dialog
+    Swal.fire({
+      title: 'Downloading...',
+      html: `
+      <div class="text-center">
+        <p>Please wait while your ${format.toUpperCase()} file is being downloaded...</p>
+        <div class="progress" style="height: 20px;">
+          <div id="download-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+            style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+        <p id="download-progress-text">0%</p>
+      </div>
+    `,
+      allowOutsideClick: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    try {
+      const response: any = await this.apiService.axiosInstance.get(endpoint, {
+        responseType: 'blob',
+        onDownloadProgress: (progressEvent) => {
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) /
+              (progressEvent.total || progressEvent.loaded),
+          );
+          const progressBar = document.getElementById('download-progress-bar');
+          const progressText = document.getElementById(
+            'download-progress-text',
+          );
+          if (progressBar && progressText) {
+            progressBar.style.width = `${percentCompleted}%`;
+            progressBar.setAttribute(
+              'aria-valuenow',
+              percentCompleted.toString(),
+            );
+            progressText.innerText = `${percentCompleted}%`;
+          }
+        },
+      });
+
+      Swal.close();
+
+      const blob = new Blob([response.data], {
+        type: response.headers['content-type'],
+      });
+
+      const contentDisposition = response.headers['content-disposition'];
+      let fileName = `training-attendance-report-${new Date().getTime()}.${format}`;
+      if (contentDisposition) {
+        const fileNameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+        if (fileNameMatch && fileNameMatch.length > 1) {
+          fileName = fileNameMatch[1];
+        }
+      }
+
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(link.href);
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: `${format.toUpperCase()} file downloaded successfully.`,
+      });
+    } catch (error: any) {
+      Swal.close();
+      console.error(`Error downloading ${format}:`, error);
+
+      const defaultErrorMessage = `Failed to download ${format} file.`;
+      let errorMessage = defaultErrorMessage;
+
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data instanceof Blob
+      ) {
+        try {
+          const reader = new FileReader();
+          await new Promise<void>((resolve, reject) => {
+            reader.onload = () => {
+              try {
+                const errorData = JSON.parse(reader.result as string);
+                errorMessage = errorData.message || defaultErrorMessage;
+                resolve();
+              } catch (e) {
+                errorMessage = defaultErrorMessage;
+                resolve();
+              }
+            };
+            reader.onerror = () => {
+              errorMessage = defaultErrorMessage;
+              resolve();
+            };
+            reader.readAsText(error.response.data);
+          });
+        } catch (e) {
+          console.error('Could not parse error blob', e);
+        }
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Download Failed',
+        text: errorMessage,
+      });
+    }
   }
 }

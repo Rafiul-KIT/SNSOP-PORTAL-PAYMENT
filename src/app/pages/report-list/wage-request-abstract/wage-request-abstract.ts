@@ -29,6 +29,7 @@ import { Router } from '@angular/router';
 import { Loader } from '../../../components/loader/loader';
 import { ApiService } from '../../../services/api.service';
 import { LookupService, LookupItem, PaymentCycleEnum, StatusWageEnum } from '../../../services/lookup.service';
+import { WageRequestStateService } from './wage-request-state.service';
 import { saveAs } from 'file-saver';
 import Swal from 'sweetalert2';
 
@@ -138,6 +139,7 @@ export class WageRequestAbstract implements OnInit {
     private router: Router,
     private api: ApiService,
     private lookupService: LookupService,
+    private stateService: WageRequestStateService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -146,7 +148,43 @@ export class WageRequestAbstract implements OnInit {
     this.initDropdowns();
     this.initForm();
     await this.loadStates();
-    // this.fetchPage(this.currentPage, this.pageSize);
+    this.restoreState();
+  }
+
+  restoreState() {
+    const savedState = this.stateService.getState();
+    if (savedState) {
+      this.abstractRecords = savedState.abstractRecords;
+      this.totalRecords = savedState.totalRecords;
+      this.currentPage = savedState.currentPage;
+      this.pageSize = savedState.pageSize;
+      this.hasSearched = savedState.hasSearched;
+      this.countyList = savedState.countyList;
+      this.payamList = savedState.payamList;
+      this.bomaList = savedState.bomaList;
+
+      // Enable dependent fields if they have data
+      if (this.countyList.length > 0) this.searchForm.get('county')?.enable();
+      if (this.payamList.length > 0) this.searchForm.get('payam')?.enable();
+      if (this.bomaList.length > 0) this.searchForm.get('boma')?.enable();
+
+      this.searchForm.patchValue(savedState.searchFormValue);
+      this.cdr.markForCheck();
+    }
+  }
+
+  saveCurrentState() {
+    this.stateService.saveState({
+      searchFormValue: this.searchForm.value,
+      abstractRecords: this.abstractRecords,
+      totalRecords: this.totalRecords,
+      currentPage: this.currentPage,
+      pageSize: this.pageSize,
+      hasSearched: this.hasSearched,
+      countyList: this.countyList,
+      payamList: this.payamList,
+      bomaList: this.bomaList
+    });
   }
 
   initBreadcrumb() {
@@ -287,6 +325,7 @@ export class WageRequestAbstract implements OnInit {
         const data = res.data || res;
         this.abstractRecords = data.content || [];
         this.totalRecords = data.totalElements || 0;
+        this.saveCurrentState();
 
         if (this.abstractRecords.length === 0) {
           this.messageService.add({
@@ -339,12 +378,13 @@ export class WageRequestAbstract implements OnInit {
     } else if (selectedSize) {
       this.pageSize = selectedSize;
     }
-    this.fetchPage(this.currentPage, this.pageSize);
     this.hasSearched = true;
+    this.fetchPage(this.currentPage, this.pageSize);
   }
 
   resetForm() {
     this.searchForm.reset();
+    this.stateService.clearState();
     this.searchForm.get('county')?.disable();
     this.searchForm.get('payam')?.disable();
     this.searchForm.get('boma')?.disable();
@@ -543,6 +583,7 @@ export class WageRequestAbstract implements OnInit {
     }
   }
 viewWageRequest(wageId: number, subprojectId: number) {
+  this.saveCurrentState();
   this.router.navigate([
     '/wage-request/details',
     wageId,
