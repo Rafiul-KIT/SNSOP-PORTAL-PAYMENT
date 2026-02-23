@@ -87,19 +87,19 @@
         <div class="col-12 d-flex margin-button   justify-content-between">
           <div>
             @if(isShow) {
-              <button class="btn btn-primary me-2" (click)="exportToCSV()" [disabled]="isExporting">
+              <button class="btn btn-primary me-2 mt-2" (click)="exportToCSV()" [disabled]="isExporting">
                 <i class="fas fa-file-csv me-2"></i>Export
               </button>
-              <button class="btn btn-info" (click)="exportToPDF()" [disabled]="isExporting">
+              <button class="btn btn-info mt-2" (click)="exportToPDF()" [disabled]="isExporting">
                 <i class="fas fa-print me-2"></i>Print
               </button>
             }
           </div>
           <div>
-            <button class="btn btn-secondary me-2" (click)="reset()" [disabled]="isExporting">
+            <button class="btn btn-secondary me-2 mt-2" (click)="reset()" [disabled]="isExporting">
               <i class="fas fa-redo me-2"></i>Reset
             </button>
-            <button class="btn btn-success" (click)="search()" [disabled]="isExporting">
+            <button class="btn btn-success mt-2" (click)="search()" [disabled]="isExporting">
               <i class="fas fa-search me-2"></i>Search
             </button>
           </div>
