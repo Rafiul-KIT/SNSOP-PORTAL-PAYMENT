@@ -158,12 +158,69 @@ export class PayrollMobileMoney implements OnInit {
   }
 
   async ngOnInit() {
-    this.isLoading = true;
+    this.isLoading = true; // Overall loading starts here
     this.initBreadcrumb();
-    await this.loadInitialLookups();
-    this.initForm();
-    await this.fetchRequests();
-    this.isLoading = false;
+    this.initForm(); // Initialize form structure before loading lookups
+    
+    try {
+      await this.loadInitialLookups(); // Load all static lookups first
+
+      // Restore filter state from session storage
+      const storedFilters = sessionStorage.getItem('payrollMobileMoneyFilters');
+      if (storedFilters) {
+        const filters = JSON.parse(storedFilters);
+
+        // Load county, payam, boma lists based on stored filters
+        if (filters.state?.id) {
+          try {
+            this.counties = await this.lookup.getCountyListByStateId(filters.state.id);
+            this.counties.forEach(c => this.countyMap.set(Number(c.id), c.name));
+            this.searchForm.get('county')?.enable();
+          } catch (error) {
+            console.error('Error loading counties during state restoration:', error);
+          }
+
+          if (filters.county?.id) {
+            try {
+              this.payams = await this.lookup.getPayamListByCountyId(filters.county.id);
+              this.payams.forEach(p => this.payamMap.set(Number(p.id), p.name));
+              this.searchForm.get('payam')?.enable();
+            } catch (error) {
+              console.error('Error loading payams during state restoration:', error);
+            }
+
+            if (filters.payam?.id) {
+              try {
+                this.bomas = await this.lookup.getBomaListByPayamId(filters.payam.id);
+                this.bomas.forEach(b => this.bomaMap.set(Number(b.id), b.name));
+                this.searchForm.get('boma')?.enable();
+              } catch (error) {
+                console.error('Error loading bomas during state restoration:', error);
+              }
+            }
+          }
+        }
+
+        // After all lists are potentially populated, patch the form
+        this.searchForm.patchValue(filters);
+        
+        await this.fetchRequests(false); // Call fetchRequests without setting its own isLoading
+        sessionStorage.removeItem('payrollMobileMoneyFilters'); // Clear after use
+      } else {
+        // If no filters are stored, fetch all requests with default loading
+        await this.fetchRequests();
+      }
+    } catch (error) {
+      console.error("Error in ngOnInit during filter restoration:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to restore filter state or load data.',
+      });
+    } finally {
+      this.isLoading = false; // Overall loading ends here
+      this.cdr.markForCheck(); // Final UI update
+    }
   }
 
   initForm() {
@@ -221,8 +278,10 @@ export class PayrollMobileMoney implements OnInit {
     this.cdr.markForCheck();
   }
 
-  async fetchRequests() {
-    this.isLoading = true;
+  async fetchRequests(setLoading: boolean = true) {
+    if (setLoading) {
+      this.isLoading = true;
+    }
     this.cdr.markForCheck();
 
     const formValues = this.searchForm.value;
@@ -278,7 +337,9 @@ export class PayrollMobileMoney implements OnInit {
       this.requestsData = [];
       this.totalRecords = 0;
     } finally {
-      this.isLoading = false;
+      if (setLoading) {
+        this.isLoading = false;
+      }
       this.cdr.markForCheck();
     }
   }
@@ -289,12 +350,13 @@ export class PayrollMobileMoney implements OnInit {
     this.fetchRequests();
   }
 
-  searchRequests() {
+  async searchRequests() {
     this.currentPage = 0;
-    this.fetchRequests();
+    sessionStorage.setItem('payrollMobileMoneyFilters', JSON.stringify(this.searchForm.value)); // Save filters
+    await this.fetchRequests();
   }
 
-  resetForm() {
+  async resetForm() {
     this.searchForm.reset({
       state: null,
       county: { value: null, disabled: true },
@@ -308,8 +370,9 @@ export class PayrollMobileMoney implements OnInit {
     this.payams = [];
     this.bomas = [];
     this.currentPage = 0;
-    this.fetchRequests();
-    this.cdr.markForCheck();
+    sessionStorage.removeItem('payrollMobileMoneyFilters'); // Clear stored filters on reset
+    await this.fetchRequests(); // Call fetchRequests with default setLoading=true
+    // Removed this.cdr.markForCheck(); as fetchRequests handles it
   }
 
   getStateName(stateId: number): string {
@@ -355,6 +418,7 @@ export class PayrollMobileMoney implements OnInit {
   }
 
   onViewClick(request: PayrollGenerationRequest) {
+    sessionStorage.setItem('payrollMobileMoneyFilters', JSON.stringify(this.searchForm.value)); // Save filters
     this.router.navigate([
       '/payroll/mobile-money-details',
       request.requestId,
