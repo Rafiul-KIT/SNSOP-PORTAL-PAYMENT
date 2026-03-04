@@ -155,11 +155,7 @@ export class PaidDateWisePaymentInvoice implements OnInit {
         // After all lists are potentially populated, patch the form
         this.searchForm.patchValue(filters);
         
-        await this.fetchAllRecords(false); // Call fetchAllRecords without setting its own isLoading
         sessionStorage.removeItem('paidDateWiseAbstractFilters'); // Clear after use
-      } else {
-        // If no filters are stored, fetch all records with default loading (if page should show data initially)
-        await this.fetchAllRecords();
       }
     } catch (error) {
       console.error("Error in ngOnInit during filter restoration:", error);
