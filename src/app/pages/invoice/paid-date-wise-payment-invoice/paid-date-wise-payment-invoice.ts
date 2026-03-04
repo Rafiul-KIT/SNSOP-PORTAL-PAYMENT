@@ -73,6 +73,8 @@ function dateRangeValidator(formGroup: FormGroup) {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PaidDateWisePaymentInvoice implements OnInit {
+  readonly maxCalendarDate: Date = new Date(new Date().setHours(23, 59, 59, 999));
+
   isLoading = false;
   isShow = false;
   isExporting = false;

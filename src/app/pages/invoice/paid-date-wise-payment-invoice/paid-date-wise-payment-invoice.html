@@ -58,7 +58,7 @@
 
         <div class="col-md-3">
           <p-floatlabel variant="on" class="w-100">
-            <p-datepicker formControlName="fromDate" showIcon="true" [style]="{ width: '100%' }" inputId="from-date"
+            <p-datepicker formControlName="fromDate" [maxDate]="maxCalendarDate" showIcon="true" [style]="{ width: '100%' }" inputId="from-date"
               dateFormat="yy-mm-dd" [class.ng-invalid]="searchForm.get('fromDate')?.invalid && searchForm.get('fromDate')?.touched"></p-datepicker>
             <label for="from-date">From Date <span class="text-danger">*</span></label>
           </p-floatlabel>
@@ -69,7 +69,7 @@
 
         <div class="col-md-3">
           <p-floatlabel variant="on" class="w-100">
-            <p-datepicker formControlName="toDate" showIcon="true" [style]="{ width: '100%' }" inputId="to-date"
+            <p-datepicker formControlName="toDate" [maxDate]="maxCalendarDate" showIcon="true" [style]="{ width: '100%' }" inputId="to-date"
               dateFormat="yy-mm-dd" [class.ng-invalid]="searchForm.get('toDate')?.invalid && searchForm.get('toDate')?.touched"></p-datepicker>
             <label for="to-date">To Date <span class="text-danger">*</span></label>
           </p-floatlabel>
