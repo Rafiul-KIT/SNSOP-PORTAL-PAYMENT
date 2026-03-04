@@ -134,22 +134,22 @@
             <div class="support-amounts">
               <div class="amount-item">
                 <span class="amount-label">Total</span>
-                <span class="amount-value">SSP {{ support.total | number }}</span>
+                <span class="amount-value">{{ support.total | number }} beneficiaries</span>
               </div>
               <div class="amount-item">
                 <span class="amount-label">Paid</span>
-                <span class="amount-value text-success">SSP {{ support.paid | number }}</span>
+                <span class="amount-value text-success">{{ support.paid | number }} beneficiaries</span>
               </div>
               <div class="amount-item">
                 <span class="amount-label">Unpaid</span>
-                <span class="amount-value text-danger">SSP {{ support.unpaid | number }}</span>
+                <span class="amount-value text-danger">{{ support.unpaid | number }} beneficiaries</span>
               </div>
             </div>
 
             <div class="support-progress">
               <p-progressBar [value]="getPercentage(support.paid, support.total)" [showValue]="false"
                 class="support-progressbar" ></p-progressBar>
-              <div class="progress-label">{{ getPercentage(support.paid, support.total) }}% payment</div>
+              <!-- <div class="progress-label">{{ getPercentage(support.paid, support.total) }}% payment</div> -->
             </div>
           </div>
         </div>
