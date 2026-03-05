@@ -27,23 +27,29 @@
                 <label>County</label>
             </p-floatlabel>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
                 <p-select [options]="payamList" optionLabel="name" formControlName="payam"
                     (onChange)="onPayamChange($event.value)" class="w-100" />
                 <label>Payam</label>
             </p-floatlabel>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
                 <p-select [options]="bomaList" optionLabel="name" formControlName="boma" class="w-100" />
                 <label>Boma</label>
             </p-floatlabel>
         </div>
-        <div class="col-md-2">
+        <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
                 <input pInputText class="form-control" formControlName="workCode" />
                 <label>Work Code</label>
+            </p-floatlabel>
+        </div>
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="statuses" optionLabel="label" formControlName="status" class="w-100" />
+                <label>Status</label>
             </p-floatlabel>
         </div>
         <div class="col-12 text-end">
@@ -102,17 +108,17 @@
         <div class="row g-3">
             <div class="col-md-4">
                 <small class="text-muted d-block">Project Name</small>
-                <strong>{{ selectedSubproject ? selectedSubproject.projectName : 'All Sub-projects' }}</strong>
+                <strong>{{ selectedSubproject ? selectedSubproject.projectName : 'All Projects' }}</strong>
             </div>
             <div class="col-md-4">
                 <small class="text-muted d-block">Work Code</small>
-                <strong>{{ selectedSubproject ? selectedSubproject.workCode : 'N/A' }}</strong>
+                <strong>{{ selectedSubproject ? selectedSubproject.workCode : 'All Sub-projects' }}</strong>
             </div>
             <div class="col-md-4 text-md-end">
                 <small class="text-muted d-block">Location</small>
                 <strong>
                     @if (selectedSubproject) {
-                        {{ selectedSubproject.stateName }}, {{ selectedSubproject.countyName }}
+                        {{ selectedSubproject.stateName }}, {{ selectedSubproject.countyName }}, {{ selectedSubproject.payamName }}, {{ selectedSubproject.bomaName }}
                     } @else {
                         All Locations
                     }
@@ -151,7 +157,7 @@
                 <p>Fetching attendance records...</p>
             </div>
         } @else {
-            <p-table [value]="records" [scrollable]="true" [scrollHeight]="'45vh'"
+            <p-table [value]="records" 
                 [tableStyle]="{ 'min-width': '1200px', 'margin-bottom': '5px' }" size="small" [rows]="pageSize">
                 
                 <ng-template pTemplate="header">
@@ -159,7 +165,7 @@
                         <th colspan="100" class="text-start bg-white">
                             <div class="d-flex justify-content-between align-items-center">
                                 <p-button label="Download CSV" icon="fas fa-download" severity="help" size="small"
-                                    [outlined]="true" (onClick)="exportCsv()" *ngIf="records.length > 0"></p-button>
+                                    [outlined]="true" (onClick)="exportCsv()" *ngIf="records.length > 0" [loading]="exportingCsv"></p-button>
                                 <p class="fw-bold mb-0">
                                     Total Beneficiaries: <kbd>{{ totalRecords }}</kbd>
                                 </p>

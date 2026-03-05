@@ -30,8 +30,7 @@ import { DividerModule } from 'primeng/divider';
 import { RadioButtonModule } from 'primeng/radiobutton';
 
 import { ApiService } from '../../../services/api.service';
-import { LookupService, LookupItem } from '../../../services/lookup.service';
-import { BeneficiaryAttendanceReportStateService } from './beneficiary-atendance-report-state.service';
+import { LookupService, LookupItem, StatusEnum } from '../../../services/lookup.service';
 import { saveAs } from 'file-saver';
 import Swal from 'sweetalert2';
 
@@ -113,6 +112,7 @@ export class BeneficiaryAtendanceReport implements OnInit {
   currentPage = 0;
   pageSize = 10;
   loadingAttendance = false;
+  exportingCsv = false;
   hasSearchedAttendance = false;
 
   breadcrumbItems: any[] = [];
@@ -123,6 +123,7 @@ export class BeneficiaryAtendanceReport implements OnInit {
   countyList: LookupItem[] = [];
   payamList: LookupItem[] = [];
   bomaList: LookupItem[] = [];
+  statuses = StatusEnum;
   maxDate: Date;
 
   roleId: number | null = null;
@@ -132,7 +133,6 @@ export class BeneficiaryAtendanceReport implements OnInit {
     private messageService: MessageService,
     private api: ApiService,
     private lookupService: LookupService,
-    private stateService: BeneficiaryAttendanceReportStateService,
     private cdr: ChangeDetectorRef
   ) {
     this.maxDate = new Date();
@@ -143,61 +143,6 @@ export class BeneficiaryAtendanceReport implements OnInit {
     this.initBreadcrumb();
     this.initForms();
     await this.loadStates();
-    this.restoreState();
-  }
-
-  restoreState() {
-    const savedState = this.stateService.getState();
-    if (savedState) {
-      // Step 1 Restore
-      this.subprojectList = savedState.subprojectList;
-      this.selectedSubproject = savedState.selectedSubproject;
-      this.subprojectPage = savedState.subprojectPage || 0;
-      this.subprojectSize = savedState.subprojectSize || 10;
-      this.totalSubprojects = savedState.totalSubprojects || 0;
-      this.subprojectForm.patchValue(savedState.subprojectSearchFormValue);
-
-      // Step 2 Restore
-      this.records = savedState.records;
-      this.dateColumns = savedState.dateColumns;
-      this.totalRecords = savedState.totalRecords;
-      this.currentPage = savedState.currentPage;
-      this.pageSize = savedState.pageSize;
-      this.hasSearchedAttendance = savedState.hasSearchedAttendance;
-      this.attendanceForm.patchValue(savedState.attendanceFormValue);
-
-      // Lookups Restore
-      this.countyList = savedState.countyList;
-      this.payamList = savedState.payamList;
-      this.bomaList = savedState.bomaList;
-
-      if (this.countyList.length > 0) this.subprojectForm.get('county')?.enable();
-      if (this.payamList.length > 0) this.subprojectForm.get('payam')?.enable();
-      if (this.bomaList.length > 0) this.subprojectForm.get('boma')?.enable();
-
-      this.cdr.markForCheck();
-    }
-  }
-
-  saveCurrentState() {
-    this.stateService.saveState({
-      subprojectSearchFormValue: this.subprojectForm.value,
-      subprojectList: this.subprojectList,
-      selectedSubproject: this.selectedSubproject,
-      subprojectPage: this.subprojectPage,
-      subprojectSize: this.subprojectSize,
-      totalSubprojects: this.totalSubprojects,
-      attendanceFormValue: this.attendanceForm.value,
-      records: this.records,
-      dateColumns: this.dateColumns,
-      totalRecords: this.totalRecords,
-      currentPage: this.currentPage,
-      pageSize: this.pageSize,
-      hasSearchedAttendance: this.hasSearchedAttendance,
-      countyList: this.countyList,
-      payamList: this.payamList,
-      bomaList: this.bomaList
-    });
   }
 
   initBreadcrumb() {
@@ -212,6 +157,7 @@ export class BeneficiaryAtendanceReport implements OnInit {
       payam: [{ value: null, disabled: true }],
       boma: [{ value: null, disabled: true }],
       workCode: [''],
+      status: [null],
     });
 
     this.attendanceForm = this.fb.group({
@@ -306,13 +252,13 @@ export class BeneficiaryAtendanceReport implements OnInit {
       typeOfMeeting: null,
       meetingDate: null,
       screeningStatus: null,
-      status: null
+      status: f.status?.value || null
     };
 
     let apiUrl = 'api/subproject/get';
-    if (Number(this.roleId) === 5) {
-      apiUrl = 'api/subproject/get/for-ip';
-    }
+    // if (Number(this.roleId) === 5) {
+    //   apiUrl = 'api/subproject/get/for-ip';
+    // }
 
     const url = `${apiUrl}?page=${this.subprojectPage}&size=${this.subprojectSize}`;
 
@@ -325,7 +271,6 @@ export class BeneficiaryAtendanceReport implements OnInit {
         if (this.subprojectList.length === 0) {
           this.messageService.add({ severity: 'info', summary: 'Sub-projects', detail: 'No sub-projects found.' });
         }
-        this.saveCurrentState();
       })
       .catch(err => {
         console.error('Search sub-projects error:', err);
@@ -333,7 +278,7 @@ export class BeneficiaryAtendanceReport implements OnInit {
       })
       .finally(() => {
         this.loadingSubprojects = false;
-        this.cdr.markForCheck();
+        this.cdr.detectChanges();
       });
   }
 
@@ -346,7 +291,6 @@ export class BeneficiaryAtendanceReport implements OnInit {
     this.hasSearchedAttendance = false;
     this.records = [];
     this.attendanceForm.patchValue({ fromDate: null, toDate: null });
-    this.saveCurrentState();
     this.cdr.markForCheck();
   }
 
@@ -430,7 +374,6 @@ export class BeneficiaryAtendanceReport implements OnInit {
           this.dateColumns = [];
           this.messageService.add({ severity: 'info', summary: 'Report', detail: 'No attendance records found.' });
         }
-        this.saveCurrentState();
       })
       .catch((err) => {
         console.error('Fetch attendance error:', err);
@@ -454,7 +397,6 @@ export class BeneficiaryAtendanceReport implements OnInit {
   resetAll() {
     this.subprojectForm.reset();
     this.attendanceForm.reset();
-    this.stateService.clearState();
     this.subprojectForm.get('county')?.disable();
     this.subprojectForm.get('payam')?.disable();
     this.subprojectForm.get('boma')?.disable();
@@ -477,7 +419,7 @@ export class BeneficiaryAtendanceReport implements OnInit {
   async exportCsv() {
     if (!this.validateAttendanceForm()) return;
 
-    this.loadingAttendance = true;
+    this.exportingCsv = true;
     this.cdr.markForCheck();
 
     const f = this.attendanceForm.value;
@@ -499,7 +441,7 @@ export class BeneficiaryAtendanceReport implements OnInit {
       console.error('CSV Export error:', error);
       this.messageService.add({ severity: 'error', summary: 'Export Error', detail: 'Failed to download CSV.' });
     } finally {
-      this.loadingAttendance = false;
+      this.exportingCsv = false;
       this.cdr.detectChanges();
     }
   }
