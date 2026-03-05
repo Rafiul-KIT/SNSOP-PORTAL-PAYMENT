@@ -58,6 +58,7 @@ interface WageAbstractRecord {
   boma: string;
   subprojectCode: string;
   requestNumber: string;
+  registrationPhase?: string | null;
   fromDate: string;
   toDate: string;
   paymentCycle: number;
@@ -111,6 +112,7 @@ export class WageRequestAbstract implements OnInit {
   paymentCycles: any[] = [];
   statuses: any[] = [];
   criteriaOptions: any[] = [];
+  registrationPhaseOptions: any[] = [];
   paymentStatusOptions: any[] = [];
   reportSizeOptions = [
     { label: '100', value: 100 },
@@ -125,6 +127,7 @@ export class WageRequestAbstract implements OnInit {
 
   // Table data
   abstractRecords: WageAbstractRecord[] = [];
+  totalMembersHeader = 'Total Members';
   totalRecords = 0;
   currentPage = 0;
   pageSize = 10;
@@ -155,6 +158,7 @@ export class WageRequestAbstract implements OnInit {
     const savedState = this.stateService.getState();
     if (savedState) {
       this.abstractRecords = savedState.abstractRecords;
+      this.updateTotalMembersHeader();
       this.totalRecords = savedState.totalRecords;
       this.currentPage = savedState.currentPage;
       this.pageSize = savedState.pageSize;
@@ -200,6 +204,11 @@ export class WageRequestAbstract implements OnInit {
       { label: 'LIPW', value: 'LIPW' },
       { label: 'Direct Income Support', value: 'DIS' },
     ];
+    this.registrationPhaseOptions = [
+      { label: 'ALL', value: 'ALL' },
+      { label: 'PARENT', value: 'PARENT' },
+      { label: 'AF', value: 'AF' },
+    ];
     this.paymentStatusOptions = [
       { label: 'All', value: 'ALL' },
       { label: 'Paid', value: 'PAID' },
@@ -220,6 +229,7 @@ export class WageRequestAbstract implements OnInit {
       status: [null],
       paymentCycle: [null],
       criteria: [null],
+      registrationPhase: ['ALL'],
       paymentStatus: [null],
       reportSize: [null],
     }, { validators: dateRangeValidator });
@@ -308,9 +318,17 @@ export class WageRequestAbstract implements OnInit {
       toDate: this.formatDate(f.toDate),
       status: f.status != null ? Number(f.status) : null,
       paymentCycle: f.paymentCycle || null,
-      criteria: f.criteria || null,
-      paymentStatus: f.paymentStatus || null,
+      criteria: f.criteria === 'ALL' ? null : f.criteria || null,
+      registrationPhase: f.registrationPhase === 'ALL' ? null : f.registrationPhase || null,
+      paymentStatus: f.paymentStatus === 'ALL' ? null : f.paymentStatus || null,
     };
+  }
+
+  private updateTotalMembersHeader(): void {
+    const phaseFromResponse = this.abstractRecords.find((item) => !!item.registrationPhase)?.registrationPhase;
+    const selectedPhase = this.searchForm?.get('registrationPhase')?.value;
+    const phase = phaseFromResponse || (selectedPhase === 'ALL' ? 'ALL' : selectedPhase || null);
+    this.totalMembersHeader = phase ? `Total Members(${phase})` : 'Total Members';
   }
 
   fetchPage(page: number, size: number) {
@@ -324,6 +342,7 @@ export class WageRequestAbstract implements OnInit {
         if (!res) throw new Error('Empty response');
         const data = res.data || res;
         this.abstractRecords = data.content || [];
+        this.updateTotalMembersHeader();
         this.totalRecords = data.totalElements || 0;
         this.saveCurrentState();
 
@@ -384,6 +403,7 @@ export class WageRequestAbstract implements OnInit {
 
   resetForm() {
     this.searchForm.reset();
+    this.searchForm.patchValue({ registrationPhase: 'ALL' });
     this.stateService.clearState();
     this.searchForm.get('county')?.disable();
     this.searchForm.get('payam')?.disable();
@@ -392,6 +412,7 @@ export class WageRequestAbstract implements OnInit {
     this.payamList = [];
     this.bomaList = [];
     this.abstractRecords = [];
+    this.totalMembersHeader = 'Total Members';
     this.totalRecords = 0;
     this.currentPage = 0;
     this.hasSearched = false;
@@ -455,7 +476,7 @@ export class WageRequestAbstract implements OnInit {
       // CSV headers
       const headers = ['IP Name', 'State', 'County', 'Payam', 'Boma', 'Work Code',
         'Request Number', 'From Date', 'To Date', 'Total Members', 'Work Days', 'Exchange Rate',
-        'Amount Paid in USD', 'Amount Paid in SSP', 'Wage Status',  'Payment Cycle'];
+        'Amount Paid in USD', 'Amount Paid in SSP', 'Wage Status', 'Payment Cycle', 'Registration Phase'];
 
       // CSV rows
       const csvRows = allRecords.map((r, idx) => [
@@ -471,10 +492,11 @@ export class WageRequestAbstract implements OnInit {
          r.totalMembers,
          r.totalWorkDays,
          r.exchangeRate,
-         r.totalAmountInUsd,
+        r.totalAmountInUsd,
         r.totalAmountInSsp,
         this.escapeCsvField(this.getStatusLabel(r.status)),
         this.escapeCsvField(this.getPaymentCycleLabel(r.paymentCycle)),
+        this.escapeCsvField(r.registrationPhase || ''),
 
         // this.escapeCsvField(this.getCriteriaLabel(r.criteria)),
         // this.escapeCsvField(r.paymentStatus),
@@ -543,7 +565,7 @@ export class WageRequestAbstract implements OnInit {
       const doc = new jsPDF.default('l', 'px', 'a4');
 
       const head = [['S.No', 'IP Name', 'State', 'County', 'Payam', 'Boma', 'Sub-Project Code',
-        'Request No', 'From', 'To', 'Cycle', 'Status', 'Criteria', 'Pay Status',
+        'Request No', 'From', 'To', 'Cycle', 'Status', 'Criteria', 'Registration Phase', 'Pay Status',
         'Members', 'Paid', 'Days', 'USD', 'SSP']];
 
       const pdfBody = allRecords.map((r, idx) => [
@@ -560,6 +582,7 @@ export class WageRequestAbstract implements OnInit {
         this.getPaymentCycleLabel(r.paymentCycle),
         this.getStatusLabel(r.status),
         this.getCriteriaLabel(r.criteria),
+        r.registrationPhase || '',
         r.paymentStatus,
         r.totalMembers,
         r.totalPaidMembers,
