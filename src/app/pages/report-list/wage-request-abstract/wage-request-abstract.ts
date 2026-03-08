@@ -52,6 +52,8 @@ export function dateRangeValidator(group: AbstractControl): ValidationErrors | n
 }
 
 interface WageAbstractRecord {
+  id: number;
+  subprojectId: number;
   state: string;
   county: string;
   payam: string;
@@ -605,7 +607,16 @@ export class WageRequestAbstract implements OnInit {
       this.cdr.detectChanges();
     }
   }
-viewWageRequest(wageId: number, subprojectId: number) {
+viewWageRequest(wageId: number | null | undefined, subprojectId: number | null | undefined) {
+  if (wageId == null || subprojectId == null) {
+    this.messageService.add({
+      severity: 'warn',
+      summary: 'View',
+      detail: 'Missing wage request ID or subproject ID.',
+    });
+    return;
+  }
+
   this.saveCurrentState();
   this.router.navigate([
     '/wage-request/details',
