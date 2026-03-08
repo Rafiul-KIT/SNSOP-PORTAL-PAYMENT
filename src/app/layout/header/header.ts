@@ -265,6 +265,11 @@ export class Header {
             routerLink: 'report/multiple-attendance',
           },
           {
+            label: 'Beneficiary Attendance Report',
+            icon: 'fas fa-file-alt',
+            routerLink: 'report/beneficiary-attendance',
+          },
+          {
             label: 'Training Attendance and Participant Summary Report',
             icon: 'fas fa-file-alt',
             routerLink: 'report/training-attendance-and-participant-summary-report',

@@ -41,6 +41,7 @@ import { TrainingAttendance } from './pages/beneficiay-attendance/training-atten
 import { TrainingAttendancePerform } from './pages/beneficiay-attendance/training-attendance-perform/training-attendance-perform';
 import { TrainingAttendanceAndParticipantSummaryReport } from './pages/report-list/training-attendance-and-participant-summary-report/training-attendance-and-participant-summary-report';
 import { ComplementarySocialMeasuresProgressReport } from './pages/report-list/complementary-social-measures-progress-report/complementary-social-measures-progress-report';
+import { BeneficiaryAtendanceReport } from './pages/report-list/beneficiary-atendance-report/beneficiary-atendance-report';
 
 
 export const routes: Routes = [
@@ -236,6 +237,11 @@ export const routes: Routes = [
        {
         path: 'multiple-attendance',
         component: MultipleAttendanceReport,
+        canActivate: [routeGuard],
+       },
+       {
+        path: 'beneficiary-attendance',
+        component: BeneficiaryAtendanceReport,
         canActivate: [routeGuard],
        },
            {
