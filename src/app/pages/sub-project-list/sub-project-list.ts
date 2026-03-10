@@ -546,12 +546,54 @@ cancelDelete() {
       title: 'Confirm',
       text: 'Are you sure you want to mark this sub-project as Completed?',
       icon: 'question',
+      input: 'textarea',
+      inputLabel: 'Comment',
+      inputPlaceholder: 'Type your comment here...',
+      inputAttributes: {
+        maxlength: '255',
+        autocapitalize: 'off',
+        autocorrect: 'off'
+      },
       showCancelButton: true,
       confirmButtonText: 'Yes, Complete',
       cancelButtonText: 'Cancel',
+      didOpen: () => {
+        const input = Swal.getInput();
+        const label = Swal.getPopup()?.querySelector('.swal2-input-label');
+        if (input && label) {
+          // Style label to be a flex container to put counter beside it
+          (label as HTMLElement).style.display = 'flex';
+          (label as HTMLElement).style.alignItems = 'center';
+          (label as HTMLElement).style.gap = '8px';
+
+          const counter = document.createElement('span');
+          counter.style.fontSize = '12px';
+          counter.style.fontWeight = 'normal';
+          counter.style.color = '#666';
+          counter.innerHTML = `(0 / 255)`;
+          label.appendChild(counter);
+
+          input.addEventListener('input', () => {
+            const length = input.value.length;
+            counter.innerHTML = `(${length} / 255)`;
+            counter.style.color = length >= 255 ? 'red' : '#666';
+          });
+        }
+      },
+      inputValidator: (value) => {
+        if (!value) {
+          return 'You need to write a comment!';
+        }
+        if (value.length > 255) {
+          return 'Comment cannot exceed 255 characters!';
+        }
+        return null;
+      }
     });
 
     if (!result.isConfirmed) return;
+
+    const comment = result.value;
 
     Swal.fire({
       title: 'Submitting',
@@ -564,7 +606,7 @@ cancelDelete() {
 
     try {
       const res: any = await this.api.POST(
-        `api/subproject/submit?subprojectId=${id}&status=Completed`,
+        `api/subproject/submit?subprojectId=${id}&status=Completed&comment=${encodeURIComponent(comment)}`,
         {}
       );
 
