@@ -1,0 +1,320 @@
+@if (isLoading()) {
+<app-loader></app-loader>
+} @else {
+<div class="breadcrumb-wrapper">
+  <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
+</div>
+<p-toast position="bottom-right"></p-toast>
+<div class="min-vh-100 d-flex">
+  <div class="content mx-auto ">
+    <!-- Header -->
+    <div class="">
+      <nav class="navbar navbar-expand-lg text-secondary navbar-dark">
+        <div class="container-fluid">
+          <span class="navbar-brand text-secondary mb-0 h1">
+            <i class="fas fa-briefcase me-2"></i>
+            View Sub-Project Details
+          </span>
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="onBack()">
+            <i class="fas fa-arrow-left me-1"></i> Back
+          </button>
+        </div>
+      </nav>
+
+      <!-- Main Content -->
+      <div class="container-fluid py-4">
+        <div class="card shadow-sm">
+          <div class="card-body p-4">
+            <form [formGroup]="proposalForm">
+
+              <!-- Basic Information -->
+              <div class="mb-5">
+                <h4 class="text-secondary border-bottom border-1 pb-2 mb-4">
+                  <i class="fas fa-info-circle me-2"></i>Basic Information
+                </h4>
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <div class="row g-3">
+                      <div class="col-md-12">
+                        <label class="form-label text-secondary fw-semibold">Project Name</label>
+                        <input type="text" class="form-control" formControlName="projectName" readonly />
+                      </div>
+                     
+                        <div class="col-md-12">
+                        <label class="form-label text-secondary fw-semibold">Paper Screening Status</label>
+                        <input type="text" class="form-control" formControlName="screeningStatus" readonly />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="row g-3">
+                      <div class="col-md-12">
+                        <label class="form-label text-secondary fw-semibold">Type of Meeting</label>
+                        <input type="text" class="form-control" formControlName="typeOfMeeting" readonly />
+                      </div>
+                      <div class="col-md-12">
+                        <label class="form-label text-secondary fw-semibold">Meeting Date</label>
+                        <p-datePicker formControlName="meetingDate" styleClass="w-100" [showIcon]="true" [readonlyInput]="true"></p-datePicker>
+                      </div>
+                    
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Work Proposal Location -->
+              <div class="mb-5">
+                <h4 class="text-secondary border-bottom border-secondary border-1 pb-2 mb-4">
+                  <i class="fas fa-map-marker-alt me-2"></i>Work Proposed Location
+                </h4>
+                <div class="row g-3">
+                  <div class="col-md-6 col-lg-3">
+                    <label class="form-label text-secondary fw-semibold">State Name</label>
+                    <input type="text" class="form-control" formControlName="stateName" readonly />
+                  </div>
+
+                  <div class="col-md-6 col-lg-3">
+                    <label class="form-label text-secondary fw-semibold">County / Municipality Name</label>
+                    <input type="text" class="form-control" formControlName="countyName" readonly />
+                  </div>
+
+                  <div class="col-md-6 col-lg-3">
+                    <label class="form-label text-secondary fw-semibold">Payam / Block Name</label>
+                    <input type="text" class="form-control" formControlName="payamName" readonly />
+                  </div>
+
+                  <div class="col-md-6 col-lg-3">
+                    <label class="form-label text-secondary fw-semibold">Boma / Quarter Council Name</label>
+                    <input type="text" class="form-control" formControlName="bomaName" readonly />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Proposed Public Work Activities -->
+              @if(workActivities.length > 0){
+              <div class="mb-5">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                  <h4 class="text-secondary border-bottom border-secondary border-1 pb-2 mb-0">
+                    <i class="fas fa-tasks me-2"></i>Proposed Public Work Activities
+                  </h4>
+                </div>
+
+                <div formArrayName="workActivities">
+                  <div *ngFor="let activity of workActivities.controls; trackBy: trackByIndex; let i = index"
+                    [formGroupName]="i" class="card mb-4 border-secondary">
+                    <div class="card-header bg-opacity-10 d-flex justify-content-between align-items-center">
+                      <h5 class="mb-0 text-secondary">
+                        <i class="fas fa-wrench me-2"></i>Activity {{ i + 1 }}
+                      </h5>
+                    </div>
+
+                    <div class="card-body">
+                      <div class="row g-3">
+                        <div class="col-md-6">
+                          <label class="form-label text-secondary fw-semibold">Work Name</label>
+                          <input type="text" class="form-control" formControlName="name" readonly />
+                        </div>
+
+                        <div class="col-md-6">
+                          <label class="form-label text-secondary fw-semibold">Work Activity Code (Internal)</label>
+                          <input type="text" class="form-control" formControlName="code" readonly />
+                        </div>
+
+                        <div class="col-md-6">
+                          <label class="form-label text-secondary fw-semibold">Type of Work</label>
+                          <input type="text" class="form-control" formControlName="typeOfWork" readonly />
+                        </div>
+
+                        <div class="col-md-6">
+                          <label class="form-label text-secondary fw-semibold">Work Activity</label>
+                          <input type="text" class="form-control" formControlName="secondaryActivity" readonly />
+                        </div>
+
+                        @if (activity.get('equipmentPhotoUrl')?.value) {
+                        <div class="col-md-6">
+                          <label class="form-label text-secondary fw-semibold">Equipment Photo</label>
+                          <div class="border rounded p-2">
+                            <a class="text-primary" (click)="viewAttachment(activity.get('equipmentPhotoUrl')?.value)">
+                              <i class="fas fa-image me-2"></i>Download Equipment Photo
+                            </a>
+                          </div>
+                        </div>
+                        }
+
+                        <div class="col-md-6">
+                          <label class="form-label text-secondary fw-semibold">
+                            Estimated Cost of Hand Tools and Equipment (In USD)
+                          </label>
+                          <div class="input-group">
+                            <span class="input-group-text">
+                              <i class="fas text-secondary fa-dollar-sign"></i>
+                            </span>
+                            <input type="number" class="form-control" formControlName="estimatedCostOfEquipment"
+                              readonly />
+                          </div>
+                        </div>
+
+                        @if (activity.get('workPhotoUrl')?.value) {
+                        <div class="col-md-6">
+                          <label class="form-label text-secondary fw-semibold">Work Photo</label>
+                          <div class="border rounded p-2">
+                            <a class="text-primary" (click)="viewAttachment(activity.get('workPhotoUrl')?.value)">
+                              <i class="fas fa-image me-2"></i>Download Work Photo
+                            </a>
+                          </div>
+                        </div>
+                        }
+
+                        @if (activity.get('materialPhotoUrl')?.value) {
+                        <div class="col-md-6">
+                          <label class="form-label text-secondary fw-semibold">Materials Photo</label>
+                          <div class="border rounded p-2">
+                            <a class="text-primary" (click)="viewAttachment(activity.get('materialPhotoUrl')?.value)">
+                              <i class="fas fa-image me-2"></i>Download Materials Photo
+                            </a>
+                          </div>
+                        </div>
+                        }
+
+                        <div class="col-md-6">
+                          <label class="form-label text-secondary fw-semibold">
+                            Estimated Cost of Materials Required (In USD)
+                          </label>
+                          <div class="input-group">
+                            <span class="input-group-text">
+                              <i class="fas text-secondary fa-dollar-sign"></i>
+                            </span>
+                            <input type="number" class="form-control" formControlName="estimatedCost" readonly />
+                          </div>
+                        </div>
+
+                        <div class="col-md-12">
+                          <label class="form-label text-secondary fw-semibold">
+                            Estimated Cost (In USD)
+                          </label>
+                          <div class="input-group">
+                            <span class="input-group-text">
+                              <i class="fas text-secondary fa-calculator"></i>
+                            </span>
+                            <input type="number" class="form-control" formControlName="totalEstimatedCost" readonly />
+                          </div>
+                        </div>
+                        
+                        <div class="col-md-6 col-lg-4">
+                          <label class="form-label text-secondary fw-semibold">Estimated Manpower</label>
+                          <input type="number" class="form-control" formControlName="estimatedManpower" readonly />
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+                          <label class="form-label text-secondary fw-semibold">Estimated Man Days</label>
+                          <input type="number" class="form-control" formControlName="estimatedManDays" readonly />
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+                          <label class="form-label text-secondary fw-semibold">Estimated Skill Labour Required</label>
+                          <input type="number" class="form-control" formControlName="estimatedSkillLabour" readonly />
+                        </div>
+                      </div>
+
+                      <br>
+                      <h5 class="text-secondary border-bottom border-secondary border-1 pb-2 mb-4">
+                        <i class="fas fa-calendar-alt me-2"></i>Work Timeline & Status
+                      </h5>
+                      <div class="row g-3">
+                        <div class="col-md-6 col-lg-4">
+                          <label class="form-label text-secondary fw-semibold">Estimated Work Start Date</label>
+                          <p-datePicker formControlName="workStartDate" styleClass="w-100" [showIcon]="true" [readonlyInput]="true"></p-datePicker>
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+                          <label class="form-label text-secondary fw-semibold">Estimated Work End Date</label>
+                          <p-datePicker formControlName="workEndDate" styleClass="w-100" [showIcon]="true" [readonlyInput]="true"></p-datePicker>
+                        </div>
+
+                        <div class="col-md-6 col-lg-4">
+                          <label class="form-label text-secondary fw-semibold">Status</label>
+                          <input type="text" class="form-control" formControlName="status" readonly />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              }
+
+              <!-- Proposed Public Work table -->
+              <div class="mb-5">
+                @if(workActivities.length > 0){
+                <div class="table-responsive">
+                  <table class="table table-bordered align-middle shadow-sm">
+                    <thead class="table-light text-center align-middle">
+                      <tr>
+                        <th style="width: 40px;">#</th>
+                        <th>Work Name</th>
+                        <th>Work Code</th>
+                        <th>Type of Work</th>
+                        <th>Work Activity</th>
+                        <th>Equipment Photo</th>
+                        <th>Equipment Cost (USD)</th>
+                        <th>Work Photo</th>
+                        <th>Materials Photo</th>
+                        <th>Materials Cost (USD)</th>
+                        <th>Total Cost (USD)</th>
+                        <th>Manpower</th>
+                        <th>Man Days</th>
+                        <th>Skilled Labour</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="workActivities" class="table-body-sm">
+                      <tr *ngFor="let activity of workActivities.controls; let i = index" [formGroupName]="i">
+                        <td class="text-center fw-semibold">{{ i + 1 }}</td>
+                        <td><span class="d-block px-2">{{ activity.get('name')?.value || '-' }}</span></td>
+                        <td><span class="d-block px-2">{{ activity.get('code')?.value || '-' }}</span></td>
+                        <td><span class="d-block px-2">{{ activity.get('typeOfWork')?.value || '-' }}</span></td>
+                        <td><span class="d-block px-2">{{ activity.get('secondaryActivity')?.value || '-' }}</span></td>
+                        <td class="text-center">
+                          @if (activity.get('equipmentPhotoUrl')?.value) {
+                          <a class="text-primary" (click)="viewAttachment(activity.get('equipmentPhotoUrl')?.value)">
+                            <i class="fas fa-image fa-lg"></i>
+                          </a>
+                          } @else { <span class="text-muted">—</span> }
+                        </td>
+                        <td class="text-end pe-3">{{ activity.get('estimatedCostOfEquipment')?.value || 0 }}</td>
+                        <td class="text-center">
+                          @if (activity.get('workPhotoUrl')?.value) {
+                          <a class="text-primary" (click)="viewAttachment(activity.get('workPhotoUrl')?.value)">
+                            <i class="fas fa-image fa-lg"></i>
+                          </a>
+                          } @else { <span class="text-muted">—</span> }
+                        </td>
+                        <td class="text-center">
+                          @if (activity.get('materialPhotoUrl')?.value) {
+                          <a class="text-primary" (click)="viewAttachment(activity.get('materialPhotoUrl')?.value)">
+                            <i class="fas fa-image fa-lg"></i>
+                          </a>
+                          } @else { <span class="text-muted">—</span> }
+                        </td>
+                        <td class="text-end pe-3">{{ activity.get('estimatedCost')?.value || 0 }}</td>
+                        <td class="text-end pe-3 fw-semibold text-success">{{ activity.get('totalEstimatedCost')?.value || 0 }}</td>
+                        <td class="text-center">{{ activity.get('estimatedManpower')?.value || 0 }}</td>
+                        <td class="text-center">{{ activity.get('estimatedManDays')?.value || 0 }}</td>
+                        <td class="text-center">{{ activity.get('estimatedSkillLabour')?.value || 0 }}</td>
+                        <td class="text-center">{{ activity.get('workStartDate')?.value | date:'MM/dd/yyyy' }}</td>
+                        <td class="text-center">{{ activity.get('workEndDate')?.value | date:'MM/dd/yyyy' }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                }
+              </div>
+
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+}

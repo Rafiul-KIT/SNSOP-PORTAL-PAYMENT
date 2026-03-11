@@ -140,6 +140,11 @@ export class Header {
             routerLink: 'sub-project/list',
           },
           {
+            label: 'Sub-project View',
+            icon: 'fas fa-clipboard',
+            routerLink: 'sub-project/view',
+          },
+          {
             label: 'Sub-project approval',
             icon: '	fas fa-tasks',
             routerLink: 'sub-project/approval',
