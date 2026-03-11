@@ -73,6 +73,8 @@ function dateRangeValidator(formGroup: FormGroup) {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PaidDateWisePaymentInvoice implements OnInit {
+  readonly maxCalendarDate: Date = new Date(new Date().setHours(23, 59, 59, 999));
+
   isLoading = false;
   isShow = false;
   isExporting = false;
@@ -103,11 +105,71 @@ export class PaidDateWisePaymentInvoice implements OnInit {
     private router: Router
   ) {}
 
-  ngOnInit(): Promise<void> {
+  async ngOnInit(): Promise<void> {
+    this.isLoading = true; // Overall loading starts here
     this.initBreadcrumb();
     this.initForm();
-    this.loadStates();
-    return Promise.resolve();
+    
+    try {
+      await this.loadStates(); // Ensure states are loaded first
+
+      // Restore filter state from session storage
+      const storedFilters = sessionStorage.getItem('paidDateWiseAbstractFilters');
+      if (storedFilters) {
+        const filters = JSON.parse(storedFilters);
+
+        // Date objects need to be converted back
+        if (filters.fromDate) {
+          filters.fromDate = new Date(filters.fromDate);
+        }
+        if (filters.toDate) {
+          filters.toDate = new Date(filters.toDate);
+        }
+
+        // Load county, payam, boma lists based on stored filters
+        if (filters.state?.id) {
+          try {
+            this.countyList = await this.lookupService.getCountyListByStateId(String(filters.state.id));
+            this.searchForm.get('county')?.enable();
+          } catch (error) {
+            console.error('Error loading counties during state restoration:', error);
+          }
+
+          if (filters.county?.id) {
+            try {
+              this.payamList = await this.lookupService.getPayamListByCountyId(String(filters.county.id));
+              this.searchForm.get('payam')?.enable();
+            } catch (error) {
+              console.error('Error loading payams during state restoration:', error);
+            }
+
+            if (filters.payam?.id) {
+              try {
+                this.bomaList = await this.lookupService.getBomaListByPayamId(String(filters.payam.id));
+                this.searchForm.get('boma')?.enable();
+              } catch (error) {
+                console.error('Error loading bomas during state restoration:', error);
+              }
+            }
+          }
+        }
+
+        // After all lists are potentially populated, patch the form
+        this.searchForm.patchValue(filters);
+        
+        sessionStorage.removeItem('paidDateWiseAbstractFilters'); // Clear after use
+      }
+    } catch (error) {
+      console.error("Error in ngOnInit during filter restoration:", error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to restore filter state or load data.',
+      });
+    } finally {
+      this.isLoading = false; // Overall loading ends here
+      this.cdr.markForCheck(); // Final UI update
+    }
   }
 
   private initBreadcrumb(): void {
@@ -264,8 +326,10 @@ export class PaidDateWisePaymentInvoice implements OnInit {
     this.cdr.markForCheck();
   }
 
-  async fetchAllRecords(): Promise<void> {
-    this.isLoading = true;
+  async fetchAllRecords(setLoading: boolean = true): Promise<void> {
+    if (setLoading) {
+      this.isLoading = true;
+    }
     this.isShow = false;
     this.cdr.markForCheck();
 
@@ -325,7 +389,9 @@ export class PaidDateWisePaymentInvoice implements OnInit {
       });
       this.isShow = false;
     } finally {
-      this.isLoading = false;
+      if (setLoading) {
+        this.isLoading = false;
+      }
       this.cdr.markForCheck();
     }
   }
@@ -450,6 +516,8 @@ export class PaidDateWisePaymentInvoice implements OnInit {
   viewDetails(record: any): void {
     const fromDate = this.formatDateForNavigation(this.searchForm.value.fromDate);
     const toDate = this.formatDateForNavigation(this.searchForm.value.toDate);
+
+    sessionStorage.setItem('paidDateWiseAbstractFilters', JSON.stringify(this.searchForm.value)); // Save filters
 
     this.router.navigate(['/invoice/paid-date-wise-payment-invoice-details'], {
       queryParams: {

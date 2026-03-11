@@ -2,7 +2,7 @@
   position: fixed;
   top: 0;
   left: 0;
-  height: 60px;
+  min-height: 60px;
   background-color: #CFE2FF;
   display: flex;
   align-items: center;
@@ -164,4 +164,69 @@
     justify-content: flex-start;
     width: 100%;
   }
+}
+// Add this inside your .header styles
+
+@media (max-width: 960px) {
+  .header {
+    // flex-wrap: wrap;
+    padding: 0 8px;
+    min-height: 50px;
+
+    .portals {
+      flex: 0 0 auto;
+
+      .vertical-line {
+        display: none; // Hide vertical line on mobile
+      }
+
+      div {
+        margin-left: 6px;
+      }
+
+      .name {
+        font-size: 16px;
+      }
+
+      strong span {
+        font-size: 11px;
+      }
+    }
+
+    .menues {
+      // display: none; 
+      width: 100%;
+      // order: 2;
+      background-color: #CFE2FF;
+      // border-top: 1px solid #0481fd;
+      padding: 5px 0;
+
+      &.mobile-open {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      p-menubar {
+        width: 100%;
+      }
+    }
+
+    // Add a hamburger button (see HTML below)
+    .hamburger-btn {
+      display: flex !important;
+      margin-left: auto;
+    }
+  }
+}
+
+// Hide hamburger on desktop
+.hamburger-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: #0ea5e9;
+  cursor: pointer;
+  padding: 4px 8px;
 }

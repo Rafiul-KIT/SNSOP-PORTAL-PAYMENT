@@ -74,6 +74,7 @@ interface SubProjectDto {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BeneficiaryAttendance implements OnInit {
+  private readonly FILTER_STORAGE_KEY = 'beneficiaryAttendance_filters';
   isLoading = true;
   lookupsLoaded = false;
   searchForm!: FormGroup;
@@ -136,6 +137,7 @@ export class BeneficiaryAttendance implements OnInit {
     try {
       await this.loadInitialLookups();
       this.lookupsLoaded = true;
+      await this.restoreFiltersFromStorage();
     } catch (err) {
       console.error('Lookups loading error:', err);
       this.messageService.add({
@@ -166,6 +168,78 @@ export class BeneficiaryAttendance implements OnInit {
       workActivity: [null],
       screeningStatus: '1',
     });
+  }
+
+  private saveFiltersToStorage(): void {
+    const state = {
+      filters: this.searchForm.getRawValue(),
+      currentPage: this.currentPage,
+      pageSize: this.pageSize,
+      advanceSearchPanelVisible: this.advanceSearchPanelVisible,
+    };
+    sessionStorage.setItem(this.FILTER_STORAGE_KEY, JSON.stringify(state));
+  }
+
+  private async restoreFiltersFromStorage(): Promise<boolean> {
+    const stored = sessionStorage.getItem(this.FILTER_STORAGE_KEY);
+    if (!stored) return false;
+
+    sessionStorage.removeItem(this.FILTER_STORAGE_KEY);
+
+    try {
+      const savedState = JSON.parse(stored);
+      const filters = savedState.filters;
+
+      this.currentPage = savedState.currentPage ?? 0;
+      this.pageSize = savedState.pageSize ?? 10;
+      this.advanceSearchPanelVisible = savedState.advanceSearchPanelVisible ?? false;
+
+      // Restore non-geo fields first
+      this.searchForm.patchValue({
+        projectId: filters.projectId,
+        projectName: filters.projectName,
+        typeOfMeeting: filters.typeOfMeeting,
+        status: filters.status,
+        workCode: filters.workCode,
+        workActivity: filters.workActivity,
+        screeningStatus: filters.screeningStatus,
+      });
+
+      // Restore geo fields with cascading
+      if (filters.state) {
+        const stateObj = this.states.find((s: any) => s.id === filters.state.id);
+        if (stateObj) {
+          this.searchForm.patchValue({ state: stateObj });
+          await this.onStateChange(stateObj);
+        }
+      }
+      if (filters.county && this.counties.length > 0) {
+        const countyObj = this.counties.find((c: any) => c.id === filters.county.id);
+        if (countyObj) {
+          this.searchForm.patchValue({ county: countyObj });
+          await this.onCountyChange(countyObj);
+        }
+      }
+      if (filters.payam && this.payams.length > 0) {
+        const payamObj = this.payams.find((p: any) => p.id === filters.payam.id);
+        if (payamObj) {
+          this.searchForm.patchValue({ payam: payamObj });
+          await this.onPayamChange(payamObj);
+        }
+      }
+      if (filters.boma && this.bomas.length > 0) {
+        const bomaObj = this.bomas.find((b: any) => b.id === filters.boma.id);
+        if (bomaObj) {
+          this.searchForm.patchValue({ boma: bomaObj });
+        }
+      }
+
+      this.cdr.markForCheck();
+      return true;
+    } catch (err) {
+      console.error('Error restoring filters:', err);
+      return false;
+    }
   }
 
   initBreadcrumb() {
@@ -302,12 +376,14 @@ export class BeneficiaryAttendance implements OnInit {
     this.payams = [];
     this.bomas = [];
     this.currentPage = 0;
+    sessionStorage.removeItem(this.FILTER_STORAGE_KEY);
     this.fetchPage(this.currentPage, this.pageSize);
     this.cdr.markForCheck();
   }
 
   // ---------- Actions ----------
   editSubProject(id: number) {
+    this.saveFiltersToStorage();
     this.router.navigate(['attendance/view', id]);
   }
 

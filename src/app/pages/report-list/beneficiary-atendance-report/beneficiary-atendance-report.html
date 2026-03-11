@@ -1,0 +1,231 @@
+<p-toast position="bottom-right"></p-toast>
+
+<div class="breadcrumb-wrapper">
+    <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
+</div>
+
+<!-- Step 1: Sub-project Search Div -->
+<div class="card p-3 mb-3 shadow-sm">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0"><i class="fas fa-search me-2 text-primary"></i>Step 1: Find Sub-project (Optional)</h5>
+        <p-button label="Reset All" icon="fas fa-refresh" severity="danger" size="small" [outlined]="true"
+            (onClick)="resetAll()"></p-button>
+    </div>
+    
+    <form [formGroup]="subprojectForm" class="row g-3">
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="states" optionLabel="name" formControlName="state"
+                    (onChange)="onStateChange($event.value)" class="w-100" />
+                <label>State</label>
+            </p-floatlabel>
+        </div>
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="countyList" optionLabel="name" formControlName="county"
+                    (onChange)="onCountyChange($event.value)" class="w-100" />
+                <label>County</label>
+            </p-floatlabel>
+        </div>
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="payamList" optionLabel="name" formControlName="payam"
+                    (onChange)="onPayamChange($event.value)" class="w-100" />
+                <label>Payam</label>
+            </p-floatlabel>
+        </div>
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="bomaList" optionLabel="name" formControlName="boma" class="w-100" />
+                <label>Boma</label>
+            </p-floatlabel>
+        </div>
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <input pInputText class="form-control" formControlName="workCode" />
+                <label>Work Code</label>
+            </p-floatlabel>
+        </div>
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="statuses" optionLabel="label" formControlName="status" class="w-100" />
+                <label>Status</label>
+            </p-floatlabel>
+        </div>
+        <div class="col-12 text-end">
+            <p-button label="Search Sub-projects" icon="fas fa-list" severity="primary" size="small"
+               (onClick)="searchSubprojects()" [loading]="loadingSubprojects"></p-button>
+        </div>
+    </form>
+
+    @if (subprojectList.length > 0) {
+    <div class="mt-3">
+        <p-table [value]="subprojectList" [scrollable]="true" scrollHeight="250px" size="small" 
+                 selectionMode="single" [(selection)]="selectedSubproject" (onRowSelect)="onSubprojectSelect($event.data)"
+                 [tableStyle]="{ 'min-width': '1000px' }">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th style="width: 50px"></th>
+                    <th>Work Code</th>
+                    <th>Project Name</th>
+                    <th>State</th>
+                    <th>County</th>
+                    <th>Payam</th>
+                    <th>Boma</th>
+                    <th>Status</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-sp>
+                <tr [pSelectableRow]="sp" [class.bg-primary-subtle]="selectedSubproject?.id === sp.id">
+                    <td class="text-center">
+                        <p-radioButton [value]="sp" [(ngModel)]="selectedSubproject" (onClick)="onSubprojectSelect(sp)"></p-radioButton>
+                    </td>
+                    <td><b>{{ sp.workCode }}</b></td>
+                    <td>{{ sp.projectName }}</td>
+                    <td>{{ sp.stateName }}</td>
+                    <td>{{ sp.countyName }}</td>
+                    <td>{{ sp.payamName }}</td>
+                    <td>{{ sp.bomaName }}</td>
+                    <td><span class="badge bg-success">{{ sp.status }}</span></td>
+                </tr>
+            </ng-template>
+        </p-table>
+        <p-paginator [rows]="subprojectSize" [totalRecords]="totalSubprojects"
+            [rowsPerPageOptions]="[10, 25, 50]" (onPageChange)="onSubprojectPageChange($event)" [first]="(subprojectPage) * subprojectSize">
+        </p-paginator>
+    </div>
+    }
+</div>
+
+<!-- Step 2: Attendance Report Div -->
+<div class="card p-3 shadow-sm border-primary">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0"><i class="fas fa-calendar-check me-2 text-primary"></i>Step 2: Generate Attendance Report</h5>
+    </div>
+
+    <!-- Sub-project Info Banner -->
+    <div class="bg-light p-3 rounded mb-3 border">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <small class="text-muted d-block">Project Name</small>
+                <strong>{{ selectedSubproject ? selectedSubproject.projectName : 'All Projects' }}</strong>
+            </div>
+            <div class="col-md-4">
+                <small class="text-muted d-block">Work Code</small>
+                <strong>{{ selectedSubproject ? selectedSubproject.workCode : 'All Sub-projects' }}</strong>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <small class="text-muted d-block">Location</small>
+                <strong>
+                    @if (selectedSubproject) {
+                        {{ selectedSubproject.stateName }}, {{ selectedSubproject.countyName }}, {{ selectedSubproject.payamName }}, {{ selectedSubproject.bomaName }}
+                    } @else {
+                        All Locations
+                    }
+                </strong>
+            </div>
+        </div>
+    </div>
+
+    <form [formGroup]="attendanceForm" class="row g-3 align-items-end mb-3">
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-datePicker formControlName="fromDate" [showIcon]="true" dateFormat="dd/mm/yy"
+                    class="w-100" [maxDate]="maxDate"></p-datePicker>
+                <label>From Date <span class="text-danger">*</span></label>
+            </p-floatlabel>
+        </div>
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-datePicker formControlName="toDate" [showIcon]="true" dateFormat="dd/mm/yy"
+                    class="w-100" [maxDate]="maxDate"></p-datePicker>
+                <label>To Date <span class="text-danger">*</span></label>
+            </p-floatlabel>
+        </div>
+        <div class="col-md-6 text-end">
+            <p-button label="Generate Report" icon="fas fa-file-invoice" severity="success" size="small"
+               (onClick)="showAttendanceReport()" [loading]="loadingAttendance"></p-button>
+        </div>
+    </form>
+
+    <p-divider></p-divider>
+
+    @if (hasSearchedAttendance) {
+        @if (loadingAttendance) {
+            <div class="text-center p-5">
+                <i class="fas fa-spinner fa-spin fa-3x text-primary mb-3"></i>
+                <p>Fetching attendance records...</p>
+            </div>
+        } @else {
+            <p-table [value]="records" 
+                [tableStyle]="{ 'min-width': '1200px', 'margin-bottom': '5px' }" size="small" [rows]="pageSize">
+                
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th colspan="100" class="text-start bg-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <p-button label="Download CSV" icon="fas fa-download" severity="help" size="small"
+                                    [outlined]="true" (onClick)="exportCsv()" *ngIf="records.length > 0" [loading]="exportingCsv"></p-button>
+                                <p class="fw-bold mb-0">
+                                    Total Beneficiaries: <kbd>{{ totalRecords }}</kbd>
+                                </p>
+                            </div>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th class="text-center" style="min-width: 50px">S.No</th>
+                        <th class="text-center" style="min-width: 250px">Full Name</th>
+                        <th class="text-center" style="min-width: 100px">Age</th>
+                        <th class="text-center" style="min-width: 80px">Gender</th>
+                        <th class="text-center" style="min-width: 100px">Component</th>
+                        <th class="text-center" style="min-width: 80px">Total</th>
+                        <th class="text-center" style="min-width: 80px">Present</th>
+                        <th class="text-center" style="min-width: 80px">Absent</th>
+                        @for (date of dateColumns; track date) {
+                            <th class="text-center" style="min-width: 100px">{{ date }}</th>
+                        }
+                    </tr>
+                </ng-template>
+
+                <ng-template pTemplate="body" let-item let-i="rowIndex">
+                    <tr>
+                        <td class="text-center">{{ (currentPage * pageSize) + i + 1 }}</td>
+                        <td>{{ item.fullName }}</td>
+                        <td class="text-center">{{ item.Age }}</td>
+                        <td class="text-center">{{ item.Gender }}</td>
+                        <td class="text-center">{{ item.Component }}</td>
+                        <td class="text-center">{{ item.tot }}</td>
+                        <td class="text-center text-success fw-bold">{{ item.present }}</td>
+                        <td class="text-center text-danger fw-bold">{{ item.absent }}</td>
+                        @for (date of dateColumns; track date) {
+                            <td class="text-center">
+                                @if (item[date] === '1') {
+                                    <span class="badge bg-success" pTooltip="Present">P</span>
+                                } @else if (item[date] === '0' || item[date] === null) {
+                                    <span class="badge bg-danger" pTooltip="Absent">A</span>
+                                } @else {
+                                    {{ item[date] }}
+                                }
+                            </td>
+                        }
+                    </tr>
+                </ng-template>
+
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                        <td [attr.colspan]="9 + dateColumns.length" class="text-center text-danger p-4">
+                            <b>No attendance records found for this period!</b>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+
+            @if(totalRecords > pageSize){
+            <p-paginator class="paginator-sticky" [rows]="pageSize" [totalRecords]="totalRecords"
+                [rowsPerPageOptions]="[10, 25, 50]" (onPageChange)="onPageChange($event)" [first]="(currentPage) * pageSize"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
+            </p-paginator>
+            }
+        }
+    }
+</div>

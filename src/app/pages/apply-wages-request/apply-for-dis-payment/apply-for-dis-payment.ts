@@ -52,6 +52,7 @@ interface Beneficiary {
   providers: []
 })
 export class ApplyForDisPayment implements OnInit {
+  private readonly FILTER_STORAGE_KEY = 'applyForDisPayment_filters';
   wagesForm!: FormGroup;
   submissionForm!: FormGroup;
   
@@ -106,7 +107,9 @@ export class ApplyForDisPayment implements OnInit {
     this.initializeSubmissionForm();
     this.initBreadcrumb();
     this.populateYearAndMonth();
-    this.loadInitialData();
+    this.loadInitialData().then(() => {
+      this.restoreFiltersFromStorage();
+    });
     this.showResults = false;
   }
 
@@ -294,7 +297,7 @@ export class ApplyForDisPayment implements OnInit {
     this.filteredBeneficiaries = [];
     this.selectedBeneficiaries = [];
     this.showResults = true;
-
+    this.saveFiltersToStorage();
     await this.fetchBeneficiaries();
   }
 
@@ -397,6 +400,7 @@ export class ApplyForDisPayment implements OnInit {
     this.beneficiaryNameFilter = '';
     this.registrationPhaseFilter = '';
     this.onFilterChange();
+    sessionStorage.removeItem(this.FILTER_STORAGE_KEY);
   }
   
   async onSubmitDisRequest(): Promise<void> {
@@ -455,6 +459,7 @@ export class ApplyForDisPayment implements OnInit {
         this.attachmentFiles = []; // Clear attachments after successful submission
         this.updateTotalAttachmentSize();
         this.showResults = false;
+        sessionStorage.removeItem(this.FILTER_STORAGE_KEY); // Clear filters after successful submission
       } else {
         Swal.fire({ icon: 'error', title: 'Error', text:  'Failed to submit DIS wage request.' });
       }
@@ -467,6 +472,7 @@ export class ApplyForDisPayment implements OnInit {
   }
 
   onCancel(): void {
+    sessionStorage.removeItem(this.FILTER_STORAGE_KEY); // Clear filters on cancel
     this.router.navigate(['/']);
   }
 
@@ -484,5 +490,90 @@ export class ApplyForDisPayment implements OnInit {
   isSubmissionFieldInvalid(fieldName: string): boolean {
     const field = this.submissionForm.get(fieldName);
     return !!(field && field.invalid && field.touched);
+  }
+
+  private saveFiltersToStorage(): void {
+    const state = {
+      wagesForm: this.wagesForm.getRawValue(),
+      householdNumberFilter: this.householdNumberFilter,
+      beneficiaryNameFilter: this.beneficiaryNameFilter,
+      registrationPhaseFilter: this.registrationPhaseFilter,
+      sortField: this.sortField,
+      sortOrder: this.sortOrder,
+      showResults: this.showResults,
+    };
+    sessionStorage.setItem(this.FILTER_STORAGE_KEY, JSON.stringify(state));
+  }
+
+  private async restoreFiltersFromStorage(): Promise<boolean> {
+    const stored = sessionStorage.getItem(this.FILTER_STORAGE_KEY);
+    if (!stored) return false;
+
+    // Do NOT remove from session storage here, because the form might be invalid after restoring,
+    // and the user might want to submit it again after fixing.
+    // It should be removed after a successful submission or explicit clear/cancel.
+
+    try {
+      const savedState = JSON.parse(stored);
+      const wagesFormFilters = savedState.wagesForm;
+
+      // Restore main search form
+      // Need to handle async loading of dependent dropdowns
+      // Patch top-level fields first
+      this.wagesForm.patchValue({
+        requestYear: wagesFormFilters.requestYear,
+        requestMonthIndex: wagesFormFilters.requestMonthIndex,
+        paymentCycleId: wagesFormFilters.paymentCycleId,
+      });
+
+      // Restore geo fields with cascading
+      if (wagesFormFilters.stateId && this.states.length > 0) {
+        const stateObj = this.states.find((s: LookupItem) => s.id === wagesFormFilters.stateId);
+        if (stateObj) {
+          this.wagesForm.get('stateId')?.setValue(stateObj.id);
+          await this.loadCounties(stateObj.id); // Await this
+        }
+      }
+      if (wagesFormFilters.countyId && this.counties.length > 0) {
+        const countyObj = this.counties.find((c: LookupItem) => c.id === wagesFormFilters.countyId);
+        if (countyObj) {
+          this.wagesForm.get('countyId')?.setValue(countyObj.id);
+          await this.loadPayams(countyObj.id); // Await this
+        }
+      }
+      if (wagesFormFilters.payamId && this.payams.length > 0) {
+        const payamObj = this.payams.find((p: LookupItem) => p.id === wagesFormFilters.payamId);
+        if (payamObj) {
+          this.wagesForm.get('payamId')?.setValue(payamObj.id);
+          await this.loadBomas(payamObj.id); // Await this
+        }
+      }
+      if (wagesFormFilters.bomaId && this.bomas.length > 0) {
+        const bomaObj = this.bomas.find((b: LookupItem) => b.id === wagesFormFilters.bomaId);
+        if (bomaObj) {
+          this.wagesForm.get('bomaId')?.setValue(bomaObj.id);
+        }
+      }
+      
+      // Restore client-side filters and sorting
+      this.householdNumberFilter = savedState.householdNumberFilter ?? '';
+      this.beneficiaryNameFilter = savedState.beneficiaryNameFilter ?? '';
+      this.registrationPhaseFilter = savedState.registrationPhaseFilter ?? '';
+      this.sortField = savedState.sortField ?? '';
+      this.sortOrder = savedState.sortOrder ?? 1;
+      this.showResults = savedState.showResults ?? false;
+
+      this.cdr.markForCheck();
+
+      // After restoring, re-run the search to populate beneficiaries
+      if (this.showResults && this.wagesForm.valid) {
+        await this.fetchBeneficiaries();
+      }
+      return true;
+    } catch (err) {
+      console.error('Error restoring filters:', err);
+      sessionStorage.removeItem(this.FILTER_STORAGE_KEY); // Clear on error
+      return false;
+    }
   }
 }

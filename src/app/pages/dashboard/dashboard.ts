@@ -40,7 +40,11 @@ interface WageReqData {
   totalUniqueLIPWBeneficiary: number;
   totalUniqueDISBeneficiary:number;
   totalUniquePaidBeneficiary: number;
+  totalUniquePaidDisBeneficiary: number;
+  totalUniquePaidLipwBeneficiary: number;
   totalUniqueUnpaidBeneficiary: number;
+  totalUniqueUnpaidDisBeneficiary: number;
+  totalUniqueUnpaidLipwBeneficiary: number;
   totalPaymentAmount: number;
   totalPaidAmount: number;
   totalUnpaidAmount: number;
@@ -245,23 +249,31 @@ subprojectStatusChartOptions: any;
           {
             name: 'LIPW',
             beneficiaries: this.dashboardData.wageReqData.totalUniqueLIPWBeneficiary,
-            total: this.dashboardData.wageReqData.lipwTotalPaymentAmount,
-            paid: this.dashboardData.wageReqData.lipwTotalPaidAmount,
-            unpaid: this.dashboardData.wageReqData.lipwTotalUnpaidAmount,
+            total: this.dashboardData.wageReqData.totalUniqueLIPWBeneficiary,
+            paid: this.dashboardData.wageReqData.totalUniquePaidLipwBeneficiary,
+            unpaid: this.dashboardData.wageReqData.totalUniqueUnpaidLipwBeneficiary,
           },
           {
             name: 'DIS',
             beneficiaries: this.dashboardData.wageReqData.totalUniqueDISBeneficiary,
-            total: this.dashboardData.wageReqData.disTotalPaymentAmount,
-            paid: this.dashboardData.wageReqData.disTotalPaidAmount,
-            unpaid: this.dashboardData.wageReqData.disTotalUnpaidAmount,
+            total: this.dashboardData.wageReqData.totalUniqueDISBeneficiary,
+            paid: this.dashboardData.wageReqData.totalUniquePaidDisBeneficiary,
+            unpaid: this.dashboardData.wageReqData.totalUniqueUnpaidDisBeneficiary,
           },
           {
             name: 'ALL',
-            beneficiaries: this.dashboardData.wageReqData.totalUniqueBeneficiary,
-            total: this.dashboardData.wageReqData.totalPaymentAmount,
-            paid: this.dashboardData.wageReqData.totalPaidAmount,
-            unpaid: this.dashboardData.wageReqData.totalUnpaidAmount,
+            beneficiaries:
+              this.dashboardData.wageReqData.totalUniqueLIPWBeneficiary +
+              this.dashboardData.wageReqData.totalUniqueDISBeneficiary,
+            total:
+              this.dashboardData.wageReqData.totalUniqueLIPWBeneficiary +
+              this.dashboardData.wageReqData.totalUniqueDISBeneficiary,
+            paid:
+              this.dashboardData.wageReqData.totalUniquePaidLipwBeneficiary +
+              this.dashboardData.wageReqData.totalUniquePaidDisBeneficiary,
+            unpaid:
+              this.dashboardData.wageReqData.totalUniqueUnpaidLipwBeneficiary +
+              this.dashboardData.wageReqData.totalUniqueUnpaidDisBeneficiary,
           },
         ];
 

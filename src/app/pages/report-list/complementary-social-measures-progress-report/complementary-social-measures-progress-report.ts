@@ -262,4 +262,129 @@ export class ComplementarySocialMeasuresProgressReport implements OnInit {
       this.cdr.markForCheck();
     }
   }
+
+  async download(format: 'pdf' | 'csv'): Promise<void> {
+    if (this.searchForm.invalid) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Validation Error',
+        text: 'Please perform a valid search first before downloading.',
+      });
+      return;
+    }
+
+    const formValues = this.searchForm.value;
+    const stateId = formValues.state?.id;
+    const countyId = formValues.county?.id;
+    const payamId = formValues.payam?.id;
+    const bomaId = formValues.boma?.id;
+
+    const endpoint = `/api/training-attendance-report/cycle-wise/${format}?stateId=${stateId}&countyId=${countyId}&payamId=${payamId}&bomaId=${bomaId}`;
+
+    // Show progress dialog
+    Swal.fire({
+      title: 'Downloading...',
+      html: `
+        <div class="text-center">
+          <p>Please wait while your ${format.toUpperCase()} file is being downloaded...</p>
+          <div class="progress" style="height: 20px;">
+            <div id="download-progress-bar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+              style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+          <p id="download-progress-text">0%</p>
+        </div>
+      `,
+      allowOutsideClick: false,
+      showConfirmButton: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    try {
+      const response: any = await this.apiService.axiosInstance.get(endpoint, {
+        responseType: 'blob',
+        onDownloadProgress: (progressEvent) => {
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / (progressEvent.total || progressEvent.loaded)
+          );
+          const progressBar = document.getElementById('download-progress-bar');
+          const progressText = document.getElementById('download-progress-text');
+          if (progressBar && progressText) {
+            progressBar.style.width = `${percentCompleted}%`;
+            progressBar.setAttribute('aria-valuenow', percentCompleted.toString());
+            progressText.innerText = `${percentCompleted}%`;
+          }
+        }
+      });
+
+      Swal.close();
+
+      const blob = new Blob([response.data], {
+        type: response.headers['content-type'],
+      });
+
+      const contentDisposition = response.headers['content-disposition'];
+      let fileName = `complementary-social-measures-report-${new Date().getTime()}.${format}`;
+      if (contentDisposition) {
+        const fileNameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+        if (fileNameMatch && fileNameMatch.length > 1) {
+          fileName = fileNameMatch[1];
+        }
+      }
+
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(link.href);
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Success',
+        text: `${format.toUpperCase()} file downloaded successfully.`,
+      });
+
+    } catch (error: any) {
+      Swal.close();
+      console.error(`Error downloading ${format}:`, error);
+      
+      const defaultErrorMessage = `Failed to download ${format} file.`;
+      let errorMessage = defaultErrorMessage;
+
+      if (error.response && error.response.data && error.response.data instanceof Blob) {
+        try {
+          const reader = new FileReader();
+          await new Promise<void>((resolve) => {
+            reader.onload = () => {
+              try {
+                const errorData = JSON.parse(reader.result as string);
+                errorMessage = errorData.message || defaultErrorMessage;
+              } catch (e) {
+                errorMessage = defaultErrorMessage;
+              }
+              resolve();
+            };
+            reader.onerror = () => {
+              errorMessage = defaultErrorMessage;
+              resolve();
+            };
+            reader.readAsText(error.response.data);
+          });
+        } catch (e) {
+          console.error('Could not parse error blob', e);
+        }
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Download Failed',
+        text: errorMessage,
+      });
+    }
+  }
 }
