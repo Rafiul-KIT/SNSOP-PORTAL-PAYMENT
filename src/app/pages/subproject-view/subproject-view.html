@@ -5,6 +5,12 @@
     <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
 </div>
 
+<p-dialog [(visible)]="showDownloadProgressModal" [modal]="true" [closable]="false" [draggable]="false"
+    [resizable]="false" [style]="{ width: '30vw' }" header="Downloading">
+    <h5 class="mb-2">{{ downloadStatus }}</h5>
+    <p-progressBar [value]="downloadProgress" [mode]="downloadProgress > 0 ? 'determinate' : 'indeterminate'"></p-progressBar>
+</p-dialog>
+
 <div class="card p-3 mb-2">
     <form [formGroup]="searchForm" class="row g-3">
      

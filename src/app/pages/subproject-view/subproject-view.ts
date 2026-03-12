@@ -23,6 +23,7 @@ import { SelectModule } from 'primeng/select';
 import { DialogModule } from 'primeng/dialog';
 import { MessageService } from 'primeng/api';
 import { InputTextModule } from 'primeng/inputtext';
+import { ProgressBarModule } from 'primeng/progressbar';
 import { saveAs } from 'file-saver';
 import {
   LookupItem,
@@ -74,7 +75,8 @@ interface SubProjectDto {
     RouterModule,
     TooltipModule,
     Loader,
-    InputTextModule
+    InputTextModule,
+    ProgressBarModule,
   ],
   providers: [MessageService],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -82,6 +84,9 @@ interface SubProjectDto {
 export class SubprojectView implements OnInit {
   private readonly FILTER_STORAGE_KEY = 'subProjectView_filters';
   isLoading = true;
+  showDownloadProgressModal = false;
+  downloadProgress = 0;
+  downloadStatus = 'Downloading...';
   lookupsLoaded = false;
   searchForm!: FormGroup;
   roleId: number | null = null;
@@ -449,18 +454,28 @@ export class SubprojectView implements OnInit {
   }
 
   async download(format: 'pdf' | 'csv') {
-    this.isLoading = true;
-    this.cdr.markForCheck();
+    this.showDownloadProgressModal = true;
+    this.downloadProgress = 0;
+    this.downloadStatus = 'Requesting data from server...';
+    this.cdr.detectChanges();
 
     const body = this.buildSearchBody(0, 100000);
 
     try {
-      const res: any = await this.api.POST(
+      const res: any = await this.api.axiosInstance.post(
         `api/subproject/get?page=0&size=100000`,
-        body
+        body,
+        {
+          onDownloadProgress: (progressEvent: any) => {
+            // Keep UI interactive while chunks arrive, but keep mode indeterminate (0)
+            this.cdr.detectChanges();
+          },
+        }
       );
+      
       const data = res.data || res;
       const content = data.content || [];
+      const totalRecords = data.totalElements || content.length;
 
       if (content.length === 0) {
         this.messageService.add({
@@ -468,8 +483,17 @@ export class SubprojectView implements OnInit {
           summary: 'Download',
           detail: 'No data to download',
         });
+        this.showDownloadProgressModal = false;
+        this.cdr.detectChanges();
         return;
       }
+
+      this.downloadStatus = `Processing ${totalRecords} records. Generating file...`;
+      this.downloadProgress = 100;
+      this.cdr.detectChanges();
+
+      // Give UI a moment to show the record count before blocking main thread for generation
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       if (format === 'pdf') {
         await this.exportPdf(content);
@@ -484,8 +508,10 @@ export class SubprojectView implements OnInit {
         detail: 'Failed to download data.',
       });
     } finally {
-      this.isLoading = false;
-      this.cdr.markForCheck();
+      this.showDownloadProgressModal = false;
+      this.downloadProgress = 0;
+      this.downloadStatus = 'Downloading...';
+      this.cdr.detectChanges();
     }
   }
 
