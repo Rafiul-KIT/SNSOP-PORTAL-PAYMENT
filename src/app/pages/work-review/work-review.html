@@ -378,9 +378,57 @@
               <!-- Approval Section -->
               <div class="card bg-light mt-3" [formGroup]="approvalForm">
                 <div class="card-body">
-                  <h5 class="text-secondary border-bottom border-1 pb-2 mb-4">
+                  <h5 class="text-secondary  pb-2 mb-4">
                     <i class="fas fa-clipboard-check me-2"></i>Approval Details
                   </h5>
+
+                  <!-- Review History Section -->
+                  @if (reviewHistory().length > 0) {
+                  <hr class="my-4">
+                  <h5 class="text-secondary border-bottom border-1 pb-2 mb-4">
+                    <i class="fas fa-history me-2"></i>Review History
+                  </h5>
+                  <div class="table-responsive">
+                    <table class="table table-bordered align-middle shadow-sm">
+                      <thead class="table-light text-center">
+                        <tr>
+                          <th style="width: 50px;">#</th>
+                          <th>Reviewed At</th>
+                          <th>Status</th>
+                          <th>Comments</th>
+                          <th>Attachment</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (history of reviewHistory(); track history.reviewedAt; let i = $index) {
+                        <tr>
+                          <td class="text-center fw-semibold">{{ i + 1 }}</td>
+                          <td class="text-center">{{ history.reviewedAt | date:'medium' }}</td>
+                          <td class="text-center">
+                            <span class="badge" [ngClass]="{
+                                'bg-success': history.status === 'Approved',
+                                'bg-danger': history.status === 'Rejected',
+                                'bg-warning text-dark': history.status !== 'Approved' && history.status !== 'Rejected'
+                              }">
+                              {{ history.status }}
+                            </span>
+                          </td>
+                          <td>{{ history.comments }}</td>
+                          <td class="text-center">
+                            @if (history.filePath) {
+                            <a class="text-primary" (click)="viewAttachment(history.filePath)" [title]="history.fileName">
+                              <i class="fas fa-paperclip me-1"></i> View
+                            </a>
+                            } @else {
+                            <span class="text-muted">-</span>
+                            }
+                          </td>
+                        </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                  }
 
                   <div class="row g-3">
                     <!-- PDC Approve Date (shown only if roleId === 12) -->
@@ -445,6 +493,8 @@
                       <i class="fas fa-check me-2"></i>Approve
                     </button>
                   </div>
+
+                  
                 </div>
               </div>
 
