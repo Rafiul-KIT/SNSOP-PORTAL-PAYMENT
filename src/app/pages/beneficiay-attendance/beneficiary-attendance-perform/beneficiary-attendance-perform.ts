@@ -440,6 +440,7 @@ export class BeneficiaryAttendancePerform implements OnInit {
       const attendanceDateStr = `${year}-${month}-${day}`;
   
       const payload = {
+        source: 'WEB_PORTAL',
         subprojectId: this.subproject.id,
         status: true,
         list: this.beneficiaries.map(b => ({
