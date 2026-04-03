@@ -4,12 +4,12 @@
 
 <div class="helpdesk-container">
   <!-- Page Header -->
-  <div class="d-flex justify-content-between align-items-start mb-3">
+  <div class="page-header">
     <div>
       <h2 class="page-title">My Requests</h2>
       <p class="page-subtitle">Review all submitted requests, current progress, and past support outcomes.</p>
     </div>
-    <div class="d-flex gap-2">
+    <div class="header-actions">
       <p-button label="Export Report" icon="fas fa-download" [outlined]="true" severity="primary" size="small"></p-button>
       <p-button label="View History" icon="fas fa-history" severity="primary" size="small"></p-button>
     </div>
@@ -21,7 +21,7 @@
       <div class="card p-3">
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h5 class="card-section-title mb-0">My Requests</h5>
-          <span class="text-muted small">Requester view</span>
+          <span class="text-muted small d-none d-sm-inline">Requester view</span>
         </div>
 
         @for (req of requests; track req.trackingNo) {

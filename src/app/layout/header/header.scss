@@ -86,21 +86,54 @@
     }
   }
 
-  .help-desk-text {
-    font-size: 0.8em !important; /* Smaller text for Help Desk label */
-  }
-
-  .helpdesk-btn .p-button-label {
-    font-size: 0.6rem !important; // Further reduced font size
-  }
-
-  .helpdesk-btn .p-button-icon {
-    font-size: 0.9rem !important;
-  }
-
   .help-desk-menu-container {
     position: relative;
     display: inline-block;
+  }
+
+  .helpdesk-trigger {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 16px;
+    background: #ffffff;
+    color: #475569;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+
+    i:first-child {
+      font-size: 0.75rem;
+      color: #64748b;
+    }
+
+    .chevron {
+      font-size: 0.5rem;
+      color: #94a3b8;
+      transition: transform 0.25s ease;
+
+      &.open {
+        transform: rotate(180deg);
+      }
+    }
+
+    &:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+      color: #1e293b;
+
+      i:first-child {
+        color: #475569;
+      }
+    }
+
+    &:active {
+      background: #e2e8f0;
+    }
   }
 
   .help-desk-menu {

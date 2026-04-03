@@ -32,10 +32,11 @@
     <div class="help-desk-desktop">
       @if(canAccessHelpDesk){
         <div class="help-desk-menu-container">
-          <p-button [text]="true" severity="info" (onClick)="toggleHelpDeskDropdown()" styleClass="helpdesk-btn">
-            <i class="fas fa-question-circle fa-lg me-2"></i>
-            <span class="help-desk-text">Help Desk</span> <i class="fas fa-caret-down fa-lg ms-1"></i>
-          </p-button>
+          <button class="helpdesk-trigger" (click)="toggleHelpDeskDropdown()">
+            <i class="fas fa-headset"></i>
+            <span>Help Desk</span>
+            <i class="fas fa-chevron-down chevron" [class.open]="showHelpDeskDropdown"></i>
+          </button>
 
 
           <div class="help-desk-menu {{ showHelpDeskDropdown ? 'show' : '' }}" (mouseleave)="hideHelpDeskDropdown()">
