@@ -49,7 +49,7 @@ import { HelpDeskMyRequests } from './pages/help-desk/my-requests/help-desk-my-r
 import { HelpDeskSupportManagement } from './pages/help-desk/support-management/help-desk-support-management';
 import { HelpDeskStatusTracker } from './pages/help-desk/status-tracker/help-desk-status-tracker';
 import { HelpDeskReports } from './pages/help-desk/reports/help-desk-reports';
-import { HelpDeskUserManual } from './pages/help-desk/user-manual/help-desk-user-manual';
+
 
 import { BeneficiaryAtendanceReport } from './pages/report-list/beneficiary-atendance-report/beneficiary-atendance-report';
 
@@ -356,7 +356,6 @@ export const routes: Routes = [
       { path: 'support-management', component: HelpDeskSupportManagement, canActivate: [routeGuard] },
       { path: 'status-tracker', component: HelpDeskStatusTracker, canActivate: [routeGuard] },
       { path: 'reports', component: HelpDeskReports, canActivate: [routeGuard] },
-      { path: 'user-manual', component: HelpDeskUserManual, canActivate: [routeGuard] },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   },
