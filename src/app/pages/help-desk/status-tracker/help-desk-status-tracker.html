@@ -1,0 +1,68 @@
+<div class="breadcrumb-wrapper">
+  <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
+</div>
+
+<div class="helpdesk-container">
+  <!-- Page Header -->
+  <div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+      <h2 class="page-title">Status Tracker</h2>
+      <p class="page-subtitle">Search and review the latest status, timeline, and resolution expectation of a request.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <p-button label="Export Report" icon="fas fa-download" [outlined]="true" severity="primary" size="small"></p-button>
+      <p-button label="Track Request" icon="fas fa-search" severity="primary" size="small" (onClick)="trackRequest()"></p-button>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- Check Status -->
+    <div class="col-lg-6">
+      <div class="card p-3">
+        <h5 class="card-section-title mb-3">Check Ticket Status</h5>
+        <div class="d-flex gap-2 mb-3">
+          <input type="text" pInputText class="w-100" [(ngModel)]="searchTrackingNo" placeholder="SNSOP-SUP-2026-000121" />
+          <p-button label="Check" severity="primary" (onClick)="checkStatus()"></p-button>
+        </div>
+
+        @if (ticketResult) {
+          <div class="ticket-info-card">
+            <div class="info-row"><strong>Tracking Number:</strong> {{ ticketResult.trackingNo }}</div>
+            <div class="info-row"><strong>Current Status:</strong> {{ ticketResult.status }}</div>
+            <div class="info-row"><strong>Assigned Role:</strong> {{ ticketResult.assignedRole }}</div>
+            <div class="info-row"><strong>Expected Resolution:</strong> {{ ticketResult.expectedResolution }}</div>
+            <div class="info-row"><strong>Requester:</strong> {{ ticketResult.requester }}</div>
+          </div>
+          <div class="d-flex gap-2 mt-3">
+            <p-button label="Re-submit" [outlined]="true" severity="secondary" size="small"></p-button>
+            <p-button label="Rate Resolution" severity="success" size="small"></p-button>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="col-lg-6">
+      <div class="card p-3">
+        <h5 class="card-section-title mb-3">Timeline</h5>
+        @if (ticketResult) {
+          <div class="timeline">
+            @for (event of ticketResult.timeline; track event.title) {
+              <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                  <div class="timeline-title">{{ event.title }}</div>
+                  <div class="timeline-detail">{{ event.detail }}</div>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="text-muted text-center py-4">
+            Enter a tracking number and click "Check" to view the timeline.
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

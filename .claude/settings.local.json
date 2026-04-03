@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"c:\\\\projects\\\\frontend\\\\snsop-mf-portal-payment\" log --oneline -10)"
+    ]
+  }
+}

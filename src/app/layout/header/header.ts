@@ -335,8 +335,13 @@ removeHelpDesk(menus: any[]): any[] {
         label: 'Help Desk',
         icon: 'fas fa-question-circle',
         items: [
-          { label: 'View Tickets', routerLink: '/help-desk/tickets', icon: 'fas fa-ticket-alt' },
-          { label: 'Create Ticket', routerLink: '/help-desk/create', icon: 'fas fa-plus' }
+          { label: 'Help Desk Dashboard', routerLink: '/help-desk/dashboard', icon: 'fas fa-tachometer-alt' },
+          { label: 'Submit Support Request', routerLink: '/help-desk/submit-request', icon: 'fas fa-plus-circle' },
+          { label: 'My Requests', routerLink: '/help-desk/my-requests', icon: 'fas fa-clipboard-list' },
+          { label: 'Support Management', routerLink: '/help-desk/support-management', icon: 'fas fa-users-cog' },
+          { label: 'Status Tracker', routerLink: '/help-desk/status-tracker', icon: 'fas fa-search' },
+          { label: 'Reports', routerLink: '/help-desk/reports', icon: 'fas fa-chart-bar' },
+          { label: 'User Manual', routerLink: '/help-desk/user-manual', icon: 'fas fa-book' }
         ]
       },
       

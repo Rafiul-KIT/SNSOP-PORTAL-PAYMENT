@@ -1,0 +1,101 @@
+<div class="breadcrumb-wrapper">
+  <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
+</div>
+
+<div class="helpdesk-container">
+  <!-- Page Header -->
+  <div class="d-flex justify-content-between align-items-start mb-3">
+    <div>
+      <h2 class="page-title">My Requests</h2>
+      <p class="page-subtitle">Review all submitted requests, current progress, and past support outcomes.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <p-button label="Export Report" icon="fas fa-download" [outlined]="true" severity="primary" size="small"></p-button>
+      <p-button label="View History" icon="fas fa-history" severity="primary" size="small"></p-button>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- Request Cards -->
+    <div class="col-lg-8">
+      <div class="card p-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="card-section-title mb-0">My Requests</h5>
+          <span class="text-muted small">Requester view</span>
+        </div>
+
+        @for (req of requests; track req.trackingNo) {
+          <div class="request-card mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <a class="tracking-link">{{ req.trackingNo }}</a>
+                <h6 class="request-title">{{ req.title }}</h6>
+              </div>
+              <p-tag [value]="req.status" [severity]="getStatusSeverity(req.status)" />
+            </div>
+            <p class="request-desc">{{ req.description }}</p>
+            <div class="request-meta">
+              <span>Priority: {{ req.priority }}</span>
+              <span>Category: {{ req.category }}</span>
+              @if (req.assignedTo) {
+                <span>Assigned: {{ req.assignedTo }}</span>
+              }
+              @if (req.submittedDate) {
+                <span>Submitted: {{ req.submittedDate }}</span>
+              }
+              @if (req.rating) {
+                <span>Rating Submitted: {{ req.rating }}</span>
+              }
+              @if (req.resubmitAvailable) {
+                <span class="text-primary">Re-submit Available</span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Summary & Feedback -->
+    <div class="col-lg-4">
+      <div class="card p-3 mb-3">
+        <h5 class="card-section-title mb-3">Request Summary</h5>
+        <div class="row g-2">
+          <div class="col-6">
+            <div class="summary-box">
+              <div class="summary-label">Total</div>
+              <div class="summary-value">{{ summary.total }}</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="summary-box">
+              <div class="summary-label">Resolved</div>
+              <div class="summary-value">{{ summary.resolved }}</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="summary-box">
+              <div class="summary-label">Pending</div>
+              <div class="summary-value">{{ summary.pending }}</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="summary-box">
+              <div class="summary-label">Reopened</div>
+              <div class="summary-value">{{ summary.reopened }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-3">
+        <h5 class="card-section-title mb-3">Recent Feedback</h5>
+        <div class="feedback-stars">
+          @for (star of getStars(feedback.rating); track $index) {
+            <i class="fas fa-star text-warning"></i>
+          }
+        </div>
+        <p class="feedback-comment">{{ feedback.comment }}</p>
+      </div>
+    </div>
+  </div>
+</div>

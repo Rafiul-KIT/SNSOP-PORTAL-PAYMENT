@@ -1,0 +1,97 @@
+.helpdesk-container {
+  padding: 0.5rem 2rem;
+  background: #f8f9fa;
+  min-height: 100vh;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 0.25rem;
+}
+
+.page-subtitle {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin: 0;
+}
+
+.card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e9ecef;
+  background: #fff;
+}
+
+.card-section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.request-card {
+  padding: 1rem;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  background: #fff;
+
+  .tracking-link {
+    font-size: 0.85rem;
+    color: #1565c0;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .request-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0.25rem 0;
+  }
+
+  .request-desc {
+    font-size: 0.85rem;
+    color: #6c757d;
+    font-style: italic;
+    margin-bottom: 0.5rem;
+  }
+
+  .request-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: #6c757d;
+  }
+}
+
+.summary-box {
+  text-align: center;
+  padding: 0.75rem;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+
+  .summary-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+  }
+
+  .summary-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #2c3e50;
+  }
+}
+
+.feedback-stars {
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.feedback-comment {
+  font-size: 0.875rem;
+  color: #495057;
+  margin: 0;
+}
