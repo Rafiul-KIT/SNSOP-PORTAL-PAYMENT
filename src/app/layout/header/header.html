@@ -29,19 +29,22 @@
   </div>
   <!-- Logged In User -->
   @if(userInfo){
-    <div class="help-desk-desktop">
+    <div class="help-desk-desktop pe-1">
       @if(canAccessHelpDesk){
         <div class="help-desk-menu-container">
           <button class="helpdesk-trigger" (click)="toggleHelpDeskDropdown()">
             <i class="fas fa-headset"></i>
-            <span>Help Desk</span>
+            <span>Help</span>
             <i class="fas fa-chevron-down chevron" [class.open]="showHelpDeskDropdown"></i>
           </button>
 
 
           <div class="help-desk-menu {{ showHelpDeskDropdown ? 'show' : '' }}" (mouseleave)="hideHelpDeskDropdown()">
             @for (item of helpDeskChildren; track item) {
-              <a class="item" [routerLink]="item.routerLink" (click)="hideHelpDeskDropdown()">
+              @if (item.separator) {
+                <div class="menu-divider"></div>
+              }
+              <a class="item {{ item.separator ? 'item-highlight' : '' }}" [routerLink]="item.routerLink" (click)="hideHelpDeskDropdown()">
                 <i class="{{ item.icon }} me-2"></i>
                 {{ item.label }}
               </a>
@@ -65,7 +68,7 @@
     @if(canAccessHelpDesk && helpDeskChildren.length > 0){
       <div class="item help-desk-mobile-header">
         <hr class="my-1"> <!-- Separator for clarity -->
-        <span class="fw-bold text-muted px-2">Help Desk</span>
+        <span class="fw-bold text-muted px-2">Help</span>
       </div>
       @for (item of helpDeskChildren; track item) {
         <a class="item help-desk-mobile-item" [routerLink]="item.routerLink" (click)="showUsermenu = false">

@@ -100,7 +100,7 @@
     border-radius: 16px;
     background: #ffffff;
     color: #475569;
-    font-size: 0.72rem;
+    font-size: 0.8rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -190,6 +190,29 @@
           color: #334155;
         }
       }
+
+      &.item-highlight {
+        color: #0d6efd;
+
+        i {
+          color: #0d6efd;
+        }
+
+        &:hover {
+          background-color: #e8f0fe;
+          color: #0a58ca;
+
+          i {
+            color: #0a58ca;
+          }
+        }
+      }
+    }
+
+    .menu-divider {
+      height: 1px;
+      background: #e2e8f0;
+      margin: 4px 12px;
     }
   }
 
