@@ -341,7 +341,7 @@ removeHelpDesk(menus: any[]): any[] {
           { label: 'Support Management', routerLink: '/help-desk/support-management', icon: 'fas fa-users-cog' },
           { label: 'Status Tracker', routerLink: '/help-desk/status-tracker', icon: 'fas fa-search' },
           { label: 'Reports', routerLink: '/help-desk/reports', icon: 'fas fa-chart-bar' },
-          { label: 'User Manual', routerLink: '/help-desk/user-manual', icon: 'fas fa-book' }
+         
         ]
       },
       
