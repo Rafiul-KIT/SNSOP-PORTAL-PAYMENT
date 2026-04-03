@@ -1,0 +1,17 @@
+.paginator-sticky {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    background: white;
+    border-top: 1px solid #dee2e6;
+}
+
+.breadcrumb-wrapper {
+    margin-bottom: 1rem;
+}
+
+:host ::v-deep {
+    .p-datatable-sm .p-datatable-tbody > tr > td {
+        padding: 0.5rem;
+    }
+}

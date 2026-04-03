@@ -60,6 +60,15 @@
             </p-floatlabel>
         </div>
 
+        <!-- Registration Phase -->
+        <div class="col-md-3">
+            <p-floatlabel variant="on" class="w-100">
+                <p-select [options]="registrationPhaseOptions" optionLabel="label" optionValue="value"
+                    formControlName="registrationPhase" />
+                <label>Registration Phase</label>
+            </p-floatlabel>
+        </div>
+
         <!-- Status -->
         <div class="col-md-3">
             <p-floatlabel variant="on" class="w-100">
@@ -179,7 +188,7 @@
               <th class="text-center">Request Number</th>
               <th class="text-center">From Date</th>
               <th class="text-center">To Date</th>
-              <th class="text-center">Total Members</th>
+              <th class="text-center">{{ totalMembersHeader }}</th>
               <th class="text-center">Work Days</th>
               <th class="text-center">Exchange Rate</th>
               <th class="text-center">Amount (USD)</th>
@@ -197,7 +206,7 @@
                    icon="fa-solid fa-eye fa-lg" pTooltip="view"
                     tooltipPosition="top"
                     appendTo="body" 
-                    (onClick)="viewWageRequest(item.id,item.subproductId)" 
+                    (onClick)="viewWageRequest(item.id,item.subprojectId)" 
                     size="small" 
                     outlined="true" 
                     severity="secondary"

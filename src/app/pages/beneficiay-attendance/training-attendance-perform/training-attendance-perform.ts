@@ -338,40 +338,48 @@ export class TrainingAttendancePerform implements OnInit {
     };
 
     this.api
-      .POST('api/training-attendance/save', payload)
-      .then((res: any) => {
-        const data = res.data || res;
-        if (data && (data.code === 200 || data.code === 202)) {
-          Swal.fire({
-            icon: 'success',
-            title: 'Success',
-            text: data.message || 'Training attendance saved successfully!',
-          });
-          // Refresh the data after save
-          this.fetchTrainingAttendance();
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Save Failed',
-            text: data?.message || 'An unknown error occurred while saving.',
-          });
-        }
-      })
-      .catch((err) => {
-        console.error('Error saving training attendance:', err);
-        let errorMessage = 'Failed to save training attendance. Please try again.';
-        if (err.response && err.response.data && err.response.data.message) {
-          errorMessage = err.response.data.message;
-        }
+    .POST('api/training-attendance/save', payload)
+    .then((res: any) => {
+      const data = res.data || res;
+      if (data && (data.code === 200 || data.code === 202)) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: data.message || 'Training attendance saved successfully!',
+        }).then(() => {
+          // Reset fields instead of reloading page
+          this.attendanceDate = null;
+          this.selectedPaymentCycle = null;
+          this.beneficiaries = [];
+          this.totalRecords = 0;
+          this.selectAll = false;
+          this.attendanceDateTouched = false;
+          this.paymentCycleTouched = false;
+          this.cdr.markForCheck();
+        });
+      } else {
         Swal.fire({
           icon: 'error',
-          title: 'API Error',
-          text: errorMessage,
+          title: 'Save Failed',
+          text: data?.message || 'An unknown error occurred while saving.',
         });
-      })
-      .finally(() => {
-        this.saving = false;
-        this.cdr.markForCheck();
+      }
+    })
+    .catch((err) => {
+      console.error('Error saving training attendance:', err);
+      let errorMessage = 'Failed to save training attendance. Please try again.';
+      if (err.response && err.response.data && err.response.data.message) {
+        errorMessage = err.response.data.message;
+      }
+      Swal.fire({
+        icon: 'error',
+        title: 'API Error',
+        text: errorMessage,
       });
-  }
+    })
+    .finally(() => {
+      this.saving = false;
+      this.cdr.markForCheck();
+    });
+}
 }

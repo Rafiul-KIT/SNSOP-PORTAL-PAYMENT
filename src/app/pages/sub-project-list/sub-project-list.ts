@@ -82,6 +82,7 @@ interface SubProjectDto {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SubProjectList implements OnInit {
+  private readonly FILTER_STORAGE_KEY = 'subProjectList_filters';
   isLoading = true;
   lookupsLoaded = false;
   searchForm!: FormGroup;
@@ -160,6 +161,7 @@ export class SubProjectList implements OnInit {
     try {
       await this.loadInitialLookups();
       this.lookupsLoaded = true;
+      await this.restoreFiltersFromStorage();
     } catch (err) {
       console.error('Lookups loading error:', err);
       this.messageService.add({
@@ -190,6 +192,78 @@ export class SubProjectList implements OnInit {
       workActivity: [null],
       screeningStatus: [null],
     });
+  }
+
+  private saveFiltersToStorage(): void {
+    const state = {
+      filters: this.searchForm.getRawValue(),
+      currentPage: this.currentPage,
+      pageSize: this.pageSize,
+      advanceSearchPanelVisible: this.advanceSearchPanelVisible,
+    };
+    sessionStorage.setItem(this.FILTER_STORAGE_KEY, JSON.stringify(state));
+  }
+
+  private async restoreFiltersFromStorage(): Promise<boolean> {
+    const stored = sessionStorage.getItem(this.FILTER_STORAGE_KEY);
+    if (!stored) return false;
+
+    sessionStorage.removeItem(this.FILTER_STORAGE_KEY);
+
+    try {
+      const savedState = JSON.parse(stored);
+      const filters = savedState.filters;
+
+      this.currentPage = savedState.currentPage ?? 0;
+      this.pageSize = savedState.pageSize ?? 10;
+      this.advanceSearchPanelVisible = savedState.advanceSearchPanelVisible ?? false;
+
+      // Restore non-geo fields first
+      this.searchForm.patchValue({
+        projectId: filters.projectId,
+        projectName: filters.projectName,
+        typeOfMeeting: filters.typeOfMeeting,
+        status: filters.status,
+        workCode: filters.workCode,
+        workActivity: filters.workActivity,
+        screeningStatus: filters.screeningStatus,
+      });
+
+      // Restore geo fields with cascading
+      if (filters.state) {
+        const stateObj = this.states.find((s: any) => s.id === filters.state.id);
+        if (stateObj) {
+          this.searchForm.patchValue({ state: stateObj });
+          await this.onStateChange(stateObj);
+        }
+      }
+      if (filters.county && this.counties.length > 0) {
+        const countyObj = this.counties.find((c: any) => c.id === filters.county.id);
+        if (countyObj) {
+          this.searchForm.patchValue({ county: countyObj });
+          await this.onCountyChange(countyObj);
+        }
+      }
+      if (filters.payam && this.payams.length > 0) {
+        const payamObj = this.payams.find((p: any) => p.id === filters.payam.id);
+        if (payamObj) {
+          this.searchForm.patchValue({ payam: payamObj });
+          await this.onPayamChange(payamObj);
+        }
+      }
+      if (filters.boma && this.bomas.length > 0) {
+        const bomaObj = this.bomas.find((b: any) => b.id === filters.boma.id);
+        if (bomaObj) {
+          this.searchForm.patchValue({ boma: bomaObj });
+        }
+      }
+
+      this.cdr.markForCheck();
+      return true;
+    } catch (err) {
+      console.error('Error restoring filters:', err);
+      return false;
+    }
   }
 
   initBreadcrumb() {
@@ -344,15 +418,18 @@ export class SubProjectList implements OnInit {
     this.payams = [];
     this.bomas = [];
     this.currentPage = 0;
+    sessionStorage.removeItem(this.FILTER_STORAGE_KEY);
     this.fetchPage(this.currentPage, this.pageSize);
     this.cdr.markForCheck();
   }
 
   // ---------- Actions ----------
   editSubProject(id: number) {
+    this.saveFiltersToStorage();
     this.router.navigate(['/sub-project/details/', id]);
   }
     newProject() {
+    this.saveFiltersToStorage();
     this.router.navigate(['/sub-project/add-new']);
   }
 
@@ -469,12 +546,54 @@ cancelDelete() {
       title: 'Confirm',
       text: 'Are you sure you want to mark this sub-project as Completed?',
       icon: 'question',
+      input: 'textarea',
+      inputLabel: 'Comment',
+      inputPlaceholder: 'Type your comment here...',
+      inputAttributes: {
+        maxlength: '255',
+        autocapitalize: 'off',
+        autocorrect: 'off'
+      },
       showCancelButton: true,
       confirmButtonText: 'Yes, Complete',
       cancelButtonText: 'Cancel',
+      didOpen: () => {
+        const input = Swal.getInput();
+        const label = Swal.getPopup()?.querySelector('.swal2-input-label');
+        if (input && label) {
+          // Style label to be a flex container to put counter beside it
+          (label as HTMLElement).style.display = 'flex';
+          (label as HTMLElement).style.alignItems = 'center';
+          (label as HTMLElement).style.gap = '8px';
+
+          const counter = document.createElement('span');
+          counter.style.fontSize = '12px';
+          counter.style.fontWeight = 'normal';
+          counter.style.color = '#666';
+          counter.innerHTML = `(0 / 255)`;
+          label.appendChild(counter);
+
+          input.addEventListener('input', () => {
+            const length = input.value.length;
+            counter.innerHTML = `(${length} / 255)`;
+            counter.style.color = length >= 255 ? 'red' : '#666';
+          });
+        }
+      },
+      inputValidator: (value) => {
+        if (!value) {
+          return 'You need to write a comment!';
+        }
+        if (value.length > 255) {
+          return 'Comment cannot exceed 255 characters!';
+        }
+        return null;
+      }
     });
 
     if (!result.isConfirmed) return;
+
+    const comment = result.value;
 
     Swal.fire({
       title: 'Submitting',
@@ -487,7 +606,7 @@ cancelDelete() {
 
     try {
       const res: any = await this.api.POST(
-        `api/subproject/submit?subprojectId=${id}&status=Completed`,
+        `api/subproject/submit?subprojectId=${id}&status=Completed&comment=${encodeURIComponent(comment)}`,
         {}
       );
 

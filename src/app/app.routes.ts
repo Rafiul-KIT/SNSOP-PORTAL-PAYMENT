@@ -13,6 +13,8 @@ import { BeneficiaryAttendancePerform } from './pages/beneficiay-attendance/bene
 import { WorkApproval } from './pages/work-approval/work-approval';
 import { WorkReview } from './pages/work-review/work-review';
 import { BeneficiaryAssignment } from './pages/beneficiary-assignment/beneficiary-assign/beneficiary-assignment';
+import { SubprojectView } from './pages/subproject-view/subproject-view';
+import { SubprojectViewDetails } from './pages/subproject-view-details/subproject-view-details';
 
 import { ApplyForDisPayment } from './pages/apply-wages-request/apply-for-dis-payment/apply-for-dis-payment';
 import { BeneficiaryRemove } from './pages/beneficiary-assignment/beneficiary-remove/beneficiary-remove';
@@ -43,6 +45,7 @@ import { TrainingAttendanceAndParticipantSummaryReport } from './pages/report-li
 import { ComplementarySocialMeasuresProgressReport } from './pages/report-list/complementary-social-measures-progress-report/complementary-social-measures-progress-report';
 import { HelpDeskComponent } from './pages/help-desk/help-desk.component';
 
+import { BeneficiaryAtendanceReport } from './pages/report-list/beneficiary-atendance-report/beneficiary-atendance-report';
 
 
 export const routes: Routes = [
@@ -103,6 +106,16 @@ export const routes: Routes = [
       {
         path: 'approval-details',
         component: WorkReview,
+        canActivate: [routeGuard],
+      },
+      {
+        path: 'view',
+        component: SubprojectView,
+        canActivate: [routeGuard],
+      },
+      {
+        path: 'view-details',
+        component: SubprojectViewDetails,
         canActivate: [routeGuard],
       },
     ],
@@ -238,6 +251,11 @@ export const routes: Routes = [
        {
         path: 'multiple-attendance',
         component: MultipleAttendanceReport,
+        canActivate: [routeGuard],
+       },
+       {
+        path: 'beneficiary-attendance',
+        component: BeneficiaryAtendanceReport,
         canActivate: [routeGuard],
        },
            {

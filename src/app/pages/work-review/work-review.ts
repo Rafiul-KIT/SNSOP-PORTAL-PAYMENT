@@ -50,6 +50,15 @@ interface WorkActivity {
   status?: boolean | string;
 }
 
+interface ReviewHistory {
+  status: string;
+  attachmentUrl: string;
+  fileName: string;
+  filePath: string;
+  comments: string;
+  reviewedAt: string;
+}
+
 @Component({
   selector: 'app-work-review',
   standalone: true,
@@ -76,6 +85,7 @@ export class WorkReview implements OnInit, OnDestroy {
 
   isLoading = signal<boolean>(false);
   subprojectId = signal<number | null>(null);
+  reviewHistory = signal<ReviewHistory[]>([]);
   readonly MAX_ATTACHMENT_SIZE_MB = 25;
 
   proposalForm!: FormGroup;
@@ -93,7 +103,7 @@ export class WorkReview implements OnInit, OnDestroy {
 
   breadcrumbItems: MenuItem[] = [
     { label: 'Dashboard', routerLink: '/dashboard' },
-    { label: 'Work Proposals', routerLink: '/work-proposals' },
+    { label: 'Work Proposals', routerLink: '/sub-project/approval' },
     { label: 'View Proposal' },
   ];
   breadcrumbHome: MenuItem = { icon: 'pi pi-home', routerLink: '/' };
@@ -263,6 +273,7 @@ async submitApproval(isApproved: boolean): Promise<void> {
       const [subprojectData, workDetails] = await Promise.all([
         this.fetchSubprojectInfo(id),
         this.fetchWorkDetails(id),
+        this.fetchReviewHistory(id),
       ]);
       this.populateForm(subprojectData, workDetails);
       this.cdr.detectChanges();
@@ -272,6 +283,19 @@ async submitApproval(isApproved: boolean): Promise<void> {
       alert('Failed to load work proposal data.');
     } finally {
       this.isLoading.set(false);
+    }
+  }
+
+  private async fetchReviewHistory(subprojectId: number): Promise<void> {
+    try {
+      const response: any = await this.api.GET(
+        `api/subproject/review/history?subprojectId=${subprojectId}`
+      );
+      if (response.data?.content) {
+        this.reviewHistory.set(response.data.content);
+      }
+    } catch (error) {
+      console.error('Error fetching review history:', error);
     }
   }
 

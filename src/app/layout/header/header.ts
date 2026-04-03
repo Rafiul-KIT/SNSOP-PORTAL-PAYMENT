@@ -167,6 +167,11 @@ removeHelpDesk(menus: any[]): any[] {
             routerLink: 'sub-project/list',
           },
           {
+            label: 'Sub-project View',
+            icon: 'fas fa-clipboard',
+            routerLink: 'sub-project/view',
+          },
+          {
             label: 'Sub-project approval',
             icon: '	fas fa-tasks',
             routerLink: 'sub-project/approval',
@@ -290,6 +295,11 @@ removeHelpDesk(menus: any[]): any[] {
             label: 'Multiple Attendance Report',
             icon: 'fas fa-file-alt',
             routerLink: 'report/multiple-attendance',
+          },
+          {
+            label: 'Beneficiary Attendance Report',
+            icon: 'fas fa-file-alt',
+            routerLink: 'report/beneficiary-attendance',
           },
           {
             label: 'Training Attendance and Participant Summary Report',
