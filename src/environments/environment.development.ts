@@ -9,6 +9,7 @@ export const environment = {
     master: 'https://localhost:4010',
     masterSettings: 'https://localhost:4010/#/user-management/users',
     surveyCTO: 'https://localhost:4010/#/cto-dashboard',
+     mNe: 'https://localhost:4010/#/monitoring-evaluation/beneficiary-enrolment-summary',
     beneficiary: 'https://localhost:4020',
     payment: 'https://localhost:4030',
     grm: 'https://localhost:4040',
