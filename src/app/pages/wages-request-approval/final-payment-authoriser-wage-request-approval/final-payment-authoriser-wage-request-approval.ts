@@ -393,11 +393,11 @@ export class FinalPaymentAuthoriserWageRequestApproval implements OnInit {
       case 0:
         return 'bg-secondary'; // Draft
       case 1:
-        return 'bg-info'; // Submitted
+        return 'bg-success'; // Pending
       case 2:
         return 'bg-success'; // Approved
       case 3:
-        return 'bg-danger'; // Rejected
+        return 'bg-success'; // Pending
       case 4:
         return 'bg-primary'; // Paid
       default:

@@ -357,7 +357,7 @@ export class InitialReviewerWageRequestApproval implements OnInit {
       case 0:
         return 'bg-secondary';
       case 1:
-        return 'bg-info';
+        return 'bg-success';
       case 2:
         return 'bg-success';
       case 3:

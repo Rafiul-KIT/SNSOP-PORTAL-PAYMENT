@@ -393,7 +393,7 @@ export class FinancialApproverWageRequestApproval implements OnInit {
       case 0:
         return 'bg-secondary'; // Draft
       case 1:
-        return 'bg-info'; // Submitted
+        return 'bg-success'; // Pending
       case 2:
         return 'bg-success'; // Approved
       case 3:

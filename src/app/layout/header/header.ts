@@ -213,17 +213,17 @@ export class Header {
           },
           {
             label: 'Initial Reviewer Approval',
-            icon: 'fas fa-repeat',
+            icon: 'fas fa-user-check',
             routerLink: 'wage-request-approval/initial-reviewer',
           },
           {
             label: 'Financial Approver Approval',
-            icon: 'fas fa-repeat',
+            icon: 'fas fa-file-invoice-dollar',
             routerLink: 'wage-request-approval/financial-approver',
           },
           {
             label: 'Final Payment Authoriser Approval',
-            icon: 'fas fa-repeat',
+            icon: 'fas fa-hand-holding-dollar',
             routerLink: 'wage-request-approval/final-payment-authoriser',
           },
         ],
