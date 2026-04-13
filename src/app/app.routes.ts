@@ -216,11 +216,11 @@ export const routes: Routes = [
         component: FinalPaymentAuthoriserWageRequestApproval,
         canActivate: [routeGuard],
       },
-      {
-        path: 'list',
-        redirectTo: 'initial-reviewer',
-        canActivate: [routeGuard],
-      },
+      // {
+      //   path: 'list',
+      //   redirectTo: 'initial-reviewer',
+      //   canActivate: [routeGuard],
+      // },
       {
         path: 'drafts',
         component: WageRequestDrafts,
