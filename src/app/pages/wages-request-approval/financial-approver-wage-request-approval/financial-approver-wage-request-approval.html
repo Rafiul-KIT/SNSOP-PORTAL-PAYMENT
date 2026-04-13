@@ -1,0 +1,287 @@
+@if (isLoading) {
+<app-loader></app-loader>
+} @else {
+<div class="breadcrumb-wrapper">
+    <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
+</div>
+
+
+
+  <div class="card p-3 mb-2">
+        <form [formGroup]="searchForm" class="row g-3">
+
+        
+
+                <!-- Sub-Project -->
+                <div class="col-md-3">
+                    <p-floatlabel variant="on" class="w-100">
+                        <p-select [options]="subProjects" optionLabel="workCode" optionValue="id"
+                            formControlName="subprojectId" [filter]="true" filterPlaceholder="Search sub-project">
+                            <ng-template let-item pTemplate="item">
+                                <div>{{ item.workCode }} - {{ item.projectName }}</div>
+                            </ng-template>
+                        </p-select>
+                        <label>Sub-Project</label>
+                    </p-floatlabel>
+                </div>
+
+                <!-- Request Number -->
+                <div class="col-md-3">
+                    <p-floatlabel variant="on" class="w-100">
+                        <input pInputText type="text" formControlName="requestNumber" class="w-100" />
+                        <label>Request Number</label>
+                    </p-floatlabel>
+                </div>
+
+                <!-- From Date -->
+                <div class="col-md-3">
+                    <p-floatlabel variant="on" class="w-100">
+                        <p-datepicker formControlName="fromDate" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body"
+                            class="w-100">
+                        </p-datepicker>
+                        <label>From Date</label>
+                    </p-floatlabel>
+                </div>
+
+                <!-- To Date -->
+                <div class="col-md-3">
+                    <p-floatlabel variant="on" class="w-100">
+                        <p-datepicker formControlName="toDate" dateFormat="dd/mm/yy" [showIcon]="true" appendTo="body"
+                            class="w-100">
+                        </p-datepicker>
+                        <label>To Date</label>
+                    </p-floatlabel>
+                    @if(searchForm.hasError('dateRangeInvalid')) {
+                    <div class="text-danger small-text mt-1">
+                        From Date cannot be after To Date.
+                    </div>
+                    }
+                </div>
+    @if (advanceSearchPanelVisible) {
+                <!-- State -->
+                <div class="col-md-3">
+                    <p-floatlabel variant="on" class="w-100">
+                        <p-select [options]="states" optionLabel="name" formControlName="state"
+                            (onChange)="onStateChange($event.value)" [filter]="true" filterPlaceholder="Search state">
+                        </p-select>
+                        <label>State Name</label>
+                    </p-floatlabel>
+                </div>
+
+                <!-- County -->
+                <div class="col-md-3">
+                    <p-floatlabel variant="on" class="w-100">
+                        <p-select [options]="counties" optionLabel="name" formControlName="county"
+                            (onChange)="onCountyChange($event.value)" [filter]="true" filterPlaceholder="Search county">
+                        </p-select>
+                        <label>County Name</label>
+                    </p-floatlabel>
+                </div>
+
+                <!-- Payam -->
+                <div class="col-md-3">
+                    <p-floatlabel variant="on" class="w-100">
+                        <p-select [options]="payams" optionLabel="name" formControlName="payam"
+                            (onChange)="onPayamChange($event.value)" [filter]="true" filterPlaceholder="Search payam">
+                        </p-select>
+                        <label>Payam Name</label>
+                    </p-floatlabel>
+                </div>
+
+                <!-- Boma -->
+                <div class="col-md-3">
+                    <p-floatlabel variant="on" class="w-100">
+                        <p-select [options]="bomas" optionLabel="name" formControlName="boma" [filter]="true" filterPlaceholder="Search boma">
+                        </p-select>
+                        <label>Boma Name</label>
+                    </p-floatlabel>
+                </div>
+                <!-- Payment Cycle -->
+                <div class="col-md-3">
+                    <p-floatlabel variant="on" class="w-100">
+                        <p-select [options]="paymentCycles" optionLabel="label" optionValue="value"
+                            formControlName="paymentCycle">
+                        </p-select>
+                        <label>Payment Cycle</label>
+                    </p-floatlabel>
+                </div>
+
+                <!-- Request Year -->
+                <div class="col-md-3">
+                    <p-floatlabel variant="on" class="w-100">
+                        <p-select [options]="years" optionLabel="label" optionValue="value" formControlName="requestYear">
+                        </p-select>
+                        <label>Request Year</label>
+                    </p-floatlabel>
+                </div>
+
+                <!-- Request Month -->
+                <div class="col-md-3">
+                    <p-floatlabel variant="on" class="w-100">
+                        <p-select [options]="months" optionLabel="label" optionValue="value"
+                            formControlName="requestMonthIndex">
+                        </p-select>
+                        <label>Request Month</label>
+                    </p-floatlabel>
+                </div>
+
+                <!-- Status -->
+                <div class="col-md-3">
+                    <p-floatlabel variant="on" class="w-100">
+                        <p-select [options]="statuses" optionLabel="label" optionValue="id" formControlName="status">
+                        </p-select>
+                        <label>Status</label>
+                    </p-floatlabel>
+                </div>
+
+             
+            }
+
+            <div class="col-12">
+                <div class="d-grid d-sm-flex justify-content-end align-items-center gap-2">
+                    <p-button [label]="advanceSearchPanelVisible ? 'Close' : 'Advance Search'" icon="fas fa-filter"
+                        severity="warn" size="small" [outlined]="true" (onClick)="toggleAdvanceSearch()">
+                    </p-button>
+
+                    <p-button label="Reset" icon="fas fa-refresh" severity="danger" size="small" [outlined]="true"
+                        (onClick)="resetForm()">
+                    </p-button>
+
+                    <p-button label="Search" icon="fas fa-search" severity="primary" size="small"
+                        (onClick)="searchWageRequests()">
+                    </p-button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+   <p-table [value]="wageRequests" 
+        [tableStyle]="{ 'min-width': '100%', 'margin-bottom': '5px' }" dataKey="id" [rowTrackBy]="trackById"
+        size="small">
+
+        <ng-template pTemplate="header">
+              <tr>
+                <th colspan="11" class="text-end">
+                    <p class="fw-bold mb-2">
+                        Showing <kbd>{{ wageRequests.length }}</kbd> of
+                        <kbd>{{ totalRecords }}</kbd> wage requests
+                    </p>
+                </th>
+            </tr>
+            <tr>
+                <th class="text-center">Serial</th>
+                <th class="text-center">Request Number</th>
+                <th class="text-center">Sub-Project</th>
+                <th class="text-center">Payment Cycle</th>
+                <th class="text-center">Status</th>
+                @if (requiresFinancialFields) {
+                <th class="text-center" style="width: 150px;">Exchange Rate <span class="text-danger">*</span></th>
+                <th class="text-center" style="width: 200px;">Attachment <span class="text-danger">*</span></th>
+                }
+                <th class="text-center" style="width: 150px;">Approval <span class="text-danger">*</span></th>
+                <th class="text-center" style="width: 250px;">Remarks <span class="text-danger">*</span></th>
+                <th class="text-center" style="width: 120px;">Action</th>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-item let-rowIndex="rowIndex">
+            <tr>
+                <td class="text-center">{{ rowIndex + 1 }}</td>
+                <td class="text-center">{{ item.requestNumber || 'N/A' }}</td>
+                <td class="text-center">{{ getSubProjectName(item.subprojectId) }}</td>
+                <td class="text-center">Cycle {{ item.paymentCycle }}</td>
+                <td class="text-center"> <span [class]="'badge ' + getStatusClass(item.status)">
+                        {{ getStatusLabel(item.status) }}
+                    </span>
+                </td>
+                @if (requiresFinancialFields) {
+                <td class="text-center">
+                    <input type="number" pInputText [(ngModel)]="item.exchangeRate"
+                           class="w-100" [class.ng-invalid]="item.exchangeRate !== undefined && !isExchangeRateValid(item.exchangeRate)"
+                           min="4000" max="6000" step="1"
+                           (keydown)="preventDecimalInput($event)" />
+                    @if (item.exchangeRate !== undefined && !isExchangeRateValid(item.exchangeRate)) {
+                        <small class="text-danger d-block">Must be integer 4000-6000</small>
+                    }
+                </td>
+                <td class="text-center">
+                    <p-button type="button" icon="fa-solid fa-paperclip" (onClick)="openAttachmentModal(item)" [label]="'Attach (' + (item.attachments?.length || 0) + ')'" size="small" />
+                </td>
+                }
+                <td class="text-center">
+                    <p-select [options]="approvalOptions" [(ngModel)]="item.selectedStatus" placeholder="Select Action"
+                        styleClass="w-100" appendTo="body" />
+                </td>
+                <td class="text-center">
+                    <textarea pInputText [(ngModel)]="item.remarksText" rows="1" class="w-100"></textarea>
+                </td>
+                <td class="text-center action-cell">
+                    <div class="button-group">
+                        <p-button type="button" label="Submit" [loading]="item.isSubmitting"
+                            (onClick)="submitRowReview(item)" size="small" />
+                        <p-button type="button" icon="fa-solid fa-eye"
+                            (onClick)="viewWageRequest(item.id, item.subprojectId)" [text]="true" [rounded]="true"
+                            severity="secondary" />
+                    </div>
+                </td>            </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="11" class="text-center text-danger">
+                    <b>No wage requests awaiting approval!</b>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+
+    <p-paginator class="paginator-sticky" [rows]="pageSize" [totalRecords]="totalRecords"
+        [rowsPerPageOptions]="[10, 25, 50]" (onPageChange)="onPageChange($event)" [first]="(currentPage) * pageSize"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries">
+    </p-paginator>
+
+}
+
+
+<p-dialog header="Upload Attachments" [(visible)]="displayAttachmentModal" [modal]="true" [style]="{ width: '50vw' }" (onHide)="cancelAttachments()">
+    <div class="attachment-dialog">
+        <div class="mb-3">
+            <label class="form-label fw-semibold">Attachments <small class="text-muted">(Max size under {{MAX_ATTACHMENT_SIZE_MB}}MB)</small></label>
+            <input type="file" #fileUpload style="display: none" multiple (change)="onFilesInModalSelect($event)" accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx">
+            <p-button type="button" label="Choose Files" icon="pi pi-upload" (onClick)="fileUpload.click()"></p-button>
+        </div>
+
+        @if (selectedFiles.length > 0) {
+        <p-table [value]="selectedFiles" styleClass="p-datatable-sm" [tableStyle]="{ 'min-width': '100%' }">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Name</th>
+                    <th>Size</th>
+                    <th>Action</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-file>
+                <tr>
+                    <td>{{ file.name }}</td>
+                    <td>{{ formatBytes(file.size) }}</td>
+                    <td>
+                        <p-button icon="pi pi-times" severity="danger" [text]="true" [rounded]="true" (onClick)="removeSelectedFile(file)"></p-button>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+        <div class="mt-2 small text-muted">
+            <span>Total size: {{ formatBytes(totalAttachmentSize) }}</span> /
+            <span>{{ MAX_ATTACHMENT_SIZE_MB }} MB</span>
+          </div>
+        } @else {
+        <div class="text-center p-3">
+            <i class="fa fa-folder-open" style="font-size: 3rem; color: #ccc;"></i>
+            <p class="mt-2">No files selected.</p>
+        </div>
+        }
+    </div>
+    <ng-template pTemplate="footer">
+        <p-button label="Cancel" icon="pi pi-times" (onClick)="cancelAttachments()" severity="secondary"></p-button>
+        <p-button label="Save Attachments" icon="pi pi-check" (onClick)="saveAttachments()"></p-button>
+    </ng-template>
+</p-dialog>

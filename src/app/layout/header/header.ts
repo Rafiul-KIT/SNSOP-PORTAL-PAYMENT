@@ -212,9 +212,19 @@ export class Header {
             routerLink: 'wage-request-approval/drafts',
           },
           {
-            label: 'Pending Approval',
+            label: 'Initial Reviewer Approval',
             icon: 'fas fa-repeat',
-            routerLink: 'wage-request-approval/list',
+            routerLink: 'wage-request-approval/initial-reviewer',
+          },
+          {
+            label: 'Financial Approver Approval',
+            icon: 'fas fa-repeat',
+            routerLink: 'wage-request-approval/financial-approver',
+          },
+          {
+            label: 'Final Payment Authoriser Approval',
+            icon: 'fas fa-repeat',
+            routerLink: 'wage-request-approval/final-payment-authoriser',
           },
         ],
       },
@@ -315,14 +325,23 @@ export class Header {
   // ✅ Recursive filter: keep only allowed menus (parent and child)
   filterMenusByAccess(menus: any[], allowedNames: string[]): any[] {
     return menus
-      .filter((menu) => allowedNames.includes(menu.label)) // filter parent menus
-      .map((menu) => ({
-        ...menu,
-        // Recursively filter child menus if the parent is allowed
-        items: menu.items
+      .map((menu) => {
+        const items = menu.items
           ? this.filterMenusByAccess(menu.items, allowedNames)
-          : undefined,
-      }));
+          : undefined;
+        const isAllowed = allowedNames.includes(menu.label);
+        const hasAllowedChildren = !!items?.length;
+
+        if (!isAllowed && !hasAllowedChildren) {
+          return null;
+        }
+
+        return {
+          ...menu,
+          items,
+        };
+      })
+      .filter((menu): menu is any => menu !== null);
   }
 
   logout() {

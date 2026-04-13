@@ -22,7 +22,9 @@ import { BeneficiarySubprojectRemove } from './pages/beneficiary-assignment/bene
 import { BeneficiarySubprojectList } from './pages/beneficiary-assignment/beneficiary-subproject-list/beneficiary-subproject-list';
 import { WageRequestDrafts } from './pages/wages-request-approval/wage-request-drafts/wage-request-drafts';
 import { WageRequestDetails } from './pages/wages-request-approval/wage-request-details/wage-request-details';
-import { WageRequestApproval } from './pages/wages-request-approval/wage-request-approval/wage-request-approval';
+import { InitialReviewerWageRequestApproval } from './pages/wages-request-approval/initial-reviewer-wage-request-approval/initial-reviewer-wage-request-approval';
+import { FinancialApproverWageRequestApproval } from './pages/wages-request-approval/financial-approver-wage-request-approval/financial-approver-wage-request-approval';
+import { FinalPaymentAuthoriserWageRequestApproval } from './pages/wages-request-approval/final-payment-authoriser-wage-request-approval/final-payment-authoriser-wage-request-approval';
 import { PayrollDownload } from './pages/payroll/payroll-download/payroll-download';
 import { MobileMoneyDetails } from './pages/payroll/mobile-money-details/mobile-money-details';
 import { ListOfWages } from './pages/apply-wages-request/list-of-wages/list-of-wages';
@@ -200,8 +202,23 @@ export const routes: Routes = [
     canActivate: [routeGuard],
     children: [
       {
+        path: 'initial-reviewer',
+        component: InitialReviewerWageRequestApproval,
+        canActivate: [routeGuard],
+      },
+      {
+        path: 'financial-approver',
+        component: FinancialApproverWageRequestApproval,
+        canActivate: [routeGuard],
+      },
+      {
+        path: 'final-payment-authoriser',
+        component: FinalPaymentAuthoriserWageRequestApproval,
+        canActivate: [routeGuard],
+      },
+      {
         path: 'list',
-        component: WageRequestApproval,
+        redirectTo: 'initial-reviewer',
         canActivate: [routeGuard],
       },
       {

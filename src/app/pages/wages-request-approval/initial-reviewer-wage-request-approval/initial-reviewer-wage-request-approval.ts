@@ -1,0 +1,560 @@
+import {
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  ValidatorFn,
+  AbstractControl,
+} from '@angular/forms';
+import { TableModule } from 'primeng/table';
+import { ButtonModule } from 'primeng/button';
+import { ToastModule } from 'primeng/toast';
+import { PaginatorModule } from 'primeng/paginator';
+import { BreadcrumbModule } from 'primeng/breadcrumb';
+import { TooltipModule } from 'primeng/tooltip';
+import { Router, RouterModule } from '@angular/router';
+import { MessageService } from 'primeng/api';
+import { ApiService } from '../../../services/api.service';
+import { Loader } from '../../../components/loader/loader';
+import { CardModule } from 'primeng/card';
+import { DividerModule } from 'primeng/divider';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
+import { InputTextModule } from 'primeng/inputtext';
+import {
+  LookupService,
+  LookupItem,
+  StatusWageEnum,
+} from '../../../services/lookup.service';
+import Swal from 'sweetalert2';
+
+interface WageRequest {
+  id: number;
+  subprojectId: number;
+  fromDate: string;
+  toDate: string;
+  requestYear: number;
+  requestMonthIndex: number;
+  paymentCycle: number;
+  status: number;
+  requestNumber: string;
+  remarks: string;
+  selectedStatus?: boolean | null;
+  remarksText?: string;
+  isSubmitting?: boolean;
+}
+
+interface SubProjectLookup {
+  id: number;
+  workCode: string;
+  projectName: string;
+}
+
+const dateRangeValidator: ValidatorFn = (
+  control: AbstractControl
+): { [key: string]: boolean } | null => {
+  const fromDate = control.get('fromDate')?.value;
+  const toDate = control.get('toDate')?.value;
+
+  if (fromDate && toDate && fromDate > toDate) {
+    return { dateRangeInvalid: true };
+  }
+  return null;
+};
+
+@Component({
+  selector: 'app-initial-reviewer-wage-request-approval',
+  templateUrl: './initial-reviewer-wage-request-approval.html',
+  styleUrl: './initial-reviewer-wage-request-approval.scss',
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    TableModule,
+    ButtonModule,
+    ToastModule,
+    PaginatorModule,
+    BreadcrumbModule,
+    RouterModule,
+    TooltipModule,
+    Loader,
+    CardModule,
+    DividerModule,
+    FloatLabelModule,
+    SelectModule,
+    DatePickerModule,
+    InputTextModule,
+  ],
+  providers: [MessageService],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class InitialReviewerWageRequestApproval implements OnInit {
+  private readonly FILTER_STORAGE_KEY =
+    'wage_request_approval_filters_initial_reviewer';
+  private readonly LIST_ENDPOINT = 'api/wage-request/get/for-init-reviewer';
+  private readonly REVIEW_ENDPOINT = '/api/wage-request-review/second';
+  private readonly ALLOWED_STATUS_IDS = [1, 101];
+
+  isLoading = true;
+  searchForm!: FormGroup;
+  states: LookupItem[] = [];
+  counties: LookupItem[] = [];
+  payams: LookupItem[] = [];
+  bomas: LookupItem[] = [];
+  years: any[] = [];
+  months: any[] = [
+    { label: 'January', value: 1 },
+    { label: 'February', value: 2 },
+    { label: 'March', value: 3 },
+    { label: 'April', value: 4 },
+    { label: 'May', value: 5 },
+    { label: 'June', value: 6 },
+    { label: 'July', value: 7 },
+    { label: 'August', value: 8 },
+    { label: 'September', value: 9 },
+    { label: 'October', value: 10 },
+    { label: 'November', value: 11 },
+    { label: 'December', value: 12 },
+  ];
+  paymentCycles: any[] = [];
+  statuses: any[] = [];
+  lookupsLoaded = false;
+  advanceSearchPanelVisible = false;
+  subProjects: SubProjectLookup[] = [];
+  wageRequests: WageRequest[] = [];
+  totalRecords = 0;
+  breadcrumbItems: any[] = [];
+  breadcrumbHome: any;
+  currentPage = 0;
+  pageSize = 10;
+  approvalOptions = [
+    { label: 'Approve', value: true },
+    { label: 'Reject', value: false },
+  ];
+
+  constructor(
+    private fb: FormBuilder,
+    private messageService: MessageService,
+    private router: Router,
+    private api: ApiService,
+    private lookup: LookupService,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  async ngOnInit() {
+    this.initForm();
+    this.initBreadcrumb();
+    await this.loadInitialLookups();
+    await this.restoreFiltersFromStorage();
+    this.fetchPage(this.currentPage, this.pageSize);
+  }
+
+  initForm() {
+    this.searchForm = this.fb.group(
+      {
+        state: [null],
+        county: [{ value: null, disabled: true }],
+        payam: [{ value: null, disabled: true }],
+        boma: [{ value: null, disabled: true }],
+        subprojectId: [null],
+        fromDate: [null],
+        toDate: [null],
+        requestYear: [null],
+        requestMonthIndex: [null],
+        paymentCycle: [null],
+        status: [null],
+        requestNumber: [''],
+      },
+      { validators: dateRangeValidator }
+    );
+  }
+
+  initBreadcrumb() {
+    this.breadcrumbHome = { icon: 'fas fa-home', routerLink: '/' };
+    this.breadcrumbItems = [{ label: 'Initial Wage Request Review' }];
+  }
+
+  async toggleAdvanceSearch() {
+    this.advanceSearchPanelVisible = !this.advanceSearchPanelVisible;
+  }
+
+  async onStateChange(state: LookupItem | null) {
+    this.searchForm.get('county')?.reset({ value: null, disabled: true });
+    this.searchForm.get('payam')?.reset({ value: null, disabled: true });
+    this.searchForm.get('boma')?.reset({ value: null, disabled: true });
+    this.counties = [];
+    this.payams = [];
+    this.bomas = [];
+
+    if (state?.id) {
+      this.counties = await this.lookup.getCountyListByStateId(state.id);
+      this.searchForm.get('county')?.enable();
+    }
+    this.cdr.markForCheck();
+  }
+
+  async onCountyChange(county: LookupItem | null) {
+    this.searchForm.get('payam')?.reset({ value: null, disabled: true });
+    this.searchForm.get('boma')?.reset({ value: null, disabled: true });
+    this.payams = [];
+    this.bomas = [];
+
+    if (county?.id) {
+      this.payams = await this.lookup.getPayamListByCountyId(county.id);
+      this.searchForm.get('payam')?.enable();
+    }
+    this.cdr.markForCheck();
+  }
+
+  async onPayamChange(payam: LookupItem | null) {
+    this.searchForm.get('boma')?.reset({ value: null, disabled: true });
+    this.bomas = [];
+
+    if (payam?.id) {
+      this.bomas = await this.lookup.getBomaListByPayamId(payam.id);
+      this.searchForm.get('boma')?.enable();
+    }
+    this.cdr.markForCheck();
+  }
+
+  private saveFiltersToStorage() {
+    const f = this.searchForm.getRawValue();
+    const filterData = {
+      state: f.state,
+      county: f.county,
+      payam: f.payam,
+      boma: f.boma,
+      subprojectId: f.subprojectId,
+      fromDate: f.fromDate,
+      toDate: f.toDate,
+      requestYear: f.requestYear,
+      requestMonthIndex: f.requestMonthIndex,
+      paymentCycle: f.paymentCycle,
+      status: f.status,
+      requestNumber: f.requestNumber,
+      currentPage: this.currentPage,
+      pageSize: this.pageSize,
+      advanceSearchPanelVisible: this.advanceSearchPanelVisible,
+      counties: this.counties,
+      payams: this.payams,
+      bomas: this.bomas,
+    };
+    sessionStorage.setItem(this.FILTER_STORAGE_KEY, JSON.stringify(filterData));
+  }
+
+  private async restoreFiltersFromStorage() {
+    const stored = sessionStorage.getItem(this.FILTER_STORAGE_KEY);
+    if (!stored) return;
+
+    sessionStorage.removeItem(this.FILTER_STORAGE_KEY);
+
+    try {
+      const filterData = JSON.parse(stored);
+
+      if (filterData.counties) this.counties = filterData.counties;
+      if (filterData.payams) this.payams = filterData.payams;
+      if (filterData.bomas) this.bomas = filterData.bomas;
+
+      if (filterData.state) {
+        this.searchForm.patchValue({ state: filterData.state });
+        this.searchForm.get('county')?.enable();
+      }
+      if (filterData.county) {
+        this.searchForm.patchValue({ county: filterData.county });
+        this.searchForm.get('payam')?.enable();
+      }
+      if (filterData.payam) {
+        this.searchForm.patchValue({ payam: filterData.payam });
+        this.searchForm.get('boma')?.enable();
+      }
+      if (filterData.boma) {
+        this.searchForm.patchValue({ boma: filterData.boma });
+      }
+
+      this.searchForm.patchValue({
+        subprojectId: filterData.subprojectId,
+        fromDate: filterData.fromDate ? new Date(filterData.fromDate) : null,
+        toDate: filterData.toDate ? new Date(filterData.toDate) : null,
+        requestYear: filterData.requestYear,
+        requestMonthIndex: filterData.requestMonthIndex,
+        paymentCycle: filterData.paymentCycle,
+        status: filterData.status,
+        requestNumber: filterData.requestNumber || '',
+      });
+
+      this.currentPage = filterData.currentPage || 0;
+      this.pageSize = filterData.pageSize || 10;
+      this.advanceSearchPanelVisible =
+        filterData.advanceSearchPanelVisible || false;
+
+      this.cdr.markForCheck();
+    } catch (e) {
+      console.error('Error restoring filters:', e);
+      sessionStorage.removeItem(this.FILTER_STORAGE_KEY);
+    }
+  }
+
+  private async loadInitialLookups() {
+    this.isLoading = true;
+    this.cdr.markForCheck();
+    try {
+      await this.lookup.getOrFetchStateList();
+      this.states = this.lookup.getStateList();
+
+      const subProjectRes: any = await this.api.POST(
+        'api/subproject/get?page=0&size=10000',
+        {}
+      );
+      if (subProjectRes.data && subProjectRes.data.content) {
+        this.subProjects = subProjectRes.data.content.map((sp: any) => ({
+          id: sp.id,
+          workCode: sp.workCode,
+          projectName: sp.projectName,
+        }));
+      }
+
+      const currentYear = new Date().getFullYear();
+      this.years = [];
+      for (let i = currentYear - 5; i <= currentYear + 2; i++) {
+        this.years.push({ label: i.toString(), value: i });
+      }
+
+      this.paymentCycles = this.lookup.getPaymentCycleEnum();
+      this.statuses = StatusWageEnum.filter((status) =>
+        this.ALLOWED_STATUS_IDS.includes(Number(status.id))
+      ).map(({ id, label }) => ({ id: Number(id), label }));
+
+      this.lookupsLoaded = true;
+    } catch (err) {
+      console.error('Lookups loading error:', err);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to load lookup data.',
+      });
+    } finally {
+      this.isLoading = false;
+      this.cdr.markForCheck();
+    }
+  }
+
+  getStatusLabel(value: number): string {
+    const found = StatusWageEnum.find((item) => Number(item.id) === value);
+    return found ? found.label : value.toString();
+  }
+
+  getStatusClass(status: number): string {
+    switch (status) {
+      case 0:
+        return 'bg-secondary';
+      case 1:
+        return 'bg-info';
+      case 2:
+        return 'bg-success';
+      case 3:
+        return 'bg-danger';
+      case 4:
+        return 'bg-primary';
+      default:
+        return 'bg-secondary';
+    }
+  }
+
+  private buildSearchBody() {
+    const f = this.searchForm.getRawValue();
+    return {
+      state: f.state?.id ? String(f.state.id) : null,
+      county: f.county?.id ? String(f.county.id) : null,
+      payam: f.payam?.id ? String(f.payam.id) : null,
+      boma: f.boma?.id ? String(f.boma.id) : null,
+      subprojectId: f.subprojectId || null,
+      fromDate: f.fromDate ? this.formatDate(f.fromDate) : null,
+      toDate: f.toDate ? this.formatDate(f.toDate) : null,
+      requestYear: f.requestYear || null,
+      requestMonthIndex: f.requestMonthIndex || null,
+      paymentCycle: f.paymentCycle || null,
+      requestNumber: f.requestNumber ? f.requestNumber.trim() : null,
+      status: f.status || null,
+    };
+  }
+
+  fetchPage(page: number, size: number, showLoader: boolean = true) {
+    if (showLoader) {
+      this.isLoading = true;
+    }
+    const body = this.buildSearchBody();
+
+    this.api
+      .POST(`${this.LIST_ENDPOINT}?page=${page}&size=${size}`, body)
+      .then((res: any) => {
+        if (!res) throw new Error('Empty response');
+
+        const data = res.data || res;
+        this.wageRequests = (data.content || []).map((req: WageRequest) => ({
+          ...req,
+          selectedStatus: null,
+          remarksText: '',
+          isSubmitting: false,
+        }));
+        this.totalRecords = data.totalElements || 0;
+
+        if (this.wageRequests.length === 0) {
+          this.messageService.add({
+            severity: 'info',
+            summary: 'Info',
+            detail: 'No wage requests found for the selected criteria.',
+          });
+        }
+      })
+      .catch((err) => {
+        console.error('Fetch wage requests error:', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to fetch wage requests for approval.',
+        });
+        this.wageRequests.forEach((req) => (req.isSubmitting = false));
+      })
+      .finally(() => {
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      });
+  }
+
+  async submitRowReview(wageRequest: WageRequest) {
+    const missingFields: string[] = [];
+
+    if (
+      wageRequest.selectedStatus === null ||
+      wageRequest.selectedStatus === undefined
+    ) {
+      missingFields.push('Approval');
+    }
+
+    if (!wageRequest.remarksText) {
+      missingFields.push('Remarks');
+    }
+
+    if (missingFields.length > 0) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Required Fields Missing',
+        html: `Please fill in the following required fields:<ul style="text-align: left; margin-top: 10px;">${missingFields.map((f) => `<li>${f}</li>`).join('')}</ul>`,
+      });
+      return;
+    }
+
+    wageRequest.isSubmitting = true;
+    this.cdr.markForCheck();
+
+    const formData = new FormData();
+    formData.append('wageRequestId', wageRequest.id.toString());
+    formData.append('approved', String(wageRequest.selectedStatus));
+    if (wageRequest.remarksText) {
+      formData.append('comments', wageRequest.remarksText);
+    }
+
+    try {
+      const response: any = await this.api.POST_FORM_DATA(
+        this.REVIEW_ENDPOINT,
+        formData
+      );
+      const responseData = response.data;
+
+      if (responseData?.code === 200 || responseData?.status === 'OK') {
+        Swal.fire({
+          icon: 'success',
+          title: 'Submitted',
+          text: 'Wage request review submitted successfully.',
+        });
+        this.saveFiltersToStorage();
+        this.fetchPage(this.currentPage, this.pageSize, false);
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: responseData?.message || 'Failed to submit review.',
+        });
+        wageRequest.isSubmitting = false;
+      }
+    } catch (error: any) {
+      console.error('Error submitting review:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.response?.data?.message || 'An unexpected error occurred.',
+      });
+      wageRequest.isSubmitting = false;
+    } finally {
+      this.cdr.markForCheck();
+    }
+  }
+
+  searchWageRequests() {
+    if (this.searchForm.invalid) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Validation Error',
+        detail: 'From Date cannot be after To Date.',
+      });
+      return;
+    }
+    this.currentPage = 0;
+    this.fetchPage(this.currentPage, this.pageSize);
+  }
+
+  resetForm() {
+    this.searchForm.reset();
+    this.searchForm.get('county')?.disable();
+    this.searchForm.get('payam')?.disable();
+    this.searchForm.get('boma')?.disable();
+    this.counties = [];
+    this.payams = [];
+    this.bomas = [];
+    sessionStorage.removeItem(this.FILTER_STORAGE_KEY);
+    this.currentPage = 0;
+    this.fetchPage(this.currentPage, this.pageSize);
+    this.cdr.markForCheck();
+  }
+
+  onPageChange(event: any) {
+    this.currentPage = event.page;
+    this.pageSize = event.rows;
+    this.fetchPage(this.currentPage, this.pageSize);
+  }
+
+  viewWageRequest(wageId: number, subprojectId: number) {
+    this.saveFiltersToStorage();
+    this.router.navigate(['/wage-request-approval/details', wageId, subprojectId]);
+  }
+
+  getSubProjectName(id: number): string {
+    if (id === 999) {
+      return 'Dis - Direct Income Support';
+    }
+    const found = this.subProjects.find((sp) => sp.id === id);
+    return found ? found.workCode : id ? id.toString() : '';
+  }
+
+  formatDate(date: Date | string): string {
+    if (!date) return '';
+    if (typeof date === 'string') {
+      return new Date(date).toISOString().split('T')[0];
+    }
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  trackById = (_: number, row: WageRequest) => row.id;
+}
