@@ -77,7 +77,7 @@ export const routeGuard: CanActivateFn = (route: ActivatedRouteSnapshot, state: 
     //  - /beneficiary/edit/:applicationId
     //  - Any other parameterized route you want to allow
     const dynamicRoutePrefixes = ['/project/add-new','/project/details/','/sub-project/add-new', '/sub-project/details',
-                                  '/sub-project/approval-details', '/beneficiaries/assignment-assign/', '/beneficiaries/assignment-remove/',
+                                  '/sub-project/approval/', '/sub-project/approval-details', '/beneficiaries/assignment-assign/', '/beneficiaries/assignment-remove/',
                                    '/beneficiaries/attendance/view/', '/wage-request/create/', '/wage-request-approval/details/', '/wage-request/details/',
                                    '/attendance/view','/reconciliation-monitoring/details', '/payroll/mobile-money-details/','/invoice/paid-date-wise-payment-invoice-details',
                                    '/invoice/wage-paid-reqiest-abstract-with-invoice-details','/training-attendance/view', '/sub-project/view-details'];

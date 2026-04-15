@@ -85,11 +85,10 @@ export class Header {
           return;
         }
 
-        const allowedNames = responseData.map((menu: any) => menu.name);
         const allMenus = this.getStaticMenus();
 
         // ✅ Update safely and trigger view refresh
-        this.menuList = this.filterMenusByAccess(allMenus, allowedNames);
+        this.menuList = this.filterMenusByAccess(allMenus, responseData);
         this.menusLoaded = true;
         this.cdRef.detectChanges();
       } else {
@@ -149,9 +148,19 @@ export class Header {
             routerLink: 'sub-project/view',
           },
           {
-            label: 'Sub-project approval',
-            icon: '	fas fa-tasks',
-            routerLink: 'sub-project/approval',
+            label: 'QE Work Approval',
+            icon: 'fas fa-user-check',
+            routerLink: 'sub-project/approval/qe',
+          },
+          {
+            label: 'ES Work Approval',
+            icon: 'fas fa-clipboard-check',
+            routerLink: 'sub-project/approval/es',
+          },
+          {
+            label: 'TST Work Approval',
+            icon: 'fas fa-list-check',
+            routerLink: 'sub-project/approval/tst',
           },
         ],
       },
@@ -323,13 +332,13 @@ export class Header {
   }
 
   // ✅ Recursive filter: keep only allowed menus (parent and child)
-  filterMenusByAccess(menus: any[], allowedNames: string[]): any[] {
+  filterMenusByAccess(menus: any[], permittedMenus: any[]): any[] {
     return menus
       .map((menu) => {
         const items = menu.items
-          ? this.filterMenusByAccess(menu.items, allowedNames)
+          ? this.filterMenusByAccess(menu.items, permittedMenus)
           : undefined;
-        const isAllowed = allowedNames.includes(menu.label);
+        const isAllowed = this.hasMenuAccess(menu, permittedMenus);
         const hasAllowedChildren = !!items?.length;
 
         if (!isAllowed && !hasAllowedChildren) {
@@ -342,6 +351,26 @@ export class Header {
         };
       })
       .filter((menu): menu is any => menu !== null);
+  }
+
+  private hasMenuAccess(menu: any, permittedMenus: any[]): boolean {
+    const menuUrl = this.normalizeMenuUrl(menu.routerLink);
+    if (!menuUrl) {
+      return false;
+    }
+
+    return permittedMenus.some((permittedMenu) => {
+      const permittedUrl = this.normalizeMenuUrl(permittedMenu?.url);
+      return !!permittedUrl && permittedUrl === menuUrl;
+    });
+  }
+
+  private normalizeMenuUrl(url: any): string {
+    if (!url || Array.isArray(url) || typeof url !== 'string') {
+      return '';
+    }
+
+    return `/${url}`.replace(/\/+/g, '/');
   }
 
   logout() {

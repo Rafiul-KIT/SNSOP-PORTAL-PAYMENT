@@ -10,8 +10,12 @@ import { SubProjectList } from './pages/sub-project-list/sub-project-list';
 import { WagesRequestLipw } from './pages/apply-wages-request/wages-request-lipw/wages-request-lipw';
 import { ApplyForWagesPaymentComponent } from './pages/apply-wages-request/apply-for-wages-payment/apply-for-wages-payment.component';
 import { BeneficiaryAttendancePerform } from './pages/beneficiay-attendance/beneficiary-attendance-perform/beneficiary-attendance-perform';
-import { WorkApproval } from './pages/work-approval/work-approval';
-import { WorkReview } from './pages/work-review/work-review';
+import { QeWorkApproval } from './pages/work-approval/qe-work-approval/qe-work-approval';
+import { EsWorkApproval } from './pages/work-approval/es-work-approval/es-work-approval';
+import { TstWorkApproval } from './pages/work-approval/tst-work-approval/tst-work-approval';
+import { QeWorkReview } from './pages/work-review/qe-work-review/qe-work-review';
+import { EsWorkReview } from './pages/work-review/es-work-review/es-work-review';
+import { TstWorkReview } from './pages/work-review/tst-work-review/tst-work-review';
 import { BeneficiaryAssignment } from './pages/beneficiary-assignment/beneficiary-assign/beneficiary-assignment';
 import { SubprojectView } from './pages/subproject-view/subproject-view';
 import { SubprojectViewDetails } from './pages/subproject-view-details/subproject-view-details';
@@ -99,13 +103,33 @@ export const routes: Routes = [
         canActivate: [routeGuard],
       },
       {
-        path: 'approval',
-        component: WorkApproval,
+        path: 'approval/qe',
+        component: QeWorkApproval,
         canActivate: [routeGuard],
       },
       {
-        path: 'approval-details',
-        component: WorkReview,
+        path: 'approval/es',
+        component: EsWorkApproval,
+        canActivate: [routeGuard],
+      },
+      {
+        path: 'approval/tst',
+        component: TstWorkApproval,
+        canActivate: [routeGuard],
+      },
+      {
+        path: 'approval-details/qe',
+        component: QeWorkReview,
+        canActivate: [routeGuard],
+      },
+      {
+        path: 'approval-details/es',
+        component: EsWorkReview,
+        canActivate: [routeGuard],
+      },
+      {
+        path: 'approval-details/tst',
+        component: TstWorkReview,
         canActivate: [routeGuard],
       },
       {
