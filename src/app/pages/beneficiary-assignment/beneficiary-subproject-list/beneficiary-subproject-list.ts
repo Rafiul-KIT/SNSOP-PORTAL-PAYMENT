@@ -95,6 +95,10 @@ export class BeneficiarySubprojectList implements OnInit {
   projects: ProjectNameDescription[] = [];
   workTypes: any[] = [];
   workActivities: LookupItem[] = [];
+  registrationPhases = [
+    { label: 'PARENT', value: 'PARENT' },
+    { label: 'AF', value: 'AF' },
+  ];
 
   statuses: any[] = [];
   screeningStatuses: any[] = [];
@@ -174,6 +178,7 @@ export class BeneficiarySubprojectList implements OnInit {
       workCode: [''],
       workActivity: [null],
       screeningStatus: [null],
+      registrationPhase: [null],
     });
   }
 
@@ -210,6 +215,7 @@ export class BeneficiarySubprojectList implements OnInit {
         workCode: filters.workCode,
         workActivity: filters.workActivity,
         screeningStatus: filters.screeningStatus,
+        registrationPhase: filters.registrationPhase,
       });
 
       // Restore geo fields with cascading
@@ -318,6 +324,7 @@ export class BeneficiarySubprojectList implements OnInit {
       typeOfMeeting: f.typeOfWork || null,
       meetingDate: null,
       screeningStatus: "1",
+      registrationPhase: f.registrationPhase || null,
       status: f.status || "TST_Approved",
     };
   }

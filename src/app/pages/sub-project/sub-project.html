@@ -82,6 +82,20 @@
                     </div>
 
                     <div class="col-md-12">
+                      <label class="form-label text-secondary fw-semibold">Registration Phase <span
+                          class="text-danger">*</span></label>
+                      <select class="form-select" formControlName="registrationPhase">
+                        <option value="">--Select--</option>
+                        @for (phase of registrationPhases; track phase.value) {
+                        <option [value]="phase.value">{{ phase.label }}</option>
+                        }
+                      </select>
+                      @if (proposalForm.get('registrationPhase')?.invalid && proposalForm.get('registrationPhase')?.touched) {
+                      <div class="text-danger mt-1">Registration Phase is required.</div>
+                      }
+                    </div>
+
+                    <div class="col-md-12">
                       <label class="form-label text-secondary fw-semibold">Paper Screening Status <span
                           class="text-danger">*</span></label>
                       <select class="form-select" formControlName="paperScreeningStatus">

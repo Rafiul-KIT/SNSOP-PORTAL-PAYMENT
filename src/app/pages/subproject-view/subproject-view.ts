@@ -100,6 +100,10 @@ export class SubprojectView implements OnInit {
   workTypes: any[] = [];
   statuses: any[] = [];
   screeningStatuses: any[] = [];
+  registrationPhases = [
+    { label: 'PARENT', value: 'PARENT' },
+    { label: 'AF', value: 'AF' },
+  ];
 
   subProjects: SubProjectDto[] = [];
   totalRecords = 0;
@@ -177,6 +181,7 @@ export class SubprojectView implements OnInit {
       workCode: [''],
       workActivity: [null],
       screeningStatus: [null],
+      registrationPhase: [null],
     });
   }
 
@@ -210,6 +215,7 @@ export class SubprojectView implements OnInit {
         workCode: filters.workCode,
         workActivity: filters.workActivity,
         screeningStatus: filters.screeningStatus,
+        registrationPhase: filters.registrationPhase,
       });
 
       if (filters.state) {
@@ -314,6 +320,7 @@ export class SubprojectView implements OnInit {
       typeOfMeeting: f.typeOfMeeting || null,
       meetingDate: null,
       screeningStatus: f.screeningStatus || null,
+      registrationPhase: f.registrationPhase || null,
       status: f.status || null,
     };
   }

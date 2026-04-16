@@ -80,6 +80,14 @@
       </p-floatlabel>
     </div> -->
 
+    <div class="col-md-3">
+      <p-floatlabel variant="on" class="w-100">
+        <p-select [options]="registrationPhases" optionLabel="label" optionValue="value"
+          formControlName="registrationPhase"></p-select>
+        <label>Registration Phase</label>
+      </p-floatlabel>
+    </div>
+
     <!-- Screening Status -->
     <!-- <div class="col-md-3">
       <p-floatlabel variant="on" class="w-100">

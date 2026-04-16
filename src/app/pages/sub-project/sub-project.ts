@@ -37,6 +37,10 @@ import { DatePickerModule } from 'primeng/datepicker';
   styleUrl: './sub-project.scss',
 })
 export class SubProject implements OnInit {
+  registrationPhases = [
+    { label: 'PARENT', value: 'PARENT' },
+    { label: 'AF', value: 'AF' },
+  ];
   searchCtrl = new FormControl<string>('');
   isLoading = false;
   proposalForm: FormGroup;
@@ -73,6 +77,7 @@ export class SubProject implements OnInit {
   ) {
     this.proposalForm = this.fb.group({
       projectName: ['', Validators.required],
+      registrationPhase: ['', Validators.required],
       typeOfMeeting: ['', Validators.required],
       meetingDate: ['', Validators.required],
       targetBeneficiaries: [''],
@@ -249,6 +254,7 @@ export class SubProject implements OnInit {
       // Assuming subProjectData from the API includes stateId and countyId
       this.proposalForm.patchValue({
         projectName: Number(subProjectData.projectId), // Re-insert and ensure project ID is a number for dropdown selection
+        registrationPhase: subProjectData.registrationPhase || '',
         typeOfMeeting: subProjectData.typeOfMeeting,
         meetingDate: this.parseApiDate(subProjectData.meetingDate),
         stateName: subProjectData.stateName,
@@ -616,6 +622,7 @@ export class SubProject implements OnInit {
         workCode: this.subprojectId ? finalWorkCode : null,
         projectId,
         projectName,
+        registrationPhase: formValue.registrationPhase || null,
         stateId,
         stateName,
         countyId,

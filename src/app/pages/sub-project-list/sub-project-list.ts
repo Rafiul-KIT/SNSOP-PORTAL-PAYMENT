@@ -96,6 +96,10 @@ export class SubProjectList implements OnInit {
   projects: ProjectNameDescription[] = [];
   workTypes: any[] = [];
   workActivities: LookupItem[] = [];
+  registrationPhases = [
+    { label: 'PARENT', value: 'PARENT' },
+    { label: 'AF', value: 'AF' },
+  ];
 
   statuses: any[] = [];
   screeningStatuses: any[] = [];
@@ -191,6 +195,7 @@ export class SubProjectList implements OnInit {
       workCode: [''],
       workActivity: [null],
       screeningStatus: [null],
+      registrationPhase: [null],
     });
   }
 
@@ -227,6 +232,7 @@ export class SubProjectList implements OnInit {
         workCode: filters.workCode,
         workActivity: filters.workActivity,
         screeningStatus: filters.screeningStatus,
+        registrationPhase: filters.registrationPhase,
       });
 
       // Restore geo fields with cascading
@@ -341,6 +347,7 @@ export class SubProjectList implements OnInit {
       typeOfMeeting: f.typeOfMeeting || null,
       meetingDate: null,
       screeningStatus: f.screeningStatus || null,
+      registrationPhase: f.registrationPhase || null,
       status: statusValue,
     };
   }

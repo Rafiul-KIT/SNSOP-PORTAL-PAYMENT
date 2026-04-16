@@ -88,6 +88,10 @@ export class TrainingAttendance implements OnInit {
   projects: ProjectNameDescription[] = [];
   workTypes: any[] = [];
   workActivities: LookupItem[] = [];
+  registrationPhases = [
+    { label: 'PARENT', value: 'PARENT' },
+    { label: 'AF', value: 'AF' },
+  ];
 
   statuses: any[] = [];
   screeningStatuses: any[] = [];
@@ -167,6 +171,7 @@ export class TrainingAttendance implements OnInit {
       workCode: [''],
       workActivity: [null],
       screeningStatus: '1',
+      registrationPhase: [null],
     });
   }
 
@@ -203,6 +208,7 @@ export class TrainingAttendance implements OnInit {
         workCode: filters.workCode,
         workActivity: filters.workActivity,
         screeningStatus: filters.screeningStatus,
+        registrationPhase: filters.registrationPhase,
       });
 
       // Restore geo fields with cascading
@@ -311,6 +317,7 @@ export class TrainingAttendance implements OnInit {
       typeOfMeeting: f.typeOfMeeting || null,
       meetingDate: null,
       screeningStatus: "1",
+      registrationPhase: f.registrationPhase || null,
       status: "InProgress",
 
     };

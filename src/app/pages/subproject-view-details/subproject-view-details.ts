@@ -201,6 +201,7 @@ export class SubprojectViewDetails implements OnInit, OnDestroy {
   private initializeForm(): void {
     this.proposalForm = this.fb.group({
       projectName: [''],
+      registrationPhase: [''],
       workActivityCode: [''],
       targetbeneficiaries: [null],
       projectCost: [null],
@@ -220,6 +221,7 @@ export class SubprojectViewDetails implements OnInit, OnDestroy {
 
     const basicInfo = {
       projectName: subprojectData.projectName || '',
+      registrationPhase: subprojectData.registrationPhase || '',
       workActivityCode: subprojectData.workCode || '',
       targetbeneficiaries:
         subprojectData.targetBeneficiaries ||

@@ -96,6 +96,10 @@ export class BeneficiarySubprojectRemove implements OnInit {
   projects: ProjectNameDescription[] = [];
   workTypes: any[] = [];
   workActivities: LookupItem[] = [];
+  registrationPhases = [
+    { label: 'PARENT', value: 'PARENT' },
+    { label: 'AF', value: 'AF' },
+  ];
 
   statuses: any[] = [];
   screeningStatuses: any[] = [];
@@ -175,6 +179,7 @@ export class BeneficiarySubprojectRemove implements OnInit {
       workCode: [''],
       workActivity: [null],
       screeningStatus: [null],
+      registrationPhase: [null],
     });
   }
 
@@ -211,6 +216,7 @@ export class BeneficiarySubprojectRemove implements OnInit {
         workCode: filters.workCode,
         workActivity: filters.workActivity,
         screeningStatus: filters.screeningStatus,
+        registrationPhase: filters.registrationPhase,
       });
 
       // Restore geo fields with cascading
@@ -319,6 +325,7 @@ export class BeneficiarySubprojectRemove implements OnInit {
       typeOfMeeting: f.typeOfWork || null,
       meetingDate: null,
       screeningStatus: "1",
+      registrationPhase: f.registrationPhase || null,
       status: "InProgress",
     };
   }

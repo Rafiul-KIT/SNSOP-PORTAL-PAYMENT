@@ -324,6 +324,7 @@ export class TstWorkReview implements OnInit, OnDestroy {
   private initializeForm(): void {
     this.proposalForm = this.fb.group({
       projectName: [''],
+      registrationPhase: [''],
       workActivityCode: [''],
       targetbeneficiaries: [null],
       projectCost: [null],
@@ -341,6 +342,7 @@ export class TstWorkReview implements OnInit, OnDestroy {
   private populateForm(subprojectData: any, workDetails: WorkActivity[]): void {
     const basicInfo = {
       projectName: subprojectData.projectName || '',
+      registrationPhase: subprojectData.registrationPhase || '',
       workActivityCode: subprojectData.workCode || '',
       targetbeneficiaries:
         subprojectData.targetBeneficiaries ||
