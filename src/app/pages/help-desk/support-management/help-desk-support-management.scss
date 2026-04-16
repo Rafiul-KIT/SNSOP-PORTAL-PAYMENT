@@ -49,6 +49,50 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+.section-box {
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 0.75rem;
+  background: #fff;
+}
+
+.attachment-list,
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.attachment-row,
+.history-row {
+  border: 1px solid #eef1f4;
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  background: #fafbfc;
+}
+
+.attachment-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.history-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.3rem;
+}
+
 @media (max-width: 767px) {
   .helpdesk-container {
     padding: 0.5rem 0.75rem;
@@ -73,5 +117,14 @@
 
   .card {
     padding: 0.75rem !important;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .attachment-row {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }

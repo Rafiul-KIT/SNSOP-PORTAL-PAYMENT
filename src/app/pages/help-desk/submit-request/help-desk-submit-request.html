@@ -1,92 +1,147 @@
-<div class="breadcrumb-wrapper">
-  <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
-</div>
-
-<div class="helpdesk-container">
-  <!-- Page Header -->
-  <div class="page-header">
-    <div>
-      <h2 class="page-title">Submit Support Request</h2>
-      <p class="page-subtitle">Create a new helpdesk ticket for technical support, clarification, or issue reporting.</p>
-    </div>
-    <div class="header-actions">
-      <p-button label="Export Report" icon="fas fa-download" [outlined]="true" severity="primary" size="small"></p-button>
-      <p-button label="Submit Demo Ticket" icon="fas fa-paper-plane" severity="primary" size="small" (onClick)="submitDemo()"></p-button>
-    </div>
+@if (isLoading) {
+  <app-loader  />
+} @else {
+  <div class="breadcrumb-wrapper">
+    <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
   </div>
 
-  <div class="row g-3">
-    <!-- Form Section -->
-    <div class="col-lg-8">
-      <div class="card p-3 p-md-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="card-section-title mb-0">Submit Support Request</h5>
-          <span class="text-muted small fst-italic d-none d-sm-inline">Fictional demo form</span>
-        </div>
+  <div class="helpdesk-container">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div>
+        <h2 class="page-title">Submit Support Request</h2>
+        <!-- <p class="page-subtitle">Create a new helpdesk ticket for technical support, clarification, or issue reporting.</p> -->
+      </div>
+      <!-- <div class="header-actions">
+        <p-button label="Export Report" icon="fas fa-download" [outlined]="true" severity="primary" size="small"></p-button>
+      </div> -->
+    </div>
 
-        <form [formGroup]="requestForm" (ngSubmit)="onSubmit()">
-          <div class="row g-3">
-            <div class="col-12 col-md-6">
-              <label class="form-label">Issue Title</label>
-              <input type="text" pInputText class="w-100" formControlName="issueTitle" placeholder="Enter issue title" />
-            </div>
-            <div class="col-12 col-md-6">
-              <label class="form-label">Category</label>
-              <p-select [options]="categories" formControlName="category" optionLabel="label" optionValue="value" placeholder="Select category" class="w-100" />
-            </div>
-            <div class="col-12 col-md-6">
-              <label class="form-label">Priority</label>
-              <p-select [options]="priorities" formControlName="priority" optionLabel="label" optionValue="value" placeholder="Select priority" class="w-100" />
-            </div>
-            <div class="col-12 col-md-6">
-              <label class="form-label">Issue Type</label>
-              <p-select [options]="issueTypes" formControlName="issueType" optionLabel="label" optionValue="value" placeholder="Select issue type" class="w-100" />
-            </div>
-            <div class="col-12">
-              <label class="form-label">Description</label>
-              <textarea pTextarea formControlName="description" rows="5" class="w-100" placeholder="Describe the issue in detail..."></textarea>
-            </div>
-            <div class="col-12 col-md-6">
-              <label class="form-label">Module</label>
-              <p-select [options]="modules" formControlName="module" optionLabel="label" optionValue="value" placeholder="Select module" class="w-100" />
-            </div>
-            <div class="col-12 col-md-6">
-              <label class="form-label">Preferred Notification</label>
-              <p-select [options]="notificationPrefs" formControlName="notification" optionLabel="label" optionValue="value" placeholder="Select notification" class="w-100" />
-            </div>
-            <div class="col-12">
-              <label class="form-label">Attachment</label>
-              <input type="file" class="form-control" (change)="onFileSelect($event)" />
-            </div>
-            <div class="col-12">
-              <div class="d-flex justify-content-center gap-2 mt-2">
-                <p-button label="Save Draft" [outlined]="true" severity="secondary" size="small" (onClick)="saveDraft()"></p-button>
-                <p-button label="Submit Request" icon="fas fa-paper-plane" severity="danger" size="small" type="submit"></p-button>
+    <div class="row g-3">
+      <!-- Form Section -->
+      <div class="col-lg-8">
+        <div class="card p-3 p-md-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-section-title mb-0">Submit Support Request</h5>
+          </div>
+
+          <form [formGroup]="requestForm" (ngSubmit)="onSubmit()">
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label class="form-label">Issue Title <span class="required-asterisk">*</span></label>
+                <input type="text" pInputText class="w-100" formControlName="issueTitle" placeholder="Enter issue title" />
+                @if (requestForm.get('issueTitle')?.invalid && (requestForm.get('issueTitle')?.dirty || requestForm.get('issueTitle')?.touched)) {
+                  <small class="error-text">Issue title is required.</small>
+                }
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Category <span class="required-asterisk">*</span></label>
+                <p-select [options]="categories" formControlName="category" optionLabel="label" optionValue="value" placeholder="Select category" class="w-100" />
+                @if (requestForm.get('category')?.invalid && (requestForm.get('category')?.dirty || requestForm.get('category')?.touched)) {
+                  <small class="error-text">Category is required.</small>
+                }
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Priority <span class="required-asterisk">*</span></label>
+                <p-select [options]="priorities" formControlName="priority" optionLabel="label" optionValue="value" placeholder="Select priority" class="w-100" />
+                @if (requestForm.get('priority')?.invalid && (requestForm.get('priority')?.dirty || requestForm.get('priority')?.touched)) {
+                  <small class="error-text">Priority is required.</small>
+                }
+              </div>
+              <div class="col-12">
+                <label class="form-label">Description <span class="required-asterisk">*</span></label>
+                <textarea pTextarea formControlName="description" rows="5" class="w-100" placeholder="Describe the issue in detail..."></textarea>
+                @if (requestForm.get('description')?.invalid && (requestForm.get('description')?.dirty || requestForm.get('description')?.touched)) {
+                  <small class="error-text">Description is required.</small>
+                }
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Module <span class="required-asterisk">*</span></label>
+                <p-select [options]="modules" formControlName="module" optionLabel="label" optionValue="value" placeholder="Select module" class="w-100" />
+                @if (requestForm.get('module')?.invalid && (requestForm.get('module')?.dirty || requestForm.get('module')?.touched)) {
+                  <small class="error-text">Module is required.</small>
+                }
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label">Preferred Notification <span class="required-asterisk">*</span></label>
+                <p-select [options]="notificationPrefs" formControlName="notification" optionLabel="label" optionValue="value" placeholder="Select notification" class="w-100" />
+                @if (requestForm.get('notification')?.invalid && (requestForm.get('notification')?.dirty || requestForm.get('notification')?.touched)) {
+                  <small class="error-text">Preferred notification is required.</small>
+                }
+              </div>
+              <div class="col-12">
+                <label class="form-label">Attachments <span class="required-asterisk">*</span></label>
+                <input type="file" class="form-control" (change)="onFileSelect($event)" multiple [ngClass]="{'is-invalid': requestForm.get('attachments')?.invalid && (requestForm.get('attachments')?.dirty || requestForm.get('attachments')?.touched)}" />
+                @if (requestForm.get('attachments')?.invalid && (requestForm.get('attachments')?.dirty || requestForm.get('attachments')?.touched)) {
+                  <small class="error-text">At least one attachment is required.</small>
+                }
+                @if (selectedFiles.length > 0) {
+                  <div class="selected-files mt-2">
+                    @for (file of selectedFiles; track file.name + '-' + file.size + '-' + file.lastModified; let i = $index) {
+                      <div class="selected-file-row">
+                        <div class="file-info">
+                          <span class="file-name">{{ file.name }}</span>
+                          <span class="file-size">{{ formatFileSize(file.size) }}</span>
+                        </div>
+                        <div class="file-actions">
+                          <p-button
+                            label="View"
+                            icon="pi pi-eye"
+                            size="small"
+                            severity="secondary"
+                            [outlined]="true"
+                            (onClick)="viewSelectedFile(file)"
+                          ></p-button>
+                          <p-button
+                            label="Delete"
+                            icon="pi pi-trash"
+                            size="small"
+                            severity="danger"
+                            [outlined]="true"
+                            (onClick)="removeSelectedFile(i)"
+                          ></p-button>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+              <div class="col-12">
+                <div class="d-flex justify-content-center gap-2 mt-2">
+                  <!-- <p-button label="Save Draft" [outlined]="true" severity="secondary" size="small" (onClick)="saveDraft()" [disabled]="isSubmitting"></p-button> -->
+                  <p-button label="Submit Request" icon="fas fa-paper-plane" severity="success" size="small" type="submit" [loading]="isSubmitting" [disabled]="isSubmitting"></p-button>
+                </div>
               </div>
             </div>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Submission Guide -->
-    <div class="col-lg-4">
-      <div class="card p-3 mb-3">
-        <h5 class="card-section-title mb-3">Submission Guide</h5>
-        <ul class="guide-list">
-          <li>Provide a clear issue title and short summary.</li>
-          <li>Select the correct category and priority.</li>
-          <li>Attach screenshot, log, or report sample when needed.</li>
-          <li>Small issues target 72 hours; large issues target 144 hours.</li>
-        </ul>
-      </div>
-
-      @if (demoResult) {
-        <div class="card p-3 demo-result">
-          <h6 class="card-section-title mb-2">Demo Result</h6>
-          <p class="mb-0">On submission, the system would generate a tracking number like <strong>{{ demoResult }}</strong>.</p>
+          </form>
         </div>
-      }
+      </div>
+
+      <!-- Submission Guide -->
+      <div class="col-lg-4">
+        <div class="card p-3 mb-3">
+          <h5 class="card-section-title mb-3">Submission Guide</h5>
+          <ul class="guide-list">
+            <li>Provide a clear issue title and short summary.</li>
+            <li>Select the correct category and priority.</li>
+            <li>Attach screenshot, log, or report sample when needed.</li>
+          </ul>
+        </div>
+
+        @if (trackingNumber) {
+          <div class="card p-3 tracking-result">
+            <h6 class="card-section-title mb-2">Submission Successful</h6>
+            <p class="mb-1">Your tracking number is:</p>
+            <div class="tracking-number-wrap">
+              <p class="tracking-number mb-0"><strong>{{ trackingNumber }}</strong></p>
+              <button type="button" class="copy-btn" (click)="copyTrackingNumber()" aria-label="Copy tracking number" title="Copy tracking number">
+                <i class="pi pi-copy"></i>
+              </button>
+            </div>
+            <p class="mb-0 small text-muted">Please save this number to track your request status.</p>
+          </div>
+        }
+      </div>
     </div>
   </div>
-</div>
+}

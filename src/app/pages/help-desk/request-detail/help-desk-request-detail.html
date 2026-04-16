@@ -1,0 +1,139 @@
+﻿@if (isLoading) {
+  <app-loader />
+} @else if (detailRequest) {
+  <div class="breadcrumb-wrapper">
+    <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
+  </div>
+
+  <div class="request-detail-page">
+    <div class="hero card p-3 p-md-4 mb-3">
+      <div class="hero-top">
+        <div>
+          <h2 class="title mb-1">{{ detailRequest.title }}</h2>
+          <p class="sub mb-0">{{ detailRequest.trackingNumber }}</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <p-tag [value]="formatStatus(detailRequest.status)" [severity]="getStatusSeverity(detailRequest.status)"></p-tag>
+          <!-- <p-button label="Back" icon="pi pi-arrow-left" severity="secondary" [outlined]="true" routerLink="/help-desk/support-management"></p-button> -->
+        </div>
+      </div>
+
+      <div class="stats-grid mt-3">
+        <div class="stat-box"><span>Priority</span><strong>{{ detailRequest.priority || '--' }}</strong></div>
+        <div class="stat-box"><span>Category</span><strong>{{ detailRequest.categoryName || '--' }}</strong></div>
+        <div class="stat-box"><span>Module</span><strong>{{ detailRequest.moduleName || '--' }}</strong></div>
+        <div class="stat-box"><span>Created</span><strong>{{ formatDate(detailRequest.createdAt) }}</strong></div>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-lg-7">
+        <div class="card p-3 mb-3">
+          <h6 class="section-title">Description</h6>
+          <p class="mb-2">{{ detailRequest.description || '--' }}</p>
+          <p class="mb-0"><strong>Latest Comment:</strong> {{ detailRequest.comment || '--' }}</p>
+        </div>
+
+        @if (canEditRequest(detailRequest)) {
+          <div class="card p-3 mb-3">
+            <h6 class="section-title">Edit Request</h6>
+            <div class="row g-2">
+              <div class="col-12">
+                <label class="small fw-semibold">Description</label>
+                <textarea class="form-control" rows="4" [(ngModel)]="editDescription"></textarea>
+              </div>
+              <div class="col-md-4">
+                <label class="small fw-semibold">Category</label>
+                <p-select [options]="categories" optionLabel="name" optionValue="id" [(ngModel)]="editCategoryId" class="w-100"></p-select>
+              </div>
+              <div class="col-md-4">
+                <label class="small fw-semibold">Module</label>
+                <p-select [options]="modules" optionLabel="name" optionValue="id" [(ngModel)]="editModuleId" class="w-100"></p-select>
+              </div>
+              <div class="col-md-4">
+                <label class="small fw-semibold">Priority</label>
+                <p-select [options]="editPriorityOptions" optionLabel="label" optionValue="value" [(ngModel)]="editPriority" class="w-100"></p-select>
+              </div>
+              <div class="col-12 text-end">
+                <p-button label="Save Update" icon="pi pi-save" [loading]="isSavingDetail" (onClick)="saveDetailUpdate()"></p-button>
+              </div>
+            </div>
+          </div>
+        }
+
+        <div class="card p-3">
+          <h6 class="section-title">History Timeline</h6>
+          @if (!detailHistory.length) {
+            <p class="text-muted mb-0">No history entries.</p>
+          } @else {
+            <div class="timeline">
+              @for (h of detailHistory; track h.id) {
+                <div class="timeline-entry">
+                  <div class="timeline-marker {{ getTimelineTone(h.action) }}">
+                    <i class="{{ getTimelineIcon(h.action) }}"></i>
+                  </div>
+                  <div class="timeline-item">
+                    <div class="timeline-head">
+                      <h6 class="timeline-title mb-0">{{ getTimelineTitle(h.action) }}</h6>
+                      <span class="history-action-badge">{{ formatStatus(h.action) }}</span>
+                    </div>
+                    @if (parseHistoryChanges(h.changes).length) {
+                      <div class="timeline-change-list mt-3">
+                        @for (c of parseHistoryChanges(h.changes); track c.field + c.newValue + c.oldValue) {
+                          <div class="timeline-change-row">
+                            <div class="timeline-field">{{ c.field }}</div>
+                            <div class="timeline-flow">
+                              <span class="value-chip old">{{ c.oldValue }}</span>
+                              <i class="fas fa-arrow-right timeline-arrow"></i>
+                              <span class="value-chip new">{{ c.newValue }}</span>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    }
+                    @if (h.comment) {
+                      <div class="history-comment mt-2">
+                        <strong>Comment:</strong> {{ h.comment }}
+                      </div>
+                    }
+                    <small class="timeline-date">{{ formatDate(h.performedAt) }}</small>
+                    <div class="timeline-by">By {{ h.performedBy }}</div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <div class="card p-3">
+          <h6 class="section-title">Attachments</h6>
+          @if (canAddAttachments(detailRequest)) {
+            <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+              <input type="file" class="form-control" style="max-width: 300px;" multiple (change)="onDetailFileSelect($event)" />
+              <p-button label="Upload" icon="pi pi-upload" severity="secondary" [loading]="isUploadingAttachments" [disabled]="!selectedDetailFiles.length" (onClick)="uploadDetailAttachments()"></p-button>
+            </div>
+          }
+
+          @if (!detailAttachments.length) {
+            <p class="text-muted mb-0">No attachments.</p>
+          } @else {
+            <div class="attachment-list">
+              @for (att of detailAttachments; track att.id) {
+                <div class="attachment-row">
+                  <div>
+                    <div class="fw-semibold">{{ att.originalFileName }}</div>
+                    <small class="text-muted">{{ att.contentType }} | {{ att.fileSize }} bytes</small>
+                    <small class="text-muted d-block">{{ formatDate(att.createdAt) }}</small>
+                  </div>
+                  <p-button label="Download" icon="pi pi-download" size="small" [outlined]="true" (onClick)="downloadAttachment(att)"></p-button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+}

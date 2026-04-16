@@ -128,47 +128,117 @@ getUserRole(): number | null {
   };
 
   // ================= Basic HTTP Functions =================
-   GET = (endpoint: string) => {
-    return this.axiosInstance.get(endpoint, this.apiHeader);
+  GET = <T = any>(
+    endpoint: string,
+    params?: any,
+    base: 'global' | 'auth' = 'global',
+    config?: any
+  ) => {
+    const instance =
+      base === 'auth' ? this.authAxiosInstance : this.axiosInstance;
+    return instance.get<T>(endpoint, {
+      ...this.apiHeader,
+      ...config,
+      params: params,
+    });
   };
 
-  GET_CONFIG = (endpoint: string, config?: object) => {
-    return this.axiosInstance.get(endpoint, { ...this.apiHeader, ...config });
+  GET_CONFIG = <T = any>(endpoint: string, config?: any) => {
+    return this.axiosInstance.get<T>(endpoint, {
+      ...this.apiHeader,
+      ...config,
+    });
   };
 
-  GET_AUTH = (endpoint: string) => {
-    return this.authAxiosInstance.get(endpoint, this.apiHeader);
+  GET_AUTH = <T = any>(endpoint: string, params?: any) => {
+    return this.authAxiosInstance.get<T>(endpoint, {
+      ...this.apiHeader,
+      params: params,
+    });
   };
 
-  POST = (endpoint: string, payload: {}) => {
-    return this.axiosInstance.post(endpoint, payload, this.apiHeader);
+  POST = <T = any>(
+    endpoint: string,
+    payload: any,
+    base: 'global' | 'auth' = 'global',
+    config?: any
+  ) => {
+    const instance =
+      base === 'auth' ? this.authAxiosInstance : this.axiosInstance;
+    return instance.post<T>(endpoint, payload, {
+      ...this.apiHeader,
+      ...config,
+    });
   };
 
-  POST_AUTH = (endpoint: string, payload: {}) => {
-    return this.authAxiosInstance.post(endpoint, payload, this.apiHeader);
+  POST_AUTH = <T = any>(endpoint: string, payload: any) => {
+    return this.authAxiosInstance.post<T>(endpoint, payload, this.apiHeader);
   };
 
-  POST_FORM_DATA = (endpoint: string, payload: FormData) => {
-    return this.axiosInstance.post(endpoint, payload, {
+  POST_FORM_DATA = <T = any>(endpoint: string, payload: FormData) => {
+    return this.axiosInstance.post<T>(endpoint, payload, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     });
   };
 
-  PUTWITHPAYLOAD = (endpoint: string, payload: {}) => {
-    return this.axiosInstance.put(endpoint, payload, this.apiHeader);
+  PUTWITHPAYLOAD = <T = any>(endpoint: string, payload: any) => {
+    return this.axiosInstance.put<T>(endpoint, payload, this.apiHeader);
   };
 
-  PUT = (endpoint: string) => {
-    return this.axiosInstance.put(endpoint, {}, this.apiHeader);
+  PUT = <T = any>(
+    endpoint: string,
+    payload: any = {},
+    base: 'global' | 'auth' = 'global',
+    config?: any
+  ) => {
+    const instance =
+      base === 'auth' ? this.authAxiosInstance : this.axiosInstance;
+    return instance.put<T>(endpoint, payload, {
+      ...this.apiHeader,
+      ...config,
+    });
   };
 
-  PATCH = (endpoint: string, payload: {}) => {
-    return this.axiosInstance.patch(endpoint, payload, this.apiHeader);
+  PATCH = <T = any>(
+    endpoint: string,
+    payload: any,
+    base: 'global' | 'auth' = 'global',
+    config?: any
+  ) => {
+    const instance =
+      base === 'auth' ? this.authAxiosInstance : this.axiosInstance;
+    return instance.patch<T>(endpoint, payload, {
+      ...this.apiHeader,
+      ...config,
+    });
   };
 
-  DELETE = (endpoint: string) => {
-    return this.axiosInstance.delete(endpoint, this.apiHeader);
+  DELETE = <T = any>(
+    endpoint: string,
+    base: 'global' | 'auth' = 'global',
+    config?: any
+  ) => {
+    const instance =
+      base === 'auth' ? this.authAxiosInstance : this.axiosInstance;
+    return instance.delete<T>(endpoint, {
+      ...this.apiHeader,
+      ...config,
+    });
+  };
+
+  POST_FORM = <T = any>(
+    endpoint: string,
+    formData: FormData,
+    base: 'global' | 'auth' = 'global'
+  ) => {
+    const instance =
+      base === 'auth' ? this.authAxiosInstance : this.axiosInstance;
+    return instance.post<T>(endpoint, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
   };
 }

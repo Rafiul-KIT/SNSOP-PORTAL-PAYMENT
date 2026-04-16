@@ -49,6 +49,30 @@
   font-weight: 500;
   color: #495057;
   margin-bottom: 0.3rem;
+
+  .required-asterisk {
+    color: #dc3545;
+    margin-left: 2px;
+  }
+}
+
+.error-text {
+  color: #dc3545;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+// PrimeNG validation styling
+:host ::ng-deep {
+  .p-inputtext.ng-invalid.ng-dirty,
+  .p-inputtext.ng-invalid.ng-touched,
+  .p-select.ng-invalid.ng-dirty,
+  .p-select.ng-invalid.ng-touched,
+  .p-textarea.ng-invalid.ng-dirty,
+  .p-textarea.ng-invalid.ng-touched {
+    border-color: #dc3545 !important;
+  }
 }
 
 .guide-list {
@@ -62,11 +86,97 @@
   }
 }
 
-.demo-result {
+.demo-result,
+.tracking-result {
   background: #e8f0fe;
   border: 1px solid #c5d9f7;
   font-size: 0.875rem;
   color: #1a3a6b;
+}
+
+.tracking-result {
+  background: #d4edda;
+  border-color: #28a745;
+  color: #155724;
+
+  .tracking-number {
+    font-size: 1.1rem;
+    color: #28a745;
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 6px;
+    text-align: center;
+  }
+
+  .tracking-number-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+  }
+
+  .copy-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid #28a745;
+    background: #fff;
+    color: #28a745;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .copy-btn:hover {
+    background: #28a745;
+    color: #fff;
+  }
+}
+
+.selected-files {
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.selected-file-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid #f1f3f5;
+}
+
+.selected-file-row:last-child {
+  border-bottom: 0;
+}
+
+.file-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.file-name {
+  font-size: 0.88rem;
+  color: #2c3e50;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 360px;
+}
+
+.file-size {
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+.file-actions {
+  display: flex;
+  gap: 0.4rem;
 }
 
 @media (max-width: 767px) {
@@ -93,5 +203,14 @@
 
   .card {
     padding: 0.75rem !important;
+  }
+
+  .selected-file-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .file-name {
+    max-width: 100%;
   }
 }

@@ -1,6 +1,9 @@
 .helpdesk-container {
   padding: 0.5rem 2rem;
-  background: #f8f9fa;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(86, 156, 214, 0.08), transparent 42%),
+    radial-gradient(circle at 100% 20%, rgba(43, 181, 143, 0.08), transparent 40%),
+    #f8fafc;
   min-height: 100vh;
 }
 
@@ -12,16 +15,28 @@
   margin-bottom: 1rem;
 }
 
+.card-surface {
+  border: 1px solid #dbe8f3;
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  background: linear-gradient(120deg, #ffffff 0%, #f5faff 100%);
+  box-shadow: 0 6px 18px rgba(22, 70, 121, 0.08);
+}
+
+.page-title-wrap {
+  min-width: 0;
+}
+
 .page-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #2c3e50;
+  color: #16335a;
   margin-bottom: 0.25rem;
 }
 
 .page-subtitle {
   font-size: 0.9rem;
-  color: #6c757d;
+  color: #5f6d80;
   margin: 0;
 }
 
@@ -34,40 +49,86 @@
 .stat-card {
   border-radius: 12px;
   padding: 1rem 1.2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 8px 20px rgba(19, 45, 74, 0.08);
+  border: 1px solid transparent;
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
 
   &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    transform: translateY(-3px);
+    box-shadow: 0 14px 26px rgba(19, 45, 74, 0.13);
+  }
+
+  .stat-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-icon {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    color: #1f3b5a;
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(31, 59, 90, 0.16);
   }
 
   .stat-label {
     font-size: 0.85rem;
-    color: #6c757d;
-    font-weight: 500;
-    margin-bottom: 0.25rem;
+    color: #5a6879;
+    font-weight: 600;
   }
 
   .stat-value {
     font-size: 1.8rem;
     font-weight: 700;
-    color: #2c3e50;
+    color: #1b3557;
     line-height: 1.2;
   }
 }
 
+.stat-total {
+  background: linear-gradient(135deg, #e8f4fd 0%, #d6edfc 100%);
+  border-color: #c2e3f8;
+}
+
+.stat-new {
+  background: linear-gradient(135deg, #fff8e1 0%, #ffefbe 100%);
+  border-color: #ffe5a3;
+}
+
+.stat-progress {
+  background: linear-gradient(135deg, #e0f2f1 0%, #c6ebe8 100%);
+  border-color: #b1dfda;
+}
+
+.stat-resolved {
+  background: linear-gradient(135deg, #e8f5e9 0%, #cdefd0 100%);
+  border-color: #b3e1bb;
+}
+
+.stat-reopened {
+  background: linear-gradient(135deg, #f3e8ff 0%, #e5d5ff 100%);
+  border-color: #d8c2ff;
+}
+
 .card {
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  border: 1px solid #e9ecef;
-  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(17, 38, 63, 0.07);
+  border: 1px solid #deebf3;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
 }
 
 .card-section-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: #1e3a5f;
 }
 
 .table-wrapper {
@@ -75,34 +136,34 @@
   -webkit-overflow-scrolling: touch;
 }
 
-.insight-box {
-  text-align: center;
-  padding: 0.75rem;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-
-  .insight-label {
-    font-size: 0.8rem;
-    color: #6c757d;
-    margin-bottom: 0.25rem;
-  }
-
-  .insight-value {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #2c3e50;
-  }
+.chart-card {
+  min-height: 390px;
 }
 
-.notification-item {
-  padding: 0.6rem 0;
-  border-bottom: 1px solid #f0f0f0;
-  font-size: 0.875rem;
-  color: #495057;
+.chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.8rem;
+  flex-wrap: wrap;
+}
 
-  &:last-child {
-    border-bottom: none;
-  }
+.chart-chip {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #3f5974;
+  padding: 0.22rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid #d7e5f1;
+  background: #f1f7fc;
+}
+
+:host ::ng-deep .chart-card .p-chart {
+  position: relative;
+  width: 100%;
 }
 
 // Mobile responsive
@@ -113,6 +174,10 @@
 
   .page-header {
     flex-direction: column;
+  }
+
+  .card-surface {
+    padding: 0.8rem 0.75rem;
   }
 
   .header-actions {
@@ -138,17 +203,19 @@
     .stat-label {
       font-size: 0.78rem;
     }
+
+    .stat-icon {
+      width: 1.8rem;
+      height: 1.8rem;
+      font-size: 0.76rem;
+    }
   }
 
   .card {
     padding: 0.75rem !important;
   }
 
-  .insight-box {
-    padding: 0.5rem;
-
-    .insight-value {
-      font-size: 1rem;
-    }
+  .chart-chip {
+    font-size: 0.63rem;
   }
 }

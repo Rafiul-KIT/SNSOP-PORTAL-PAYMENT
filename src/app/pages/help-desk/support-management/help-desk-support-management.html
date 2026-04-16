@@ -1,72 +1,130 @@
-<div class="breadcrumb-wrapper">
-  <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
-</div>
-
-<div class="helpdesk-container">
-  <!-- Page Header -->
-  <div class="page-header">
-    <div>
-      <h2 class="page-title">Support Management</h2>
-      <p class="page-subtitle">Manage assignment, role-based resolution, and operational follow-up for support tickets.</p>
-    </div>
-    <div class="header-actions">
-      <p-button label="Export Report" icon="fas fa-download" [outlined]="true" severity="primary" size="small"></p-button>
-      <p-button label="Assign Ticket" icon="fas fa-user-plus" severity="primary" size="small" (onClick)="assignTicket()"></p-button>
-    </div>
+﻿@if (isLoading) {
+  <app-loader  />
+} @else {
+  <div class="breadcrumb-wrapper">
+    <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
   </div>
 
-  <!-- Management Panel -->
-  <div class="card p-3">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h5 class="card-section-title mb-0">Support Management Panel</h5>
-      <span class="text-muted small d-none d-sm-inline">Role-based assignment and resolution</span>
-    </div>
-
-    <!-- Filters -->
-    <div class="row g-2 mb-3 align-items-end">
-      <div class="col-12 col-md-3">
-        <input type="text" pInputText class="w-100" [(ngModel)]="searchText" placeholder="Search ticket" />
+  <div class="helpdesk-container">
+    <div class="page-header">
+      <div>
+        <h2 class="page-title">Support Management</h2>
+        <p class="page-subtitle">Manage workflow transitions and monitor support requests.</p>
       </div>
-      <div class="col-4 col-md-2">
-        <p-select [options]="statuses" [(ngModel)]="selectedStatus" optionLabel="label" optionValue="value" placeholder="Status" class="w-100" />
-      </div>
-      <div class="col-4 col-md-2">
-        <p-select [options]="priorityOptions" [(ngModel)]="selectedPriority" optionLabel="label" optionValue="value" placeholder="Priority" class="w-100" />
-      </div>
-      <div class="col-4 col-md-2">
-        <p-select [options]="roles" [(ngModel)]="selectedRole" optionLabel="label" optionValue="value" placeholder="Role" class="w-100" />
-      </div>
-      <div class="col-12 col-md-3">
-        <p-button label="Apply" severity="primary" class="w-100" (onClick)="applyFilters()"></p-button>
+      <div class="header-actions">
+        <p-button label="Refresh" icon="fas fa-rotate" severity="primary" size="small" (onClick)="loadRequests()"></p-button>
       </div>
     </div>
 
-    <!-- Table -->
-    <div class="table-wrapper">
-      <p-table [value]="filteredTickets" [tableStyle]="{ 'min-width': '700px' }" size="small" [stripedRows]="true">
-        <ng-template pTemplate="header">
-          <tr>
-            <th class="fw-bold">Tracking No.</th>
-            <th class="fw-bold">Title</th>
-            <th class="fw-bold">Current Status</th>
-            <th class="fw-bold">Assigned Role</th>
-            <th class="fw-bold">Assigned Staff</th>
-            <th class="fw-bold">Action</th>
-          </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-ticket>
-          <tr>
-            <td>{{ ticket.trackingNo }}</td>
-            <td>{{ ticket.title }}</td>
-            <td><p-tag [value]="ticket.status" [severity]="getStatusSeverity(ticket.status)" /></td>
-            <td>{{ ticket.role }}</td>
-            <td>{{ ticket.staff }}</td>
-            <td>
-              <p-button [label]="getActionLabel(ticket)" [severity]="getActionSeverity(ticket)" size="small" [outlined]="ticket.status === 'Resolved'" (onClick)="onAction(ticket)"></p-button>
-            </td>
-          </tr>
-        </ng-template>
-      </p-table>
+    <div class="card p-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="card-section-title mb-0">Support Request Queue</h5>
+        <!-- <span class="text-muted small d-none d-sm-inline">{{ getWorkflowContextText() }}</span> -->
+      </div>
+
+  
+
+      @if (requests.length === 0) {
+        <div class="text-center text-muted py-4">
+          <i class="fas fa-inbox fa-2x mb-2"></i>
+          <p>No requests found for the current filter.</p>
+        </div>
+      } @else {
+        <div class="table-wrapper">
+          <p-table [value]="requests" [tableStyle]="{ 'min-width': '900px' }" size="small" [stripedRows]="true">
+            <ng-template pTemplate="header">
+                  <tr>
+                <th class="fw-bold">  <div class="">
+          <label class="small fw-semibold mb-1 d-block">Search</label>
+          <input
+            type="text"
+            pInputText
+            class="w-100"
+            [(ngModel)]="searchText"
+            placeholder="Search by title or tracking number"
+            (keyup.enter)="applyFilters()"
+          />
+        </div></th>
+                <th class="fw-bold"></th>
+                <th class="fw-bold">  <div class="">
+          <label class="small fw-semibold mb-1 d-block">Status</label>
+          <p-select
+            [options]="statuses"
+            [(ngModel)]="selectedStatus"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Status"
+            class="w-100"
+          />
+        </div></th>
+                <th class="fw-bold"> <div class="">
+          <label class="small fw-semibold mb-1 d-block">Priority</label>
+          <p-select
+            [options]="priorityOptions"
+            [(ngModel)]="selectedPriority"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Priority"
+            class="w-100"
+          />
+        </div></th>
+                <th class="fw-bold"></th>
+                <th class="fw-bold"></th>
+                <th class="fw-bold">   <div class="">
+      <p-button 
+  label="Search" 
+  severity="primary" 
+  [style]="{ width: '50%' }"
+  (onClick)="applyFilters()">
+</p-button>
+        </div></th>
+              </tr>
+              <tr>
+                <th class="fw-bold">Tracking No.</th>
+                <th class="fw-bold">Title</th>
+                <th class="fw-bold">Status</th>
+                <th class="fw-bold">Priority</th>
+                <th class="fw-bold">Category</th>
+                <th class="fw-bold">Module</th>
+                <th class="fw-bold">Actions</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-ticket>
+              <tr>
+                <td>{{ ticket.trackingNumber }}</td>
+                <td>{{ ticket.title }}</td>
+                <td>
+                  <p-tag [value]="formatStatus(ticket.status)" [severity]="getStatusSeverity(ticket.status)" />
+                </td>
+                <td>
+                  <p-tag [value]="ticket.priority || '--'" [severity]="getPrioritySeverity(ticket.priority)" />
+                </td>
+                <td>{{ ticket.categoryName || '--' }}</td>
+                <td>{{ ticket.moduleName || '--' }}</td>
+                <td>
+                  <div class="d-flex flex-wrap gap-1">
+                    <p-button
+                      label="View"
+                      severity="secondary"
+                      size="small"
+                      [outlined]="true"
+                      (onClick)="onView(ticket)"
+                    ></p-button>
+                    <p-button
+                      [label]="getStatusActionLabel(ticket)"
+                      severity="info"
+                      size="small"
+                      [disabled]="!getAvailableActions(ticket).length"
+                      [outlined]="!getAvailableActions(ticket).length"
+                      (onClick)="onAction(ticket)"
+                    ></p-button>
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      }
     </div>
   </div>
-</div>
+}

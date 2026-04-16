@@ -1,101 +1,147 @@
-<div class="breadcrumb-wrapper">
-  <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
-</div>
-
-<div class="helpdesk-container">
-  <!-- Page Header -->
-  <div class="page-header">
-    <div>
-      <h2 class="page-title">My Requests</h2>
-      <p class="page-subtitle">Review all submitted requests, current progress, and past support outcomes.</p>
-    </div>
-    <div class="header-actions">
-      <p-button label="Export Report" icon="fas fa-download" [outlined]="true" severity="primary" size="small"></p-button>
-      <p-button label="View History" icon="fas fa-history" severity="primary" size="small"></p-button>
-    </div>
+@if (isLoading) {
+  <app-loader  />
+} @else {
+  <div class="breadcrumb-wrapper">
+    <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
   </div>
 
-  <div class="row g-3">
-    <!-- Request Cards -->
-    <div class="col-lg-8">
-      <div class="card p-3">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="card-section-title mb-0">My Requests</h5>
-          <span class="text-muted small d-none d-sm-inline">Requester view</span>
-        </div>
-
-        @for (req of requests; track req.trackingNo) {
-          <div class="request-card mb-3">
-            <div class="d-flex justify-content-between align-items-start">
-              <div>
-                <a class="tracking-link">{{ req.trackingNo }}</a>
-                <h6 class="request-title">{{ req.title }}</h6>
-              </div>
-              <p-tag [value]="req.status" [severity]="getStatusSeverity(req.status)" />
-            </div>
-            <p class="request-desc">{{ req.description }}</p>
-            <div class="request-meta">
-              <span>Priority: {{ req.priority }}</span>
-              <span>Category: {{ req.category }}</span>
-              @if (req.assignedTo) {
-                <span>Assigned: {{ req.assignedTo }}</span>
-              }
-              @if (req.submittedDate) {
-                <span>Submitted: {{ req.submittedDate }}</span>
-              }
-              @if (req.rating) {
-                <span>Rating Submitted: {{ req.rating }}</span>
-              }
-              @if (req.resubmitAvailable) {
-                <span class="text-primary">Re-submit Available</span>
-              }
-            </div>
-          </div>
-        }
+  <div class="helpdesk-container">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div>
+        <h2 class="page-title">My Requests</h2>
+        <p class="page-subtitle">Review all submitted requests, current progress, and past support outcomes.</p>
       </div>
+      <!-- <div class="header-actions">
+        <p-button label="Export Report" icon="fas fa-download" [outlined]="true" severity="primary" size="small"></p-button>
+      </div> -->
     </div>
 
-    <!-- Summary & Feedback -->
-    <div class="col-lg-4">
-      <div class="card p-3 mb-3">
-        <h5 class="card-section-title mb-3">Request Summary</h5>
-        <div class="row g-2">
-          <div class="col-6">
-            <div class="summary-box">
-              <div class="summary-label">Total</div>
-              <div class="summary-value">{{ summary.total }}</div>
-            </div>
+    <div class="row g-3">
+      <!-- Request Cards -->
+      <div class="col-lg-8">
+        <div class="card p-3">
+          <div class="mb-3">
+            <h5 class="card-section-title mb-0">My Requests</h5>
           </div>
-          <div class="col-6">
-            <div class="summary-box">
-              <div class="summary-label">Resolved</div>
-              <div class="summary-value">{{ summary.resolved }}</div>
-            </div>
-          </div>
-          <div class="col-6">
-            <div class="summary-box">
-              <div class="summary-label">Pending</div>
-              <div class="summary-value">{{ summary.pending }}</div>
-            </div>
-          </div>
-          <div class="col-6">
-            <div class="summary-box">
-              <div class="summary-label">Reopened</div>
-              <div class="summary-value">{{ summary.reopened }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <div class="card p-3">
-        <h5 class="card-section-title mb-3">Recent Feedback</h5>
-        <div class="feedback-stars">
-          @for (star of getStars(feedback.rating); track $index) {
-            <i class="fas fa-star text-warning"></i>
+          @if (filteredRequests.length === 0) {
+            <div class="text-center text-muted py-4">
+              <i class="fas fa-inbox fa-2x mb-2"></i>
+              <p>No requests found.</p>
+            </div>
+          } @else {
+            <p-table [value]="filteredRequests" [rows]="10" [paginator]="true" responsiveLayout="scroll" styleClass="p-datatable-sm p-datatable-striped">
+              <ng-template pTemplate="header">
+                   <tr>
+                  <th></th>
+                  <th></th>
+                  <th>
+                    <p-select [options]="statusOptions" [(ngModel)]="selectedStatus" (onChange)="filterRequests()" optionLabel="label" optionValue="value" placeholder="Status" styleClass="w-100" />
+                  </th>
+                  <th>
+                    <p-select [options]="priorityOptions" [(ngModel)]="selectedPriority" (onChange)="filterRequests()" optionLabel="label" optionValue="value" placeholder="Priority" styleClass="w-100" />
+                  </th>
+                  <th></th>
+                  <th></th>
+                </tr>
+                <tr>
+                  <th>Tracking ID</th>
+                  <th>Title</th>
+                  <th>Status</th>
+                  <th>Priority</th>
+                  <th>Submitted</th>
+                  <th class="action-col-cell">Action</th>
+                </tr>
+             
+              </ng-template>
+                  <ng-template pTemplate="body" let-req>
+                  <tr>
+                  <td>
+                     <!-- class="tracking-link" (click)="onView(req)" -->
+                    <a>{{ req.trackingNumber }}</a>
+                  </td>
+                  <td>
+                    <span class="request-title-table" (click)="onView(req)">{{ req.title }}</span>
+                  </td>
+                  <td>
+                    <p-tag [value]="req.status.replace('_', ' ')" [severity]="getStatusSeverity(req.status)" />
+                  </td>
+                  <td>
+                    <span class="priority-text" [ngClass]="req.priority?.toLowerCase()">{{ req.priority }}</span>
+                  </td>
+                  <td>{{ formatDate(req.createdAt) }}</td>
+                  <td class="action-col-cell">
+                    <div class="d-flex flex-wrap gap-1">
+                      <p-button
+                        label="View"
+                        icon="pi pi-eye"
+                        [outlined]="true"
+                        severity="secondary"
+                        size="small"
+                        (onClick)="onView(req)"
+                      ></p-button>
+                      <p-button
+                        [label]="getStatusActionLabel(req)"
+                        severity="info"
+                        size="small"
+                        [disabled]="!getAvailableActions(req).length"
+                        [outlined]="!getAvailableActions(req).length"
+                        (onClick)="onAction(req)"
+                      ></p-button>
+                    </div>
+                  </td>
+                  </tr>
+
+                
+              </ng-template>
+            </p-table>
           }
         </div>
-        <p class="feedback-comment">{{ feedback.comment }}</p>
+      </div>
+
+      <!-- Summary & Feedback -->
+      <div class="col-lg-4">
+        <div class="card p-3 mb-3">
+          <h5 class="card-section-title mb-3">Request Summary</h5>
+          <div class="row g-2">
+            <div class="col-6">
+              <div class="summary-box">
+                <div class="summary-label">Total</div>
+                <div class="summary-value">{{ summary.total }}</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="summary-box">
+                <div class="summary-label">Resolved</div>
+                <div class="summary-value">{{ summary.resolved }}</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="summary-box">
+                <div class="summary-label">Pending</div>
+                <div class="summary-value">{{ summary.pending }}</div>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="summary-box">
+                <div class="summary-label">Reopened</div>
+                <div class="summary-value">{{ summary.reopened }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- <div class="card p-3">
+          <h5 class="card-section-title mb-3">Recent Feedback</h5>
+          <div class="feedback-stars">
+            @for (star of getStars(feedback.rating); track $index) {
+              <i class="fas fa-star text-warning"></i>
+            }
+          </div>
+          <p class="feedback-comment">{{ feedback.comment }}</p>
+        </div> -->
       </div>
     </div>
   </div>
-</div>
+}

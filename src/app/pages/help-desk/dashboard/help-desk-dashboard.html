@@ -1,130 +1,126 @@
-<div class="breadcrumb-wrapper">
-  <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
-</div>
-
-<div class="helpdesk-container">
-  <!-- Page Header -->
-  <div class="page-header">
-    <div>
-      <h2 class="page-title">IT Helpdesk Dashboard</h2>
-      <p class="page-subtitle">Monitor support requests, track SLAs, and manage issue resolution in SNSOP MIS.</p>
-    </div>
-    <div class="header-actions">
-      <p-button label="Export Report" icon="fas fa-download" [outlined]="true" severity="primary" size="small"></p-button>
-      <p-button label="New Support Request" icon="fas fa-plus" severity="primary" size="small" (onClick)="navigateTo('/help-desk/submit-request')"></p-button>
-    </div>
+@if (isLoading) {
+  <app-loader  />
+} @else {
+  <div class="breadcrumb-wrapper">
+    <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
   </div>
 
-  <!-- Stat Cards -->
-  <div class="row g-2 g-md-3 mb-3">
-    <div class="col-6 col-md-4 col-lg">
-      <div class="stat-card" style="background-color: #e8f4fd; border: 2px solid #e8f4fd;">
-        <div class="stat-label">Total Requests</div>
-        <div class="stat-value">{{ stats.totalRequests }}</div>
+  <div class="helpdesk-container">
+    <div class="page-header card-surface">
+      <div class="page-title-wrap">
+        <h2 class="page-title">IT Helpdesk Dashboard</h2>
+        <p class="page-subtitle">Overview of status, modules, priorities and recent reporting trends.</p>
+      </div>
+      <div class="header-actions">
+        <p-button label="New Support Request" icon="fas fa-plus" severity="primary" size="small" (onClick)="navigateTo('/help-desk/submit-request')"></p-button>
       </div>
     </div>
-    <div class="col-6 col-md-4 col-lg">
-      <div class="stat-card" style="background-color: #fff8e1; border: 2px solid #fff8e1;">
-        <div class="stat-label">New Requests</div>
-        <div class="stat-value">{{ stats.newRequests }}</div>
-      </div>
-    </div>
-    <div class="col-6 col-md-4 col-lg">
-      <div class="stat-card" style="background-color: #e0f2f1; border: 2px solid #e0f2f1;">
-        <div class="stat-label">In Progress</div>
-        <div class="stat-value">{{ stats.inProgress }}</div>
-      </div>
-    </div>
-    <div class="col-6 col-md-4 col-lg">
-      <div class="stat-card" style="background-color: #e8f5e9; border: 2px solid #e8f5e9;">
-        <div class="stat-label">Resolved</div>
-        <div class="stat-value">{{ stats.resolved }}</div>
-      </div>
-    </div>
-    <div class="col-12 col-sm-6 col-md-4 col-lg">
-      <div class="stat-card" style="background-color: #fce4ec; border: 2px solid #fce4ec;">
-        <div class="stat-label" style="color: #c62828;">SLA Breached</div>
-        <div class="stat-value" style="color: #c62828;">{{ stats.slaBreached }}</div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Main Content -->
-  <div class="row g-3">
-    <!-- Support Overview -->
-    <div class="col-lg-8">
-      <div class="card p-3">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="card-section-title mb-0">Support Overview</h5>
-          <span class="text-muted small d-none d-sm-inline">Latest ticket activities</span>
+    <div class="row g-2 g-md-3 mb-3">
+      <div class="col-6 col-md-4 col-lg">
+        <div class="stat-card stat-total">
+          <div class="stat-top">
+            <div class="stat-label">Total Requests</div>
+            <span class="stat-icon"><i class="fas fa-layer-group"></i></span>
+          </div>
+          <div class="stat-value">{{ stats.totalRequests }}</div>
         </div>
-        <div class="table-wrapper">
-          <p-table [value]="recentTickets" [tableStyle]="{ 'min-width': '600px' }" size="small">
-            <ng-template pTemplate="header">
-              <tr>
-                <th>Tracking No.</th>
-                <th>Issue</th>
-                <th>Status</th>
-                <th>Priority</th>
-                <th>Assigned To</th>
-                <th>SLA</th>
-              </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-ticket>
-              <tr>
-                <td>{{ ticket.trackingNo }}</td>
-                <td>{{ ticket.issue }}</td>
-                <td><p-tag [value]="ticket.status" [severity]="getStatusSeverity(ticket.status)" /></td>
-                <td><p-tag [value]="ticket.priority" [severity]="getPrioritySeverity(ticket.priority)" /></td>
-                <td>{{ ticket.assignedTo }}</td>
-                <td>{{ ticket.sla }}</td>
-              </tr>
-            </ng-template>
-          </p-table>
+      </div>
+      <div class="col-6 col-md-4 col-lg">
+        <div class="stat-card stat-new">
+          <div class="stat-top">
+            <div class="stat-label">New</div>
+            <span class="stat-icon"><i class="fas fa-bell"></i></span>
+          </div>
+          <div class="stat-value">{{ stats.newRequests }}</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-4 col-lg">
+        <div class="stat-card stat-progress">
+          <div class="stat-top">
+            <div class="stat-label">In Progress</div>
+            <span class="stat-icon"><i class="fas fa-spinner"></i></span>
+          </div>
+          <div class="stat-value">{{ stats.inProgress }}</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-4 col-lg">
+        <div class="stat-card stat-resolved">
+          <div class="stat-top">
+            <div class="stat-label">Resolved + Closed</div>
+            <span class="stat-icon"><i class="fas fa-circle-check"></i></span>
+          </div>
+          <div class="stat-value">{{ stats.resolved }}</div>
+        </div>
+      </div>
+      <div class="col-12 col-sm-6 col-md-4 col-lg">
+        <div class="stat-card stat-reopened">
+          <div class="stat-top">
+            <div class="stat-label">Reopened</div>
+            <span class="stat-icon"><i class="fas fa-rotate-left"></i></span>
+          </div>
+          <div class="stat-value">{{ stats.reopened }}</div>
         </div>
       </div>
     </div>
 
-    <!-- Quick Insights & Notifications -->
-    <div class="col-lg-4">
-      <div class="card p-3 mb-3">
-        <h5 class="card-section-title mb-3">Quick Insights</h5>
-        <div class="row g-2">
-          <div class="col-6">
-            <div class="insight-box">
-              <div class="insight-label">Avg. Resolution</div>
-              <div class="insight-value">{{ quickInsights.avgResolution }}</div>
-            </div>
+    <div class="row g-3">
+      <div class="col-lg-6">
+        <div class="card p-3 chart-card">
+          <div class="chart-head">
+            <h5 class="card-section-title mb-0">Requests By Module</h5>
+            <span class="chart-chip">Total vs Resolved</span>
           </div>
-          <div class="col-6">
-            <div class="insight-box">
-              <div class="insight-label">Reopened</div>
-              <div class="insight-value">{{ quickInsights.reopened }}</div>
-            </div>
+          @if (moduleChartData) {
+            <p-chart type="bar" [data]="moduleChartData" [options]="barChartOptions" height="320px"></p-chart>
+          } @else {
+            <div class="text-muted text-center py-3">No module data.</div>
+          }
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card p-3 chart-card">
+          <div class="chart-head">
+            <h5 class="card-section-title mb-0">Priority Overview</h5>
+            <span class="chart-chip">Priority Breakdown</span>
           </div>
-          <div class="col-6">
-            <div class="insight-box">
-              <div class="insight-label">User Rating</div>
-              <div class="insight-value">{{ quickInsights.userRating }}</div>
-            </div>
+          @if (priorityChartData) {
+            <p-chart type="bar" [data]="priorityChartData" [options]="barChartOptions" height="300px"></p-chart>
+          } @else {
+            <div class="text-muted text-center py-3">No priority data.</div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3 mt-1">
+      <div class="col-lg-6">
+        <div class="card p-3 chart-card">
+          <div class="chart-head">
+            <h5 class="card-section-title mb-0">Status Distribution</h5>
+            <span class="chart-chip">Current Queue</span>
           </div>
-          <div class="col-6">
-            <div class="insight-box">
-              <div class="insight-label">Active Agents</div>
-              <div class="insight-value">{{ quickInsights.activeAgents }}</div>
-            </div>
-          </div>
+          @if (statusChartData) {
+            <p-chart type="doughnut" [data]="statusChartData" [options]="doughnutChartOptions" height="300px"></p-chart>
+          } @else {
+            <div class="text-muted text-center py-3">No status data.</div>
+          }
         </div>
       </div>
 
-      <div class="card p-3">
-        <h5 class="card-section-title mb-3">Recent Notifications</h5>
-        @for (note of notifications; track note) {
-          <div class="notification-item">
-            <span>{{ note }}</span>
+      <div class="col-lg-6">
+        <div class="card p-3 chart-card">
+          <div class="chart-head">
+            <h5 class="card-section-title mb-0">Reported Issues (Last 6 Months)</h5>
+            <span class="chart-chip">Monthly Trend</span>
           </div>
-        }
+          @if (sixMonthsChartData) {
+            <p-chart type="line" [data]="sixMonthsChartData" [options]="lineChartOptions" height="320px"></p-chart>
+          } @else {
+            <div class="text-muted text-center py-3">No monthly trend data.</div>
+          }
+        </div>
       </div>
     </div>
   </div>
-</div>
+}
