@@ -47,7 +47,7 @@
         <td>{{ beneficiary.recipientFullName }}</td>
         <td>{{ beneficiary.walletNumber }}</td>
         <td>{{ beneficiary.amount | number: '1.2-2' }}</td>
-        <td>{{ beneficiary.status }}</td>
+        <td>{{ getStatusLabel(beneficiary.status) }}</td>
       </tr>
     </ng-template>
     <ng-template pTemplate="emptymessage">

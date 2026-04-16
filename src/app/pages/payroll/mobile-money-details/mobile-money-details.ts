@@ -56,6 +56,16 @@ export class MobileMoneyDetails implements OnInit {
   requestId: string | null = null;
   beneficiaries: MobileMoneyBeneficiary[] = [];
   selectedBeneficiaries: MobileMoneyBeneficiary[] = [];
+  readonly statusLabels: Record<string, string> = {
+    PAYROLL_GENERATED: 'Payroll Generated',
+    ADDED_TO_QUEUE: 'Added to Queue',
+    INITIATED: 'Initiated',
+    INITIATION_FAILED: 'Initiation Failed',
+    INVALID_WALLET_ID: 'Invalid Wallet ID',
+    ABANDONED: 'Abandoned',
+    RECONCILED_AS_PAID: 'Reconciled as Paid',
+    RECONCILED_AS_UNPAID: 'Reconciled as Unpaid',
+  };
 
   breadcrumbItems: any[] = [];
   breadcrumbHome: any;
@@ -101,7 +111,7 @@ export class MobileMoneyDetails implements OnInit {
         {}
       );
       if (response.data.success) {
-        const selectableStatuses = ['PAYROLL_GENERATED', 'RECONCILED_AS_UNPAID', 'ABANDONED'];
+        const selectableStatuses = ['PAYROLL_GENERATED', 'RECONCILED_AS_UNPAID', 'ABANDONED', 'INITIATION_FAILED'];
         this.beneficiaries = response.data.data.map((beneficiary: MobileMoneyBeneficiary) => {
           const isSelectable = selectableStatuses.includes(beneficiary.status);
           return {
@@ -238,5 +248,9 @@ export class MobileMoneyDetails implements OnInit {
 
   hasSelectedEnabledBeneficiaries(): boolean {
     return this.selectedBeneficiaries.some(b => !b.isDisabled);
+  }
+
+  getStatusLabel(status: string): string {
+    return this.statusLabels[status] || 'Unknown';
   }
 }
