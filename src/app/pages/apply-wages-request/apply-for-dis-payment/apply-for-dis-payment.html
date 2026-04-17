@@ -50,6 +50,17 @@
                   </div>
 
                   <div class="col-md-6 col-lg-6 mb-3">
+                    <label for="registrationPhase" class="form-label fw-semibold">Registration Phase <span
+                        class="text-danger">*</span></label>
+                    <p-select id="registrationPhase" formControlName="registrationPhase" [options]="registrationPhases"
+                      optionLabel="label" optionValue="value" placeholder="Select Phase" class="w-100"
+                      [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('registrationPhase') }"></p-select>
+                    @if (isFieldInvalid('registrationPhase')) {
+                    <small class="text-danger">Registration phase is required</small>
+                    }
+                  </div>
+
+                  <div class="col-md-6 col-lg-6 mb-3">
                     <label for="paymentCycleId" class="form-label fw-semibold">Payment Cycle <span
                         class="text-danger">*</span></label>
                     <p-select id="paymentCycleId" formControlName="paymentCycleId" [options]="paymentCycles"

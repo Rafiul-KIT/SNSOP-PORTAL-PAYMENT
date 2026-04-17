@@ -130,6 +130,7 @@ export class ApplyForWagesPaymentComponent implements OnInit {
         fromDate: [null, Validators.required],
         toDate: [null, Validators.required],
         paymentCycle: [null, Validators.required],
+        registrationPhase: [null, Validators.required],
         attachment: [[], [this.attachmentRequiredValidator]]
       },
       { validators: this.dateRangeValidator }
@@ -247,7 +248,8 @@ export class ApplyForWagesPaymentComponent implements OnInit {
       const requestBody = {
         subprojectId: Number(this.subprojectId),
         fromDate: this.formatDate(formValue.fromDate),
-        toDate: this.formatDate(formValue.toDate)
+        toDate: this.formatDate(formValue.toDate),
+        registrationPhase: formValue.registrationPhase || null
       };
 
       const response: any = await this.apiService.POST(
@@ -386,6 +388,9 @@ export class ApplyForWagesPaymentComponent implements OnInit {
       formData.append('fromDate', this.formatDate(formValue.fromDate));
       formData.append('toDate', this.formatDate(formValue.toDate));
       formData.append('paymentCycle', formValue.paymentCycle);
+      if (formValue.registrationPhase) {
+        formData.append('registrationPhase', formValue.registrationPhase);
+      }
       
       beneficiaryIds.forEach(id => formData.append('beneficiaryIds', id.toString()));
 
@@ -429,7 +434,7 @@ export class ApplyForWagesPaymentComponent implements OnInit {
   }
 
   resetForm(): void {
-    this.wagesForm.reset({ wageRate: 2.7 });
+    this.wagesForm.reset({ wageRate: 2.7, registrationPhase: null });
     this.originalBeneficiaries = [];
     this.filteredBeneficiaries = [];
     this.selectedBeneficiaries = [];

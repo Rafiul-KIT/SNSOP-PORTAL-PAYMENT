@@ -108,6 +108,31 @@ getUserRole(): number | null {
     return this.cookieService.get(this.ACCESS_TOKEN) || null;
   }
 
+  private getLocalUserIdHeader(): Record<string, string> {
+    if (environment.env !== 'local') {
+      return {};
+    }
+
+    const token = this.getToken();
+    if (!token) {
+      return {};
+    }
+
+    try {
+      const decoded: any = jwtDecode(token);
+      const userId = decoded?.user_id ?? decoded?.userId ?? decoded?.id ?? decoded?.sub;
+      const roleId = decoded?.roleId ?? decoded?.role_id;
+
+      return {
+        ...(userId ? { 'X-User-Id': String(userId) } : {}),
+        ...(roleId ? { 'X-Role-Id': String(roleId) } : {}),
+      };
+    } catch (err) {
+      console.error('Invalid token:', err);
+      return {};
+    }
+  }
+
   logout = () => {
     const host = (() => {
       try {
@@ -152,6 +177,7 @@ getUserRole(): number | null {
     return this.axiosInstance.post(endpoint, payload, {
       headers: {
         'Content-Type': 'multipart/form-data',
+        ...this.getLocalUserIdHeader(),
       },
     });
   };

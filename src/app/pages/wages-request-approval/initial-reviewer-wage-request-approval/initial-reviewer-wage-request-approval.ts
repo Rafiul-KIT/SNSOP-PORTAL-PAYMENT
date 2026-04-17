@@ -39,6 +39,7 @@ import Swal from 'sweetalert2';
 interface WageRequest {
   id: number;
   subprojectId: number;
+  registrationPhase?: string | null;
   fromDate: string;
   toDate: string;
   requestYear: number;
@@ -125,6 +126,10 @@ export class InitialReviewerWageRequestApproval implements OnInit {
     { label: 'November', value: 11 },
     { label: 'December', value: 12 },
   ];
+  registrationPhases: { label: string; value: string }[] = [
+    { label: 'AF', value: 'AF' },
+    { label: 'PARENT', value: 'PARENT' },
+  ];
   paymentCycles: any[] = [];
   statuses: any[] = [];
   lookupsLoaded = false;
@@ -170,6 +175,7 @@ export class InitialReviewerWageRequestApproval implements OnInit {
         toDate: [null],
         requestYear: [null],
         requestMonthIndex: [null],
+        registrationPhase: [null],
         paymentCycle: [null],
         status: [null],
         requestNumber: [''],
@@ -238,6 +244,7 @@ export class InitialReviewerWageRequestApproval implements OnInit {
       toDate: f.toDate,
       requestYear: f.requestYear,
       requestMonthIndex: f.requestMonthIndex,
+      registrationPhase: f.registrationPhase,
       paymentCycle: f.paymentCycle,
       status: f.status,
       requestNumber: f.requestNumber,
@@ -286,6 +293,7 @@ export class InitialReviewerWageRequestApproval implements OnInit {
         toDate: filterData.toDate ? new Date(filterData.toDate) : null,
         requestYear: filterData.requestYear,
         requestMonthIndex: filterData.requestMonthIndex,
+        registrationPhase: filterData.registrationPhase,
         paymentCycle: filterData.paymentCycle,
         status: filterData.status,
         requestNumber: filterData.requestNumber || '',
@@ -381,6 +389,7 @@ export class InitialReviewerWageRequestApproval implements OnInit {
       toDate: f.toDate ? this.formatDate(f.toDate) : null,
       requestYear: f.requestYear || null,
       requestMonthIndex: f.requestMonthIndex || null,
+      registrationPhase: f.registrationPhase || null,
       paymentCycle: f.paymentCycle || null,
       requestNumber: f.requestNumber ? f.requestNumber.trim() : null,
       status: f.status || null,

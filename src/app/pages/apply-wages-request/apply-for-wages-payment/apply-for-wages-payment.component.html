@@ -132,8 +132,20 @@
                   <small class="text-danger">Payment cycle is required</small>
                   }
                 </div>
+                <div class="col-md-6 col-lg-3 mb-3">
+                  <label for="registrationPhase" class="form-label fw-semibold">
+                    Registration Phase <span class="text-danger">*</span>
+                  </label>
+                  <p-select id="registrationPhase" formControlName="registrationPhase" [options]="registrationPhases"
+                    optionLabel="label" optionValue="value" placeholder="Select phase" class="w-100"
+                    [ngClass]="{ 'ng-invalid ng-dirty': isFieldInvalid('registrationPhase') }">
+                  </p-select>
+                  @if (isFieldInvalid('registrationPhase')) {
+                  <small class="text-danger">Registration phase is required</small>
+                  }
+                </div>
                    <!-- Attachment -->
-                <div class="col-md-3 col-lg-3 mb-3">
+                <div class="col-md-6 col-lg-6 mb-3">
                   <label for="attachment" class="form-label fw-semibold">Attachments <small class="text-muted"><span class="text-danger">*</span>(Max size under {{MAX_ATTACHMENT_SIZE_MB}}MB)</small></label>
                   <input type="file" id="attachment" class="form-control" (change)="onFileChange($event)" multiple
                     [class.is-invalid]="wagesForm.get('attachment')?.invalid && wagesForm.get('attachment')?.touched">

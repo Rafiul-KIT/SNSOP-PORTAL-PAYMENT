@@ -72,6 +72,13 @@
     </div>
     <div class="col-md-3">
       <p-floatlabel variant="on" class="w-100">
+        <p-select [options]="registrationPhases" optionLabel="label" optionValue="value"
+          formControlName="registrationPhase"></p-select>
+        <label>Registration Phase</label>
+      </p-floatlabel>
+    </div>
+    <div class="col-md-3">
+      <p-floatlabel variant="on" class="w-100">
         <p-select [options]="paymentCycles" optionLabel="label" optionValue="value"
           formControlName="paymentCycle"></p-select>
         <label>Payment Cycle</label>
@@ -115,7 +122,7 @@
   [rowTrackBy]="trackById" size="small">
   <ng-template pTemplate="header">
     <tr>
-      <th colspan="9" class="text-end">
+      <th colspan="10" class="text-end">
         <p class="fw-bold mb-2">Showing <kbd>{{ wageRequests.length }}</kbd> of <kbd>{{ totalRecords }}</kbd> wage requests</p>
       </th>
     </tr>
@@ -123,6 +130,7 @@
       <th class="text-center">Serial</th>
       <th class="text-center">Request Number</th>
       <th class="text-center">Sub-Project</th>
+      <th class="text-center">Registration Phase</th>
       <th class="text-center">Payment Cycle</th>
       <th class="text-center">Status</th>
       <th class="text-center" style="width: 150px;">Approval <span class="text-danger">*</span></th>
@@ -135,6 +143,7 @@
       <td class="text-center">{{ rowIndex + 1 }}</td>
       <td class="text-center">{{ item.requestNumber || 'N/A' }}</td>
       <td class="text-center">{{ getSubProjectName(item.subprojectId) }}</td>
+      <td class="text-center">{{ item.registrationPhase || '-' }}</td>
       <td class="text-center">Cycle {{ item.paymentCycle }}</td>
       <td class="text-center"><span [class]="'badge ' + getStatusClass(item.status)">{{ getStatusLabel(item.status) }}</span></td>
       <td class="text-center">
@@ -156,7 +165,7 @@
   </ng-template>
   <ng-template pTemplate="emptymessage">
     <tr>
-      <td colspan="9" class="text-center text-danger">
+      <td colspan="10" class="text-center text-danger">
         <b>No wage requests awaiting approval!</b>
       </td>
     </tr>

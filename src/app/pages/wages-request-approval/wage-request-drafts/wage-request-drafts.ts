@@ -41,6 +41,7 @@ import { formatBytes, handleMultipleFileUpload } from '../../../validators/file-
 interface WageRequestDto {
   id: number;
   subprojectId: number;
+  registrationPhase?: string | null;
   fromDate: string;
   toDate: string;
   requestYear: number;
@@ -119,6 +120,10 @@ export class WageRequestDrafts implements OnInit {
     { label: 'October', value: 10 },
     { label: 'November', value: 11 },
     { label: 'December', value: 12 },
+  ];
+  registrationPhases: { label: string; value: string }[] = [
+    { label: 'AF', value: 'AF' },
+    { label: 'PARENT', value: 'PARENT' },
   ];
   paymentCycles: any[] = [];
   statuses: any[] = [];
@@ -213,6 +218,7 @@ export class WageRequestDrafts implements OnInit {
       toDate: [null],
       requestYear: [null],
       requestMonthIndex: [null],
+      registrationPhase: [null],
       paymentCycle: [null],
       status: [null],
       requestNumber: [''],
@@ -320,6 +326,7 @@ export class WageRequestDrafts implements OnInit {
       toDate: f.toDate ? this.formatDate(f.toDate) : null,
       requestYear: f.requestYear || null,
       requestMonthIndex: f.requestMonthIndex || null,
+      registrationPhase: f.registrationPhase || null,
       paymentCycle: f.paymentCycle || null,
       requestNumber: f.requestNumber ? f.requestNumber.trim() : null,
       status: f.status || null,
@@ -619,6 +626,7 @@ getSubProjectName(id: number): string {
         toDate: filters.toDate,
         requestYear: filters.requestYear,
         requestMonthIndex: filters.requestMonthIndex,
+        registrationPhase: filters.registrationPhase,
         paymentCycle: filters.paymentCycle,
         status: filters.status,
         requestNumber: filters.requestNumber,

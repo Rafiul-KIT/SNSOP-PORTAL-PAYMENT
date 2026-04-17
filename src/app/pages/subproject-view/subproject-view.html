@@ -150,6 +150,7 @@
             <th class="text-center">County</th>
             <th class="text-center">Payam</th>
             <th class="text-center">Boma</th>
+            <th class="text-center">Registration Phase</th>
             <th class="text-center">Status</th>
             <th class="text-center" [style]="{ width: '100px' }">Action</th>
         </tr>
@@ -164,6 +165,7 @@
             <td class="text-center">{{ item.countyName }}</td>
             <td class="text-center">{{ item.payamName }}</td>
             <td class="text-center">{{ item.bomaName }}</td>
+            <td class="text-center">{{ item.registrationPhase || '-' }}</td>
             <td class="text-center">
                 <span
                     [class]="'badge ' + (item.status === 'Approved' || item.status === 'Completed' ? 'bg-success' : item.status === 'Rejected' ? 'bg-danger' : 'bg-warning')">

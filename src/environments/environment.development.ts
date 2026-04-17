@@ -3,7 +3,8 @@ export const environment = {
   env: 'local',
   useHash: false,
   domain: 'localhost', // or 'snsopmis.local' if you use hosts file trick
-  globalApi: 'https://devgwapp.southsudansafetynet.info/mis_server/', // your Spring Boot backend in dev
+  //globalApi: 'https://devgwapp.southsudansafetynet.info/mis_server/', // your Spring Boot backend in dev
+  globalApi: 'http://localhost:8090/mis_server/',
   authApi: 'https://devgwapp.southsudansafetynet.info/mis_auth/',
   portals: {
     master: 'https://localhost:4010',
@@ -11,7 +12,7 @@ export const environment = {
     surveyCTO: 'https://localhost:4010/#/cto-dashboard',
      mNe: 'https://localhost:4010/#/monitoring-evaluation/beneficiary-enrolment-summary',
     beneficiary: 'https://localhost:4020',
-    payment: 'https://localhost:4030',
+    payment: 'https://localhost:4200',
     grm: 'https://localhost:4040',
     report: 'https://localhost:4050',
   },

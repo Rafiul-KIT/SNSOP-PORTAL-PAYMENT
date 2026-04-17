@@ -126,6 +126,7 @@ export class ApplyForDisPayment implements OnInit {
       countyId: [{ value: null, disabled: true }, Validators.required],
       payamId: [{ value: null, disabled: true }, Validators.required],
       bomaId: [{ value: null, disabled: true }, Validators.required],
+      registrationPhase: [null, Validators.required],
       paymentCycleId: [null, Validators.required]
     });
 
@@ -309,6 +310,7 @@ export class ApplyForDisPayment implements OnInit {
       requestYear: formValue.requestYear,
       requestMonthIndex: formValue.requestMonthIndex,
       bomaId: parseInt(formValue.bomaId, 10),
+      registrationPhase: formValue.registrationPhase || null,
       paymentCycleId: formValue.paymentCycleId
     };
 
@@ -434,6 +436,9 @@ export class ApplyForDisPayment implements OnInit {
     formData.append('requestMonthIndex', searchFormValue.requestMonthIndex);
     formData.append('bomaId', searchFormValue.bomaId);
     formData.append('paymentCycleId', searchFormValue.paymentCycleId);
+    if (searchFormValue.registrationPhase) {
+      formData.append('registrationPhase', searchFormValue.registrationPhase);
+    }
     formData.append('totalDays', submissionFormValue.totalDays);
 
     beneficiaryIds.forEach(id => {
@@ -523,6 +528,7 @@ export class ApplyForDisPayment implements OnInit {
       this.wagesForm.patchValue({
         requestYear: wagesFormFilters.requestYear,
         requestMonthIndex: wagesFormFilters.requestMonthIndex,
+        registrationPhase: wagesFormFilters.registrationPhase ?? null,
         paymentCycleId: wagesFormFilters.paymentCycleId,
       });
 
