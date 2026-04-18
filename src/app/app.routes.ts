@@ -43,13 +43,6 @@ import { TrainingAttendance } from './pages/beneficiay-attendance/training-atten
 import { TrainingAttendancePerform } from './pages/beneficiay-attendance/training-attendance-perform/training-attendance-perform';
 import { TrainingAttendanceAndParticipantSummaryReport } from './pages/report-list/training-attendance-and-participant-summary-report/training-attendance-and-participant-summary-report';
 import { ComplementarySocialMeasuresProgressReport } from './pages/report-list/complementary-social-measures-progress-report/complementary-social-measures-progress-report';
-import { HelpDeskDashboard } from './pages/help-desk/dashboard/help-desk-dashboard';
-import { HelpDeskSubmitRequest } from './pages/help-desk/submit-request/help-desk-submit-request';
-import { HelpDeskMyRequests } from './pages/help-desk/my-requests/help-desk-my-requests';
-import { HelpDeskSupportManagement } from './pages/help-desk/support-management/help-desk-support-management';
-import { HelpDeskStatusTracker } from './pages/help-desk/status-tracker/help-desk-status-tracker';
-import { HelpDeskReports } from './pages/help-desk/reports/help-desk-reports';
-import { HelpDeskUserManual } from './pages/help-desk/user-manual/help-desk-user-manual';
 
 import { BeneficiaryAtendanceReport } from './pages/report-list/beneficiary-atendance-report/beneficiary-atendance-report';
 
@@ -346,20 +339,6 @@ export const routes: Routes = [
     ],
   },
   { path: 'unauthorized', component: Unauthorized },
-  {
-    path: 'help-desk',
-    canActivate: [routeGuard],
-    children: [
-      { path: 'dashboard', component: HelpDeskDashboard, canActivate: [routeGuard] },
-      { path: 'submit-request', component: HelpDeskSubmitRequest, canActivate: [routeGuard] },
-      { path: 'my-requests', component: HelpDeskMyRequests, canActivate: [routeGuard] },
-      { path: 'support-management', component: HelpDeskSupportManagement, canActivate: [routeGuard] },
-      { path: 'status-tracker', component: HelpDeskStatusTracker, canActivate: [routeGuard] },
-      { path: 'reports', component: HelpDeskReports, canActivate: [routeGuard] },
-      { path: 'user-manual', component: HelpDeskUserManual, canActivate: [routeGuard] },
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
-    ]
-  },
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
   {
     component: NotFound,

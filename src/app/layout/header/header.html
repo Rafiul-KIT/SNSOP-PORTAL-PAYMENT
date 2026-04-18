@@ -1,18 +1,17 @@
 <div class="header">
   <!-- Portal selector (left) -->
-  <!-- <img src="SNSOP_logo.png" style="height: 30px; width: auto" />
-  &nbsp;&nbsp;&nbsp; -->
-
   <div class="portals" (click)="showPortalOptions = !showPortalOptions">
     <i class="fas fa-braille hand"></i>
     <div>
-     <strong><h3 class="name">SNSOP</h3>
-     <span>Payment</span></strong>
+      <strong>
+        <h3 class="name">SNSOP</h3>
+        <span>Payment</span>
+      </strong>
     </div>
     <i class="fas fa-angle-{{ showPortalOptions ? 'down' : 'right' }} hand"></i>
     <span class="vertical-line"></span>
   </div>
-  
+
   <div class="menues">
     <p-menubar [model]="menuList"></p-menubar>
   </div>
@@ -20,62 +19,66 @@
   <div class="portals-option-wrapper {{ showPortalOptions ? 'show' : '' }}" (mouseleave)="showPortalOptions = false">
     <div class="portal-items">
       @for (portal of portalList; track portal) {
-      <a class="item" [href]="portal.link">
+      <a class="item" [attr.href]="portal.newTab ? null : portal.link" (click)="onPortalClick($event, portal)">
         <i class="{{ portal.icon }} w-50"></i>
         <span>{{ portal.label }}</span>
       </a>
       }
     </div>
   </div>
+
   <!-- Logged In User -->
   @if(userInfo){
-    <div class="help-desk-desktop pe-1">
-      @if(canAccessHelpDesk){
-        <div class="help-desk-menu-container">
-          <button class="helpdesk-trigger" (click)="toggleHelpDeskDropdown()">
-            <i class="fas fa-headset"></i>
-            <span>Help</span>
-            <i class="fas fa-chevron-down chevron" [class.open]="showHelpDeskDropdown"></i>
-          </button>
+  <div class="help-desk-desktop pe-1">
+    @if(canAccessHelpDesk){
+    <div class="help-desk-menu-container">
+      <button class="helpdesk-trigger" (click)="toggleHelpDeskDropdown()">
+        <i class="fas fa-headset"></i>
+        <span>Help</span>
+        <i class="fas fa-chevron-down chevron" [class.open]="showHelpDeskDropdown"></i>
+      </button>
 
-
-          <div class="help-desk-menu {{ showHelpDeskDropdown ? 'show' : '' }}" (mouseleave)="hideHelpDeskDropdown()">
-            @for (item of helpDeskChildren; track item) {
-              @if (item.separator) {
-                <div class="menu-divider"></div>
-              }
-              <a class="item {{ item.separator ? 'item-highlight' : '' }}" [routerLink]="item.routerLink" (click)="hideHelpDeskDropdown()">
-                <i class="{{ item.icon }} me-2"></i>
-                {{ item.label }}
-              </a>
-            }
-          </div>
-        </div>
-      }
+      <div class="help-desk-menu {{ showHelpDeskDropdown ? 'show' : '' }}" (mouseleave)="hideHelpDeskDropdown()">
+        @for (item of helpDeskChildren; track item.label) {
+        @if (item.separator) {
+        <div class="menu-divider"></div>
+        }
+        <a class="item {{ item.separator ? 'item-highlight' : '' }}" [attr.href]="item.newTab ? null : item.link"
+          (click)="onHelpDeskMenuClick($event, item)">
+          <i class="{{ item.icon }} me-2"></i>
+          {{ item.label }}
+        </a>
+        }
+      </div>
     </div>
+    }
+  </div>
+
   <p-button [text]="true" icon="fas fa-user-circle fa-lg" severity="info"
     (onClick)="showUsermenu = !showUsermenu"></p-button>
 
   <div class="user-menu {{ showUsermenu ? 'show' : '' }}" (mouseleave)="showUsermenu = false">
-                  <div class="item" (click)="goToProfile()">
-                    <i class="fas fa-user me-2"></i>
-                    Profile
-                  </div>
-                  <div class="item" (click)="logout()">          <i class="fas fa-sign-out-alt me-2"></i>
+    <div class="item" (click)="goToProfile()">
+      <i class="fas fa-user me-2"></i>
+      Profile
+    </div>
+    <div class="item" (click)="logout()">
+      <i class="fas fa-sign-out-alt me-2"></i>
       Logout
     </div>
     <!-- Mobile Help Desk items -->
     @if(canAccessHelpDesk && helpDeskChildren.length > 0){
-      <div class="item help-desk-mobile-header">
-        <hr class="my-1"> <!-- Separator for clarity -->
-        <span class="fw-bold text-muted px-2">Help</span>
-      </div>
-      @for (item of helpDeskChildren; track item) {
-        <a class="item help-desk-mobile-item" [routerLink]="item.routerLink" (click)="showUsermenu = false">
-          <i class="{{ item.icon }} me-2"></i>
-          {{ item.label }}
-        </a>
-      }
+    <div class="item help-desk-mobile-header">
+      <hr class="my-1"> <!-- Separator for clarity -->
+      <span class="fw-bold text-muted px-2">Help</span>
+    </div>
+    @for (item of helpDeskChildren; track item.label) {
+    <a class="item help-desk-mobile-item" [attr.href]="item.newTab ? null : item.link"
+      (click)="onHelpDeskMenuClick($event, item)">
+      <i class="{{ item.icon }} me-2"></i>
+      {{ item.label }}
+    </a>
+    }
     }
   </div>
   }
