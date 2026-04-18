@@ -1,0 +1,73 @@
+<div class="breadcrumb-wrapper">
+  <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
+</div>
+
+<div class="helpdesk-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Reports</h2>
+      <p class="page-subtitle">Analyze ticket volume, SLA compliance, user satisfaction, and support performance trends.</p>
+    </div>
+    <div class="header-actions">
+      <p-button label="Export Report" icon="fas fa-download" [outlined]="true" severity="primary" size="small"></p-button>
+      <p-button label="Export Summary" icon="fas fa-file-export" severity="primary" size="small"></p-button>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="row g-2 g-md-3 mb-3">
+    <div class="col-6 col-md-3">
+      <div class="stat-card" style="background-color: #e8f4fd; border: 2px solid #e8f4fd;">
+        <div class="stat-label">Resolution within SLA</div>
+        <div class="stat-value">{{ kpis.resolutionWithinSla }}</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card" style="background-color: #fff8e1; border: 2px solid #fff8e1;">
+        <div class="stat-label">Average User Rating</div>
+        <div class="stat-value">{{ kpis.avgUserRating }}</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card" style="background-color: #e0f2f1; border: 2px solid #e0f2f1;">
+        <div class="stat-label">Total Re-submissions</div>
+        <div class="stat-value">{{ kpis.totalResubmissions }}</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card" style="background-color: #f3e5f5; border: 2px solid #f3e5f5;">
+        <div class="stat-label">Open High Priority</div>
+        <div class="stat-value">{{ kpis.openHighPriority }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reporting Matrix -->
+  <div class="card p-3">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="card-section-title mb-0">Reporting Matrix</h5>
+      <p-button label="Export Excel" icon="fas fa-file-excel" [outlined]="true" severity="secondary" size="small"></p-button>
+    </div>
+    <div class="table-wrapper">
+      <p-table [value]="reportMatrix" [tableStyle]="{ 'min-width': '500px' }" size="small">
+        <ng-template pTemplate="header">
+          <tr>
+            <th class="fw-bold">Report Type</th>
+            <th class="fw-bold">Current Month</th>
+            <th class="fw-bold">Previous Month</th>
+            <th class="fw-bold">Trend</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td class="text-primary fw-semibold">{{ row.type }}</td>
+            <td>{{ row.current }}</td>
+            <td>{{ row.previous }}</td>
+            <td [class]="getTrendClass(row.trend)">{{ row.trend }}</td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </div>
+</div>

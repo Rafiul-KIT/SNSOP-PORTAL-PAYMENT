@@ -1,0 +1,131 @@
+<div class="breadcrumb-wrapper">
+  <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
+</div>
+
+<div class="helpdesk-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Status Tracker</h2>
+      <p class="page-subtitle">Search and review the latest status, timeline, and resolution expectation of a request.</p>
+    </div>
+    <!-- <div class="header-actions">
+      <p-button label="Export Report" icon="fas fa-download" [outlined]="true" severity="primary" size="small"></p-button>
+    </div> -->
+  </div>
+
+  <div class="row g-3">
+    <!-- Check Status -->
+    <div class="col-lg-6">
+      <div class="card p-3">
+        <h5 class="card-section-title mb-3">Check Ticket Status</h5>
+        <div class="search-row">
+          <p-inputgroup class="w-100">
+            <input type="text" pInputText [(ngModel)]="searchTrackingNo" placeholder="Enter tracking number (e.g., SNSOP-SUP-2026-000121)" (keyup.enter)="checkStatus()" />
+            <p-button label="Check" severity="primary" (onClick)="checkStatus()" [loading]="isLoading" />
+          </p-inputgroup>
+        </div>
+
+        @if (isLoading) {
+          <div class="text-center py-4">
+            <p-progressSpinner styleClass="w-2rem h-2rem" strokeWidth="6" />
+            <p class="mt-2 text-muted">Searching...</p>
+          </div>
+        }
+
+        @if (notFound && !isLoading) {
+          <div class="alert alert-warning mt-3">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            No ticket found with this tracking number. Please verify and try again.
+          </div>
+        }
+
+        @if (ticketResult && !isLoading) {
+          <div class="ticket-info-card mt-3">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <div class="ticket-tracking">{{ ticketResult.trackingNumber }}</div>
+                <p-tag [value]="ticketResult.status.replace('_', ' ')" [severity]="getStatusSeverity(ticketResult.status)" class="mt-1" />
+              </div>
+            </div>
+            
+            <div class="info-row"><strong>Title:</strong> {{ ticketResult.title }}</div>
+            <div class="info-row"><strong>Description:</strong> {{ ticketResult.description }}</div>
+            <div class="info-row"><strong>Priority:</strong> {{ ticketResult.priority }}</div>
+            <div class="info-row"><strong>Category:</strong> {{ ticketResult.categoryName || '--' }}</div>
+            <div class="info-row"><strong>Module:</strong> {{ ticketResult.moduleName || '--' }}</div>
+            <div class="info-row"><strong>Created:</strong> {{ formatDate(ticketResult.createdAt) }}</div>
+            @if (ticketResult.comment) {
+              <div class="info-row"><strong>Comment:</strong> {{ ticketResult.comment }}</div>
+            }
+
+            <div class="d-flex justify-content-end mt-3 pt-2 border-top">
+              <p-button label="View Full Details" icon="pi pi-eye" size="small" severity="info" [outlined]="true" (onClick)="onView()"></p-button>
+            </div>
+          </div>
+          <!-- <div class="d-flex flex-wrap gap-2 mt-3">
+            <p-button label="Re-submit" [outlined]="true" severity="secondary" size="small"></p-button>
+            <p-button label="Rate Resolution" severity="success" size="small"></p-button>
+          </div> -->
+        }
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="col-lg-6">
+      <div class="card p-3">
+        <h5 class="card-section-title mb-3">Timeline</h5>
+        @if (ticketResult && !isLoading) {
+          @if (getTimelineHistory().length > 0) {
+            <div class="timeline">
+              @for (event of getTimelineHistory(); track event.date + event.action) {
+                <div class="timeline-item">
+                  <div class="timeline-dot" [ngClass]="'timeline-dot-' + event.tone">
+                    <i [class]="event.icon"></i>
+                  </div>
+                  <div class="timeline-content">
+                    <div class="timeline-title-row">
+                      <div class="timeline-title">{{ event.title }}</div>
+                      <span class="timeline-action-chip">{{ event.action.replace('_', ' ') }}</span>
+                    </div>
+                    @if (event.changeRows.length > 0) {
+                      <div class="timeline-change-table">
+                        @for (row of event.changeRows; track row.field + row.newValue) {
+                          <div class="change-row">
+                            <div class="change-field">{{ row.field }}</div>
+                            <div class="change-values">
+                              <span class="value-pill value-old">{{ row.oldValue }}</span>
+                              <i class="fas fa-arrow-right"></i>
+                              <span class="value-pill value-new">{{ row.newValue }}</span>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    }
+                    @if (event.note) {
+                      <div class="timeline-note">
+                        <i class="fas fa-comment-dots"></i>
+                        <span>{{ event.note }}</span>
+                      </div>
+                    }
+                    <div class="timeline-date">{{ event.date }}</div>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="text-muted text-center py-4">
+              <i class="fas fa-clock fa-2x mb-2"></i>
+              <p>No timeline history available yet.</p>
+            </div>
+          }
+        } @else {
+          <div class="text-muted text-center py-4">
+            <i class="fas fa-search fa-2x mb-2"></i>
+            <p>Enter a tracking number and click "Check" to view the timeline.</p>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

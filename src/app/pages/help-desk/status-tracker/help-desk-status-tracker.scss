@@ -1,0 +1,335 @@
+.helpdesk-container {
+  padding: 0.5rem 2rem;
+  background: #f8f9fa;
+  min-height: 100vh;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 0.25rem;
+}
+
+.page-subtitle {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e9ecef;
+  background: #fff;
+}
+
+.card-section-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.search-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.ticket-info-card {
+  background: #f0f4ff;
+  border: 1px solid #d5e0f5;
+  border-radius: 10px;
+  padding: 1rem;
+
+  .info-row {
+    font-size: 0.875rem;
+    color: #2c3e50;
+    margin-bottom: 0.4rem;
+    word-break: break-word;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+// Timeline
+.timeline {
+  position: relative;
+  padding-left: 1.5rem;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+  }
+}
+
+.timeline-item {
+  position: relative;
+  padding-bottom: 1.5rem;
+  display: flex;
+  gap: 0.75rem;
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+}
+
+.timeline-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #eff3ff;
+  border: 1px solid #dce5ff;
+  color: #2f55d4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+  position: relative;
+  z-index: 1;
+
+  i {
+    font-size: 0.75rem;
+  }
+}
+
+.timeline-dot-created {
+  background: #e8f8ee;
+  border-color: #c5e9d2;
+  color: #198754;
+}
+
+.timeline-dot-updated {
+  background: #fff9e9;
+  border-color: #ffe7a8;
+  color: #b78103;
+}
+
+.timeline-dot-status {
+  background: #eaf3ff;
+  border-color: #ccddff;
+  color: #1d4ed8;
+}
+
+.timeline-dot-attachment {
+  background: #f0ecff;
+  border-color: #dcd2ff;
+  color: #6f42c1;
+}
+
+.timeline-content {
+  flex: 1;
+  min-width: 0;
+  background: #f9fbff;
+  border: 1px solid #ebf0fa;
+  border-radius: 10px;
+  padding: 0.65rem 0.75rem;
+}
+
+.timeline-title-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.timeline-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1f2d3d;
+}
+
+.timeline-action-chip {
+  font-size: 0.67rem;
+  font-weight: 600;
+  color: #3f4d63;
+  background: #eef2f7;
+  border: 1px solid #dde5ef;
+  border-radius: 999px;
+  padding: 0.16rem 0.45rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.timeline-change-table {
+  margin-top: 0.55rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.change-row {
+  display: grid;
+  grid-template-columns: minmax(96px, 150px) 1fr;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.change-field {
+  font-size: 0.73rem;
+  color: #5f6e82;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.change-values {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+
+  i {
+    font-size: 0.68rem;
+    color: #8d99aa;
+  }
+}
+
+.value-pill {
+  font-size: 0.75rem;
+  border-radius: 6px;
+  padding: 0.16rem 0.42rem;
+  border: 1px solid transparent;
+  word-break: break-word;
+}
+
+.value-old {
+  background: #fff4f4;
+  border-color: #ffd7d7;
+  color: #9b2b2b;
+}
+
+.value-new {
+  background: #ecf9f1;
+  border-color: #c7efd6;
+  color: #1f7a4f;
+}
+
+.timeline-note {
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: #3f5168;
+  background: #f2f6ff;
+  border: 1px solid #dce6ff;
+  border-radius: 8px;
+  padding: 0.35rem 0.45rem;
+
+  i {
+    margin-top: 0.12rem;
+    color: #5077d8;
+  }
+}
+
+.timeline-date {
+  font-size: 0.75rem;
+  color: #7f8a98;
+  margin-top: 0.45rem;
+}
+
+.ticket-tracking {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1565c0;
+}
+
+.alert {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.alert-warning {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  color: #856404;
+}
+
+@media (max-width: 767px) {
+  .helpdesk-container {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .page-header {
+    flex-direction: column;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .page-title {
+    font-size: 1.2rem;
+  }
+
+  .page-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .card {
+    padding: 0.75rem !important;
+  }
+
+  .search-row {
+    flex-direction: column;
+  }
+
+  .ticket-info-card {
+    padding: 0.75rem;
+
+    .info-row {
+      font-size: 0.8rem;
+    }
+  }
+
+  .timeline-title {
+    font-size: 0.84rem;
+  }
+
+  .timeline-action-chip {
+    font-size: 0.62rem;
+  }
+
+  .change-row {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
+
+  .change-field {
+    font-size: 0.69rem;
+  }
+
+  .value-pill {
+    font-size: 0.72rem;
+  }
+
+  .timeline-note {
+    font-size: 0.74rem;
+  }
+}

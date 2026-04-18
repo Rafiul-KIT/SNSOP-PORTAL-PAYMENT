@@ -1,0 +1,63 @@
+<div class="breadcrumb-wrapper">
+  <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
+</div>
+
+<div class="helpdesk-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">User Manual / Help Menu</h2>
+      <p class="page-subtitle">Access guidance, FAQs, workflow instructions, and support usage policies.</p>
+    </div>
+    <div class="header-actions">
+      <!-- <p-button label="Export Report" icon="fas fa-download" [outlined]="true" severity="primary" size="small"></p-button> -->
+      <p-button label="Open Guide" icon="fas fa-book-open" severity="primary" size="small"></p-button>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- FAQ Accordion -->
+    <div class="col-lg-8">
+      <div class="card p-3">
+        <h5 class="card-section-title mb-3">User Manual / Help Menu</h5>
+        <p-accordion [multiple]="false">
+          @for (faq of faqs; track faq.question) {
+            <p-accordion-panel>
+              <p-accordion-header>{{ faq.question }}</p-accordion-header>
+              <p-accordion-content>
+                <p class="faq-answer">{{ faq.answer }}</p>
+              </p-accordion-content>
+            </p-accordion-panel>
+          }
+        </p-accordion>
+      </div>
+    </div>
+
+    <!-- Quick Help Sidebar -->
+    <div class="col-lg-4">
+      <div class="card p-3 mb-3">
+        <h5 class="card-section-title mb-2">Quick Help</h5>
+
+        <div class="help-section mb-3">
+          <h6 class="help-section-title">Helpdesk Contact</h6>
+          <p class="mb-1"><small>Email: support&#64;snsopmis.demo</small></p>
+          <p class="mb-0"><small>Phone: +211-000-000-000</small></p>
+        </div>
+
+        <div class="help-section mb-3">
+          <h6 class="help-section-title">Popular Topics</h6>
+          <ul class="popular-list">
+            @for (topic of popularTopics; track topic) {
+              <li>{{ topic }}</li>
+            }
+          </ul>
+        </div>
+
+        <div class="help-section">
+          <h6 class="help-section-title">Demo Note</h6>
+          <p class="demo-note mb-0">This is a fictional end-to-end UI demo showing how all left menu items can behave like a full module.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
