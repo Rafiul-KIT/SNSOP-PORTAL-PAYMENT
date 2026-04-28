@@ -61,6 +61,12 @@ export class Header {
       link: environment.portals.mNe,
       icon: 'fas fa-chart-bar',
     },
+         {
+        label: 'Economic Opportunities',
+        link: environment.portals.economicOpportunities,
+        icon: 'fas fa-briefcase',
+    
+      },
   ];
 
   constructor(

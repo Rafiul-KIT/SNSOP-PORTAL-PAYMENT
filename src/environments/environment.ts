@@ -14,6 +14,7 @@ export const environment = {
      mNe: 'https://mis.southsudansafetynet.info/v2/#/monitoring-evaluation/beneficiary-enrolment-summary',
     grm: 'https://mis.southsudansafetynet.info/v2/grm',
     report: 'https://mis.southsudansafetynet.info/v2/report',
+    economicOpportunities: 'https://mis.southsudansafetynet.info/v2/#/economic-opportunities/dashboard',
   },
   cookie_name:'mis_ta'
 };
