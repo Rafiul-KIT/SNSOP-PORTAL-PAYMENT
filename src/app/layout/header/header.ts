@@ -90,6 +90,8 @@ export class Header {
         if (responseData.length === 0) {
           console.warn(`No menus found for role ${roleId}`);
           this.menuList = [];
+            this.helpDeskChildren = [];
+          this.canAccessHelpDesk = false;
           this.menusLoaded = true;
           this.cdRef.detectChanges();
           return;
@@ -102,19 +104,26 @@ export class Header {
         this.menuList = this.filterMenusByAccess(allMenus, allowedNames);
 
         // Help Desk access: check if user has 'Help Desk' in allowed names
-        this.canAccessHelpDesk = allowedNames.includes('Help Desk');
-        this.helpDeskChildren = this.getHelpDeskMenuItems();
+          // Filter help desk items based on permitted URLs
+        const allHelpDeskItems = this.getHelpDeskMenuItems();
+        this.helpDeskChildren = allHelpDeskItems.filter(item => this.checkRouteAccess(responseData, item.route));
+        this.canAccessHelpDesk = this.helpDeskChildren.length > 0;
 
         this.menusLoaded = true;
         this.cdRef.detectChanges();
       } else {
         console.warn(`No menus found in sessionStorage for role ${roleId}`);
+           this.helpDeskChildren = [];
+        this.canAccessHelpDesk = false;
         this.menuList = [];
         this.menusLoaded = true;
         this.cdRef.detectChanges();
       }
     } catch (error) {
       console.error('Error loading menus:', error);
+        this.menuList = [];
+      this.helpDeskChildren = [];
+      this.canAccessHelpDesk = false;
       this.menusLoaded = true;
       this.cdRef.detectChanges();
     }
@@ -348,51 +357,46 @@ export class Header {
   }
 
   getHelpDeskMenuItems(): any[] {
-    return [
-      {
-        label: 'Help Desk Dashboard',
-        link: this.getMasterHelpDeskMenuLink('/help-desk/dashboard'),
-        icon: 'fas fa-tachometer-alt',
-        newTab: true,
-      },
-      {
-        label: 'Submit Support Request',
-        link: this.getMasterHelpDeskMenuLink('/help-desk/submit-request'),
-        icon: 'fas fa-plus-circle',
-        newTab: true,
-      },
-      {
-        label: 'My Requests',
-        link: this.getMasterHelpDeskMenuLink('/help-desk/my-requests'),
-        icon: 'fas fa-clipboard-list',
-        newTab: true,
-      },
-      {
-        label: 'Support Management',
-        link: this.getMasterHelpDeskMenuLink('/help-desk/support-management'),
-        icon: 'fas fa-users-cog',
-        newTab: true,
-      },
-      {
-        label: 'Status Tracker',
-        link: this.getMasterHelpDeskMenuLink('/help-desk/status-tracker'),
-        icon: 'fas fa-search',
-        newTab: true,
-      },
-      {
-        label: 'Reports',
-        link: this.getMasterHelpDeskMenuLink('/help-desk/reports'),
-        icon: 'fas fa-chart-bar',
-        newTab: true,
-      },
-      {
-        separator: true,
-        label: 'User Manual',
-        link: this.getMasterHelpDeskMenuLink('/help-desk/user-manual'),
-        icon: 'fas fa-book',
-        newTab: true,
-      },
+    const items = [
+      { label: 'Help Desk Dashboard', route: '/help-desk/dashboard', icon: 'fas fa-tachometer-alt', newTab: true },
+      { label: 'Submit Support Request', route: '/help-desk/submit-request', icon: 'fas fa-plus-circle', newTab: true },
+      { label: 'My Requests', route: '/help-desk/my-requests', icon: 'fas fa-clipboard-list', newTab: true },
+      { label: 'Support Management', route: '/help-desk/support-management', icon: 'fas fa-users-cog', newTab: true },
+      { label: 'Status Tracker', route: '/help-desk/status-tracker', icon: 'fas fa-search', newTab: true },
+      { label: 'Reports', route: '/help-desk/reports', icon: 'fas fa-chart-bar', newTab: true },
+      { separator: true, label: 'User Manual', route: '/help-desk/user-manual', icon: 'fas fa-book', newTab: true }
     ];
+
+    return items.map(item => ({
+      ...item,
+      link: this.getMasterHelpDeskMenuLink(item.route)
+    }));
+  }
+
+  private checkRouteAccess(permittedMenus: any[], url: string): boolean {
+    if (!url) return false;
+    const cleanUrl = url.split('?')[0];
+    const urlSegments = cleanUrl.split('/').filter(s => s.length > 0);
+
+    for (const menu of permittedMenus) {
+      if (!menu.url) continue;
+
+      const menuUrlSegments = menu.url.split('/').filter((s: string) => s.length > 0);
+
+      if (urlSegments.length === menuUrlSegments.length) {
+        let match = true;
+        for (let i = 0; i < urlSegments.length; i++) {
+          if (menuUrlSegments[i].startsWith(':') || menuUrlSegments[i] === urlSegments[i]) {
+            continue;
+          } else {
+            match = false;
+            break;
+          }
+        }
+        if (match) return true;
+      }
+    }
+    return false;
   }
 
   toggleHelpDeskDropdown = () => {
@@ -449,10 +453,9 @@ export class Header {
 
   private openInNewTab(targetUrl: string): void {
     const popup = window.open(targetUrl, '_blank', 'noopener,noreferrer');
-    if (!popup) {
-      console.warn('Popup blocked while opening Help Desk in new tab.');
-    }
+    
   }
+
 
   logout() {
     this.apiService.logout();
