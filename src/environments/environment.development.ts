@@ -13,7 +13,7 @@ export const environment = {
     beneficiary: 'https://localhost:4020',
     payment: 'https://localhost:4030',
     grm: 'https://localhost:4040',
-    report: 'https://localhost:4050',
+    report: 'https://localhost:4010/#/home/metabase',
     economicOpportunities: 'https://localhost:4010/#/economic-opportunities/dashboard',
   },
   cookie_name:'mis_ta'

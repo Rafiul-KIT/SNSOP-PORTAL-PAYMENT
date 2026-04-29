@@ -13,7 +13,7 @@ export const environment = {
     mNe: 'https://qa-mis.southsudansafetynet.info/v2/#/monitoring-evaluation/beneficiary-enrolment-summary',
     payment: 'https://qa-mis.southsudansafetynet.info/v2/payment',
     grm: 'https://qa-mis.southsudansafetynet.info/v2/grm',
-    report: 'https://qa-mis.southsudansafetynet.info/v2/report',
+    report: 'https://qa-mis.southsudansafetynet.info/v2/#/home/metabase',
     economicOpportunities: 'https://qa-mis.southsudansafetynet.info/v2/#/economic-opportunities/dashboard',
   },
   cookie_name:'mis_ta'
