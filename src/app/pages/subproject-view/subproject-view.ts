@@ -55,6 +55,18 @@ interface SubProjectDto {
   status: string;
 }
 
+interface BeneficiaryDetailsDto {
+  id: number;
+  householdNumber: string;
+  beneficiaryName: string;
+  gender: string;
+  age: number;
+  registrationPhase: string;
+  phoneNo: string;
+  householdMonthlyAvgIncome: number;
+  assigned: boolean;
+}
+
 @Component({
   selector: 'app-subproject-view',
   templateUrl: './subproject-view.html',
@@ -87,6 +99,16 @@ export class SubprojectView implements OnInit {
   showDownloadProgressModal = false;
   downloadProgress = 0;
   downloadStatus = 'Downloading...';
+  showBeneficiaryDownloadDialog = false;
+  showNoBeneficiaryDialog = false;
+  noBeneficiaryMessage = 'No beneficiary assigned to this sub-project.';
+  selectedBeneficiarySubProject: SubProjectDto | null = null;
+  beneficiaryDownloadFormat: 'excel' | 'pdf' | null = null;
+  isBeneficiaryDownloading = false;
+  beneficiaryDownloadOptions = [
+    { label: 'Excel', value: 'excel' },
+    { label: 'PDF', value: 'pdf' },
+  ];
   lookupsLoaded = false;
   searchForm!: FormGroup;
   roleId: number | null = null;
@@ -451,6 +473,214 @@ export class SubprojectView implements OnInit {
     const csvContent = xlsx.utils.sheet_to_csv(worksheet);
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     saveAs(blob, `sub_project_list_${Date.now()}.csv`);
+  }
+
+  isInProgressStatus(status: string | null | undefined): boolean {
+    return status === 'InProgress' || status === 'In Progress';
+  }
+
+  openBeneficiaryDownloadDialog(subProject: SubProjectDto) {
+    if (!this.isInProgressStatus(subProject.status)) return;
+
+    this.selectedBeneficiarySubProject = subProject;
+    this.beneficiaryDownloadFormat = 'pdf';
+    this.showBeneficiaryDownloadDialog = true;
+    this.cdr.markForCheck();
+  }
+
+  closeBeneficiaryDownloadDialog() {
+    if (this.isBeneficiaryDownloading) return;
+
+    this.showBeneficiaryDownloadDialog = false;
+    this.selectedBeneficiarySubProject = null;
+    this.beneficiaryDownloadFormat = null;
+    this.cdr.markForCheck();
+  }
+
+  closeNoBeneficiaryDialog() {
+    this.showNoBeneficiaryDialog = false;
+    this.cdr.markForCheck();
+  }
+
+  async confirmBeneficiaryDownload() {
+    if (
+      !this.selectedBeneficiarySubProject ||
+      !this.beneficiaryDownloadFormat ||
+      this.isBeneficiaryDownloading
+    ) {
+      return;
+    }
+
+    await this.downloadBeneficiaryDetails(
+      this.selectedBeneficiarySubProject,
+      this.beneficiaryDownloadFormat
+    );
+  }
+
+  private getBeneficiaryExportData(content: BeneficiaryDetailsDto[]) {
+    return content.map((item, index) => ({
+      Serial: index + 1,
+      'Household Number': item.householdNumber || '',
+      'Beneficiary Name': item.beneficiaryName || '',
+      Gender: item.gender || '',
+      Age: item.age ?? '',
+      'Registration Phase': item.registrationPhase || '',
+      'Phone No': item.phoneNo || '',
+      'Household Monthly Avg Income': item.householdMonthlyAvgIncome ?? '',
+      Assigned: item.assigned ? 'Yes' : 'No',
+    }));
+  }
+
+  private getBeneficiaryFilePrefix(subProject: SubProjectDto): string {
+    const rawName = subProject.workCode || `subproject_${subProject.id}`;
+    const safeName = rawName.replace(/[^a-zA-Z0-9_-]+/g, '_');
+    return `beneficiary_details_${safeName}`;
+  }
+
+  async exportBeneficiaryDetailsExcel(
+    content: BeneficiaryDetailsDto[],
+    subProject: SubProjectDto
+  ) {
+    const xlsx = await import('xlsx');
+    const worksheet = xlsx.utils.json_to_sheet(
+      this.getBeneficiaryExportData(content)
+    );
+    const workbook = {
+      Sheets: { Beneficiaries: worksheet },
+      SheetNames: ['Beneficiaries'],
+    };
+    const excelBuffer = xlsx.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array',
+    });
+    const blob = new Blob([excelBuffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8',
+    });
+
+    saveAs(blob, `${this.getBeneficiaryFilePrefix(subProject)}_${Date.now()}.xlsx`);
+  }
+
+  async exportBeneficiaryDetailsPdf(
+    content: BeneficiaryDetailsDto[],
+    subProject: SubProjectDto
+  ) {
+    const jsPDF = await import('jspdf');
+    const { default: autoTable } = await import('jspdf-autotable');
+    const doc = new jsPDF.default('l', 'px', 'a4');
+    const exportData = this.getBeneficiaryExportData(content);
+
+    doc.setFontSize(14);
+    doc.text('Beneficiary Details', 30, 28);
+    doc.setFontSize(10);
+    doc.text(`Sub-Project Code: ${subProject.workCode || '-'}`, 30, 44);
+
+    autoTable(doc, {
+      startY: 58,
+      head: [
+        [
+          'Serial',
+          'Household Number',
+          'Beneficiary Name',
+          'Gender',
+          'Age',
+          'Registration Phase',
+          'Phone No',
+          'Household Monthly Avg Income',
+          'Assigned',
+        ],
+      ],
+      body: exportData.map((item) => [
+        item.Serial,
+        item['Household Number'],
+        item['Beneficiary Name'],
+        item.Gender,
+        item.Age,
+        item['Registration Phase'],
+        item['Phone No'],
+        item['Household Monthly Avg Income'],
+        item.Assigned,
+      ]),
+      styles: { fontSize: 8, overflow: 'linebreak' },
+      headStyles: { fontSize: 8 },
+      didDrawPage: () => {
+        const pageSize = doc.internal.pageSize;
+        const pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight();
+        const pageWidth = pageSize.width ? pageSize.width : pageSize.getWidth();
+        const pageNumber = doc.getNumberOfPages();
+        const text = `Page ${pageNumber}`;
+        const textWidth = doc.getTextWidth(text);
+
+        doc.setFontSize(9);
+        doc.text(text, (pageWidth - textWidth) / 2, pageHeight - 16);
+      },
+    });
+
+    doc.save(`${this.getBeneficiaryFilePrefix(subProject)}_${Date.now()}.pdf`);
+  }
+
+  async downloadBeneficiaryDetails(
+    subProject: SubProjectDto,
+    format: 'excel' | 'pdf'
+  ) {
+    this.showBeneficiaryDownloadDialog = false;
+    this.isBeneficiaryDownloading = true;
+    this.showDownloadProgressModal = true;
+    this.downloadProgress = 0;
+    this.downloadStatus = 'Requesting beneficiary details from server...';
+    this.cdr.detectChanges();
+
+    try {
+      const res: any = await this.api.axiosInstance.get(
+        `api/subproject/assign/progress/beneficiary/existing?subprojectId=${subProject.id}&page=0&size=100000`,
+        {
+          onDownloadProgress: () => {
+            this.cdr.detectChanges();
+          },
+        }
+      );
+
+      const data = res?.data || res;
+      const content: BeneficiaryDetailsDto[] = Array.isArray(data?.content)
+        ? data.content
+        : [];
+      const totalRecords = data.totalElements || content.length;
+
+      if (content.length === 0) {
+        this.showDownloadProgressModal = false;
+        this.downloadProgress = 0;
+        this.downloadStatus = 'Downloading...';
+        this.showNoBeneficiaryDialog = true;
+        this.cdr.detectChanges();
+        return;
+      }
+
+      this.downloadStatus = `Processing ${totalRecords} beneficiaries. Generating file...`;
+      this.downloadProgress = 100;
+      this.cdr.detectChanges();
+
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      if (format === 'pdf') {
+        await this.exportBeneficiaryDetailsPdf(content, subProject);
+      } else {
+        await this.exportBeneficiaryDetailsExcel(content, subProject);
+      }
+    } catch (err) {
+      console.error('Beneficiary details download error:', err);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Failed to download beneficiary details.',
+      });
+    } finally {
+      this.isBeneficiaryDownloading = false;
+      this.selectedBeneficiarySubProject = null;
+      this.beneficiaryDownloadFormat = null;
+      this.showDownloadProgressModal = false;
+      this.downloadProgress = 0;
+      this.downloadStatus = 'Downloading...';
+      this.cdr.detectChanges();
+    }
   }
 
   async download(format: 'pdf' | 'csv') {

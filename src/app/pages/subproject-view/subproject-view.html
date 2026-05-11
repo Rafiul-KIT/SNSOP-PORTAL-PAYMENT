@@ -1,6 +1,8 @@
 @if (isLoading) {
 <app-loader></app-loader>
 } @else {
+<p-toast></p-toast>
+
 <div class="breadcrumb-wrapper">
     <p-breadcrumb [model]="breadcrumbItems" [home]="breadcrumbHome" class="w-100"></p-breadcrumb>
 </div>
@@ -9,6 +11,47 @@
     [resizable]="false" [style]="{ width: '30vw' }" header="Downloading">
     <h5 class="mb-2">{{ downloadStatus }}</h5>
     <p-progressBar [value]="downloadProgress" [mode]="downloadProgress > 0 ? 'determinate' : 'indeterminate'"></p-progressBar>
+</p-dialog>
+
+<p-dialog header="Download Beneficiary Details" [(visible)]="showBeneficiaryDownloadDialog" [modal]="true"
+    [draggable]="false" [resizable]="false" [closable]="!isBeneficiaryDownloading" [style]="{ width: '420px' }"
+    (onHide)="closeBeneficiaryDownloadDialog()">
+    <div class="d-flex flex-column gap-3">
+        <div>
+            <div class="fw-semibold">Sub-Project Code</div>
+            <div>{{ selectedBeneficiarySubProject?.workCode || '-' }}</div>
+        </div>
+
+        <p-floatlabel variant="on" class="w-100">
+            <p-select [options]="beneficiaryDownloadOptions" optionLabel="label" optionValue="value"
+                [(ngModel)]="beneficiaryDownloadFormat" appendTo="body" class="w-100"
+                [disabled]="isBeneficiaryDownloading"></p-select>
+            <label>Download Format</label>
+        </p-floatlabel>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <p-button label="Cancel" icon="pi pi-times" severity="secondary" [outlined]="true"
+            [disabled]="isBeneficiaryDownloading" (onClick)="closeBeneficiaryDownloadDialog()">
+        </p-button>
+        <p-button label="Download" icon="fas fa-download" severity="primary"
+            [disabled]="!beneficiaryDownloadFormat || isBeneficiaryDownloading"
+            (onClick)="confirmBeneficiaryDownload()">
+        </p-button>
+    </ng-template>
+</p-dialog>
+
+<p-dialog header="No Beneficiary Assigned" [(visible)]="showNoBeneficiaryDialog" [modal]="true"
+    [draggable]="false" [resizable]="false" [style]="{ width: '420px' }">
+    <div class="d-flex align-items-center gap-3">
+        <i class="pi pi-info-circle text-warning" style="font-size: 2rem"></i>
+        <span>{{ noBeneficiaryMessage }}</span>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <p-button label="OK" icon="pi pi-check" severity="primary" (onClick)="closeNoBeneficiaryDialog()">
+        </p-button>
+    </ng-template>
 </p-dialog>
 
 <div class="card p-3 mb-2">
@@ -105,9 +148,7 @@
                     (onClick)="resetForm()">
                 </p-button>
 
-                <p-button label="Search" icon="fas fa-search" severity="primary" size="small"
-                    (onClick)="searchBeneficiaries()">
-                </p-button>
+      
 
                 <p-button label="Download PDF" icon="fas fa-file-pdf" severity="help" size="small" [outlined]="true"
                     (onClick)="download('pdf')">
@@ -115,6 +156,9 @@
 
                 <p-button label="Download CSV" icon="fas fa-file-csv" severity="success" size="small" [outlined]="true"
                     (onClick)="download('csv')">
+                </p-button>
+                          <p-button label="Search" icon="fas fa-search" severity="primary" size="small"
+                    (onClick)="searchBeneficiaries()">
                 </p-button>
             </div>
         </div>
@@ -143,7 +187,7 @@
             <th class="text-center">Payam</th>
             <th class="text-center">Boma</th>
             <th class="text-center">Status</th>
-            <th class="text-center" [style]="{ width: '100px' }">Action</th>
+            <th class="text-center" [style]="{ width: '140px' }">Action</th>
         </tr>
     </ng-template>
 
@@ -163,9 +207,16 @@
                 </span>
             </td>
             <td class="text-center">
-                <p-button type="button" icon="fas fa-eye" pTooltip="View Details" tooltipPosition="top"
-                    appendTo="body" (onClick)="viewSubProject(item.id)" size="small" outlined="true" severity="info"
-                    class="big-icon-btn" />
+                <div class="d-flex justify-content-center align-items-center gap-2">
+                    @if (isInProgressStatus(item.status)) {
+                    <p-button type="button" icon="fas fa-download" pTooltip="Download Beneficiary Details"
+                        tooltipPosition="top" appendTo="body" (onClick)="openBeneficiaryDownloadDialog(item)"
+                        size="small" outlined="true" severity="success" class="big-icon-btn" />
+                    }
+                    <p-button type="button" icon="fas fa-eye" pTooltip="View Details" tooltipPosition="top"
+                        appendTo="body" (onClick)="viewSubProject(item.id)" size="small" outlined="true" severity="info"
+                        class="big-icon-btn" />
+                </div>
             </td>
         </tr>
     </ng-template>
