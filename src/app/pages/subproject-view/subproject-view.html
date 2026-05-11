@@ -208,11 +208,23 @@
             </td>
             <td class="text-center">
                 <div class="d-flex justify-content-center align-items-center gap-2">
-                    @if (isInProgressStatus(item.status)) {
-                    <p-button type="button" icon="fas fa-download" pTooltip="Download Beneficiary Details"
-                        tooltipPosition="top" appendTo="body" (onClick)="openBeneficiaryDownloadDialog(item)"
-                        size="small" outlined="true" severity="success" class="big-icon-btn" />
-                    }
+@if (isInProgressStatus(item.status)) {
+    <p-button
+        type="button"
+        icon="fas fa-download"
+        pTooltip="Download Beneficiary Details"
+        tooltipPosition="top"
+        appendTo="body"
+        (onClick)="openBeneficiaryDownloadDialog(item)"
+        size="small"
+        outlined="true"
+        severity="success"
+        class="big-icon-btn">
+    </p-button>
+}
+@else {
+    <div class="big-icon-btn invisible-placeholder"></div>
+}
                     <p-button type="button" icon="fas fa-eye" pTooltip="View Details" tooltipPosition="top"
                         appendTo="body" (onClick)="viewSubProject(item.id)" size="small" outlined="true" severity="info"
                         class="big-icon-btn" />
