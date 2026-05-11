@@ -15,6 +15,7 @@ export const environment = {
     grm: 'https://localhost:4040',
     report: 'https://localhost:4010/#/home/metabase',
     economicOpportunities: 'https://localhost:4010/#/economic-opportunities/dashboard',
+    underConstruction: 'https://localhost:4010/#/under-construction'
   },
   cookie_name:'mis_ta'
 };

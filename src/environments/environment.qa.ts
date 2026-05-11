@@ -15,6 +15,7 @@ export const environment = {
     grm: 'https://qa-mis.southsudansafetynet.info/v2/grm',
     report: 'https://qa-mis.southsudansafetynet.info/v2/#/home/metabase',
     economicOpportunities: 'https://qa-mis.southsudansafetynet.info/v2/#/economic-opportunities/dashboard',
+    underConstruction: 'https://qa-mis.southsudansafetynet.info/v2/#/under-construction'
   },
   cookie_name:'mis_ta'
 };

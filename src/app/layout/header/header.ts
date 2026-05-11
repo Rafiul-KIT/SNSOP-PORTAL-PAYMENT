@@ -37,7 +37,7 @@ export class Header {
     { label: 'GRM', link: environment.portals.grm, icon: 'fas fa-sitemap' },
     {
       label: 'Report',
-      link: environment.portals.report,
+      link: environment.portals.underConstruction,
       icon: 'fas fa-chart-line',
     },
     {
@@ -52,9 +52,10 @@ export class Header {
     },
     {
       label: 'Help Desk',
-      link: this.getMasterHelpDeskLink(),
+      // link: this.getMasterHelpDeskLink(),
+      link: environment.portals.underConstruction,
       icon: 'fas fa-headset',
-      newTab: true,
+      // newTab: true,
     },
     {
       label: 'Monitoring & Evaluation',
@@ -63,9 +64,9 @@ export class Header {
     },
          {
         label: 'Economic Opportunities',
-        link: environment.portals.economicOpportunities,
+        link: environment.portals.underConstruction,
         icon: 'fas fa-briefcase',
-    
+
       },
   ];
 
@@ -459,7 +460,7 @@ export class Header {
 
   private openInNewTab(targetUrl: string): void {
     const popup = window.open(targetUrl, '_blank', 'noopener,noreferrer');
-    
+
   }
 
 
