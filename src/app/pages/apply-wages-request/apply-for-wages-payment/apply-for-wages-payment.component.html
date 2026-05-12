@@ -250,12 +250,13 @@
                   </td>
                   <td>{{ beneficiary.beneficiaryName }}</td>
                                             <td>
-  <span 
-    [class]="'badge ' + 
-      (beneficiary.registrationPhase === 'PARENT' ? 'bg-primary' : 
-       beneficiary.registrationPhase === 'AF' ? 'bg-success' : 'bg-secondary')">
-    {{ beneficiary.registrationPhase || '—' }}
-  </span>
+  <span [class]="'badge ' + 
+  (beneficiary.registrationPhase === 'PARENT' ? 'bg-primary' : 
+   beneficiary.registrationPhase === 'AF' ? 'bg-success' :
+   beneficiary.registrationPhase === 'RP' ? 'bg-warning' : 
+   'bg-secondary')">
+  {{ beneficiary.registrationPhase || '—' }}
+</span>
 </td>
                   <td>
                     <span [class]="beneficiary.gender === 'MALE' ? 'badge bg-info' : 'badge bg-pink'">

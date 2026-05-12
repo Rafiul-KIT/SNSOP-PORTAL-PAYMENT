@@ -32,7 +32,7 @@ interface Beneficiary {
   phoneNo: string;
   legalStatus: string;
   totalDays: number;
-  registrationPhase: 'AF' | 'PARENT';
+  registrationPhase: 'AF' | 'PARENT' | 'RP';
 }
 
 @Component({
@@ -89,6 +89,7 @@ export class ApplyForWagesPaymentComponent implements OnInit {
   registrationPhases: { label: string; value: string }[] = [
     { label: 'AF', value: 'AF' },
     { label: 'PARENT', value: 'PARENT' },
+    { label: 'RP', value: 'RP' }
   ];
 
   constructor(
