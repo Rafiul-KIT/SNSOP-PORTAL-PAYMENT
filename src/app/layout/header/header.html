@@ -19,11 +19,14 @@
   <div class="portals-option-wrapper {{ showPortalOptions ? 'show' : '' }}" (mouseleave)="showPortalOptions = false">
     <div class="portal-items">
       @for (portal of portalList; track portal) {
-    <a class="item" [attr.href]="portal.newTab ? null : portal.link" (click)="onPortalClick($event, portal)">
-        <i class="{{ portal.icon }} w-50"></i>
-        <span>{{ portal.label }}</span>
-      </a>
-      }
+    <a
+  class="item"
+  [attr.href]="portal.newTab ? null : portal.link"
+  (click)="onPortalClick($event, portal)"
+>
+  <i [class]="portal.icon + ' w-50'"></i>
+  <span>{{ portal.label }}</span>
+</a>}
     </div>
   </div>
 
@@ -34,7 +37,7 @@
     <div class="help-desk-menu-container">
       <button class="helpdesk-trigger" (click)="toggleHelpDeskDropdown()">
         <i class="fas fa-headset"></i>
-        <span>Help Desk</span>
+        <span>Helpdesk</span>
         <i class="fas fa-chevron-down chevron" [class.open]="showHelpDeskDropdown"></i>
       </button>
 
