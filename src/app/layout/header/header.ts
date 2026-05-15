@@ -482,13 +482,17 @@ export class Header {
     this.showHelpDeskDropdown = false;
   };
 
-  onPortalClick(event: MouseEvent, portal: any): void {
-    if (!portal?.newTab || !portal?.link) return;
-
+onPortalClick(event: MouseEvent, portal: any): void {
+  if (!portal?.link) {
     event.preventDefault();
-    event.stopPropagation();
-    this.openInNewTab(portal.link);
+    return;
   }
+
+  if (portal.newTab) {
+    event.preventDefault();
+    window.open(portal.link, '_blank');
+  }
+}
 
   onHelpDeskMenuClick(event: MouseEvent, item: any): void {
     if (!item?.newTab || !item?.link) return;
