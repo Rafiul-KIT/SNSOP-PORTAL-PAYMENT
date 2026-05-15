@@ -150,7 +150,7 @@ export class Header {
   getStaticMenus(): any[] {
     return [
       {
-        label: 'Dashboard',
+        label: 'Payment Dashboard',
         icon: 'fas fa-tachometer-alt',
         routerLink: 'dashboard',
       },
