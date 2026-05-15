@@ -30,11 +30,11 @@
   <!-- Logged In User -->
   @if(userInfo){
   <div class="help-desk-desktop pe-1">
-    <!-- @if(canAccessHelpDesk){
+    @if(canAccessHelpDesk){
     <div class="help-desk-menu-container">
       <button class="helpdesk-trigger" (click)="toggleHelpDeskDropdown()">
         <i class="fas fa-headset"></i>
-        <span>Help Desk</span>
+        <span>Helpdesk</span>
         <i class="fas fa-chevron-down chevron" [class.open]="showHelpDeskDropdown"></i>
       </button>
 
@@ -51,7 +51,7 @@
         }
       </div>
     </div>
-    } -->
+    }
   </div>
 
   <p-button [text]="true" icon="fas fa-user-circle fa-lg" severity="info"
@@ -67,7 +67,7 @@
       Logout
     </div>
     <!-- Mobile Help Desk items -->
-    <!-- @if(canAccessHelpDesk && helpDeskChildren.length > 0){
+    @if(canAccessHelpDesk && helpDeskChildren.length > 0){
     <div class="item help-desk-mobile-header">
       <hr class="my-1">
       <span class="fw-bold text-muted px-2">Help</span>
@@ -79,7 +79,7 @@
       {{ item.label }}
     </a>
     }
-    } -->
+    }
   </div>
   }
 </div>

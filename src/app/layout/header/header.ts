@@ -52,10 +52,10 @@ export class Header {
     },
     {
       label: 'Help Desk',
-      // link: this.getMasterHelpDeskLink(),
-      link: environment.portals.underConstruction,
+      link: this.getMasterHelpDeskLink(),
+      // link: environment.portals.underConstruction,
       icon: 'fas fa-headset',
-      // newTab: true,
+      newTab: true,
     },
     {
       label: 'Monitoring & Evaluation',
@@ -81,9 +81,11 @@ export class Header {
       this.userInfo = this.apiService.loginState()?.user;
       if (this.userInfo?.roleId) {
         this.loadMenusForUser(this.userInfo.roleId);
+      } else {
+        this.menuList = [];
+        this.helpDeskChildren = [];
+        this.canAccessHelpDesk = false;
       }
-      // Help Desk access: show when user is logged in
-      this.canAccessHelpDesk = !!this.userInfo;
     });
   }
 
@@ -110,10 +112,8 @@ export class Header {
         // ✅ Update safely and trigger view refresh
         this.menuList = this.filterMenusByAccess(allMenus, allowedNames);
 
-        // Help Desk access: check if user has 'Help Desk' in allowed names
-          // Filter help desk items based on permitted URLs
-        const allHelpDeskItems = this.getHelpDeskMenuItems();
-        this.helpDeskChildren = allHelpDeskItems.filter(item => this.checkRouteAccess(responseData, item.route));
+        // Help Desk items must always be filtered against session menu permissions
+        this.helpDeskChildren = this.getHelpDeskMenuItems(responseData);
         this.canAccessHelpDesk = this.helpDeskChildren.length > 0;
 
         this.menusLoaded = true;
@@ -363,49 +363,115 @@ export class Header {
       }));
   }
 
-  getHelpDeskMenuItems(): any[] {
+  getHelpDeskMenuItems(permittedMenus: any[] = []): any[] {
     const items = [
       { label: 'Helpdesk Dashboard', route: '/help-desk/dashboard', icon: 'fas fa-tachometer-alt', newTab: true },
       { label: 'Submit Support Request', route: '/help-desk/submit-request', icon: 'fas fa-plus-circle', newTab: true },
-       
       { label: 'My Requests', route: '/help-desk/my-requests', icon: 'fas fa-clipboard-list', newTab: true },
       { label: 'Support Management', route: '/help-desk/support-management', icon: 'fas fa-users-cog', newTab: true },
-       { label: 'Request List', route: '/help-desk/assigned-requests', icon: 'fas fa-user-check', newTab: true },
+      { label: 'Request List', route: '/help-desk/assigned-requests', icon: 'fas fa-user-check', newTab: true },
       { label: 'Status Tracker', route: '/help-desk/status-tracker', icon: 'fas fa-search', newTab: true },
       { label: 'Reports', route: '/help-desk/reports', icon: 'fas fa-chart-bar', newTab: true },
       { separator: true, label: 'User Manual', route: '/help-desk/user-manual', icon: 'fas fa-book', newTab: true }
     ];
 
-    return items.map(item => ({
-      ...item,
-      link: this.getMasterHelpDeskMenuLink(item.route)
-    }));
+    return items
+      .filter((item) => this.hasSessionMenuAccessForRoute(permittedMenus, item.route))
+      .map(item => ({
+        ...item,
+        link: this.getMasterHelpDeskMenuLink(item.route)
+      }));
   }
 
-  private checkRouteAccess(permittedMenus: any[], url: string): boolean {
-    if (!url) return false;
-    const cleanUrl = url.split('?')[0];
-    const urlSegments = cleanUrl.split('/').filter(s => s.length > 0);
+  private hasSessionMenuAccessForRoute(permittedMenus: any[], route: string): boolean {
+    const normalizedRoute = this.normalizePath(route);
+    const sessionMenu = this
+      .flattenMenus(permittedMenus)
+      .find((menu) => menu?.url && this.normalizePath(menu.url) === normalizedRoute);
 
-    for (const menu of permittedMenus) {
-      if (!menu.url) continue;
+    return !!sessionMenu && this.hasMenuAccess(sessionMenu);
+  }
 
-      const menuUrlSegments = menu.url.split('/').filter((s: string) => s.length > 0);
+  private flattenMenus(menus: any[]): any[] {
+    const flattened: any[] = [];
 
-      if (urlSegments.length === menuUrlSegments.length) {
-        let match = true;
-        for (let i = 0; i < urlSegments.length; i++) {
-          if (menuUrlSegments[i].startsWith(':') || menuUrlSegments[i] === urlSegments[i]) {
-            continue;
-          } else {
-            match = false;
-            break;
+    const traverse = (items: any[]) => {
+      for (const item of items ?? []) {
+        if (!item || typeof item !== 'object') continue;
+
+        flattened.push(item);
+
+        for (const childKey of ['children', 'items', 'childMenus', 'subMenus', 'menus']) {
+          if (Array.isArray(item[childKey])) {
+            traverse(item[childKey]);
           }
         }
-        if (match) return true;
+      }
+    };
+
+    traverse(menus);
+    return flattened;
+  }
+
+  private hasMenuAccess(menu: any): boolean {
+    const accessKeys = [
+      'hasAccess',
+      'isAccess',
+      'isAccessible',
+      'access',
+      'allowed',
+      'isAllowed',
+      'checked',
+      'isChecked',
+      'selected',
+      'isSelected',
+      'canView',
+      'canRead',
+      'view',
+      'read',
+      'status',
+      'isActive',
+      'active',
+      'enabled',
+    ];
+
+    for (const key of accessKeys) {
+      if (typeof menu[key] === 'boolean') {
+        return menu[key];
+      }
+      if (typeof menu[key] === 'number') {
+        return menu[key] === 1;
+      }
+      if (typeof menu[key] === 'string') {
+        const value = menu[key].trim().toLowerCase();
+        if (['true', '1', 'active', 'enabled', 'allowed', 'yes'].includes(value)) return true;
+        if (['false', '0', 'inactive', 'disabled', 'denied', 'no'].includes(value)) return false;
       }
     }
-    return false;
+
+    return true;
+  }
+
+  private normalizePath(input: string): string {
+    if (!input) return '';
+
+    let value = String(input).trim();
+    const hashIndex = value.indexOf('#');
+    if (hashIndex >= 0) {
+      value = value.slice(hashIndex + 1);
+    }
+
+    // Support absolute URLs and relative paths uniformly.
+    const parsedPath = (() => {
+      try {
+        return new URL(value, window.location.origin).pathname;
+      } catch {
+        return value.split('?')[0];
+      }
+    })();
+
+    const cleaned = parsedPath.split('?')[0].replace(/\/+$/, '');
+    return cleaned.startsWith('/') ? cleaned : `/${cleaned}`;
   }
 
   toggleHelpDeskDropdown = () => {
