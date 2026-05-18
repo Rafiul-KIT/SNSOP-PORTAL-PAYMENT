@@ -46,7 +46,7 @@ export class ReconciliationMonitoringDetails implements OnInit {
   records: any[] = []; // All records from server
   filteredRecords: any[] = []; // Filtered records
   totalBeneficiaries: number = 0;
-  
+
   // Pagination properties
   rows: number = 10;
   rowsPerPageOptions: any[] = [10, 20, 50, 100, { showAll: 'All' }];
@@ -148,11 +148,11 @@ export class ReconciliationMonitoringDetails implements OnInit {
     this.apiService
       .POST('api/payroll/recon/monitoring/geo/details', payload)
       .then((res: any) => {
-        if (res.data.statusCode === 200 && res.data.data) {
+        if (res.data.code === 200 && res.data.data) {
           this.totalBeneficiaries = res.data.metadata?.totalElements || res.data.data.length;
           this.records = res.data.data;
           this.filteredRecords = [...this.records];
-      
+
           this.extractSupportTypes();
         } else {
           this.records = [];
@@ -185,10 +185,10 @@ export class ReconciliationMonitoringDetails implements OnInit {
         uniqueTypes.add(record.supportType);
       }
     });
-    
+
     // Convert to array and sort
     const typesArray = Array.from(uniqueTypes).sort();
-    
+
     // Create options array with "All Types" as first option using null
     this.supportTypeOptions = [
       { label: 'All Types', value: null },
@@ -257,45 +257,45 @@ export class ReconciliationMonitoringDetails implements OnInit {
       // Check each filter field
       for (const key in this.filters) {
         const filterValue = this.filters[key];
-        
+
         // Skip if filter is null, undefined, or empty string
         if (filterValue === null || filterValue === undefined || filterValue === '') {
           continue;
         }
-        
+
         // Special handling for alternate names
         if (key === 'alternate1Name') {
-          const alt1Match = record.alternate1Name && 
+          const alt1Match = record.alternate1Name &&
             record.alternate1Name.toLowerCase().includes(filterValue.toLowerCase());
-          const alt2Match = record.alternate2Name && 
+          const alt2Match = record.alternate2Name &&
             record.alternate2Name.toLowerCase().includes(filterValue.toLowerCase());
-          
+
           if (!alt1Match && !alt2Match) {
             return false;
           }
-        } 
+        }
         // Special handling for numeric fields
         else if (key === 'totalAttendance' || key === 'wageTotal' || key === 'wageRateSspTotal') {
           const recordValue = record[key];
           if (recordValue === null || recordValue === undefined) {
             return false;
           }
-          
+
           // Convert to string for comparison
           if (!recordValue.toString().includes(filterValue.toString())) {
             return false;
           }
-        } 
+        }
         // Default string comparison
         else {
           const recordValue = record[key];
           if (!recordValue) {
             return false;
           }
-          
+
           const recordValueStr = recordValue.toString().toLowerCase();
           const filterValueStr = filterValue.toString().toLowerCase();
-          
+
           if (!recordValueStr.includes(filterValueStr)) {
             return false;
           }
@@ -325,15 +325,15 @@ export class ReconciliationMonitoringDetails implements OnInit {
       alternate1Name: '',
       paymentStatus: null
     };
-    
+
     // Reset to original data
     this.filteredRecords = [...this.records];
-    
+
     // Reapply sorting if needed
     if (this.sortField) {
       this.applySorting();
     }
-    
+
     this.cdr.markForCheck();
   }
 }
