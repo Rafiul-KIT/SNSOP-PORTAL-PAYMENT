@@ -297,13 +297,16 @@ export class ReconciliationMonitoring implements OnInit {
       this.apiService
         .POST(`api/payroll/recon/monitoring/geo?page=${page}&size=${size}`, body)
         .then((res: any) => {
+          console.log('API Response:', res);
           if (!res) throw new Error('Empty response');
 
-          const data = res.data || res;
+          const data = res.data;
+          console.log('Data code:', data.code, 'Records length:', data.data?.length);
 
-          if (data.statusCode === 200) {
+          if (data.code === 200) {
             this.records = data.data || [];
-            this.totalRecords = data.metadata.totalElements || 0;
+            this.totalRecords = data.metadata?.totalElements || 0;
+            console.log('Records set to:', this.records.length);
 
             if (this.records.length === 0 && !isInitialLoad) {
               this.messageService.add({
@@ -313,6 +316,7 @@ export class ReconciliationMonitoring implements OnInit {
               });
             }
           } else {
+            console.warn('Unexpected status code:', data.code);
             this.records = [];
             this.totalRecords = 0;
           }
@@ -416,8 +420,8 @@ export class ReconciliationMonitoring implements OnInit {
 
   const options: Intl.DateTimeFormatOptions = {
     year: 'numeric',
-    month: 'short', 
-    day: 'numeric', 
+    month: 'short',
+    day: 'numeric',
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
@@ -442,7 +446,7 @@ export class ReconciliationMonitoring implements OnInit {
   }
 
   // Helper method for tracking rows
-  trackById = (_: number, record: any) => 
+  trackById = (_: number, record: any) =>
     `${record.stateId}_${record.countyId}_${record.payamId}_${record.bomaId}_${record.paymentCycle}`;
-  
+
 }
