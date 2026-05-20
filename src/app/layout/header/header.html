@@ -21,7 +21,7 @@
       @for (portal of portalList; track portal) {
     <a
   class="item"
-  [attr.href]="portal.newTab ? null : portal.link"
+  [attr.href]="portal.link"
   (click)="onPortalClick($event, portal)"
 >
   <i [class]="portal.icon + ' w-50'"></i>
