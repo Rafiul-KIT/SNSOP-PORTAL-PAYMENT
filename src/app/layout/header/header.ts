@@ -36,14 +36,15 @@ export class Header {
     },
     { label: 'GRM', link: environment.portals.grm, icon: 'fas fa-sitemap' },
     {
-      label: 'Report',
+      label: 'Economic Opportunities',
       link: environment.portals.underConstruction,
-      icon: 'fas fa-chart-line',
+      // link: environment.portals.UnderConstruction,
+      icon: 'fas fa-briefcase',
     },
     {
-      label: 'Settings',
-      link: environment.portals.masterSettings,
-      icon: 'fas fa-cog',
+      label: 'Monitoring & Evaluation',
+      link: environment.portals.mNe,
+      icon: 'fas fa-chart-bar',
     },
     {
       label: 'Survey CTO',
@@ -51,23 +52,28 @@ export class Header {
       icon: 'fas fa-poll',
     },
     {
-      label: 'Help Desk',
-      link: this.getMasterHelpDeskLink(),
-      // link: environment.portals.underConstruction,
-      icon: 'fas fa-headset',
-      newTab: true,
+      label: 'Report',
+      link: environment.portals.underConstruction,
+      icon: 'fas fa-chart-line',
     },
-    {
-      label: 'Monitoring & Evaluation',
-      link: environment.portals.mNe,
-      icon: 'fas fa-chart-bar',
-    },
-         {
-        label: 'Economic Opportunities',
+    // {
+    //   label: 'Help Desk',
+    //   link: this.getMasterHelpDeskLink(),
+    //   icon: 'fas fa-headset',
+    //   // link: environment.portals.UnderConstruction,
+    //   newTab: true,
+    // },
+     {
+        label: 'DMS',
+        icon: 'fas fa-file',
         link: environment.portals.underConstruction,
-        icon: 'fas fa-briefcase',
-
+        tooltipText: 'Document Management System'
       },
+    {
+      label: 'Settings',
+      link: environment.portals.masterSettings,
+      icon: 'fas fa-cog',
+    },
   ];
 
   constructor(
