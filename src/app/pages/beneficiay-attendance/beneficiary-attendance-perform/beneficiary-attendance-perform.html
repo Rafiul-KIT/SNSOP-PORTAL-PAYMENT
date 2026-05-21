@@ -138,11 +138,17 @@
                     </p>
                 </div>
                 <p-table [value]="filteredBeneficiaries" [(selection)]="selectedBeneficiaries" dataKey="beneficiaryId"
-                    [tableStyle]="{'min-width': '50rem'}">
+                    [tableStyle]="{'min-width': '60rem'}">
                     <ng-template pTemplate="header">
                         <tr class="filter-row">
                             <th style="padding-bottom: 1rem;"></th>
                             <th style="padding-bottom: 2rem;"></th>
+                            <th style="padding-bottom: 2rem;">
+                                <label class="text-sm font-medium text-center-aligned">Beneficiary ID :</label>
+                                <input pInputText type="text" [(ngModel)]="beneficiaryIdFilter"
+                                    [ngModelOptions]="{standalone: true}" (input)="onFilterChange()"
+                                    placeholder="Filter ID" class="w-full p-column-filter">
+                            </th>
                             <th style="padding-bottom: 2rem;">
                                 <label class="text-sm font-medium">Household :&nbsp; </label>
                                 <input pInputText type="text" [(ngModel)]="householdNumberFilter"
@@ -176,7 +182,10 @@
                             <th style="width: 4rem">
                                 ALL <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
                             </th>
-                            <th class="text-center-aligned">S.No</th>
+                            <!-- <th class="text-center-aligned">S.No</th> -->
+                            <th class="text-center-aligned" (click)="sortOnClient('beneficiaryId')"
+                                style="cursor: pointer;">Beneficiary ID <i [ngClass]="getSortIcon('beneficiaryId')"
+                                    class="pi ms-2"></i></th>
                             <th class="text-center-aligned" (click)="sortOnClient('householdNumber')"
                                 style="cursor: pointer;">Household No. <i [ngClass]="getSortIcon('householdNumber')"
                                     class="pi ms-2"></i></th>
@@ -199,7 +208,8 @@
                             <td>
                                 <p-tableCheckbox [value]="beneficiary"></p-tableCheckbox>
                             </td>
-                            <td class="text-center-aligned">{{ i + 1 }}</td>
+                            <!-- <td class="text-center-aligned">{{ i + 1 }}</td> -->
+                            <td class="text-center-aligned">{{beneficiary.beneficiaryId}}</td>
                             <td class="text-center-aligned">{{beneficiary.householdNumber}}</td>
                             <td class="text-center-aligned">{{beneficiary.beneficiaryName}}</td>
                             <td class="text-center-aligned">{{beneficiary.gender}}</td>

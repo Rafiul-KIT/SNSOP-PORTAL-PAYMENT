@@ -42,11 +42,11 @@ interface SubProject {
 }
 
 interface BeneficiaryAttendanceRecord {
-  beneficiaryId: number;
+  beneficiaryId: number | null;
   householdNumber: string;
   beneficiaryName: string;
   gender: string;
-  age: number;
+  age: number | null;
   phoneNo: string;
   present: boolean | null;
   finlitAttended: boolean | null;
@@ -102,6 +102,7 @@ export class BeneficiaryAttendancePerform implements OnInit {
   attendanceDate: Date | null = null;
   attendanceDateTouched: boolean = false;
 
+  beneficiaryIdFilter: string = '';
   householdNumberFilter: string = '';
   beneficiaryNameFilter: string = '';
   genderFilter: string = '';
@@ -208,7 +209,7 @@ export class BeneficiaryAttendancePerform implements OnInit {
         .then((res: any) => {
           const data = res.data || res;
           if (data && data.content && data.content.length > 0) {
-            this.beneficiaries = data.content;
+            this.beneficiaries = data.content.map((b: any) => this.mapBeneficiaryAttendanceRecord(b));
             this.selectedBeneficiaries = this.beneficiaries.filter(b => b.present);
             this.totalRecords = data.totalElements || 0;
             this.applyFiltersAndSorting(); // Apply filters and sorting after fetching
@@ -241,12 +242,12 @@ export class BeneficiaryAttendancePerform implements OnInit {
           const data = res.data || res;
           if (data && data.content) {
             this.beneficiaries = data.content.map((b: any) => ({
-              beneficiaryId: b.id,
-              householdNumber: b.householdNumber,
-              beneficiaryName: b.beneficiaryName,
-              gender: b.gender,
-              age: b.age,
-              phoneNo: b.phoneNo,
+              beneficiaryId: this.getBeneficiaryId(b, true),
+              householdNumber: b.householdNumber ?? '',
+              beneficiaryName: b.beneficiaryName ?? '',
+              gender: b.gender ?? '',
+              age: b.age ?? null,
+              phoneNo: b.phoneNo ?? '',
               present: null, // Default to unselected
               finlitAttended: null,
               ecdAttended: null,
@@ -284,6 +285,34 @@ export class BeneficiaryAttendancePerform implements OnInit {
           this.cdr.markForCheck();
         });
     }
+
+    private mapBeneficiaryAttendanceRecord(record: any): BeneficiaryAttendanceRecord {
+      return {
+        beneficiaryId: this.getBeneficiaryId(record),
+        householdNumber: record.householdNumber ?? '',
+        beneficiaryName: record.beneficiaryName ?? '',
+        gender: record.gender ?? '',
+        age: record.age ?? null,
+        phoneNo: record.phoneNo ?? '',
+        present: record.present ?? null,
+        finlitAttended: record.finlitAttended ?? null,
+        ecdAttended: record.ecdAttended ?? null,
+        washAttended: record.washAttended ?? null,
+        gbvAttended: record.gbvAttended ?? null,
+      };
+    }
+
+    private matchesFilter(value: unknown, filter: string): boolean {
+      return String(value ?? '').toLowerCase().includes(filter.trim().toLowerCase());
+    }
+
+    private getBeneficiaryId(record: any, useIdFallback = false): number | null {
+      return record.beneficiaryId
+        ?? record.beneficiary?.beneficiaryId
+        ?? record.beneficiary?.id
+        ?? record.beneficiary_id
+        ?? (useIdFallback ? record.id : null);
+    }
   
     onFilterChange() {
       this.applyFiltersAndSorting();
@@ -307,6 +336,7 @@ export class BeneficiaryAttendancePerform implements OnInit {
     }
   
     clearFilters() {
+      this.beneficiaryIdFilter = '';
       this.householdNumberFilter = '';
       this.beneficiaryNameFilter = '';
       this.genderFilter = '';
@@ -321,20 +351,23 @@ export class BeneficiaryAttendancePerform implements OnInit {
       let tempBeneficiaries = [...this.beneficiaries];
   
       // Apply filters
+      if (this.beneficiaryIdFilter) {
+        tempBeneficiaries = tempBeneficiaries.filter(b => this.matchesFilter(b.beneficiaryId, this.beneficiaryIdFilter));
+      }
       if (this.householdNumberFilter) {
-        tempBeneficiaries = tempBeneficiaries.filter(b => b.householdNumber.toLowerCase().includes(this.householdNumberFilter.toLowerCase()));
+        tempBeneficiaries = tempBeneficiaries.filter(b => this.matchesFilter(b.householdNumber, this.householdNumberFilter));
       }
       if (this.beneficiaryNameFilter) {
-        tempBeneficiaries = tempBeneficiaries.filter(b => b.beneficiaryName.toLowerCase().includes(this.beneficiaryNameFilter.toLowerCase()));
+        tempBeneficiaries = tempBeneficiaries.filter(b => this.matchesFilter(b.beneficiaryName, this.beneficiaryNameFilter));
       }
       if (this.genderFilter) {
-        tempBeneficiaries = tempBeneficiaries.filter(b => b.gender.toLowerCase().includes(this.genderFilter.toLowerCase()));
+        tempBeneficiaries = tempBeneficiaries.filter(b => this.matchesFilter(b.gender, this.genderFilter));
       }
       if (this.ageFilter !== null) {
         tempBeneficiaries = tempBeneficiaries.filter(b => b.age === this.ageFilter);
       }
       if (this.phoneNoFilter) {
-        tempBeneficiaries = tempBeneficiaries.filter(b => b.phoneNo && b.phoneNo.toLowerCase().includes(this.phoneNoFilter.toLowerCase()));
+        tempBeneficiaries = tempBeneficiaries.filter(b => this.matchesFilter(b.phoneNo, this.phoneNoFilter));
       }
   
       // Apply sorting
@@ -344,9 +377,9 @@ export class BeneficiaryAttendancePerform implements OnInit {
           const valueB = (b as any)[this.sortField];
   
           let result = 0;
-          if (valueA === null && valueB !== null) result = -1;
-          else if (valueA !== null && valueB === null) result = 1;
-          else if (valueA === null && valueB === null) result = 0;
+          if (valueA == null && valueB != null) result = -1;
+          else if (valueA != null && valueB == null) result = 1;
+          else if (valueA == null && valueB == null) result = 0;
           else if (typeof valueA === 'string' && typeof valueB === 'string') {
             result = valueA.localeCompare(valueB);
           } else {
