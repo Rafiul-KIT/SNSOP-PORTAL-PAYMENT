@@ -137,93 +137,91 @@
                         </span>
                     </p>
                 </div>
-                <div class="attendance-table-shell">
                 <p-table [value]="filteredBeneficiaries" [(selection)]="selectedBeneficiaries" dataKey="beneficiaryId"
-                    styleClass="attendance-table p-datatable-sm p-datatable-striped p-datatable-gridlines"
-                    responsiveLayout="scroll" size="small" [rowHover]="true"
-                    [tableStyle]="{'min-width': '56rem'}">
+                    [tableStyle]="{'min-width': '60rem'}">
                     <ng-template pTemplate="header">
                         <tr class="filter-row">
-                            <th class="select-col"></th>
-                            <th class="filter-cell id-col">
-                                <label>Beneficiary ID</label>
+                            <th style="padding-bottom: 1rem;"></th>
+                            <th style="padding-bottom: 2rem;">
+                                <label class="text-sm font-medium text-center-aligned">Beneficiary ID :</label>
                                 <input pInputText type="text" [(ngModel)]="beneficiaryIdFilter"
                                     [ngModelOptions]="{standalone: true}" (input)="onFilterChange()"
                                     placeholder="Filter ID" class="w-full p-column-filter">
                             </th>
-                            <th class="filter-cell household-col">
-                                <label>Household</label>
+                            <th style="padding-bottom: 2rem;">
+                                <label class="text-sm font-medium">Household :&nbsp; </label>
                                 <input pInputText type="text" [(ngModel)]="householdNumberFilter"
                                     [ngModelOptions]="{standalone: true}" (input)="onFilterChange()"
-                                    placeholder="Filter Household" class="w-full p-column-filter">
+                                    placeholder="Filter Household " class="w-full p-column-filter">
                             </th>
-                            <th class="filter-cell name-col">
-                                <label>Name</label>
+                            <th style="padding-bottom: 2rem;">
+                                <label class="text-sm font-medium">Name :&nbsp; </label>
                                 <input pInputText type="text" [(ngModel)]="beneficiaryNameFilter"
                                     [ngModelOptions]="{standalone: true}" (input)="onFilterChange()"
                                     placeholder="Filter Name" class="w-full p-column-filter">
                             </th>
-                            <th class="compact-empty-filter gender-col"></th>
-                            <th class="compact-empty-filter age-col"></th>
-                            <th class="filter-cell phone-col">
-                                <label>Phone No.</label>
+                            <th style="padding-bottom: 2rem;">
+                                
+                            </th>
+                            <th style="padding-bottom: 2rem;">
+                               
+                            </th>
+                            <th style="padding-bottom: 2rem;">
+                                <label class="text-sm font-medium">Phone No. :&nbsp; </label>
                                 <input pInputText type="text" [(ngModel)]="phoneNoFilter"
                                     [ngModelOptions]="{standalone: true}" (input)="onFilterChange()"
                                     placeholder="Filter Phone No." class="w-full p-column-filter">
                             </th>
-                            <th class="status-col filter-action-cell">
+                            <th style="padding-bottom: 2rem;">
                                 <button pButton type="button" icon="pi pi-filter-slash" (click)="clearFilters()"
-                                    class="p-button-outlined p-button-sm clear-filter-btn" label="Clear"></button>
+                                    class="p-button-outlined p-button-sm">Clear</button>
                             </th>
                         </tr>
                         <tr>
-                            <th class="select-col">
+                            <th style="width: 4rem">
                                 ALL <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
                             </th>
                             <!-- <th class="text-center-aligned">S.No</th> -->
-                            <th class="text-center-aligned sortable-col id-col" (click)="sortOnClient('beneficiaryId')">
-                                Beneficiary ID <i [ngClass]="getSortIcon('beneficiaryId')"
+                            <th class="text-center-aligned" (click)="sortOnClient('beneficiaryId')"
+                                style="cursor: pointer;">Beneficiary ID <i [ngClass]="getSortIcon('beneficiaryId')"
                                     class="pi ms-2"></i></th>
-                            <th class="text-center-aligned sortable-col household-col" (click)="sortOnClient('householdNumber')">
-                                Household No. <i [ngClass]="getSortIcon('householdNumber')"
+                            <th class="text-center-aligned" (click)="sortOnClient('householdNumber')"
+                                style="cursor: pointer;">Household No. <i [ngClass]="getSortIcon('householdNumber')"
                                     class="pi ms-2"></i></th>
-                            <th class="text-center-aligned sortable-col name-col" (click)="sortOnClient('beneficiaryName')">
-                                Beneficiary Name <i [ngClass]="getSortIcon('beneficiaryName')"
+                            <th class="text-center-aligned" (click)="sortOnClient('beneficiaryName')"
+                                style="cursor: pointer;">Beneficiary Name <i [ngClass]="getSortIcon('beneficiaryName')"
                                     class="pi ms-2"></i></th>
-                            <th class="text-center-aligned sortable-col gender-col" (click)="sortOnClient('gender')">
+                            <th class="text-center-aligned" (click)="sortOnClient('gender')" style="cursor: pointer;">
                                 Gender <i [ngClass]="getSortIcon('gender')" class="pi ms-2"></i></th>
-                            <th class="text-center-aligned sortable-col age-col" (click)="sortOnClient('age')">Age
+                            <th class="text-center-aligned" (click)="sortOnClient('age')" style="cursor: pointer;">Age
                                 <i [ngClass]="getSortIcon('age')" class="pi ms-2"></i></th>
-                            <th class="text-center-aligned sortable-col phone-col" (click)="sortOnClient('phoneNo')">
+                            <th class="text-center-aligned" (click)="sortOnClient('phoneNo')" style="cursor: pointer;">
                                 Phone No. <i [ngClass]="getSortIcon('phoneNo')" class="pi ms-2"></i></th>
-                            <th class="text-center-aligned status-col">Status <p-select [options]="statusOptions"
+                            <th class="text-center-aligned">Status <p-select [options]="statusOptions"
                                     (onChange)="onSelectAllStatus($event)" placeholder="--select--" appendTo="body"
-                                    styleClass="status-select"
                                     [disabled]="selectedBeneficiaries.length === 0"></p-select></th>
                         </tr>
                     </ng-template>
                     <ng-template pTemplate="body" let-beneficiary let-i="rowIndex">
                         <tr>
-                            <td class="select-col">
+                            <td>
                                 <p-tableCheckbox [value]="beneficiary"></p-tableCheckbox>
                             </td>
                             <!-- <td class="text-center-aligned">{{ i + 1 }}</td> -->
-                            <td class="text-center-aligned id-col">{{beneficiary.beneficiaryId}}</td>
-                            <td class="text-center-aligned household-col">{{beneficiary.householdNumber}}</td>
-                            <td class="text-center-aligned name-col">{{beneficiary.beneficiaryName}}</td>
-                            <td class="text-center-aligned gender-col">{{beneficiary.gender}}</td>
-                            <td class="text-center-aligned age-col">{{beneficiary.age}}</td>
-                            <td class="text-center-aligned phone-col">{{beneficiary.phoneNo}}</td>
-                            <td class="text-center-aligned status-col">
+                            <td class="text-center-aligned">{{beneficiary.beneficiaryId}}</td>
+                            <td class="text-center-aligned">{{beneficiary.householdNumber}}</td>
+                            <td class="text-center-aligned">{{beneficiary.beneficiaryName}}</td>
+                            <td class="text-center-aligned">{{beneficiary.gender}}</td>
+                            <td class="text-center-aligned">{{beneficiary.age}}</td>
+                            <td class="text-center-aligned">{{beneficiary.phoneNo}}</td>
+                            <td class="text-center-aligned">
                                 <p-select [options]="statusOptions" [(ngModel)]="beneficiary.present"
                                     optionLabel="label" optionValue="value" appendTo="body" placeholder="--select--"
-                                    styleClass="status-select"
                                     [disabled]="!selectedBeneficiaries.includes(beneficiary)"></p-select>
                             </td>
                         </tr>
                     </ng-template>
                 </p-table>
-                </div>
 
 
 
