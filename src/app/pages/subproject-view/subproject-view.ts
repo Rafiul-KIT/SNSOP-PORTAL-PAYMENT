@@ -520,6 +520,7 @@ export class SubprojectView implements OnInit {
   private getBeneficiaryExportData(content: BeneficiaryDetailsDto[]) {
     return content.map((item, index) => ({
       Serial: index + 1,
+      ID: item.id ?? '',
       'Household Number': item.householdNumber || '',
       'Beneficiary Name': item.beneficiaryName || '',
       Gender: item.gender || '',
@@ -579,6 +580,7 @@ export class SubprojectView implements OnInit {
       head: [
         [
           'Serial',
+          'ID',
           'Household Number',
           'Beneficiary Name',
           'Gender',
@@ -591,6 +593,7 @@ export class SubprojectView implements OnInit {
       ],
       body: exportData.map((item) => [
         item.Serial,
+        item.ID,
         item['Household Number'],
         item['Beneficiary Name'],
         item.Gender,
