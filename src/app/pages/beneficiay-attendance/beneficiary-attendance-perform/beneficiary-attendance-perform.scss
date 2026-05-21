@@ -3,3 +3,127 @@
   text-align: center;
 }
 
+.attendance-table-shell {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+:host ::ng-deep .attendance-table {
+  font-size: 0.875rem;
+}
+
+:host ::ng-deep .attendance-table .p-datatable-wrapper {
+  border-radius: 8px;
+}
+
+:host ::ng-deep .attendance-table .p-datatable-thead > tr > th,
+:host ::ng-deep .attendance-table .p-datatable-tbody > tr > td {
+  padding: 0.45rem 0.55rem;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+:host ::ng-deep .attendance-table .p-datatable-thead > tr > th {
+  background: #f8fafc;
+  color: #334155;
+  font-weight: 600;
+}
+
+:host ::ng-deep .attendance-table .filter-row > th {
+  padding: 0.5rem;
+  background: #f1f5f9;
+}
+
+:host ::ng-deep .attendance-table .filter-cell label {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+:host ::ng-deep .attendance-table .p-column-filter {
+  width: 100%;
+  height: 2rem;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.8125rem;
+}
+
+:host ::ng-deep .attendance-table .p-select {
+  min-height: 2rem;
+  font-size: 0.8125rem;
+}
+
+:host ::ng-deep .attendance-table .status-col .p-select {
+  width: 7.5rem;
+}
+
+:host ::ng-deep .attendance-table .sortable-col {
+  cursor: pointer;
+  user-select: none;
+}
+
+:host ::ng-deep .attendance-table .select-col {
+  width: 3.5rem;
+  min-width: 3.5rem;
+  text-align: center;
+}
+
+:host ::ng-deep .attendance-table .id-col {
+  min-width: 7.25rem;
+}
+
+:host ::ng-deep .attendance-table .household-col {
+  min-width: 7.5rem;
+}
+
+:host ::ng-deep .attendance-table .name-col {
+  min-width: 10rem;
+}
+
+:host ::ng-deep .attendance-table .gender-col {
+  min-width: 5.25rem;
+}
+
+:host ::ng-deep .attendance-table .age-col {
+  min-width: 4.25rem;
+}
+
+:host ::ng-deep .attendance-table .phone-col {
+  min-width: 8rem;
+}
+
+:host ::ng-deep .attendance-table .status-col {
+  min-width: 8.5rem;
+}
+
+:host ::ng-deep .attendance-table .filter-action-cell {
+  text-align: center;
+}
+
+:host ::ng-deep .attendance-table .clear-filter-btn {
+  height: 2rem;
+  padding-inline: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .attendance-table-shell {
+    width: calc(100% + 1rem);
+    margin-inline: -0.5rem;
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+  }
+
+  :host ::ng-deep .attendance-table {
+    font-size: 0.8125rem;
+  }
+
+  :host ::ng-deep .attendance-table .p-datatable-thead > tr > th,
+  :host ::ng-deep .attendance-table .p-datatable-tbody > tr > td {
+    padding: 0.4rem 0.45rem;
+  }
+}
+
