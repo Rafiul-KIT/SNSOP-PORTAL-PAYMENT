@@ -253,16 +253,42 @@
                 <!-- Replace the beneficiaries p-table section with this: -->
 
                 <p-card class="mt-4 shadow-sm border-0">
-                    <h5 class="mb-3 text-success">
-                        <i class="pi pi-users me-2"></i>
-                        Beneficiaries
-                    </h5>
+                 
+
+                  
 
                     <!-- Table without built-in paginator -->
                     <p-table [value]="beneficiaries" [loading]="isBeneficiaryLoading" responsiveLayout="scroll"
                         class="p-datatable-sm">
 
                         <ng-template pTemplate="header">
+                            <tr>
+                                <th>   <h5 class="mb-3 text-success">
+                        <i class="pi pi-users me-2"></i>
+                        Beneficiaries
+                    </h5></th>
+                                <th></th>
+                                <th>  <div class="d-flex align-items-end gap-2 mb-3 flex-wrap">
+                        <div class="beneficiary-name-filter">
+                            <label for="beneficiaryNameFilter" class="form-label mb-1 text-muted">Name</label>
+                            <input id="beneficiaryNameFilter" pInputText type="text"
+                                [(ngModel)]="beneficiaryNameFilter" [ngModelOptions]="{standalone: true}"
+                                (keyup.enter)="onBeneficiaryNameSearch()" placeholder="Search by name"
+                                class="form-control" />
+                        </div>
+                     
+                    </div></th>
+                                <th>   <p-button label="Search" icon="fas fa-search" severity="primary" size="small"
+                            (onClick)="onBeneficiaryNameSearch()" [disabled]="isBeneficiaryLoading">
+                        </p-button>
+                      </th>
+                        <th>  <p-button label="Clear" icon="pi pi-filter-slash" severity="secondary" size="small"
+                            [outlined]="true" (onClick)="clearBeneficiaryNameFilter()"
+                            [disabled]="isBeneficiaryLoading || !beneficiaryNameFilter">
+                        </p-button></th>
+                              
+                                
+                            </tr>
                             <tr>
                                 <th>SL</th>
                                 <th>House Hold Number</th>

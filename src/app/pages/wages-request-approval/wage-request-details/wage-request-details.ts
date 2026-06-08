@@ -14,6 +14,7 @@ import { BreadcrumbModule } from 'primeng/breadcrumb';
 import { TableModule } from 'primeng/table';
 import { PaginatorModule } from 'primeng/paginator';
 import { SelectModule } from 'primeng/select';
+import { InputTextModule } from 'primeng/inputtext';
 import { FileUploadModule } from 'primeng/fileupload';
 import { MessageModule } from 'primeng/message';
 import { ButtonModule } from 'primeng/button';
@@ -101,6 +102,7 @@ interface StatusInfo {
     TableModule,
     PaginatorModule,
     SelectModule,
+    InputTextModule,
     MessageModule,
     ButtonModule,
     FileUploadModule,
@@ -117,6 +119,7 @@ export class WageRequestDetails implements OnInit {
   totalBeneficiaries = 0;
   beneficiaryCurrentPage = 0;
   beneficiaryPageSize = 20;
+  beneficiaryNameFilter = '';
   isBeneficiaryLoading = false;
   isLoading = false;
   apiError = '';
@@ -643,8 +646,20 @@ export class WageRequestDetails implements OnInit {
     this.isBeneficiaryLoading = true;
     this.cdr.detectChanges();
     try {
+      const params: Record<string, string | number> = {
+        page,
+        size,
+        wageRequestId: this.wageId,
+      };
+      const beneficiaryName = this.beneficiaryNameFilter.trim();
+
+      if (beneficiaryName) {
+        params['beneficiaryName'] = beneficiaryName;
+      }
+
       const response: any = await this.apiService.GET(
-        `/api/wage-request/beneficiary-list/get?page=${page}&size=${size}&wageRequestId=${this.wageId}`,
+        '/api/wage-request/beneficiary-list/get',
+        params,
       );
 
       if (response?.data?.content && Array.isArray(response.data.content)) {
@@ -673,6 +688,25 @@ export class WageRequestDetails implements OnInit {
       this.isBeneficiaryLoading = false;
       this.cdr.detectChanges();
     }
+  }
+
+  onBeneficiaryNameSearch(): void {
+    this.beneficiaryCurrentPage = 0;
+    this.loadBeneficiaries(
+      this.beneficiaryCurrentPage,
+      this.beneficiaryPageSize,
+    );
+  }
+
+  clearBeneficiaryNameFilter(): void {
+    if (!this.beneficiaryNameFilter) return;
+
+    this.beneficiaryNameFilter = '';
+    this.beneficiaryCurrentPage = 0;
+    this.loadBeneficiaries(
+      this.beneficiaryCurrentPage,
+      this.beneficiaryPageSize,
+    );
   }
 
   private updateRowsPerPageOptions(): void {
