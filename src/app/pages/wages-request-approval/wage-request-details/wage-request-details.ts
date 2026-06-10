@@ -705,7 +705,7 @@ export class WageRequestDetails implements OnInit {
     this.beneficiaryCurrentPage = 0;
     this.loadBeneficiaries(
       this.beneficiaryCurrentPage,
-      this.beneficiaryPageSize,
+      this.beneficiaryPageSize=20,
     );
   }
 
