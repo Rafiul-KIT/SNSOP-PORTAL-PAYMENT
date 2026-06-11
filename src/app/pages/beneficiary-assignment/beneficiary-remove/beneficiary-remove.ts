@@ -28,7 +28,7 @@ interface Beneficiary {
   householdNumber: string;
   beneficiaryName: string;
   gender: 'MALE' | 'FEMALE';
-  registrationPhase: 'AF' | 'PARENT'; // Added registrationPhase
+  registrationPhase: 'AF' | 'PARENT' | 'RP'; 
   age: number;
   phoneNo: string;
   householdMonthlyAvgIncome: number;
@@ -93,6 +93,7 @@ export class BeneficiaryRemove implements OnInit {
   registrationPhases: { label: string; value: string }[] = [
     { label: 'AF', value: 'AF' },
     { label: 'PARENT', value: 'PARENT' },
+    { label: 'RP', value: 'RP' },
   ];
 
   // Multiple attachments

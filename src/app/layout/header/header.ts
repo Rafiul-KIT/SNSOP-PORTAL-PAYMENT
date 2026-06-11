@@ -224,11 +224,11 @@ export class Header {
         icon: 'fas fa-user-edit',
         routerLink: 'attendance',
       },
-      // {
-      //   label: 'Training Attendance',
-      //   icon: 'fas fa-user-clock',
-      //   routerLink: 'training-attendance',
-      // },
+      {
+        label: 'Training Attendance',
+        icon: 'fas fa-user-clock',
+        routerLink: 'training-attendance',
+      },
       {
         label: 'Wage Request',
         icon: 'fas fa-receipt',
@@ -375,6 +375,7 @@ export class Header {
       { label: 'Helpdesk Dashboard', route: '/help-desk/dashboard', icon: 'fas fa-tachometer-alt', newTab: true },
       { label: 'Submit Support Request', route: '/help-desk/submit-request', icon: 'fas fa-plus-circle', newTab: true },
       { label: 'My Requests', route: '/help-desk/my-requests', icon: 'fas fa-clipboard-list', newTab: true },
+        { label: 'Assigned Requests', route: '/help-desk/assigned-requests', icon: 'fas fa-user-check', newTab: true },
       { label: 'Support Management', route: '/help-desk/support-management', icon: 'fas fa-users-cog', newTab: true },
       { label: 'Request List', route: '/help-desk/assigned-requests', icon: 'fas fa-user-check', newTab: true },
       { label: 'Status Tracker', route: '/help-desk/status-tracker', icon: 'fas fa-search', newTab: true },

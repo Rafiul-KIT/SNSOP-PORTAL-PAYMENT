@@ -27,7 +27,7 @@ interface Beneficiary {
   age: number;
   phoneNo: string;
   legalStatus: string;
-  registrationPhase: 'AF' | 'PARENT';
+  registrationPhase: 'AF' | 'PARENT' | 'RP';
 }
 
 @Component({
@@ -87,6 +87,7 @@ export class ApplyForDisPayment implements OnInit {
   registrationPhases: { label: string; value: string }[] = [
     { label: 'AF', value: 'AF' },
     { label: 'PARENT', value: 'PARENT' },
+    { label: 'RP', value: 'RP' }
   ];
 
   breadcrumbItems: any[] = [];
