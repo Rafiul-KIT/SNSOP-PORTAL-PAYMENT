@@ -210,6 +210,7 @@ export class WageRequestAbstract implements OnInit {
       { label: 'ALL', value: 'ALL' },
       { label: 'PARENT', value: 'PARENT' },
       { label: 'AF', value: 'AF' },
+      { label: 'RP', value: 'RP' },
     ];
     this.paymentStatusOptions = [
       { label: 'All', value: 'ALL' },

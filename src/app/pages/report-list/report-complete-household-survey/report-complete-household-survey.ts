@@ -61,7 +61,11 @@ export class ReportCompleteHouseholdSurvey {
         groupedByDate[dateStr].af_file = file.fileName;
       } else if (file.registrationPhase === 'PARENT') {
         groupedByDate[dateStr].parent_file = file.fileName;
-      } else if (file.registrationPhase === 'ALL') {
+      }
+      else if (file.registrationPhase === 'RP') {
+        groupedByDate[dateStr].parent_file = file.fileName;
+      }
+      else if (file.registrationPhase === 'ALL') {
         groupedByDate[dateStr].all_file = file.fileName;
       }
     }

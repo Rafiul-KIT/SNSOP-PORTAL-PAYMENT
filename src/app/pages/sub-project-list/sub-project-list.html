@@ -177,7 +177,7 @@
                 <p-button type="button" icon="fas fa-pencil-alt" pTooltip="Edit" tooltipPosition="top"
                     appendTo="body" (onClick)="editSubProject(item.id)" size="small" outlined="true" severity="secondary"
                     class="me-2 big-icon-btn" />
-                @if (item.status !== 'Completed' && roleId === 1) {
+                @if (item.status !== 'Completed' && roleId === 5  || item.status !== 'Completed' && roleId === 1 ) {
                 <p-button type="button" icon="fas fa-check" pTooltip="Complete" tooltipPosition="top" title="Complete"
                     appendTo="body" (onClick)="completeSubProject(item.id)" size="small" [outlined]="true" severity="success"
                     class="me-2" />

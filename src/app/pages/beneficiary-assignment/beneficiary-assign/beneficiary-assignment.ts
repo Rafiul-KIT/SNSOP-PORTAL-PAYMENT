@@ -28,7 +28,7 @@ interface Beneficiary {
   householdNumber: string;
   beneficiaryName: string;
   gender: 'MALE' | 'FEMALE';
-  registrationPhase: 'AF' | 'PARENT';
+  registrationPhase: 'AF' | 'PARENT' | 'RP';
   age: number;
   phoneNo: string;
   householdMonthlyAvgIncome: number;
@@ -93,9 +93,11 @@ export class BeneficiaryAssignment implements OnInit {
   householdNumberFilter: string = '';
   beneficiaryNameFilter: string = '';
   registrationPhaseFilter: string = '';
+  private canBeAssignedRequestId = 0;
   registrationPhases: { label: string; value: string }[] = [
     { label: 'AF', value: 'AF' },
     { label: 'PARENT', value: 'PARENT' },
+    { label: 'RP', value: 'RP' }
   ];
 
   // Multiple attachments
@@ -231,12 +233,16 @@ export class BeneficiaryAssignment implements OnInit {
   ): Promise<void> {
     if (!this.subprojectId) return;
 
+    const requestId = ++this.canBeAssignedRequestId;
     this.isLoadingCanBeAssigned = true;
 
     try {
       const response: any = await this.apiService.GET(
-        `api/subproject/assign/progress/beneficiary/can-be-assigned?subprojectId=${this.subprojectId}&page=${page}&size=${size}`
+        'api/subproject/assign/progress/beneficiary/can-be-assigned',
+        this.getCanBeAssignedQueryParams(page, size)
       );
+
+      if (requestId !== this.canBeAssignedRequestId) return;
 
       if (response?.data?.code === 200) {
         const beneficiaries = response.data.content || [];
@@ -245,59 +251,70 @@ export class BeneficiaryAssignment implements OnInit {
           isSelected: this.selectedBeneficiaryIds.has(b.id),
         }));
         this.canBeAssignedTotalRecords = response.data.totalElements || 0;
-        this.onFilterChange(); // Apply filters to the newly loaded data
+        this.filteredBeneficiaries = [...this.originalBeneficiaries];
+        this.selectAll =
+          this.filteredBeneficiaries.length > 0 &&
+          this.filteredBeneficiaries.every((b) => b.isSelected);
+        this.sortOnClient(this.sortField, false);
       } else {
         this.originalBeneficiaries = [];
         this.filteredBeneficiaries = [];
         this.canBeAssignedTotalRecords = 0;
+        this.selectAll = false;
       }
     } catch (error) {
+      if (requestId !== this.canBeAssignedRequestId) return;
+
       console.error('Failed to load can be assigned beneficiaries:', error);
       this.originalBeneficiaries = [];
       this.filteredBeneficiaries = [];
       this.canBeAssignedTotalRecords = 0;
+      this.selectAll = false;
     } finally {
-      this.isLoadingCanBeAssigned = false;
-      this.cdr.detectChanges();
+      if (requestId === this.canBeAssignedRequestId) {
+        this.isLoadingCanBeAssigned = false;
+        this.cdr.detectChanges();
+      }
     }
   }
 
-  onFilterChange(): void {
-    let tempBeneficiaries = [...this.originalBeneficiaries];
+  private getCanBeAssignedQueryParams(page: number, size: number): any {
+    const params: any = {
+      subprojectId: this.subprojectId,
+      page,
+      size,
+    };
 
-    if (this.householdNumberFilter) {
-      tempBeneficiaries = tempBeneficiaries.filter((b) =>
-        b.householdNumber
-          ?.toLowerCase()
-          .includes(this.householdNumberFilter.toLowerCase())
-      );
-    }
-    if (this.beneficiaryNameFilter) {
-      tempBeneficiaries = tempBeneficiaries.filter((b) =>
-        b.beneficiaryName
-          ?.toLowerCase()
-          .includes(this.beneficiaryNameFilter.toLowerCase())
-      );
-    }
+    const householdNumber = this.householdNumberFilter.trim();
+    const beneficiaryName = this.beneficiaryNameFilter.trim();
+
+    if (householdNumber) params.householdNumber = householdNumber;
+    if (beneficiaryName) params.beneficiaryName = beneficiaryName;
     if (this.registrationPhaseFilter) {
-      tempBeneficiaries = tempBeneficiaries.filter(
-        (b) => b.registrationPhase === this.registrationPhaseFilter
-      );
+      params.registrationPhase = this.registrationPhaseFilter;
     }
 
-    this.filteredBeneficiaries = tempBeneficiaries;
-    this.sortOnClient(this.sortField, false); // Re-apply sort without flipping order
+    return params;
+  }
+
+  searchBeneficiaries(): void {
+    this.reloadCanBeAssignedFromFirstPage();
+  }
+
+  private reloadCanBeAssignedFromFirstPage(): void {
+    this.canBeAssignedFirst = 0;
+    this.selectedBeneficiaryIds.clear();
+    this.selectAll = false;
+    this.loadCanBeAssignedBeneficiaries(0, this.canBeAssignedRows);
   }
 
   onCanBeAssignedPageChange(event: any): void {
     if (this.canBeAssignedRows !== event.rows) {
       this.selectedBeneficiaryIds.clear();
+      this.selectAll = false;
     }
 
-    // When paginating, reset client-side state
-    this.householdNumberFilter = '';
-    this.beneficiaryNameFilter = '';
-    this.registrationPhaseFilter = '';
+    // Sort is page-local; reset it when the server page changes.
     this.sortField = '';
     this.sortOrder = 1;
 
@@ -347,7 +364,7 @@ export class BeneficiaryAssignment implements OnInit {
     this.householdNumberFilter = '';
     this.beneficiaryNameFilter = '';
     this.registrationPhaseFilter = '';
-    this.onFilterChange(); // Re-apply filters
+    this.reloadCanBeAssignedFromFirstPage();
   }
 
   getSelectedCanBeAssignedIds(): number[] {
