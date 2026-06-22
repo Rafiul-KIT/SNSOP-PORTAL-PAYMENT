@@ -90,6 +90,7 @@ export class BeneficiaryRemove implements OnInit {
   householdNumberFilter: string = '';
   beneficiaryNameFilter: string = '';
   registrationPhaseFilter: string = '';
+  private existingRequestId = 0;
   registrationPhases: { label: string; value: string }[] = [
     { label: 'AF', value: 'AF' },
     { label: 'PARENT', value: 'PARENT' },
@@ -225,14 +226,18 @@ export class BeneficiaryRemove implements OnInit {
   }
 
   async loadExistingBeneficiaries(page: number, size: number): Promise<void> {
-    if (!this.subprojectId || this.isLoadingExisting) return;
+    if (!this.subprojectId) return;
 
+    const requestId = ++this.existingRequestId;
     this.isLoadingExisting = true;
 
     try {
       const response: any = await this.apiService.GET(
-        `api/subproject/assign/progress/beneficiary/existing?subprojectId=${this.subprojectId}&page=${page}&size=${size}`
+        'api/subproject/assign/progress/beneficiary/existing',
+        this.getExistingQueryParams(page, size)
       );
+
+      if (requestId !== this.existingRequestId) return;
 
       if (response?.data?.code === 200) {
         const beneficiaries = response.data.content || [];
@@ -245,48 +250,63 @@ export class BeneficiaryRemove implements OnInit {
         }));
 
         this.existingTotalRecords = response.data.totalElements || 0;
-        this.onFilterChange(); // Apply filters and sort to newly loaded data
+        this.filteredExistingBeneficiaries = [
+          ...this.originalExistingBeneficiaries,
+        ];
+        this.selectAll =
+          this.filteredExistingBeneficiaries.length > 0 &&
+          this.filteredExistingBeneficiaries.every((b) => b.isSelected);
+        this.sortOnClient(this.sortField, false);
       } else {
         this.originalExistingBeneficiaries = [];
         this.filteredExistingBeneficiaries = [];
         this.existingTotalRecords = 0;
+        this.selectAll = false;
       }
     } catch (error) {
+      if (requestId !== this.existingRequestId) return;
+
       console.error('Failed to load existing beneficiaries:', error);
       this.originalExistingBeneficiaries = [];
       this.filteredExistingBeneficiaries = [];
       this.existingTotalRecords = 0;
+      this.selectAll = false;
     } finally {
-      this.isLoadingExisting = false;
-      this.cdr.detectChanges();
+      if (requestId === this.existingRequestId) {
+        this.isLoadingExisting = false;
+        this.cdr.detectChanges();
+      }
     }
   }
 
-  onFilterChange(): void {
-    let tempBeneficiaries = [...this.originalExistingBeneficiaries];
+  private getExistingQueryParams(page: number, size: number): any {
+    const params: any = {
+      subprojectId: this.subprojectId,
+      page,
+      size,
+    };
 
-    if (this.householdNumberFilter) {
-      tempBeneficiaries = tempBeneficiaries.filter((b) =>
-        b.householdNumber
-          ?.toLowerCase()
-          .includes(this.householdNumberFilter.toLowerCase())
-      );
-    }
-    if (this.beneficiaryNameFilter) {
-      tempBeneficiaries = tempBeneficiaries.filter((b) =>
-        b.beneficiaryName
-          ?.toLowerCase()
-          .includes(this.beneficiaryNameFilter.toLowerCase())
-      );
-    }
+    const householdNumber = this.householdNumberFilter.trim();
+    const beneficiaryName = this.beneficiaryNameFilter.trim();
+
+    if (householdNumber) params.householdNumber = householdNumber;
+    if (beneficiaryName) params.beneficiaryName = beneficiaryName;
     if (this.registrationPhaseFilter) {
-      tempBeneficiaries = tempBeneficiaries.filter(
-        (b) => b.registrationPhase === this.registrationPhaseFilter
-      );
+      params.registrationPhase = this.registrationPhaseFilter;
     }
 
-    this.filteredExistingBeneficiaries = tempBeneficiaries;
-    this.sortOnClient(this.sortField, false); // Re-apply sort without flipping order
+    return params;
+  }
+
+  searchBeneficiaries(): void {
+    this.reloadExistingFromFirstPage();
+  }
+
+  private reloadExistingFromFirstPage(): void {
+    this.existingFirst = 0;
+    this.selectedBeneficiaryIds.clear();
+    this.selectAll = false;
+    this.loadExistingBeneficiaries(0, this.existingRows);
   }
 
   onExistingPageChange(event: any): void {
@@ -295,10 +315,7 @@ export class BeneficiaryRemove implements OnInit {
       this.selectAll = false;
     }
 
-    // When paginating, reset client-side state
-    this.householdNumberFilter = '';
-    this.beneficiaryNameFilter = '';
-    this.registrationPhaseFilter = '';
+    // Sort is page-local; reset it when the server page changes.
     this.sortField = '';
     this.sortOrder = 1;
 
@@ -348,7 +365,7 @@ export class BeneficiaryRemove implements OnInit {
     this.householdNumberFilter = '';
     this.beneficiaryNameFilter = '';
     this.registrationPhaseFilter = '';
-    this.onFilterChange(); // Re-apply filters
+    this.reloadExistingFromFirstPage();
   }
 
   getSelectedExistingIds(): number[] {

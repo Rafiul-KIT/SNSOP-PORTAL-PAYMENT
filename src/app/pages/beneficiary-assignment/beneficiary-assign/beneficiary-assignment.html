@@ -169,7 +169,8 @@
                                             <div class="flex flex-col gap-1">
                                                 <label class="text-sm font-medium">Household :&nbsp; </label>
                                                 <input pInputText type="text" [(ngModel)]="householdNumberFilter"
-                                                    [ngModelOptions]="{standalone: true}" (input)="onFilterChange()"
+                                                    [ngModelOptions]="{standalone: true}"
+                                                    (keydown.enter)="searchBeneficiaries()"
                                                     placeholder="Filter Household"
                                                     class="w-full p-2 border border-gray-300 rounded" />
                                             </div>
@@ -180,7 +181,8 @@
                                             <div class="flex flex-col gap-6">
                                                 <label class="text-sm font-medium">Beneficiary Name : &nbsp;</label>
                                                 <input pInputText type="text" [(ngModel)]="beneficiaryNameFilter"
-                                                    [ngModelOptions]="{standalone: true}" (input)="onFilterChange()"
+                                                    [ngModelOptions]="{standalone: true}"
+                                                    (keydown.enter)="searchBeneficiaries()"
                                                     placeholder="Filter Name"
                                                     class="w-full p-2 border border-gray-300 rounded" />
                                             </div>
@@ -192,7 +194,8 @@
                                                 <label class="text-sm font-medium">Registration Phase : &nbsp;</label>
                                                 <p-select [options]="registrationPhases"
                                                     [(ngModel)]="registrationPhaseFilter"
-                                                    [ngModelOptions]="{standalone: true}" (onChange)="onFilterChange()"
+                                                    [ngModelOptions]="{standalone: true}"
+                                                    (keydown.enter)="searchBeneficiaries()"
                                                     placeholder="Select Phase" optionLabel="label" optionValue="value"
                                                     class="w-full"></p-select>
                                             </div>
@@ -203,11 +206,16 @@
                                         <th style="padding-bottom: 1rem;"></th>
                                         <th style="padding-bottom: 1rem;"></th>
                                         
-                                        <!-- Clear Filters Button -->
-                                        <th style="padding-bottom: 2rem;" class="flex items-end justify-center">
-                                            <button pButton type="button" icon="pi pi-filter-slash"
-                                                (click)="clearFilters()" label="Clear"
-                                                class="p-button-outlined p-button-sm"></button>
+                                        <!-- Search and Clear Filters Buttons -->
+                                        <th style="padding-bottom: 2rem; min-width: 12rem;">
+                                            <div class="d-flex align-items-end justify-content-center gap-2 flex-nowrap">
+                                                <button pButton type="button" icon="pi pi-search"
+                                                    (click)="searchBeneficiaries()" label="Search"
+                                                    class="p-button-sm"></button>
+                                                <button pButton type="button" icon="pi pi-filter-slash"
+                                                    (click)="clearFilters()" label="Clear"
+                                                    class="p-button-outlined p-button-sm"></button>
+                                            </div>
                                         </th>
                                     </tr>
 
