@@ -52,9 +52,10 @@ export class Header {
       icon: 'fas fa-poll',
     },
     {
-      label: 'Report',
+      label: 'Analytics Report',
       link: environment.portals.report,
       icon: 'fas fa-chart-line',
+      newTab: true,
     },
     // {
     //   label: 'Help Desk',
