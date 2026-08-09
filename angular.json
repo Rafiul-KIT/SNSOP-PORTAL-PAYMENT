@@ -34,6 +34,7 @@
           },
           "configurations": {
             "production": {
+              "baseHref": "/v2/payment/",
               "budgets": [
                 {
                   "type": "initial",
@@ -60,6 +61,8 @@
               ]
             },
             "staging": {
+              "baseHref": "/trial/payment/",
+              "outputHashing": "all",
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -68,6 +71,8 @@
               ]
             },
             "qa": {
+              "baseHref": "/v2/payment/",
+              "outputHashing": "all",
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
