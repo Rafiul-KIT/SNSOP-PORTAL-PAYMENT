@@ -109,13 +109,7 @@ getUserRole(): number | null {
   }
 
   logout = () => {
-    const host = (() => {
-      try {
-        return new URL(environment.domain).hostname;
-      } catch {
-        return environment.domain.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
-      }
-    })();
+    const host = window.location.hostname;
     this.cookieService.delete(this.ACCESS_TOKEN, '/', host, true, 'Lax'); // Explicitly delete mis_ta
     sessionStorage.clear();
     this.loginState.set({ token: null, user: null });

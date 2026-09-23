@@ -2,21 +2,20 @@ export const environment = {
   production: false,
   env: 'dev',
   useHash: true,
-  domain: 'https://newmis.southsudansafetynet.info',
   globalApi: 'https://devgwapp.southsudansafetynet.info/mis_server/',
   authApi: 'https://devgwapp.southsudansafetynet.info/mis_auth/',
   portals: {
-    master: 'https://newmis.southsudansafetynet.info/trial/master',
-    masterSettings: 'https://newmis.southsudansafetynet.info/trial/master/#/user-management/users',
-    surveyCTO: 'https://newmis.southsudansafetynet.info/trial/master/#/cto-dashboard',
-    beneficiary: 'https://newmis.southsudansafetynet.info/trial/beneficiary',
-      mNe: 'https://newmis.southsudansafetynet.info/trial/master/#/monitoring-evaluation/beneficiary-enrolment-summary',
-    payment: 'https://newmis.southsudansafetynet.info/trial/payment',
-    grm: 'https://newmis.southsudansafetynet.info/trial/grm',
-    report: 'https://newmis.southsudansafetynet.info/trial/master/#/home/metabase',
-    economicOpportunities: 'https://newmis.southsudansafetynet.info/trial/master/#/economic-opportunities/dashboard',
-    underConstruction: 'https://newmis.southsudansafetynet.info/trial/master/#/under-construction',
-    dms: 'https://newmis.southsudansafetynet.info/trial/dms/'
+    master: '/trial/master',
+    masterSettings: '/trial/master/#/user-management/users',
+    surveyCTO: '/trial/master/#/cto-dashboard',
+    beneficiary: '/trial/beneficiary',
+      mNe: '/trial/master/#/monitoring-evaluation/beneficiary-enrolment-summary',
+    payment: '/trial/payment',
+    grm: '/trial/grm',
+    report: '/trial/master/#/home/metabase',
+    economicOpportunities: '/trial/master/#/economic-opportunities/dashboard',
+    underConstruction: '/trial/master/#/under-construction',
+    dms: '/trial/dms/'
   },
   cookie_name:'mis_ta'
 };
